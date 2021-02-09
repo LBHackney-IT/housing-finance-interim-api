@@ -1,4 +1,4 @@
-service: your-api-name
+service: housing-finance-interim-api
 provider:
   name: aws
   runtime: dotnetcore3.1
