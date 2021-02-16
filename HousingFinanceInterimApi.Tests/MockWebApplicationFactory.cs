@@ -26,7 +26,7 @@ namespace HousingFinanceInterimApi.Tests
             builder.ConfigureServices(services =>
             {
                 var dbBuilder = new DbContextOptionsBuilder();
-                dbBuilder.UseNpgsql(_connection);
+                dbBuilder.UseSqlServer(_connection);
                 var context = new DatabaseContext(dbBuilder.Options);
                 services.AddSingleton(context);
 

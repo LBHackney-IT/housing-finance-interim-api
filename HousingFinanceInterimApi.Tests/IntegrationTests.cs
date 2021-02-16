@@ -1,8 +1,8 @@
 using System.Net.Http;
 using HousingFinanceInterimApi.V1.Infrastructure;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Npgsql;
 using NUnit.Framework;
 
 namespace HousingFinanceInterimApi.Tests
@@ -13,21 +13,21 @@ namespace HousingFinanceInterimApi.Tests
         protected DatabaseContext DatabaseContext { get; private set; }
 
         private MockWebApplicationFactory<TStartup> _factory;
-        private NpgsqlConnection _connection;
+        private SqlConnection _connection;
         private IDbContextTransaction _transaction;
         private DbContextOptionsBuilder _builder;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            _connection = new NpgsqlConnection(ConnectionString.TestDatabase());
+            _connection = new SqlConnection(ConnectionString.TestDatabase());
             _connection.Open();
             var npgsqlCommand = _connection.CreateCommand();
             npgsqlCommand.CommandText = "SET deadlock_timeout TO 30";
             npgsqlCommand.ExecuteNonQuery();
 
             _builder = new DbContextOptionsBuilder();
-            _builder.UseNpgsql(_connection);
+            _builder.UseSqlServer(_connection);
 
         }
 

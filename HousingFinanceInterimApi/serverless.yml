@@ -25,7 +25,7 @@ functions:
     role: lambdaExecutionRole
     environment:
 # TODO: Create ssm variables for this API's postgres mirror then rename base-api below to match api name
-      CONNECTION_STRING: Host=${ssm:/housing-finance/${self:provider.stage}/db-host};Port=${ssm:/housing-finance/${self:provider.stage}/db-port};Database=${ssm:/housing-finance/${self:provider.stage}/db-database};Username=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password}
+      CONNECTION_STRING: Server=${ssm:/housing-finance/${self:provider.stage}/db-host};Port=${ssm:/housing-finance/${self:provider.stage}/db-port};Database=${ssm:/housing-finance/${self:provider.stage}/db-database};Username=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password}
     events:
       - http:
           path: /{proxy+}

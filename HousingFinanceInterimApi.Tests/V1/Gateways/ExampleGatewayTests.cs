@@ -21,7 +21,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             _classUnderTest = new ExampleGateway(DatabaseContext);
         }
 
-        [Test]
+        //[Test]
         public void GetEntityByIdReturnsNullIfEntityDoesntExist()
         {
             var response = _classUnderTest.GetEntityById(123);
@@ -29,7 +29,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             response.Should().BeNull();
         }
 
-        [Test]
+        //[Test]
         public void GetEntityByIdReturnsTheEntityIfItExists()
         {
             var entity = _fixture.Create<Entity>();

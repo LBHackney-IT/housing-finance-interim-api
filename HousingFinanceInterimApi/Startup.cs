@@ -115,7 +115,7 @@ namespace HousingFinanceInterimApi
             var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 
             services.AddDbContext<DatabaseContext>(
-                opt => opt.UseNpgsql(connectionString));
+                opt => opt.UseSqlServer(connectionString));
         }
 
         private static void RegisterGateways(IServiceCollection services)

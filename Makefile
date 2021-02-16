@@ -17,7 +17,6 @@ shell:
 .PHONY: test
 test:
 	docker-compose up test-database & docker-compose build housing-finance-interim-api-test && docker-compose up housing-finance-interim-api-test
-
 .PHONY: lint
 lint:
 	-dotnet tool install -g dotnet-format

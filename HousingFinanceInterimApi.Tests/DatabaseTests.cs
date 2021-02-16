@@ -15,9 +15,8 @@ namespace HousingFinanceInterimApi.Tests
         public void RunBeforeAnyTests()
         {
             var builder = new DbContextOptionsBuilder();
-            builder.UseNpgsql(ConnectionString.TestDatabase());
+            builder.UseSqlServer(ConnectionString.TestDatabase());
             DatabaseContext = new DatabaseContext(builder.Options);
-
             DatabaseContext.Database.EnsureCreated();
             _transaction = DatabaseContext.Database.BeginTransaction();
         }
