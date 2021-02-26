@@ -22,7 +22,7 @@ namespace HousingFinanceInterimApi.Tests
         {
             _connection = new SqlConnection(ConnectionString.TestDatabase());
             _connection.Open();
-            var npgsqlCommand = _connection.CreateCommand();
+            SqlCommand npgsqlCommand = _connection.CreateCommand();
             npgsqlCommand.CommandText = "SET deadlock_timeout TO 30";
             npgsqlCommand.ExecuteNonQuery();
 

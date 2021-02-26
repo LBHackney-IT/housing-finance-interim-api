@@ -1,13 +1,16 @@
 using System.Collections.Generic;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Factories;
+using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 
-namespace HousingFinanceInterimApi.V1.Gateways
+namespace HousingFinanceInterimApi.V1.Gateways.Implementation
 {
+
     //TODO: Rename to match the data source that is being accessed in the gateway eg. MosaicGateway
     public class ExampleGateway : IExampleGateway
     {
+
         private readonly DatabaseContext _databaseContext;
 
         public ExampleGateway(DatabaseContext databaseContext)
@@ -17,7 +20,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
         public Entity GetEntityById(int id)
         {
-            var result = _databaseContext.DatabaseEntities.Find(id);
+            DatabaseEntity result = _databaseContext.DatabaseEntities.Find(id);
 
             return result?.ToDomain();
         }
@@ -26,5 +29,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             return new List<Entity>();
         }
+
     }
+
 }

@@ -15,7 +15,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         {
             JsonConvert.DefaultSettings = () =>
             {
-                var settings = new JsonSerializerSettings();
+                JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.Formatting = Formatting.Indented;
                 settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 

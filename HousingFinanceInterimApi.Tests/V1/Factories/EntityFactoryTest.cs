@@ -1,6 +1,7 @@
 using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using FluentAssertions;
+using HousingFinanceInterimApi.V1.Domain;
 using NUnit.Framework;
 
 namespace HousingFinanceInterimApi.Tests.V1.Factories
@@ -13,8 +14,8 @@ namespace HousingFinanceInterimApi.Tests.V1.Factories
         [Test]
         public void CanMapADatabaseEntityToADomainObject()
         {
-            var databaseEntity = new DatabaseEntity();
-            var entity = databaseEntity.ToDomain();
+            DatabaseEntity databaseEntity = new DatabaseEntity();
+            Entity entity = databaseEntity.ToDomain();
 
             databaseEntity.Id.Should().Be(entity.Id);
             databaseEntity.CreatedAt.Should().BeSameDateAs(entity.CreatedAt);

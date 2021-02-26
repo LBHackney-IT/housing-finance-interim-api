@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using HousingFinanceInterimApi.V1.Gateways;
+using HousingFinanceInterimApi.V1.Gateways.Implementation;
+using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
@@ -17,93 +19,111 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace HousingFinanceInterimApi
 {
+
     public class Startup
     {
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        private static IConfiguration Configuration { get; set; }
+
         private static List<ApiVersionDescription> _apiVersions { get; set; }
-        //TODO update the below to the name of your API
-        private const string ApiName = "Your API Name";
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public static void ConfigureServices(IServiceCollection services)
         {
-            services
-                .AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            // Setup configuration
+            IConfigurationSection apiOptionsConfigSection = Configuration.GetSection(nameof(ApiOptions));
+            services.Configure<ApiOptions>(apiOptionsConfigSection);
+            ApiOptions apiOptions = apiOptionsConfigSection.Get<ApiOptions>();
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
             services.AddApiVersioning(o =>
             {
                 o.DefaultApiVersion = new ApiVersion(1, 0);
-                o.AssumeDefaultVersionWhenUnspecified = true; // assume that the caller wants the default version if they don't specify
-                o.ApiVersionReader = new UrlSegmentApiVersionReader(); // read the version number from the url segment header)
+
+                // Assume that the caller wants the default version if they don't specify
+                o.AssumeDefaultVersionWhenUnspecified = true;
+
+                // Read the version number from the url segment header)
+                o.ApiVersionReader = new UrlSegmentApiVersionReader();
             });
 
             services.AddSingleton<IApiVersionDescriptionProvider, DefaultApiVersionDescriptionProvider>();
 
-            services.AddSwaggerGen(c =>
+            services.AddSwaggerGen(swaggerSetup =>
             {
-                c.AddSecurityDefinition("Token",
-                    new OpenApiSecurityScheme
-                    {
-                        In = ParameterLocation.Header,
-                        Description = "Your Hackney API Key",
-                        Name = "X-Api-Key",
-                        Type = SecuritySchemeType.ApiKey
-                    });
+                swaggerSetup.AddSecurityDefinition("Token", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
 
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    // TODO ensure populated
+                    Description = apiOptions.HackneyApiKey,
+                    Name = "X-Api-Key",
+                    Type = SecuritySchemeType.ApiKey
+                });
+
+                swaggerSetup.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
                         new OpenApiSecurityScheme
                         {
-                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Token" }
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme, Id = "Token"
+                            }
                         },
                         new List<string>()
                     }
                 });
 
-                //Looks at the APIVersionAttribute [ApiVersion("x")] on controllers and decides whether or not
-                //to include it in that version of the swagger document
-                //Controllers must have this [ApiVersion("x")] to be included in swagger documentation!!
-                c.DocInclusionPredicate((docName, apiDesc) =>
+                // Looks at the APIVersionAttribute [ApiVersion("x")] on controllers and decides whether or not
+                // to include it in that version of the swagger document
+                // Controllers must have this [ApiVersion("x")] to be included in swagger documentation!!
+                swaggerSetup.DocInclusionPredicate((docName, apiDesc) =>
                 {
-                    apiDesc.TryGetMethodInfo(out var methodInfo);
+                    apiDesc.TryGetMethodInfo(out MethodInfo methodInfo);
 
-                    var versions = methodInfo?
-                        .DeclaringType?.GetCustomAttributes()
+                    IList<ApiVersion> versions = methodInfo?.DeclaringType?.GetCustomAttributes()
                         .OfType<ApiVersionAttribute>()
-                        .SelectMany(attr => attr.Versions).ToList();
+                        .SelectMany(attr => attr.Versions)
+                        .ToList();
 
                     return versions?.Any(v => $"{v.GetFormattedApiVersion()}" == docName) ?? false;
                 });
 
-                //Get every ApiVersion attribute specified and create swagger docs for them
-                foreach (var apiVersion in _apiVersions)
+                // Get every ApiVersion attribute specified and create swagger docs for them
+                foreach (string version in _apiVersions.Select(apiVersion => $"v{apiVersion.ApiVersion}"))
                 {
-                    var version = $"v{apiVersion.ApiVersion.ToString()}";
-                    c.SwaggerDoc(version, new OpenApiInfo
+                    swaggerSetup.SwaggerDoc(version, new OpenApiInfo
                     {
-                        Title = $"{ApiName}-api {version}",
+                        Title = $"{apiOptions.ApiName}-api {version}",
                         Version = version,
-                        Description = $"{ApiName} version {version}. Please check older versions for depreciated endpoints."
+                        Description =
+                            $"{apiOptions.ApiName} version {version}. Please check older versions for depreciated endpoints."
                     });
                 }
 
-                c.CustomSchemaIds(x => x.FullName);
+                swaggerSetup.CustomSchemaIds(x => x.FullName);
+
                 // Set the comments path for the Swagger JSON and UI.
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
                 if (File.Exists(xmlPath))
-                    c.IncludeXmlComments(xmlPath);
+                {
+                    swaggerSetup.IncludeXmlComments(xmlPath);
+                }
             });
             ConfigureDbContext(services);
             RegisterGateways(services);
@@ -112,10 +132,8 @@ namespace HousingFinanceInterimApi
 
         private static void ConfigureDbContext(IServiceCollection services)
         {
-            var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-
-            services.AddDbContext<DatabaseContext>(
-                opt => opt.UseSqlServer(connectionString));
+            string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            services.AddDbContext<DatabaseContext>(opt => opt.UseSqlServer(connectionString));
         }
 
         private static void RegisterGateways(IServiceCollection services)
@@ -130,7 +148,7 @@ namespace HousingFinanceInterimApi
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env, IOptions<ApiOptions> apiOptions)
         {
             if (env.IsDevelopment())
             {
@@ -141,27 +159,30 @@ namespace HousingFinanceInterimApi
                 app.UseHsts();
             }
 
-            //Get All ApiVersions,
-            var api = app.ApplicationServices.GetService<IApiVersionDescriptionProvider>();
+            // Get All ApiVersions,
+            IApiVersionDescriptionProvider api = app.ApplicationServices.GetService<IApiVersionDescriptionProvider>();
             _apiVersions = api.ApiVersionDescriptions.ToList();
 
-            //Swagger ui to view the swagger.json file
+            // Swagger ui to view the swagger.json file
             app.UseSwaggerUI(c =>
             {
-                foreach (var apiVersionDescription in _apiVersions)
+                foreach (ApiVersionDescription apiVersionDescription in _apiVersions)
                 {
                     //Create a swagger endpoint for each swagger version
                     c.SwaggerEndpoint($"{apiVersionDescription.GetFormattedApiVersion()}/swagger.json",
-                        $"{ApiName}-api {apiVersionDescription.GetFormattedApiVersion()}");
+                        $"{apiOptions.Value.ApiName}-api {apiVersionDescription.GetFormattedApiVersion()}");
                 }
             });
             app.UseSwagger();
             app.UseRouting();
+
             app.UseEndpoints(endpoints =>
             {
                 // SwaggerGen won't find controllers that are routed via this technique.
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
         }
+
     }
+
 }

@@ -14,7 +14,7 @@ namespace HousingFinanceInterimApi.Tests
         [SetUp]
         public void RunBeforeAnyTests()
         {
-            var builder = new DbContextOptionsBuilder();
+            DbContextOptionsBuilder builder = new DbContextOptionsBuilder();
             builder.UseSqlServer(ConnectionString.TestDatabase());
             DatabaseContext = new DatabaseContext(builder.Options);
             DatabaseContext.Database.EnsureCreated();

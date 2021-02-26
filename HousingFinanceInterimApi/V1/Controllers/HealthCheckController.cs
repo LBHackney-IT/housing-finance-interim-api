@@ -14,7 +14,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(typeof(Dictionary<string, bool>), 200)]
         public IActionResult HealthCheck()
         {
-            var result = new Dictionary<string, bool> { { "success", true } };
+            Dictionary<string, bool> result = new Dictionary<string, bool> { { "success", true } };
 
             return Ok(result);
         }

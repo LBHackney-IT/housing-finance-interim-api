@@ -2,6 +2,7 @@ using System.Threading;
 using HousingFinanceInterimApi.V1.UseCase;
 using Bogus;
 using FluentAssertions;
+using HousingFinanceInterimApi.V1.Boundary;
 using Microsoft.Extensions.HealthChecks;
 using Moq;
 using NUnit.Framework;
@@ -38,7 +39,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         [Test]
         public void ReturnsResponseWithStatus()
         {
-            var response = _classUnderTest.Execute();
+            HealthCheckResponse response = _classUnderTest.Execute();
 
             response.Should().NotBeNull();
             response.Success.Should().BeTrue();

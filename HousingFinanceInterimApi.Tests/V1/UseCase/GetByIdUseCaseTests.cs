@@ -1,4 +1,5 @@
 using HousingFinanceInterimApi.V1.Gateways;
+using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase;
 using Moq;
 using NUnit.Framework;
