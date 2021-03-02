@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace HousingFinanceInterimApi.V1.Gateways.Implementation.Options
+namespace HousingFinanceInterimApi.V1.Gateways.Options
 {
 
     /// <summary>

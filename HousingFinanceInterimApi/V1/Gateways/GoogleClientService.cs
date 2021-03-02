@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Auth.OAuth2.Responses;
@@ -6,15 +10,11 @@ using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Util.Store;
-using HousingFinanceInterimApi.V1.Gateways.Implementation.Options;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
+using HousingFinanceInterimApi.V1.Gateways.Options;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace HousingFinanceInterimApi.V1.Gateways.Implementation
+namespace HousingFinanceInterimApi.V1.Gateways
 {
 
     /// <summary>

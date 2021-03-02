@@ -3,7 +3,6 @@ using HousingFinanceInterimApi.Tests.V1.Helper;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Gateways;
 using FluentAssertions;
-using HousingFinanceInterimApi.V1.Gateways.Implementation;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using NUnit.Framework;
 

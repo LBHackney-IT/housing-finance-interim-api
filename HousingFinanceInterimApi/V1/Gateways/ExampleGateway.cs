@@ -4,7 +4,7 @@ using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 
-namespace HousingFinanceInterimApi.V1.Gateways.Implementation
+namespace HousingFinanceInterimApi.V1.Gateways
 {
 
     //TODO: Rename to match the data source that is being accessed in the gateway eg. MosaicGateway

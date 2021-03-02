@@ -1,4 +1,3 @@
-using HousingFinanceInterimApi.V1.Gateways.Implementation;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using HousingFinanceInterimApi.V1.UseCase;
@@ -21,6 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using HousingFinanceInterimApi.V1.Gateways;
 
 namespace HousingFinanceInterimApi
 {
