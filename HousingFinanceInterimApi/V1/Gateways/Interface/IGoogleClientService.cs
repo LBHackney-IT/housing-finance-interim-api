@@ -10,6 +10,16 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
     {
 
         /// <summary>
+        /// Ensures the user's shared Google folder exists.
+        /// </summary>
+        /// <param name="userEmail">The user email.</param>
+        /// <param name="userGoogleId">The user google identifier.</param>
+        /// <returns>
+        /// A bool determining the success of the method.
+        /// </returns>
+        public Task<bool> EnsureUserFolderExistsAsync(string userEmail, string userGoogleId);
+
+        /// <summary>
         /// Reads the given spreadsheet to a JSON file asynchronous.
         /// </summary>
         /// <param name="spreadSheetId">The spread sheet identifier.</param>

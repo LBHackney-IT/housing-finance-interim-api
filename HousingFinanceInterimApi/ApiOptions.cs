@@ -1,5 +1,3 @@
-using HousingFinanceInterimApi.V1.Gateways.Implementation.Options;
-
 namespace HousingFinanceInterimApi
 {
 
@@ -18,11 +16,6 @@ namespace HousingFinanceInterimApi
         /// Gets or sets the hackney API key.
         /// </summary>
         public string HackneyApiKey { get; set; }
-
-        /// <summary>
-        /// Gets or sets the google credentials.
-        /// </summary>
-        public GoogleCredentials GoogleCredentials { get; set; }
 
     }
 

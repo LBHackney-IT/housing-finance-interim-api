@@ -1,12 +1,16 @@
 using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2.Flows;
+using Google.Apis.Auth.OAuth2.Responses;
+using Google.Apis.Drive.v3;
+using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Util.Store;
 using HousingFinanceInterimApi.V1.Gateways.Implementation.Options;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,7 +34,21 @@ namespace HousingFinanceInterimApi.V1.Gateways.Implementation
         /// <summary>
         /// The logger
         /// </summary>
-        private readonly ILogger<GoogleClientService> _logger;
+        private readonly ILogger _logger;
+
+        #region Drive service
+
+        /// <summary>
+        /// The drive service backing variable
+        /// </summary>
+        private DriveService _driveServiceBacking;
+
+        /// <summary>
+        /// Gets the drive service.
+        /// </summary>
+        private DriveService _driveService => _driveServiceBacking ??= new DriveService(_initializer);
+
+        #endregion
 
         #region Sheets service
 
@@ -55,38 +73,83 @@ namespace HousingFinanceInterimApi.V1.Gateways.Implementation
         /// </summary>
         /// <param name="logger">The logger.</param>
         /// <param name="options">The client options.</param>
-        public GoogleClientService(ILogger<GoogleClientService> logger, IOptions<GoogleClientServiceOptions> options)
+        /// <param name="entityDataStore">The entity data store.</param>
+        /// <param name="authorizationCode">The authorization code.</param>
+        public GoogleClientService(ILogger logger, GoogleClientServiceOptions options, IDataStore entityDataStore,
+            string authorizationCode)
         {
             _logger = logger;
 
-            // The file googletoken.json stores the user's access and refresh tokens, and is created
-            // automatically when the authorization flow completes for the first time.
-            const string CREDENTIAL_PATH = "googletoken.json";
+            using IAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow(
+                new GoogleAuthorizationCodeFlow.Initializer
+                {
+                    ClientSecrets = new ClientSecrets
+                    {
+                        ClientId = options.ClientId, ClientSecret = options.ClientSecret
+                    },
+                    Scopes = options.Scopes,
+                    // TODO use entityDataStore
+                    DataStore = new FileDataStore("GoogleTokens")
+                });
 
-            // Create the client secrets
-            ClientSecrets clientSecrets = new ClientSecrets
-            {
-                ClientId = options.Value.ClientId, ClientSecret = options.Value.ClientSecret
-            };
-
-            // Create credential
-            UserCredential userCredential = Task.Run(() => GoogleWebAuthorizationBroker.AuthorizeAsync(clientSecrets,
-                    options.Value.Scopes, "user", CancellationToken.None, new FileDataStore(CREDENTIAL_PATH, true)))
+            TokenResponse token = Task.Run(() => flow.ExchangeCodeForTokenAsync("USER_ID",
+                    authorizationCode, options.RedirectUri, CancellationToken.None))
                 .GetAwaiter()
                 .GetResult();
-            logger.LogInformation("Google credential file saved to: " + CREDENTIAL_PATH);
+            UserCredential credential = new UserCredential(flow, Environment.UserName, token);
 
             // Create service initializer
             _initializer = new BaseClientService.Initializer
             {
-                HttpClientInitializer = userCredential, ApplicationName = options.Value.ApplicationName
+                HttpClientInitializer = credential, ApplicationName = options.ApplicationName
             };
         }
+
+        #region Google Drive
+
+        /// <summary>
+        /// Ensures the user's shared Google folder exists.
+        /// </summary>
+        /// <param name="userEmail">The user email.</param>
+        /// <param name="userGoogleId">The user google identifier.</param>
+        /// <returns>
+        /// A bool determining the success of the method.
+        /// </returns>
+        public async Task<bool> EnsureUserFolderExistsAsync(string userEmail, string userGoogleId)
+        {
+            FilesResource.CreateRequest createRequest = _driveService.Files.Create(new File
+            {
+                Name = userEmail,
+                MimeType = "application/vnd.google-apps.folder",
+                PermissionIds = new List<string>
+                {
+                    userGoogleId
+                },
+                Parents = new List<string>
+                {
+                    // TODO parent containing folder
+                    ""
+                }
+            });
+
+            File createResult = await createRequest.ExecuteAsync();
+            string folderId = createResult.Id;
+
+            // TODO save configuration
+
+            return !string.IsNullOrWhiteSpace(folderId);
+        }
+
+        #endregion
+
+        #region Google Sheets
 
         public Task ReadSheetToJsonAsync(string spreadSheetId, string sheetName, string sheetRange, string outputFileName)
         {
             throw new NotImplementedException();
         }
+
+        #endregion
 
         #endregion
 

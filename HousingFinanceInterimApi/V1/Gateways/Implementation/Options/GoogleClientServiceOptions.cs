@@ -20,6 +20,11 @@ namespace HousingFinanceInterimApi.V1.Gateways.Implementation.Options
         public IList<string> Scopes { get; set; }
 
         /// <summary>
+        /// Gets or sets the redirect URI.
+        /// </summary>
+        public string RedirectUri { get; set; }
+
+        /// <summary>
         /// Gets or sets the name of the application.
         /// </summary>
         public string ApplicationName { get; set; }

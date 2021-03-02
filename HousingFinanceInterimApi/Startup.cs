@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Gateways.Implementation;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
@@ -22,6 +16,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace HousingFinanceInterimApi
 {
@@ -34,12 +33,12 @@ namespace HousingFinanceInterimApi
             Configuration = configuration;
         }
 
-        private static IConfiguration Configuration { get; set; }
+        private IConfiguration Configuration { get; }
 
         private static List<ApiVersionDescription> _apiVersions { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public static void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             // Setup configuration
             IConfigurationSection apiOptionsConfigSection = Configuration.GetSection(nameof(ApiOptions));
@@ -128,6 +127,9 @@ namespace HousingFinanceInterimApi
             ConfigureDbContext(services);
             RegisterGateways(services);
             RegisterUseCases(services);
+
+            // Add services
+            services.AddScoped<IGoogleClientServiceFactory, GoogleClientServiceFactory>();
         }
 
         private static void ConfigureDbContext(IServiceCollection services)

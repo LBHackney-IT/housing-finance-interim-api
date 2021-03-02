@@ -4,8 +4,11 @@ using Newtonsoft.Json.Serialization;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
+
+    [Route("api/v1/[controller]")]
     public class BaseController : Controller
     {
+
         public BaseController()
         {
             ConfigureJsonSerializer();
@@ -15,15 +18,18 @@ namespace HousingFinanceInterimApi.V1.Controllers
         {
             JsonConvert.DefaultSettings = () =>
             {
-                JsonSerializerSettings settings = new JsonSerializerSettings();
-                settings.Formatting = Formatting.Indented;
-                settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-
-                settings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
-                settings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+                JsonSerializerSettings settings = new JsonSerializerSettings
+                {
+                    Formatting = Formatting.Indented,
+                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                    DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                    DateFormatHandling = DateFormatHandling.IsoDateFormat
+                };
 
                 return settings;
             };
         }
+
     }
+
 }
