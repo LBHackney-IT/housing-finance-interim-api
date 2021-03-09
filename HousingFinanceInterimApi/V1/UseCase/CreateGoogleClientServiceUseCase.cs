@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 
@@ -7,8 +8,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
     /// <summary>
     /// The create Google client service use case implementation.
     /// </summary>
-    /// <seealso cref="ICreateGoogleClientServiceUseCase" />
-    public class CreateGoogleClientServiceUseCase : ICreateGoogleClientServiceUseCase
+    /// <seealso cref="ICreateAuthGoogleClientServiceUseCase" />
+    public class CreateGoogleClientServiceUseCase : ICreateAuthGoogleClientServiceUseCase
     {
 
         /// <summary>
@@ -32,8 +33,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
         /// <returns>
         /// An instance of <see cref="IGoogleClientService" />
         /// </returns>
-        public IGoogleClientService Execute(string authCode)
-            => _googleClientServiceFactory.CreateGoogleClientServiceForUser(authCode);
+        public async Task<IGoogleClientService> ExecuteAsync(string authCode)
+            => await _googleClientServiceFactory.CreateGoogleClientServiceForUserAsync(authCode).ConfigureAwait(true);
 
     }
 

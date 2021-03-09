@@ -9,9 +9,9 @@ namespace HousingFinanceInterimApi.V1.Controllers
     public class AuthController : BaseController
     {
 
-        private readonly ICreateGoogleClientServiceUseCase _createGoogleClientServiceUseCase;
+        private readonly ICreateAuthGoogleClientServiceUseCase _createGoogleClientServiceUseCase;
 
-        public AuthController(ICreateGoogleClientServiceUseCase createGoogleClientServiceUseCase)
+        public AuthController(ICreateAuthGoogleClientServiceUseCase createGoogleClientServiceUseCase)
         {
             _createGoogleClientServiceUseCase = createGoogleClientServiceUseCase;
         }

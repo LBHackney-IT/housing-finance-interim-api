@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.Gateways.Interface
@@ -10,14 +11,13 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
     {
 
         /// <summary>
-        /// Ensures the user's shared Google folder exists.
+        /// Reads the file line data asynchronous.
         /// </summary>
-        /// <param name="userEmail">The user email.</param>
-        /// <param name="userGoogleId">The user google identifier.</param>
-        /// <returns>
-        /// A bool determining the success of the method.
-        /// </returns>
-        public Task<bool> EnsureUserFolderExistsAsync(string userEmail, string userGoogleId);
+        /// <param name="fileName">Name of the file.</param>
+        /// <param name="fileId">The file identifier.</param>
+        /// <param name="mime">The MIME.</param>
+        /// <returns>The file contents line by line.</returns>
+        public Task<IList<string>> ReadFileLineDataAsync(string fileName, string fileId, string mime);
 
         /// <summary>
         /// Reads the given spreadsheet to a JSON file asynchronous.

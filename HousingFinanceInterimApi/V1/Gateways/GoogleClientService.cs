@@ -1,18 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Auth.OAuth2.Flows;
-using Google.Apis.Auth.OAuth2.Responses;
+using Google.Apis.Download;
 using Google.Apis.Drive.v3;
-using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
-using Google.Apis.Util.Store;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
-using HousingFinanceInterimApi.V1.Gateways.Options;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -72,72 +67,60 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// Initializes a new instance of the <see cref="GoogleClientService" /> class.
         /// </summary>
         /// <param name="logger">The logger.</param>
-        /// <param name="options">The client options.</param>
-        /// <param name="entityDataStore">The entity data store.</param>
-        /// <param name="authorizationCode">The authorization code.</param>
-        public GoogleClientService(ILogger logger, GoogleClientServiceOptions options, IDataStore entityDataStore,
-            string authorizationCode)
+        /// <param name="initializer">The initializer.</param>
+        public GoogleClientService(ILogger logger, BaseClientService.Initializer initializer)
         {
             _logger = logger;
-
-            using IAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow(
-                new GoogleAuthorizationCodeFlow.Initializer
-                {
-                    ClientSecrets = new ClientSecrets
-                    {
-                        ClientId = options.ClientId, ClientSecret = options.ClientSecret
-                    },
-                    Scopes = options.Scopes,
-                    // TODO use entityDataStore
-                    DataStore = new FileDataStore("GoogleTokens")
-                });
-
-            TokenResponse token = Task.Run(() => flow.ExchangeCodeForTokenAsync("USER_ID",
-                    authorizationCode, options.RedirectUri, CancellationToken.None))
-                .GetAwaiter()
-                .GetResult();
-            UserCredential credential = new UserCredential(flow, Environment.UserName, token);
-
-            // Create service initializer
-            _initializer = new BaseClientService.Initializer
-            {
-                HttpClientInitializer = credential, ApplicationName = options.ApplicationName
-            };
+            _initializer = initializer;
         }
 
         #region Google Drive
 
         /// <summary>
-        /// Ensures the user's shared Google folder exists.
+        /// Reads the file line data asynchronous.
         /// </summary>
-        /// <param name="userEmail">The user email.</param>
-        /// <param name="userGoogleId">The user google identifier.</param>
+        /// <param name="fileName">Name of the file.</param>
+        /// <param name="fileId">The file identifier.</param>
+        /// <param name="mime">The MIME.</param>
         /// <returns>
-        /// A bool determining the success of the method.
+        /// The file contents line by line.
         /// </returns>
-        public async Task<bool> EnsureUserFolderExistsAsync(string userEmail, string userGoogleId)
+        public async Task<IList<string>> ReadFileLineDataAsync(string fileName, string fileId, string mime)
         {
-            FilesResource.CreateRequest createRequest = _driveService.Files.Create(new File
+            FilesResource.GetRequest request = _driveService.Files.Get(fileId);
+            IList<string> results = new List<string>();
+
+            await using MemoryStream stream = new MemoryStream();
+            IDownloadProgress progress = await request.DownloadAsync(stream).ConfigureAwait(true);
+
+            if (progress.Status == DownloadStatus.Completed)
             {
-                Name = userEmail,
-                MimeType = "application/vnd.google-apps.folder",
-                PermissionIds = new List<string>
+                if (!Directory.Exists("tempfiles"))
                 {
-                    userGoogleId
-                },
-                Parents = new List<string>
-                {
-                    // TODO parent containing folder
-                    ""
+                    Directory.CreateDirectory("tempfiles");
                 }
-            });
 
-            File createResult = await createRequest.ExecuteAsync();
-            string folderId = createResult.Id;
+                string outputPath = $"tempfiles/{fileName}";
 
-            // TODO save configuration
+                await using (FileStream file = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                {
+                    stream.WriteTo(file);
+                }
 
-            return !string.IsNullOrWhiteSpace(folderId);
+                if (File.Exists(outputPath))
+                {
+                    results = await File.ReadAllLinesAsync(outputPath).ConfigureAwait(true);
+                    File.Delete(outputPath);
+                }
+
+                return results;
+            }
+            else
+            {
+                // TODO log
+            }
+
+            return results;
         }
 
         #endregion

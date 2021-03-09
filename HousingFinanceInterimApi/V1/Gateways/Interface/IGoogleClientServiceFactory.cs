@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace HousingFinanceInterimApi.V1.Gateways.Interface
 {
 
@@ -14,7 +16,14 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// <returns>
         /// A Google Client Service instance.
         /// </returns>
-        public IGoogleClientService CreateGoogleClientServiceForUser(string authCode);
+        public Task<IGoogleClientService> CreateGoogleClientServiceForUserAsync(string authCode);
+
+        /// <summary>
+        /// Creates the google client service for API key asynchronous.
+        /// </summary>
+        /// <param name="apiKey">The API key.</param>
+        /// <returns>A Google Client Service instance.</returns>
+        public IGoogleClientService CreateGoogleClientServiceForApiKey(string apiKey);
 
     }
 
