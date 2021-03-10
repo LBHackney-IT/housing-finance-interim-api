@@ -15,7 +15,7 @@ namespace HousingFinanceInterimApi.V1.UseCase.Interfaces
         /// </summary>
         /// <param name="authCode">The authentication code.</param>
         /// <returns>An instance of <see cref="IGoogleClientService"/></returns>
-        public  Task<IGoogleClientService> ExecuteAsync(string authCode);
+        public Task<IGoogleClientService> ExecuteAsync(string authCode);
 
     }
 

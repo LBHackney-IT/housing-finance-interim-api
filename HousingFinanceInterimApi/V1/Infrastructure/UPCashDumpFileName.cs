@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
-
+    
     /// <summary>
     /// The UP Cash dump file name entity.
     /// </summary>
@@ -17,7 +17,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the identifier.
         /// </summary>
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the file.
@@ -33,12 +33,13 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// <summary>
         /// Gets or sets the time stamp.
         /// </summary>
-        public DateTimeOffset Timestamp { get; private set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public DateTimeOffset Timestamp { get; set; }
 
         /// <summary>
         /// Gets or sets up cash dumps against this file name.
         /// </summary>
-        public ICollection<UPCashDump> UpCashDumps { get; set; }
+        public ICollection<UPCashDump> UpCashDumps { get; private set; }
 
     }
 

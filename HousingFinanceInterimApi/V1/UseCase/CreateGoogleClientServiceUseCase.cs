@@ -34,7 +34,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         /// An instance of <see cref="IGoogleClientService" />
         /// </returns>
         public async Task<IGoogleClientService> ExecuteAsync(string authCode)
-            => await _googleClientServiceFactory.CreateGoogleClientServiceForUserAsync(authCode).ConfigureAwait(true);
+            => await _googleClientServiceFactory.CreateGoogleClientServiceForUserAsync(authCode).ConfigureAwait(false);
 
     }
 

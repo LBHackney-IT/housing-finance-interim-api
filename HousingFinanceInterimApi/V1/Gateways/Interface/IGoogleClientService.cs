@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Google.Apis.Drive.v3.Data;
 
 namespace HousingFinanceInterimApi.V1.Gateways.Interface
 {
@@ -9,6 +10,13 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
     /// </summary>
     public interface IGoogleClientService
     {
+
+        /// <summary>
+        /// Gets the files in drive asynchronous.
+        /// </summary>
+        /// <param name="driveId">The drive identifier.</param>
+        /// <returns>The list of files for the given drive.</returns>
+        public Task<IList<File>> GetFilesInDriveAsync(string driveId);
 
         /// <summary>
         /// Reads the file line data asynchronous.
@@ -29,8 +37,8 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// <returns>
         /// An async task.
         /// </returns>
-        public Task ReadSheetToJsonAsync(string spreadSheetId, string sheetName, string sheetRange,
-            string outputFileName);
+        public Task<IList<_TEntity>> ReadSheetToEntitiesAsync<_TEntity>(string spreadSheetId, string sheetName,
+            string sheetRange);
 
     }
 

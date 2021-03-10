@@ -41,7 +41,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// <summary>
         /// Gets the timestamp.
         /// </summary>
-        public DateTimeOffset Timestamp { get; private set; }
+        public DateTime Timestamp { get; private set; }
 
     }
 

@@ -17,12 +17,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the identifier.
         /// </summary>
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// Gets or sets up cash dump file name identifier.
         /// </summary>
-        public int UPCashDumpFileNameId { get; set; }
+        public long UPCashDumpFileNameId { get; set; }
 
         /// <summary>
         /// Gets or sets the name of up cash dump file.
@@ -37,13 +37,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public string FullText { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this instance is read.
-        /// </summary>
-        public bool IsRead { get; set; }
-
-        /// <summary>
         /// Gets or sets the timestamp.
         /// </summary>
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTimeOffset Timestamp { get; private set; }
 
     }

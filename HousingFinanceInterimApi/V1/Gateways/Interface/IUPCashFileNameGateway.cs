@@ -7,7 +7,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
     /// <summary>
     /// The UP cash file name gateway interface.
     /// </summary>
-    public interface IUpCashFileNameGateway
+    public interface IUPCashFileNameGateway
     {
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// </summary>
         /// <param name="fileId">The file identifier.</param>
         /// <returns>A bool determining the success of the method.</returns>
-        public Task<bool> SetToSuccessAsync(int fileId);
+        public Task<bool> SetToSuccessAsync(long fileId);
 
     }
 

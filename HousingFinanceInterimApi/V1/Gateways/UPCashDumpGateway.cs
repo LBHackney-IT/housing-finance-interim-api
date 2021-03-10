@@ -1,6 +1,6 @@
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
-using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.Gateways
@@ -28,24 +28,31 @@ namespace HousingFinanceInterimApi.V1.Gateways
         }
 
         /// <summary>
-        /// Creates the given cash file dump line entry asynchronous.
+        /// Creates bulk file line entries asynchronous.
         /// </summary>
         /// <param name="fileId">The file identifier.</param>
-        /// <param name="cashDumpLine">The cash dump line.</param>
-        /// <param name="isRead">if set to <c>true</c> [is read].</param>
+        /// <param name="lines">The lines.</param>
         /// <returns>
-        /// The created instance of <see cref="UPCashDump" />
+        /// The list of UP cash dumps.
         /// </returns>
-        public async Task<UPCashDump> CreateAsync(int fileId, string cashDumpLine, bool isRead)
+        public async Task<IList<UPCashDump>> CreateBulkAsync(long fileId, IList<string> lines)
         {
-            UPCashDump entry = new UPCashDump
-            {
-                UPCashDumpFileNameId = fileId, IsRead = isRead, FullText = cashDumpLine
-            };
-            await _context.UpCashDumps.AddAsync(entry).ConfigureAwait(true);
+            IList<UPCashDump> results = new List<UPCashDump>();
 
-            return await _context.SaveChangesAsync().ConfigureAwait(true) == 1
-                ? entry
+            foreach (string line in lines)
+            {
+                UPCashDump entry = new UPCashDump
+                {
+                    UPCashDumpFileNameId = fileId, FullText = line
+                };
+                await _context.UpCashDumps.AddAsync(entry).ConfigureAwait(false);
+                results.Add(entry);
+            }
+
+            bool success = await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
+
+            return success
+                ? results
                 : null;
         }
 

@@ -9,8 +9,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
     /// <summary>
     /// The UP Cash file name gateway implementation.
     /// </summary>
-    /// <seealso cref="IUpCashFileNameGateway" />
-    public class UPCashFileNameGateway : IUpCashFileNameGateway
+    /// <seealso cref="IUPCashFileNameGateway" />
+    public class UPCashFileNameGateway : IUPCashFileNameGateway
     {
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// </returns>
         public async Task<UPCashDumpFileName> GetAsync(string fileName)
             => await _context.UpCashDumpFileNames.FirstOrDefaultAsync(item => item.FileName.Equals(fileName))
-                .ConfigureAwait(true);
+                .ConfigureAwait(false);
 
         /// <summary>
         /// Creates a UP Cash dump file name entry for the given file name asynchronous.
@@ -48,19 +48,19 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// </returns>
         public async Task<UPCashDumpFileName> CreateAsync(string fileName, bool isSuccess = false)
         {
-            var getResult = await GetAsync(fileName).ConfigureAwait(true);
+            var getResult = await GetAsync(fileName).ConfigureAwait(false);
 
-            if (getResult != null)
+            if (getResult == null)
             {
                 // Create and add
                 UPCashDumpFileName newFileName = new UPCashDumpFileName
                 {
                     FileName = fileName, IsSuccess = isSuccess
                 };
-                await _context.UpCashDumpFileNames.AddAsync(newFileName).ConfigureAwait(true);
+                await _context.UpCashDumpFileNames.AddAsync(newFileName).ConfigureAwait(false);
 
                 // If saved successfully, return entity
-                return await _context.SaveChangesAsync().ConfigureAwait(true) == 1
+                return await _context.SaveChangesAsync().ConfigureAwait(false) == 1
                     ? newFileName
                     : null;
             }
@@ -75,16 +75,16 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// <returns>
         /// A bool determining the success of the method.
         /// </returns>
-        public async Task<bool> SetToSuccessAsync(int fileId)
+        public async Task<bool> SetToSuccessAsync(long fileId)
         {
             var fileName = await _context.UpCashDumpFileNames.FirstOrDefaultAsync(item => item.Id == fileId)
-                .ConfigureAwait(true);
+                .ConfigureAwait(false);
 
             if (fileName != null)
             {
                 fileName.IsSuccess = true;
 
-                return await _context.SaveChangesAsync().ConfigureAwait(true) == 1;
+                return await _context.SaveChangesAsync().ConfigureAwait(false) == 1;
             }
 
             return false;
