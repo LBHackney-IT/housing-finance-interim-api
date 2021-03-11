@@ -1,4 +1,8 @@
 using Amazon.Lambda.Core;
+using Google.Apis.Drive.v3;
+using Google.Apis.Drive.v3.Data;
+using Google.Apis.Sheets.v4;
+using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Gateways.Options;
@@ -11,10 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Google.Apis.Drive.v3;
-using Google.Apis.Drive.v3.Data;
-using Google.Apis.Sheets.v4;
-using HousingFinanceInterimApi.V1.Domain;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -27,9 +27,30 @@ namespace HousingFinanceInterimApi
     public class Handler
     {
 
+        /// <summary>
+        /// The google client service
+        /// </summary>
         private readonly IGoogleClientService _googleClientService;
-        private readonly IUPCashFileNameGateway _cashFileNameGateway;
-        private readonly IUPCashDumpGateway _cashDumpGateway;
+
+        /// <summary>
+        /// The create bulk cash dumps use case
+        /// </summary>
+        private readonly ICreateBulkCashDumpsUseCase _createBulkCashDumpsUseCase;
+
+        /// <summary>
+        /// The get up cash file name use case
+        /// </summary>
+        private readonly IGetUPCashFileNameUseCase _getUpCashFileNameUseCase;
+
+        /// <summary>
+        /// The create up cash file name use case
+        /// </summary>
+        private readonly ICreateUPCashFileNameUseCase _createUpCashFileNameUseCase;
+
+        /// <summary>
+        /// The set up cash file name success use case
+        /// </summary>
+        private readonly ISetUPCashFileNameSuccessUseCase _setUpCashFileNameSuccessUseCase;
 
         /// <summary>
         /// The google file settings list use case
@@ -45,10 +66,18 @@ namespace HousingFinanceInterimApi
             optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
             DatabaseContext context = new DatabaseContext(optionsBuilder.Options);
 
-            // Create the file settings gateway
-            IGoogleFileSettingGateway settingGateway = new GoogleFileSettingGateway(context);
+            // File name use cases
+            IUPCashFileNameGateway fileNameGateway = new UPCashFileNameGateway(context);
+            _getUpCashFileNameUseCase = new GetUPCashFileNameUseCase(fileNameGateway);
+            _createUpCashFileNameUseCase = new CreateUPCashFileNameUseCase(fileNameGateway);
+            _setUpCashFileNameSuccessUseCase = new SetUPCashFileNameSuccessUseCase(fileNameGateway);
 
-            // Create a list Google file settings use case
+            // Cash dump use cases
+            IUPCashDumpGateway cashDumpGateway = new UPCashDumpGateway(context);
+            _createBulkCashDumpsUseCase = new CreateBulkCashDumpsUseCase(cashDumpGateway);
+
+            // Google file setting use cases
+            IGoogleFileSettingGateway settingGateway = new GoogleFileSettingGateway(context);
             _googleFileSettingsList = new ListGoogleFileSettingsUseCase(settingGateway);
 
             // Create a google client service factory and instance
@@ -120,14 +149,14 @@ namespace HousingFinanceInterimApi
                 try
                 {
                     // Check if entry already made
-                    UPCashDumpFileName getResult =
-                        await _cashFileNameGateway.GetAsync(fileItem.Name).ConfigureAwait(false);
+                    UPCashFileNameDomain getResult =
+                        await _getUpCashFileNameUseCase.ExecuteAsync(fileItem.Name).ConfigureAwait(false);
 
                     if (getResult == null)
                     {
                         // Create file entry
-                        UPCashDumpFileName createResult =
-                            await _cashFileNameGateway.CreateAsync(fileItem.Name).ConfigureAwait(false);
+                        UPCashFileNameDomain createResult = await _createUpCashFileNameUseCase.ExecuteAsync(fileItem.Name)
+                            .ConfigureAwait(false);
 
                         if (createResult != null)
                         {
@@ -151,8 +180,8 @@ namespace HousingFinanceInterimApi
                                 if (batch.Any())
                                 {
                                     // Bulk insert the lines
-                                    IList<UPCashDump> result = await _cashDumpGateway
-                                        .CreateBulkAsync(createResult.Id, batch)
+                                    IList<UPCashDumpDomain> result = await _createBulkCashDumpsUseCase
+                                        .ExecuteAsync(createResult.Id, batch)
                                         .ConfigureAwait(false);
 
                                     // Determine failure
@@ -175,7 +204,9 @@ namespace HousingFinanceInterimApi
                             if (!failure)
                             {
                                 Console.WriteLine("File success");
-                                await _cashFileNameGateway.SetToSuccessAsync(createResult.Id).ConfigureAwait(false);
+
+                                await _setUpCashFileNameSuccessUseCase.ExecuteAsync(createResult.Id)
+                                    .ConfigureAwait(false);
                             }
                         }
                     }
