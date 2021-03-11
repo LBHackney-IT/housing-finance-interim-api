@@ -28,9 +28,14 @@ namespace HousingFinanceInterimApi
     {
 
         /// <summary>
-        /// The google client service
+        /// The get files in google drive use case
         /// </summary>
-        private readonly IGoogleClientService _googleClientService;
+        private readonly IGetFilesInGoogleDriveUseCase _getFilesInGoogleDriveUseCase;
+
+        /// <summary>
+        /// The read google file line data use case
+        /// </summary>
+        private readonly IReadGoogleFileLineDataUseCase _readGoogleFileLineDataUseCase;
 
         /// <summary>
         /// The create bulk cash dumps use case
@@ -89,10 +94,13 @@ namespace HousingFinanceInterimApi
                     DriveService.Scope.DriveReadonly, SheetsService.Scope.SpreadsheetsReadonly
                 }
             });
-            IGoogleClientServiceFactory serviceFactory = new GoogleClientServiceFactory(default, options, context);
 
-            _googleClientService =
-                serviceFactory.CreateGoogleClientServiceForApiKey(Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
+            // Google service use cases
+            IGoogleClientService googleClientService =
+                new GoogleClientServiceFactory(default, options, context).CreateGoogleClientServiceForApiKey(
+                    Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
+            _getFilesInGoogleDriveUseCase = new GetFilesInGoogleDriveUseCase(googleClientService);
+            _readGoogleFileLineDataUseCase = new ReadGoogleFileLineDataUseCase(googleClientService);
         }
 
         /// <summary>
@@ -107,8 +115,8 @@ namespace HousingFinanceInterimApi
             foreach (GoogleFileSettingDomain googleFileSettingItem in googleFileSettings)
             {
                 // Retrieve files from this folder
-                IList<File> folderFiles = await _googleClientService
-                    .GetFilesInDriveAsync(googleFileSettingItem.GoogleFolderId)
+                IList<File> folderFiles = await _getFilesInGoogleDriveUseCase
+                    .ExecuteAsync(googleFileSettingItem.GoogleFolderId)
                     .ConfigureAwait(false);
 
                 // If we have folder files
@@ -160,8 +168,8 @@ namespace HousingFinanceInterimApi
 
                         if (createResult != null)
                         {
-                            IList<string> fileLines = await _googleClientService
-                                .ReadFileLineDataAsync(fileItem.Name, fileItem.Id, fileItem.MimeType)
+                            IList<string> fileLines = await _readGoogleFileLineDataUseCase
+                                .ExecuteAsync(fileItem.Name, fileItem.Id, fileItem.MimeType)
                                 .ConfigureAwait(false);
 
                             // Ensure no blank lines
