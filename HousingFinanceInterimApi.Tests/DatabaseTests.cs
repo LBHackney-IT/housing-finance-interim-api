@@ -1,3 +1,4 @@
+using System;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -5,14 +6,14 @@ using NUnit.Framework;
 
 namespace HousingFinanceInterimApi.Tests
 {
-    [TestFixture]
-    public class DatabaseTests
-    {
-        private IDbContextTransaction _transaction;
-        protected DatabaseContext DatabaseContext { get; private set; }
 
-        [SetUp]
-        public void RunBeforeAnyTests()
+    public class DatabaseTests : IDisposable
+    {
+
+        private readonly IDbContextTransaction _transaction;
+        protected DatabaseContext DatabaseContext { get; }
+
+        public DatabaseTests()
         {
             DbContextOptionsBuilder builder = new DbContextOptionsBuilder();
             builder.UseSqlServer(ConnectionString.TestDatabase());
@@ -21,11 +22,12 @@ namespace HousingFinanceInterimApi.Tests
             _transaction = DatabaseContext.Database.BeginTransaction();
         }
 
-        [TearDown]
-        public void RunAfterAnyTests()
+        public void Dispose()
         {
             _transaction.Rollback();
             _transaction.Dispose();
         }
+
     }
+
 }
