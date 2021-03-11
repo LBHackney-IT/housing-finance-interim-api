@@ -20,6 +20,11 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         }
 
         /// <summary>
+        /// Gets or sets the google file settings.
+        /// </summary>
+        public DbSet<GoogleFileSetting> GoogleFileSettings { get; set; }
+
+        /// <summary>
         /// Gets or sets the up cash dump file names.
         /// </summary>
         public DbSet<UPCashDumpFileName> UpCashDumpFileNames { get; set; }
