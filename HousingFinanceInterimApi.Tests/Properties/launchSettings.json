@@ -12,6 +12,7 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
+        "DB_HOST": "(localdb)\\\\mssqllocaldb",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
