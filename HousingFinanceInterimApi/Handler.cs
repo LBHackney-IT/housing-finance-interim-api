@@ -28,6 +28,11 @@ namespace HousingFinanceInterimApi
     {
 
         /// <summary>
+        /// The log error use case
+        /// </summary>
+        private readonly ILogErrorUseCase _logErrorUseCase;
+
+        /// <summary>
         /// The get files in google drive use case
         /// </summary>
         private readonly IGetFilesInGoogleDriveUseCase _getFilesInGoogleDriveUseCase;
@@ -70,6 +75,10 @@ namespace HousingFinanceInterimApi
             DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
             optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
             DatabaseContext context = new DatabaseContext(optionsBuilder.Options);
+
+            // Error log use cases
+            IErrorLogGateway errorLogGateway = new ErrorLogGateway(context);
+            _logErrorUseCase = new LogErrorUseCase(errorLogGateway);
 
             // File name use cases
             IUPCashFileNameGateway fileNameGateway = new UPCashFileNameGateway(context);
@@ -221,8 +230,14 @@ namespace HousingFinanceInterimApi
                 }
                 catch (Exception exc)
                 {
-                    // TODO error log
-                    Console.WriteLine(exc);
+                    string namespaceLabel =
+                        $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(HandleDatFileDownloads)}";
+
+                    // Log error
+                    await _logErrorUseCase
+                        .ExecuteAsync($"{nameof(UPCashDumpFileName)} -- {nameof(UPCashDump)} -- {fileItem.Name}", null,
+                            $"{namespaceLabel} application error", exc.ToString())
+                        .ConfigureAwait(false);
 
                     throw;
                 }
