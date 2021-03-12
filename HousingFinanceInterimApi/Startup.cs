@@ -1,7 +1,6 @@
+using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
-using HousingFinanceInterimApi.V1.UseCase;
-using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using HousingFinanceInterimApi.Versioning;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -20,7 +19,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using HousingFinanceInterimApi.V1.Gateways;
 
 namespace HousingFinanceInterimApi
 {

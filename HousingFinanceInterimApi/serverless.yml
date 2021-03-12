@@ -1,6 +1,7 @@
 service: housing-finance-interim-api
 provider:
   name: aws
+  timeout: 300
   runtime: dotnetcore3.1
   vpc: ${self:custom.vpc.${opt:stage}}
   stage: ${opt:stage}
