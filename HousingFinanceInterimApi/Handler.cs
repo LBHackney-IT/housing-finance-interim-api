@@ -184,7 +184,7 @@ namespace HousingFinanceInterimApi
                             // Ensure no blank lines
                             fileLines = fileLines.Where(item => !string.IsNullOrWhiteSpace(item)).ToList();
 
-                            const int TAKE = 1000;
+                            const int TAKE = 250;
                             int skip = 0;
                             bool failure = false;
                             IList<string> batch;

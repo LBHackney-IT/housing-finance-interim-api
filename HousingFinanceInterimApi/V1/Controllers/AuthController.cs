@@ -18,9 +18,6 @@ namespace HousingFinanceInterimApi.V1.Controllers
 
         public async Task<IActionResult> AuthenticateGoogleAuthCode(string code)
         {
-            // TODO
-            IGoogleClientService googleClientService = _createGoogleClientServiceUseCase.Execute(code);
-
             return null;
         }
 
