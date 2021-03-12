@@ -33,7 +33,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// <summary>
         /// Gets or sets the time stamp.
         /// </summary>
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTimeOffset Timestamp { get; set; }
 
         /// <summary>

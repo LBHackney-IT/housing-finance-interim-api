@@ -8,8 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace HousingFinanceInterimApi.Tests
 {
-    public class MockWebApplicationFactory<TStartup>
-        : WebApplicationFactory<TStartup> where TStartup : class
+    public class MockWebApplicationFactory<_TStartup>
+        : WebApplicationFactory<_TStartup> where _TStartup : class
     {
         private readonly DbConnection _connection;
 

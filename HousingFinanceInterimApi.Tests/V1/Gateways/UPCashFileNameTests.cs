@@ -20,7 +20,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             {
                 DatabaseContext.UpCashDumpFileNames.Add(new UPCashDumpFileName
                 {
-                    IsSuccess = true, FileName = $"testfile{i}.dat", Id = i, Timestamp = DateTimeOffset.UtcNow
+                    IsSuccess = true, FileName = $"testfile{i}.dat", Timestamp = DateTimeOffset.UtcNow
                 });
             }
 
@@ -42,7 +42,6 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             var getResult = await _fileNameGateway.GetAsync(fileName).ConfigureAwait(false);
 
             Assert.NotNull(getResult);
-            Assert.Equal(value, getResult.Id);
             Assert.Equal(fileName, getResult.FileName);
         }
 

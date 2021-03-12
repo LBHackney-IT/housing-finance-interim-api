@@ -1,9 +1,8 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
+using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace HousingFinanceInterimApi.Tests.V1.Gateways
@@ -31,7 +30,6 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             {
                 DatabaseContext.GoogleFileSettings.Add(new GoogleFileSetting
                 {
-                    Id = i,
                     GoogleFolderId = i.ToString(),
                     EndDate = DateTimeOffset.UtcNow.AddDays(1),
                     StartDate = DateTimeOffset.UtcNow,
@@ -46,18 +44,14 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         /// <summary>
         /// Determines whether this instance can get the specified value.
         /// </summary>
-        /// <param name="value">The value.</param>
-        [Theory]
-        [InlineData(1)]
-        [InlineData(2)]
-        [InlineData(3)]
-        public async Task CanGet(int value)
+        [Fact]
+        public async Task GetTest()
         {
             var listResult = await _gateway.ListAsync().ConfigureAwait(false);
 
             Assert.NotNull(listResult);
             Assert.NotEmpty(listResult);
-            Assert.Contains(value, listResult.Select(item => item.Id));
+            Assert.True(listResult.Count >= 3);
         }
 
     }

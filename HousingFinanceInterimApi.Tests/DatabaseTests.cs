@@ -2,7 +2,6 @@ using System;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using NUnit.Framework;
 
 namespace HousingFinanceInterimApi.Tests
 {

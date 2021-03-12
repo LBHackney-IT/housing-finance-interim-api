@@ -1,24 +1,20 @@
-using System.Linq;
 using HousingFinanceInterimApi.Tests.V1.Helper;
-using HousingFinanceInterimApi.V1.Infrastructure;
-using NUnit.Framework;
 
 namespace HousingFinanceInterimApi.Tests.V1.Infrastructure
 {
-    [TestFixture]
     public class DatabaseContextTest : DatabaseTests
     {
-        //[Test]
-        public void CanGetADatabaseEntity()
-        {
-            DatabaseEntity databaseEntity = DatabaseEntityHelper.CreateDatabaseEntity();
+        ////[Test]
+        //public void CanGetADatabaseEntity()
+        //{
+        //    DatabaseEntity databaseEntity = DatabaseEntityHelper.CreateDatabaseEntity();
 
-            DatabaseContext.Add(databaseEntity);
-            DatabaseContext.SaveChanges();
+        //    DatabaseContext.Add(databaseEntity);
+        //    DatabaseContext.SaveChanges();
 
-            DatabaseEntity result = DatabaseContext.DatabaseEntities.ToList().FirstOrDefault();
+        //    DatabaseEntity result = DatabaseContext.DatabaseEntities.ToList().FirstOrDefault();
 
-            Assert.AreEqual(result, databaseEntity);
-        }
+        //    Assert.AreEqual(result, databaseEntity);
+        //}
     }
 }
