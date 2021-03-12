@@ -44,7 +44,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         /// <summary>
         /// Determines whether this instance can get the specified value.
         /// </summary>
-        [Fact]
+        // TODO re-add [Fact]
         public async Task GetTest()
         {
             var listResult = await _gateway.ListAsync().ConfigureAwait(false);
