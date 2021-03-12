@@ -22,9 +22,12 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="5.4.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.4.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.4.1" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.50.0.2229" />
+    <PackageReference Include="Google.Apis.Sheets.v4" Version="1.50.0.2175" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Properties\" />
     <Folder Include="terraform\" />
   </ItemGroup>
 

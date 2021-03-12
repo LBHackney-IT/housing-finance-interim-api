@@ -8,7 +8,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Helper
     {
         public static DatabaseEntity CreateDatabaseEntity()
         {
-            var entity = new Fixture().Create<Entity>();
+            Entity entity = new Fixture().Create<Entity>();
 
             return CreateDatabaseEntityFrom(entity);
         }

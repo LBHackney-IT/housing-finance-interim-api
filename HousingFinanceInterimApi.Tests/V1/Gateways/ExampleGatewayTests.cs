@@ -3,6 +3,7 @@ using HousingFinanceInterimApi.Tests.V1.Helper;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Gateways;
 using FluentAssertions;
+using HousingFinanceInterimApi.V1.Infrastructure;
 using NUnit.Framework;
 
 namespace HousingFinanceInterimApi.Tests.V1.Gateways
@@ -24,7 +25,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         //[Test]
         public void GetEntityByIdReturnsNullIfEntityDoesntExist()
         {
-            var response = _classUnderTest.GetEntityById(123);
+            Entity response = _classUnderTest.GetEntityById(123);
 
             response.Should().BeNull();
         }
@@ -32,13 +33,13 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         //[Test]
         public void GetEntityByIdReturnsTheEntityIfItExists()
         {
-            var entity = _fixture.Create<Entity>();
-            var databaseEntity = DatabaseEntityHelper.CreateDatabaseEntityFrom(entity);
+            Entity entity = _fixture.Create<Entity>();
+            DatabaseEntity databaseEntity = DatabaseEntityHelper.CreateDatabaseEntityFrom(entity);
 
             DatabaseContext.DatabaseEntities.Add(databaseEntity);
             DatabaseContext.SaveChanges();
 
-            var response = _classUnderTest.GetEntityById(databaseEntity.Id);
+            Entity response = _classUnderTest.GetEntityById(databaseEntity.Id);
 
             databaseEntity.Id.Should().Be(response.Id);
             databaseEntity.CreatedAt.Should().BeSameDateAs(response.CreatedAt);

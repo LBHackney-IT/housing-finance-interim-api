@@ -1,5 +1,4 @@
 using System.Data.Common;
-using HousingFinanceInterimApi;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -25,13 +24,13 @@ namespace HousingFinanceInterimApi.Tests
                 .UseStartup<Startup>();
             builder.ConfigureServices(services =>
             {
-                var dbBuilder = new DbContextOptionsBuilder();
+                DbContextOptionsBuilder dbBuilder = new DbContextOptionsBuilder();
                 dbBuilder.UseSqlServer(_connection);
-                var context = new DatabaseContext(dbBuilder.Options);
+                DatabaseContext context = new DatabaseContext(dbBuilder.Options);
                 services.AddSingleton(context);
 
-                var serviceProvider = services.BuildServiceProvider();
-                var dbContext = serviceProvider.GetRequiredService<DatabaseContext>();
+                ServiceProvider serviceProvider = services.BuildServiceProvider();
+                DatabaseContext dbContext = serviceProvider.GetRequiredService<DatabaseContext>();
 
                 dbContext.Database.EnsureCreated();
             });

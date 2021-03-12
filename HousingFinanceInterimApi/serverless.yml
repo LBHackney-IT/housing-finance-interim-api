@@ -1,6 +1,7 @@
 service: housing-finance-interim-api
 provider:
   name: aws
+  timeout: 300
   runtime: dotnetcore3.1
   vpc: ${self:custom.vpc.${opt:stage}}
   stage: ${opt:stage}
@@ -19,18 +20,28 @@ package:
   artifact: ./bin/release/netcoreapp3.1/your-api-name.zip
 
 functions:
-  baseApi:
-    name: ${self:service}-${self:provider.stage}
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.LambdaEntryPoint::FunctionHandlerAsync
+#  baseApi:
+#    name: ${self:service}-${self:provider.stage}
+#    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.LambdaEntryPoint::FunctionHandlerAsync
+#    role: lambdaExecutionRole
+#    environment:
+## TODO: Create ssm variables for this API's postgres mirror then rename base-api below to match api name
+#      CONNECTION_STRING: Server=${ssm:/housing-finance/${self:provider.stage}/db-host};Port=${ssm:/housing-finance/${self:provider.stage}/db-port};Database=${ssm:/housing-finance/${self:provider.stage}/db-database};Username=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password}
+#    events:
+#      - http:
+#          path: /{proxy+}
+#          method: ANY
+#          private: true
+  importFiles:
+    name: ${self:service}-${self:provider.stage}-scheduled
+    description: "The scheduler to import finance files from Google drives."
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportFiles
     role: lambdaExecutionRole
     environment:
-# TODO: Create ssm variables for this API's postgres mirror then rename base-api below to match api name
       CONNECTION_STRING: Server=${ssm:/housing-finance/${self:provider.stage}/db-host};Port=${ssm:/housing-finance/${self:provider.stage}/db-port};Database=${ssm:/housing-finance/${self:provider.stage}/db-database};Username=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password}
+      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
     events:
-      - http:
-          path: /{proxy+}
-          method: ANY
-          private: true
+      - schedule: cron(0 14 * * ? *)
 resources:
   Resources:
     lambdaExecutionRole:

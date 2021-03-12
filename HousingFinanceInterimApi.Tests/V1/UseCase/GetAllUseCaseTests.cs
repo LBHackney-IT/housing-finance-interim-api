@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
 using HousingFinanceInterimApi.V1.Boundary.Response;
@@ -6,6 +7,7 @@ using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.UseCase;
 using FluentAssertions;
+using HousingFinanceInterimApi.V1.Gateways.Interface;
 using Moq;
 using NUnit.Framework;
 
@@ -28,10 +30,10 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         [Test]
         public void GetsAllFromTheGateway()
         {
-            var stubbedEntities = _fixture.CreateMany<Entity>().ToList();
+            List<Entity> stubbedEntities = _fixture.CreateMany<Entity>().ToList();
             _mockGateway.Setup(x => x.GetAll()).Returns(stubbedEntities);
 
-            var expectedResponse = new ResponseObjectList { ResponseObjects = stubbedEntities.ToResponse() };
+            ResponseObjectList expectedResponse = new ResponseObjectList { ResponseObjects = stubbedEntities.ToResponse() };
 
             _classUnderTest.Execute().Should().BeEquivalentTo(expectedResponse);
         }

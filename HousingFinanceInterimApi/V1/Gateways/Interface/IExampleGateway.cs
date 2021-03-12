@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using HousingFinanceInterimApi.V1.Domain;
 
-namespace HousingFinanceInterimApi.V1.Gateways
+namespace HousingFinanceInterimApi.V1.Gateways.Interface
 {
     public interface IExampleGateway
     {

@@ -14,9 +14,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public HealthCheckResponse Execute()
         {
-            var result = _healthCheckService.CheckHealthAsync().Result;
+            CompositeHealthCheckResult result = _healthCheckService.CheckHealthAsync().Result;
 
-            var success = result.CheckStatus == CheckStatus.Healthy;
+            bool success = result.CheckStatus == CheckStatus.Healthy;
             return new HealthCheckResponse(success, result.Description);
         }
     }

@@ -23,8 +23,8 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
         [Test]
         public void ReturnsResponseWithStatus()
         {
-            var expected = new Dictionary<string, object> { { "success", true } };
-            var response = _classUnderTest.HealthCheck() as OkObjectResult;
+            Dictionary<string, object> expected = new Dictionary<string, object> { { "success", true } };
+            OkObjectResult response = _classUnderTest.HealthCheck() as OkObjectResult;
 
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(200);
