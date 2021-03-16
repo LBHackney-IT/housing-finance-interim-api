@@ -19,14 +19,19 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public int Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the google folder identifier.
+        /// Gets or sets the google folder/file identifier.
         /// </summary>
-        public string GoogleFolderId { get; set; }
+        public string GoogleIdentifier { get; set; }
 
         /// <summary>
         /// Gets or sets the type of the file.
         /// </summary>
         public string FileType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the label.
+        /// </summary>
+        public string Label { get; set; }
 
         /// <summary>
         /// Gets or sets the start date.

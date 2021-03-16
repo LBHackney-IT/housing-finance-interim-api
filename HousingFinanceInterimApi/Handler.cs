@@ -154,9 +154,13 @@ namespace HousingFinanceInterimApi
         /// </summary>
         public async Task ImportFiles()
         {
+            const string DAT_FILE = ".dat";
+
             IList<GoogleFileSettingDomain> googleFileSettings =
-                await _googleFileSettingsList.Execute().ConfigureAwait(false);
-            Console.WriteLine($"{googleFileSettings.Count} google file settings found");
+                (await _googleFileSettingsList.Execute().ConfigureAwait(false)).Where(item
+                    => item.FileType.Equals(DAT_FILE, StringComparison.CurrentCultureIgnoreCase))
+                .ToList();
+            Console.WriteLine($"{googleFileSettings.Count} google dat file settings found");
 
             // Sequentially execute, for parallel execution, each will need a database context
             foreach (GoogleFileSettingDomain googleFileSettingItem in googleFileSettings)
@@ -172,23 +176,8 @@ namespace HousingFinanceInterimApi
                     // Filter to file types
                     folderFiles = folderFiles.Where(item => item.FileExtension.Equals(googleFileSettingItem.FileType))
                         .ToList();
-
-                    const string G_SHEET = ".gsheet";
-                    const string DAT_FILE = ".dat";
-
-                    switch (googleFileSettingItem.FileType)
-                    {
-                        case G_SHEET:
-                        {
-                            break;
-                        }
-                        case DAT_FILE:
-                        {
-                            await HandleDatFileDownloads(folderFiles).ConfigureAwait(false);
-
-                            break;
-                        }
-                    }
+                    
+                    await HandleDatFileDownloads(folderFiles).ConfigureAwait(false);
                 }
             }
         }

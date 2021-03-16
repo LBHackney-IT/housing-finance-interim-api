@@ -21,10 +21,11 @@ namespace HousingFinanceInterimApi.V1.Factories
             => settings.Select(item => new GoogleFileSettingDomain
                 {
                     Id = item.Id,
-                    GoogleIdentifier = item.GoogleFolderId,
+                    GoogleIdentifier = item.GoogleIdentifier,
                     FileType = item.FileType,
                     StartDate = item.StartDate,
-                    EndDate = item.EndDate
+                    EndDate = item.EndDate,
+                    Label = item.Label
                 })
                 .ToList();
 
