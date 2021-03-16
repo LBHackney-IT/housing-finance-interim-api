@@ -15,9 +15,14 @@ namespace HousingFinanceInterimApi.V1.Domain
         public int Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the google folder identifier.
+        /// Gets or sets the label.
         /// </summary>
-        public string GoogleFolderId { get; set; }
+        public string Label { get; set; }
+
+        /// <summary>
+        /// Gets or sets the google folder/file identifier.
+        /// </summary>
+        public string GoogleIdentifier { get; set; }
 
         /// <summary>
         /// Gets or sets the type of the file.

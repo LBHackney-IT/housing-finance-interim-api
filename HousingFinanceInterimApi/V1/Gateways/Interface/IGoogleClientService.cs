@@ -33,7 +33,6 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// <param name="spreadSheetId">The spread sheet identifier.</param>
         /// <param name="sheetName">Name of the sheet to read.</param>
         /// <param name="sheetRange">The sheet range to read.</param>
-        /// <param name="outputFileName">Name of the output file.</param>
         /// <returns>
         /// An async task.
         /// </returns>

@@ -192,7 +192,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// An async task.
         /// </returns>
         public async Task<IList<_TEntity>> ReadSheetToEntitiesAsync<_TEntity>(string spreadSheetId, string sheetName,
-            string sheetRange)
+            string sheetRange) where _TEntity : class
         {
             SpreadsheetsResource.ValuesResource.GetRequest getter =
                 _sheetsService.Spreadsheets.Values.Get(spreadSheetId, $"{sheetName}!{sheetRange}");
@@ -248,6 +248,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
             catch (Exception exc)
             {
                 _logger.LogError("Error writing values to object and serializing", exc);
+
                 throw;
             }
         }

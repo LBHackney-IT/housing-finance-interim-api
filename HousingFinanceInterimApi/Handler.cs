@@ -15,6 +15,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using HousingFinanceInterimApi.V1.Domain.AutoMaps;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -41,6 +43,16 @@ namespace HousingFinanceInterimApi
         /// The read google file line data use case
         /// </summary>
         private readonly IReadGoogleFileLineDataUseCase _readGoogleFileLineDataUseCase;
+
+        /// <summary>
+        /// The read google sheet to entities use case
+        /// </summary>
+        private readonly IReadGoogleSheetToEntities _readGoogleSheetToEntitiesUseCase;
+
+        /// <summary>
+        /// The save rent breakdowns use case
+        /// </summary>
+        private readonly ISaveRentBreakdownsUseCase _saveRentBreakdownsUseCase;
 
         /// <summary>
         /// The create bulk cash dumps use case
@@ -72,6 +84,13 @@ namespace HousingFinanceInterimApi
         /// </summary>
         public Handler()
         {
+            // Create auto mapper instance
+            var mapperConfig = new MapperConfiguration(mapperConfiguration =>
+            {
+                mapperConfiguration.AddProfile(new RentBreakdownMappingProfile());
+            });
+            IMapper autoMapper = mapperConfig.CreateMapper();
+
             DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
             optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
             DatabaseContext context = new DatabaseContext(optionsBuilder.Options);
@@ -79,6 +98,10 @@ namespace HousingFinanceInterimApi
             // Error log use cases
             IErrorLogGateway errorLogGateway = new ErrorLogGateway(context);
             _logErrorUseCase = new LogErrorUseCase(errorLogGateway);
+
+            // Rent breakdown use cases
+            IRentBreakdownGateway rentBreakdownGateway = new RentBreakdownGateway(context);
+            _saveRentBreakdownsUseCase = new SaveRentBreakdownsUseCase(autoMapper, rentBreakdownGateway);
 
             // File name use cases
             IUPCashFileNameGateway fileNameGateway = new UPCashFileNameGateway(context);
@@ -110,6 +133,7 @@ namespace HousingFinanceInterimApi
                     Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
             _getFilesInGoogleDriveUseCase = new GetFilesInGoogleDriveUseCase(googleClientService);
             _readGoogleFileLineDataUseCase = new ReadGoogleFileLineDataUseCase(googleClientService);
+            _readGoogleSheetToEntitiesUseCase = new ReadGoogleSheetToEntities(googleClientService);
         }
 
         /// <summary>
@@ -119,13 +143,14 @@ namespace HousingFinanceInterimApi
         {
             IList<GoogleFileSettingDomain> googleFileSettings =
                 await _googleFileSettingsList.Execute().ConfigureAwait(false);
+            Console.WriteLine($"{googleFileSettings.Count} google file settings found");
 
             // Sequentially execute, for parallel execution, each will need a database context
             foreach (GoogleFileSettingDomain googleFileSettingItem in googleFileSettings)
             {
                 // Retrieve files from this folder
                 IList<File> folderFiles = await _getFilesInGoogleDriveUseCase
-                    .ExecuteAsync(googleFileSettingItem.GoogleFolderId)
+                    .ExecuteAsync(googleFileSettingItem.GoogleIdentifier)
                     .ConfigureAwait(false);
 
                 // If we have folder files
@@ -152,6 +177,25 @@ namespace HousingFinanceInterimApi
                         }
                     }
                 }
+            }
+        }
+
+        public async Task ImportRentBreakdown()
+        {
+            GoogleFileSettingDomain googleFileSetting =
+                (await _googleFileSettingsList.Execute().ConfigureAwait(false)).First(item
+                    => item.Label.Equals("Rent Breakdown", StringComparison.CurrentCultureIgnoreCase));
+
+            if (googleFileSetting != null)
+            {
+                IList<RentBreakdownDomain> data = await _readGoogleSheetToEntitiesUseCase
+                    .ExecuteAsync<RentBreakdownDomain>(googleFileSetting.GoogleIdentifier, "Rent Debit By Account",
+                        "A:BB")
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                throw new Exception($"No Google file setting found for {nameof(ImportRentBreakdown)}");
             }
         }
 

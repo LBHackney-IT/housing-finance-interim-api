@@ -21,7 +21,7 @@ namespace HousingFinanceInterimApi.V1.Factories
             => settings.Select(item => new GoogleFileSettingDomain
                 {
                     Id = item.Id,
-                    GoogleFolderId = item.GoogleFolderId,
+                    GoogleIdentifier = item.GoogleFolderId,
                     FileType = item.FileType,
                     StartDate = item.StartDate,
                     EndDate = item.EndDate

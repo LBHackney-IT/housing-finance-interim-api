@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
@@ -38,6 +40,31 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the error logs.
         /// </summary>
         public DbSet<ErrorLog> ErrorLogs { get; set; }
+
+        /// <summary>
+        /// Gets or sets the rent breakdowns.
+        /// </summary>
+        public DbSet<RentBreakdown> RentBreakdowns { get; set; }
+
+        /// <summary>
+        /// Deletes the rent breakdowns.
+        /// </summary>
+        public async Task DeleteRentBreakdowns()
+        {
+            await using var transaction = await Database.BeginTransactionAsync().ConfigureAwait(false);
+
+            try
+            {
+                await Database.ExecuteSqlRawAsync("DeleteRentbreakdowns").ConfigureAwait(false);
+                await transaction.CommitAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                await transaction.RollbackAsync().ConfigureAwait(false);
+
+                throw;
+            }
+        }
 
     }
 
