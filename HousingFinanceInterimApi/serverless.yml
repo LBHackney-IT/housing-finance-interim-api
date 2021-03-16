@@ -38,7 +38,27 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportFiles
     role: lambdaExecutionRole
     environment:
-      CONNECTION_STRING: Server=${ssm:/housing-finance/${self:provider.stage}/db-host};Port=${ssm:/housing-finance/${self:provider.stage}/db-port};Database=${ssm:/housing-finance/${self:provider.stage}/db-database};Username=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password}
+      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
+    events:
+      - schedule: cron(20 17 * * ? *)
+  importRentBreakdowns:
+    name: ${self:service}-${self:provider.stage}-rent-breakdown-scheduled
+    description: "The scheduler to import rent breakdown data from the Google spreadsheet."
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportRentBreakdowns
+    role: lambdaExecutionRole
+    environment:
+      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
+    events:
+      - schedule: cron(20 17 * * ? *)
+  importRentPositions:
+    name: ${self:service}-${self:provider.stage}-rent-position-scheduled
+    description: "The scheduler to import current rent position data from the Google spreadsheet."
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportRentPositions
+    role: lambdaExecutionRole
+    environment:
+      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
       GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
     events:
       - schedule: cron(20 17 * * ? *)

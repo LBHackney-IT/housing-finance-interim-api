@@ -30,7 +30,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             {
                 DatabaseContext.GoogleFileSettings.Add(new GoogleFileSetting
                 {
-                    GoogleFolderId = i.ToString(),
+                    GoogleIdentifier = i.ToString(),
                     EndDate = DateTimeOffset.UtcNow.AddDays(1),
                     StartDate = DateTimeOffset.UtcNow,
                     FileType = ".dat"
