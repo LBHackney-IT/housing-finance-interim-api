@@ -43,7 +43,7 @@ functions:
     events:
       - schedule: cron(20 17 * * ? *)
   importRentBreakdowns:
-    name: ${self:service}-${self:provider.stage}-scheduled
+    name: ${self:service}-${self:provider.stage}-rent-breakdown-scheduled
     description: "The scheduler to import rent breakdown data from the Google spreadsheet."
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportRentBreakdowns
     role: lambdaExecutionRole
