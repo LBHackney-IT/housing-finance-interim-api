@@ -55,6 +55,11 @@ namespace HousingFinanceInterimApi
         private readonly ISaveRentBreakdownsUseCase _saveRentBreakdownsUseCase;
 
         /// <summary>
+        /// The save current rent positions use case
+        /// </summary>
+        private readonly ISaveCurrentRentPositionsUseCase _saveCurrentRentPositionsUseCase;
+
+        /// <summary>
         /// The create bulk cash dumps use case
         /// </summary>
         private readonly ICreateBulkCashDumpsUseCase _createBulkCashDumpsUseCase;
@@ -88,9 +93,11 @@ namespace HousingFinanceInterimApi
             var mapperConfig = new MapperConfiguration(mapperConfiguration =>
             {
                 mapperConfiguration.AddProfile(new RentBreakdownMappingProfile());
+                mapperConfiguration.AddProfile(new CurrentRentPositionMappingProfile());
             });
             IMapper autoMapper = mapperConfig.CreateMapper();
 
+            // Create database context
             DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
             optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
             DatabaseContext context = new DatabaseContext(optionsBuilder.Options);
@@ -102,6 +109,12 @@ namespace HousingFinanceInterimApi
             // Rent breakdown use cases
             IRentBreakdownGateway rentBreakdownGateway = new RentBreakdownGateway(context);
             _saveRentBreakdownsUseCase = new SaveRentBreakdownsUseCase(autoMapper, rentBreakdownGateway);
+
+            // Current rent position use cases
+            ICurrentRentPositionGateway currentRentPositionGateway = new CurrentRentPositionGateway(context);
+
+            _saveCurrentRentPositionsUseCase =
+                new SaveCurrentRentPositionsUseCase(autoMapper, currentRentPositionGateway);
 
             // File name use cases
             IUPCashFileNameGateway fileNameGateway = new UPCashFileNameGateway(context);
@@ -198,7 +211,7 @@ namespace HousingFinanceInterimApi
             {
                 IList<RentBreakdownDomain> data = await _readGoogleSheetToEntitiesUseCase
                     .ExecuteAsync<RentBreakdownDomain>(googleFileSetting.GoogleIdentifier, "Rent Debit By Account",
-                        "A:BB")
+                        "A:AU")
                     .ConfigureAwait(false);
 
                 // Save data
@@ -212,6 +225,41 @@ namespace HousingFinanceInterimApi
             else
             {
                 throw new Exception($"No Google file setting found for {nameof(ImportRentBreakdowns)}");
+            }
+        }
+
+        /// <summary>
+        /// Imports the rent positions.
+        /// </summary>
+        /// <exception cref="Exception">
+        /// Failed to save rent position items
+        /// or
+        /// No Google file setting found for {nameof(ImportRentPositions)}
+        /// </exception>
+        public async Task ImportRentPositions()
+        {
+            GoogleFileSettingDomain googleFileSetting =
+                (await _googleFileSettingsList.Execute().ConfigureAwait(false)).First(item
+                    => item.Label.Equals("Rent Position", StringComparison.CurrentCultureIgnoreCase));
+
+            if (googleFileSetting != null)
+            {
+                IList<CurrentRentPositionDomain> data = await _readGoogleSheetToEntitiesUseCase
+                    .ExecuteAsync<CurrentRentPositionDomain>(googleFileSetting.GoogleIdentifier, "Weekly Payments",
+                        "A:BB")
+                    .ConfigureAwait(false);
+
+                // Save data
+                var saveResult = await _saveCurrentRentPositionsUseCase.ExecuteAsync(data).ConfigureAwait(false);
+
+                if (saveResult <= 0)
+                {
+                    throw new Exception("Failed to save rent position items");
+                }
+            }
+            else
+            {
+                throw new Exception($"No Google file setting found for {nameof(ImportRentPositions)}");
             }
         }
 

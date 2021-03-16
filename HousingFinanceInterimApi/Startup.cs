@@ -49,6 +49,7 @@ namespace HousingFinanceInterimApi
             var mapperConfig = new MapperConfiguration(mapperConfiguration =>
             {
                 mapperConfiguration.AddProfile(new RentBreakdownMappingProfile());
+                mapperConfiguration.AddProfile(new CurrentRentPositionMappingProfile());
             });
             services.AddSingleton(mapperConfig.CreateMapper());
 

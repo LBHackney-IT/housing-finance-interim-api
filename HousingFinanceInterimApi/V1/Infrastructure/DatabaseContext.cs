@@ -47,15 +47,33 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<RentBreakdown> RentBreakdowns { get; set; }
 
         /// <summary>
+        /// Gets or sets the current rent positions.
+        /// </summary>
+        public DbSet<CurrentRentPosition> CurrentRentPositions { get; set; }
+
+        /// <summary>
         /// Deletes the rent breakdowns.
         /// </summary>
         public async Task DeleteRentBreakdowns()
+            => await PerformTransactionStoredProcedure("usp_DeleteCurrentRentPosition").ConfigureAwait(false);
+
+        /// <summary>
+        /// Deletes the current rent positions.
+        /// </summary>
+        public async Task DeleteCurrentRentPositions()
+            => await PerformTransactionStoredProcedure("usp_DeleteCurrentRentPosition").ConfigureAwait(false);
+
+        /// <summary>
+        /// Performs the transaction stored procedure execution.
+        /// </summary>
+        /// <param name="storedProc">The stored proc.</param>
+        private async Task PerformTransactionStoredProcedure(string storedProc)
         {
             await using var transaction = await Database.BeginTransactionAsync().ConfigureAwait(false);
 
             try
             {
-                await Database.ExecuteSqlRawAsync("DeleteRentbreakdowns").ConfigureAwait(false);
+                await Database.ExecuteSqlRawAsync(storedProc).ConfigureAwait(false);
                 await transaction.CommitAsync().ConfigureAwait(false);
             }
             catch
