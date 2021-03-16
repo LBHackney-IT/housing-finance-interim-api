@@ -180,7 +180,15 @@ namespace HousingFinanceInterimApi
             }
         }
 
-        public async Task ImportRentBreakdown()
+        /// <summary>
+        /// Imports the rent breakdowns.
+        /// </summary>
+        /// <exception cref="Exception">
+        /// Failed to save rent breakdown items
+        /// or
+        /// No Google file setting found for {nameof(ImportRentBreakdowns)}
+        /// </exception>
+        public async Task ImportRentBreakdowns()
         {
             GoogleFileSettingDomain googleFileSetting =
                 (await _googleFileSettingsList.Execute().ConfigureAwait(false)).First(item
@@ -192,10 +200,18 @@ namespace HousingFinanceInterimApi
                     .ExecuteAsync<RentBreakdownDomain>(googleFileSetting.GoogleIdentifier, "Rent Debit By Account",
                         "A:BB")
                     .ConfigureAwait(false);
+
+                // Save data
+                var saveResult = await _saveRentBreakdownsUseCase.ExecuteAsync(data).ConfigureAwait(false);
+
+                if (saveResult <= 0)
+                {
+                    throw new Exception("Failed to save rent breakdown items");
+                }
             }
             else
             {
-                throw new Exception($"No Google file setting found for {nameof(ImportRentBreakdown)}");
+                throw new Exception($"No Google file setting found for {nameof(ImportRentBreakdowns)}");
             }
         }
 
