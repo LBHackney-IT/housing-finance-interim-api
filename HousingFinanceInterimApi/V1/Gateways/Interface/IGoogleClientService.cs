@@ -37,7 +37,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// An async task.
         /// </returns>
         public Task<IList<_TEntity>> ReadSheetToEntitiesAsync<_TEntity>(string spreadSheetId, string sheetName,
-            string sheetRange);
+            string sheetRange) where _TEntity : class;
 
     }
 
