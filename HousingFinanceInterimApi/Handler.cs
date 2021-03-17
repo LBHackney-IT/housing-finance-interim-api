@@ -174,7 +174,7 @@ namespace HousingFinanceInterimApi
                 if (folderFiles.Any())
                 {
                     // Filter to file types
-                    folderFiles = folderFiles.Where(item => item.FileExtension.Equals(googleFileSettingItem.FileType))
+                    folderFiles = folderFiles.Where(item => item.Name.EndsWith(googleFileSettingItem.FileType))
                         .ToList();
                     
                     await HandleDatFileDownloads(folderFiles).ConfigureAwait(false);
