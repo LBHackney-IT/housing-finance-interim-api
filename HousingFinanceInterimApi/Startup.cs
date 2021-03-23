@@ -41,7 +41,8 @@ namespace HousingFinanceInterimApi
         public void ConfigureServices(IServiceCollection services)
         {
             // Setup configuration
-            IConfigurationSection apiOptionsConfigSection = Configuration.GetSection(nameof(ApiOptions));
+            IConfigurationSection settingsSection = Configuration.GetSection("Settings");
+            IConfigurationSection apiOptionsConfigSection = settingsSection.GetSection(nameof(ApiOptions));
             services.Configure<ApiOptions>(apiOptionsConfigSection);
             ApiOptions apiOptions = apiOptionsConfigSection.Get<ApiOptions>();
 
@@ -70,15 +71,14 @@ namespace HousingFinanceInterimApi
 
             services.AddSwaggerGen(swaggerSetup =>
             {
-                swaggerSetup.AddSecurityDefinition("Token", new OpenApiSecurityScheme
-                {
-                    In = ParameterLocation.Header,
-
-                    // TODO ensure populated
-                    Description = apiOptions.HackneyApiKey,
-                    Name = "X-Api-Key",
-                    Type = SecuritySchemeType.ApiKey
-                });
+                //swaggerSetup.AddSecurityDefinition("Token", new OpenApiSecurityScheme
+                //{
+                //    In = ParameterLocation.Header,
+                //    // TODO ensure populated
+                //    Description = apiOptions.HackneyApiKey,
+                //    Name = "X-Api-Key",
+                //    Type = SecuritySchemeType.ApiKey
+                //});
 
                 swaggerSetup.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
@@ -136,7 +136,6 @@ namespace HousingFinanceInterimApi
             RegisterGateways(services);
             RegisterUseCases(services);
 
-            // Add services
             services.AddScoped<IGoogleClientServiceFactory, GoogleClientServiceFactory>();
         }
 
@@ -148,6 +147,7 @@ namespace HousingFinanceInterimApi
 
         private static void RegisterGateways(IServiceCollection services)
         {
+            services.AddScoped<IOperatingBalanceGateway, OperatingBalanceGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)

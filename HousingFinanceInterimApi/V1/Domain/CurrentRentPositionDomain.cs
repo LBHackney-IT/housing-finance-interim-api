@@ -1,7 +1,6 @@
 using HousingFinanceInterimApi.JsonConverters;
 using Newtonsoft.Json;
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Linq;
 

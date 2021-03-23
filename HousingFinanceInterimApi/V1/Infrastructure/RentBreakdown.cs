@@ -8,6 +8,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
     /// <summary>
     /// The rent breakdown entity.
     /// </summary>
+    [Table("SSRentBreakdown")]
     public class RentBreakdown
     {
 

@@ -8,6 +8,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
     /// <summary>
     /// The current rent position entity.
     /// </summary>
+    [Table("SSCurrentRentPosition")]
     public class CurrentRentPosition
     {
 

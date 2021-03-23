@@ -1,6 +1,7 @@
 using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
@@ -11,6 +12,23 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
     /// <seealso cref="DbContext" />
     public class DatabaseContext : DbContext
     {
+
+        /// <summary>
+        /// Override this method to further configure the model that was discovered by convention from the entity types
+        /// exposed in <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1" /> properties on your derived context. The resulting model may be cached
+        /// and re-used for subsequent instances of your derived context.
+        /// </summary>
+        /// <param name="modelBuilder">The builder being used to construct the model for this context. Databases (and other extensions) typically
+        /// define extension methods on this object that allow you to configure aspects of the model that are specific
+        /// to a given database.</param>
+        /// <remarks>
+        /// If a model is explicitly set on the options for this context (via <see cref="M:Microsoft.EntityFrameworkCore.DbContextOptionsBuilder.UseModel(Microsoft.EntityFrameworkCore.Metadata.IModel)" />)
+        /// then this method will not be run.
+        /// </remarks>
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<OperatingBalance>().HasNoKey().ToView(null);
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseContext"/> class.
@@ -50,6 +68,23 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the current rent positions.
         /// </summary>
         public DbSet<CurrentRentPosition> CurrentRentPositions { get; set; }
+
+        /// <summary>
+        /// Gets the operating balances.
+        /// </summary>
+        /// <param name="startDate">The start date.</param>
+        /// <param name="endDate">The end date.</param>
+        /// <returns>The operating balances.</returns>
+        public async Task<IList<OperatingBalance>> GetOperatingBalancesAsync(DateTime startDate, DateTime endDate)
+            => await OperatingBalancesValue
+                .FromSqlInterpolated($"usp_GetOperatingBalances {startDate:yyyy-MM-dd}, {endDate:yyyy-MM-dd}")
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+        /// <summary>
+        /// Gets or sets the operating balances.
+        /// </summary>
+        private DbSet<OperatingBalance> OperatingBalancesValue { get; set; }
 
         /// <summary>
         /// Deletes the rent breakdowns.

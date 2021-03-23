@@ -6,6 +6,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
 {
 
     [Route("api/v1/[controller]")]
+    [ApiVersion("v1.0")]
     public class BaseController : Controller
     {
 
