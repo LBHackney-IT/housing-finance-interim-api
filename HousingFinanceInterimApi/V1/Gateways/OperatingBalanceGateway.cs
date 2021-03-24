@@ -2,6 +2,7 @@ using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.Gateways
@@ -26,7 +27,20 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// The list of operating balances.
         /// </returns>
         public async Task<IList<OperatingBalance>> ListAsync(DateTime startDate, DateTime endDate)
-            => await _context.GetOperatingBalancesAsync(startDate, endDate).ConfigureAwait(false);
+        {
+            var results = await _context.GetOperatingBalancesAsync(startDate, endDate).ConfigureAwait(false);
+
+            OperatingBalance totalBalance = new OperatingBalance
+            {
+                RentGroup = "Totals",
+                TotalRentDue = results.Sum(item => item.TotalRentDue),
+                TotalRentPaid = results.Sum(item => item.TotalRentPaid),
+                Balance = results.Sum(item => item.Balance)
+            };
+            results.Add(totalBalance);
+
+            return results;
+        }
 
     }
 
