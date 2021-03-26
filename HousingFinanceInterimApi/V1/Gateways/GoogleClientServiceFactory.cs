@@ -68,7 +68,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 {
                     ClientSecrets = new ClientSecrets
                     {
-                        ClientId = _options.ClientId, ClientSecret = _options.ClientSecret
+                        ClientId = _options.ClientId,
+                        ClientSecret = _options.ClientSecret
                     },
                     Scopes = _options.Scopes,
 
@@ -83,7 +84,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
             // Create service initializer
             BaseClientService.Initializer initializer = new BaseClientService.Initializer
             {
-                HttpClientInitializer = credential, ApplicationName = _options.ApplicationName
+                HttpClientInitializer = credential,
+                ApplicationName = _options.ApplicationName
             };
 
             return new GoogleClientService(_logger, initializer);
@@ -100,7 +102,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             BaseClientService.Initializer initializer = new BaseClientService.Initializer
             {
-                ApplicationName = _options.ApplicationName, ApiKey = apiKey
+                ApplicationName = _options.ApplicationName,
+                ApiKey = apiKey
             };
 
             return new GoogleClientService(_logger, initializer);

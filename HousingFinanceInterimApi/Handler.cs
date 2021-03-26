@@ -176,7 +176,7 @@ namespace HousingFinanceInterimApi
                     // Filter to file types
                     folderFiles = folderFiles.Where(item => item.Name.EndsWith(googleFileSettingItem.FileType))
                         .ToList();
-                    
+
                     await HandleDatFileDownloads(folderFiles).ConfigureAwait(false);
                 }
             }

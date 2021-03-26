@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
-    
+
     /// <summary>
     /// The UP Cash dump file name entity.
     /// </summary>

@@ -20,7 +20,9 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             {
                 DatabaseContext.UpCashDumpFileNames.Add(new UPCashDumpFileName
                 {
-                    IsSuccess = true, FileName = $"testfile{i}.dat", Timestamp = DateTimeOffset.UtcNow
+                    IsSuccess = true,
+                    FileName = $"testfile{i}.dat",
+                    Timestamp = DateTimeOffset.UtcNow
                 });
             }
 
