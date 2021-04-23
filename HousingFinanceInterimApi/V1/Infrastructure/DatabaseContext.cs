@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
@@ -28,6 +30,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<OperatingBalance>().HasNoKey().ToView(null);
+            modelBuilder.Entity<Payment>().HasNoKey().ToView(null);
+            modelBuilder.Entity<Tenancy>().HasNoKey().ToView(null);
+            modelBuilder.Entity<TenancyTransaction>().HasNoKey().ToView(null);
         }
 
         /// <summary>
@@ -77,7 +82,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// <returns>The operating balances.</returns>
         public async Task<IList<OperatingBalance>> GetOperatingBalancesAsync(DateTime startDate, DateTime endDate)
             => await OperatingBalancesValue
-                .FromSqlInterpolated($"usp_GetOperatingBalances {startDate:yyyy-MM-dd}, {endDate:yyyy-MM-dd}")
+                .FromSqlInterpolated($"usp_GetOperatingBalancesByRentGroup {startDate:yyyy-MM-dd}, {endDate:yyyy-MM-dd}")
                 .ToListAsync()
                 .ConfigureAwait(false);
 
@@ -85,6 +90,64 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the operating balances.
         /// </summary>
         private DbSet<OperatingBalance> OperatingBalancesValue { get; set; }
+
+        /// <summary>
+        /// Gets the payments.
+        /// </summary>
+        /// <param name="tenancyAgreementRef">The tenancy agreement reference.</param>
+        /// <param name="rentAccount">The rent account number.</param>
+        /// <param name="householdRef">The household reference.</param>
+        /// <param name="count">Number of rows to return.</param>
+        /// <param name="order">List order (ASC or DESC).</param>
+        /// <returns>The operating balances.</returns>
+        public async Task<IList<Payment>> GetPaymentsAsync(string tenancyAgreementRef, string rentAccount, string householdRef, int count, string order)
+            => await PaymentsValue
+                .FromSqlInterpolated($"usp_GetTenantLastPayments {tenancyAgreementRef}, {rentAccount}, {householdRef}, {count}, {order}")
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+        /// <summary>
+        /// Gets or sets the payments.
+        /// </summary>
+        private DbSet<Payment> PaymentsValue { get; set; }
+
+        /// <summary>
+        /// Gets the tenancy details.
+        /// </summary>
+        /// <param name="tenancyAgreementRef">The tenancy agreement reference.</param>
+        /// <param name="rentAccount">The rent account number.</param>
+        /// <param name="householdRef">The household reference.</param>
+        /// <returns>Tenancy information.</returns>
+        public async Task<IList<Tenancy>> GetTenanciesAsync(string tenancyAgreementRef, string rentAccount, string householdRef)
+            => await TenanciesValue
+                .FromSqlInterpolated($"usp_GetTenancyDetails {tenancyAgreementRef}, {rentAccount}, {householdRef}")
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+        /// <summary>
+        /// Gets or sets the tenancies.
+        /// </summary>
+        private DbSet<Tenancy> TenanciesValue { get; set; }
+
+        /// <summary>
+        /// Gets the tenancy details.
+        /// </summary>
+        /// <param name="tenancyAgreementRef">The tenancy agreement reference.</param>
+        /// <param name="rentAccount">The rent account number.</param>
+        /// <param name="householdRef">The household reference.</param>
+        /// <param name="count">Number of rows to return.</param>
+        /// <param name="order">List order (ASC or DESC).</param>
+        /// <returns>Tenancy transactions.</returns>
+        public async Task<IList<TenancyTransaction>> GetTenancyTransactionsAsync(string tenancyAgreementRef, string rentAccount, string householdRef, int count, string order)
+            => await TenancyTransactionValue
+                .FromSqlInterpolated($"usp_GetTenancyTransactions {tenancyAgreementRef}, {rentAccount}, {householdRef}, {count}, {order}")
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+        /// <summary>
+        /// Gets or sets the tenancies.
+        /// </summary>
+        private DbSet<TenancyTransaction> TenancyTransactionValue { get; set; }
 
         /// <summary>
         /// Deletes the rent breakdowns.

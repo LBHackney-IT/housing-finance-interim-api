@@ -149,6 +149,8 @@ namespace HousingFinanceInterimApi
         private static void RegisterGateways(IServiceCollection services)
         {
             services.AddScoped<IOperatingBalanceGateway, OperatingBalanceGateway>();
+            services.AddScoped<IPaymentGateway, PaymentGateway>();
+            services.AddScoped<ITenancyGateway, TenancyGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)

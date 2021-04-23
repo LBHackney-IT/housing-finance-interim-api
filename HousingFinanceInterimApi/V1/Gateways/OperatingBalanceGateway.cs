@@ -33,9 +33,12 @@ namespace HousingFinanceInterimApi.V1.Gateways
             OperatingBalance totalBalance = new OperatingBalance
             {
                 RentGroup = "Totals",
-                TotalRentDue = results.Sum(item => item.TotalRentDue),
-                TotalRentPaid = results.Sum(item => item.TotalRentPaid),
-                Balance = results.Sum(item => item.Balance)
+                TotalCharged = results.Sum(item => item.TotalCharged),
+                TotalPaid = results.Sum(item => item.TotalPaid),
+                TotalBalance = results.Sum(item => item.TotalBalance),
+                ChargedYTD = results.Sum(item => item.ChargedYTD),
+                PaidYTD = results.Sum(item => item.PaidYTD),
+                ArrearsYTD = results.Sum(item => item.ArrearsYTD),
             };
             results.Add(totalBalance);
 
