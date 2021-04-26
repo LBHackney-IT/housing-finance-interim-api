@@ -60,6 +60,16 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<UPCashDump> UpCashDumps { get; set; }
 
         /// <summary>
+        /// Gets or sets the up cash dump file names.
+        /// </summary>
+        public DbSet<UPHousingCashDumpFileName> UpHousingCashDumpFileNames { get; set; }
+
+        /// <summary>
+        /// Gets or sets the up cash dumps.
+        /// </summary>
+        public DbSet<UPHousingCashDump> UpHousingCashDumps { get; set; }
+
+        /// <summary>
         /// Gets or sets the error logs.
         /// </summary>
         public DbSet<ErrorLog> ErrorLogs { get; set; }
