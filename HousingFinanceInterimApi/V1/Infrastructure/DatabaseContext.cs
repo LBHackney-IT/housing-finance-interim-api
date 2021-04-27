@@ -85,6 +85,11 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<CurrentRentPosition> CurrentRentPositions { get; set; }
 
         /// <summary>
+        /// Gets or sets the current rent positions.
+        /// </summary>
+        public DbSet<ServiceChargePaymentsReceived> ServiceChargesPaymentsReceived { get; set; }
+
+        /// <summary>
         /// Gets the operating balances.
         /// </summary>
         /// <param name="startDate">The start date.</param>
@@ -170,6 +175,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// </summary>
         public async Task DeleteCurrentRentPositions()
             => await PerformTransactionStoredProcedure("usp_DeleteCurrentRentPosition").ConfigureAwait(false);
+
+        /// <summary>
+        /// Deletes the current rent positions.
+        /// </summary>
+        public async Task DeleteServiceChargePaymentsReceived()
+            => await PerformTransactionStoredProcedure("usp_DeleteServiceChargePaymentsReceived").ConfigureAwait(false);
 
         /// <summary>
         /// Performs the transaction stored procedure execution.

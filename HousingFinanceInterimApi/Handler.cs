@@ -60,6 +60,11 @@ namespace HousingFinanceInterimApi
         private readonly ISaveCurrentRentPositionsUseCase _saveCurrentRentPositionsUseCase;
 
         /// <summary>
+        /// The save service charges payments received use case
+        /// </summary>
+        private readonly ISaveServiceChargePaymentsReceivedUseCase _saveServiceChargePaymentsReceivedUseCase;
+
+        /// <summary>
         /// The create bulk cash dumps use case
         /// </summary>
         private readonly ICreateBulkCashDumpsUseCase _createBulkCashDumpsUseCase;
@@ -312,6 +317,41 @@ namespace HousingFinanceInterimApi
 
                 // Save data
                 var saveResult = await _saveCurrentRentPositionsUseCase.ExecuteAsync(data).ConfigureAwait(false);
+
+                if (saveResult <= 0)
+                {
+                    throw new Exception("Failed to save rent position items");
+                }
+            }
+            else
+            {
+                throw new Exception($"No Google file setting found for {nameof(ImportRentPositions)}");
+            }
+        }
+
+        /// <summary>
+        /// Imports the rent positions.
+        /// </summary>
+        /// <exception cref="Exception">
+        /// Failed to save rent position items
+        /// or
+        /// No Google file setting found for {nameof(ImportRentPositions)}
+        /// </exception>
+        public async Task ImportServiceChargePaymentsReceived()
+        {
+            GoogleFileSettingDomain googleFileSetting =
+                (await _googleFileSettingsList.Execute().ConfigureAwait(false)).First(item
+                    => item.Label.Equals("Service Charge Payments Received", StringComparison.CurrentCultureIgnoreCase));
+
+            if (googleFileSetting != null)
+            {
+                IList<ServiceChargePaymentsReceivedDomain> data = await _readGoogleSheetToEntitiesUseCase
+                    .ExecuteAsync<ServiceChargePaymentsReceivedDomain>(googleFileSetting.GoogleIdentifier, "Monthly SC Payments",
+                        "A:AB")
+                    .ConfigureAwait(false);
+
+                // Save data
+                var saveResult = await _saveServiceChargePaymentsReceivedUseCase.ExecuteAsync(data).ConfigureAwait(false);
 
                 if (saveResult <= 0)
                 {
