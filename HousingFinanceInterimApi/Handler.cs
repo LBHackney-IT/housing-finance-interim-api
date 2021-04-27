@@ -65,6 +65,11 @@ namespace HousingFinanceInterimApi
         private readonly ISaveServiceChargePaymentsReceivedUseCase _saveServiceChargePaymentsReceivedUseCase;
 
         /// <summary>
+        /// The save leasehold accounts use case
+        /// </summary>
+        private readonly ISaveLeaseholdAccountsUseCase _saveLeaseholdAccountsUseCase;
+
+        /// <summary>
         /// The create bulk cash dumps use case
         /// </summary>
         private readonly ICreateBulkCashDumpsUseCase _createBulkCashDumpsUseCase;
@@ -333,9 +338,9 @@ namespace HousingFinanceInterimApi
         /// Imports the rent positions.
         /// </summary>
         /// <exception cref="Exception">
-        /// Failed to save rent position items
+        /// Failed to save service charge payments received items
         /// or
-        /// No Google file setting found for {nameof(ImportRentPositions)}
+        /// No Google file setting found for {nameof(ImportServiceChargePaymentsReceived)}
         /// </exception>
         public async Task ImportServiceChargePaymentsReceived()
         {
@@ -355,12 +360,47 @@ namespace HousingFinanceInterimApi
 
                 if (saveResult <= 0)
                 {
-                    throw new Exception("Failed to save rent position items");
+                    throw new Exception("Failed to save service charges payments received items");
                 }
             }
             else
             {
-                throw new Exception($"No Google file setting found for {nameof(ImportRentPositions)}");
+                throw new Exception($"No Google file setting found for {nameof(ImportServiceChargePaymentsReceived)}");
+            }
+        }
+
+        /// <summary>
+        /// Imports the leasehold accounts.
+        /// </summary>
+        /// <exception cref="Exception">
+        /// Failed to save leasehold accounts items
+        /// or
+        /// No Google file setting found for {nameof(ImportLeaseholdAccounts)}
+        /// </exception>
+        public async Task ImportLeaseholdAccounts()
+        {
+            GoogleFileSettingDomain googleFileSetting =
+                (await _googleFileSettingsList.Execute().ConfigureAwait(false)).First(item
+                    => item.Label.Equals("Leasehold Accounts", StringComparison.CurrentCultureIgnoreCase));
+
+            if (googleFileSetting != null)
+            {
+                IList<LeaseholdAccountDomain> data = await _readGoogleSheetToEntitiesUseCase
+                    .ExecuteAsync<LeaseholdAccountDomain>(googleFileSetting.GoogleIdentifier, "Current",
+                        "A:M")
+                    .ConfigureAwait(false);
+
+                // Save data
+                var saveResult = await _saveLeaseholdAccountsUseCase.ExecuteAsync(data).ConfigureAwait(false);
+
+                if (saveResult <= 0)
+                {
+                    throw new Exception("Failed to save leasehold accounts items");
+                }
+            }
+            else
+            {
+                throw new Exception($"No Google file setting found for {nameof(ImportLeaseholdAccounts)}");
             }
         }
 
