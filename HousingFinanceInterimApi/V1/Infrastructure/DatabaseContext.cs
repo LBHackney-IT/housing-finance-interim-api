@@ -95,6 +95,11 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<LeaseholdAccount> LeaseholdAccounts { get; set; }
 
         /// <summary>
+        /// Gets or sets the garages.
+        /// </summary>
+        public DbSet<Garage> Garages { get; set; }
+
+        /// <summary>
         /// Gets the operating balances.
         /// </summary>
         /// <param name="startDate">The start date.</param>
@@ -192,6 +197,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// </summary>
         public async Task DeleteLeaseholdAccounts()
             => await PerformTransactionStoredProcedure("usp_DeleteLeaseholdAccounts").ConfigureAwait(false);
+
+        /// <summary>
+        /// Deletes the garages.
+        /// </summary>
+        public async Task DeleteGarages()
+            => await PerformTransactionStoredProcedure("usp_DeleteGarages").ConfigureAwait(false);
 
         /// <summary>
         /// Performs the transaction stored procedure execution.

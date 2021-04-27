@@ -70,6 +70,11 @@ namespace HousingFinanceInterimApi
         private readonly ISaveLeaseholdAccountsUseCase _saveLeaseholdAccountsUseCase;
 
         /// <summary>
+        /// The save garages use case
+        /// </summary>
+        private readonly ISaveGaragesUseCase _saveGaragesUseCase;
+
+        /// <summary>
         /// The create bulk cash dumps use case
         /// </summary>
         private readonly ICreateBulkCashDumpsUseCase _createBulkCashDumpsUseCase;
@@ -401,6 +406,41 @@ namespace HousingFinanceInterimApi
             else
             {
                 throw new Exception($"No Google file setting found for {nameof(ImportLeaseholdAccounts)}");
+            }
+        }
+
+        /// <summary>
+        /// Imports the rent breakdowns.
+        /// </summary>
+        /// <exception cref="Exception">
+        /// Failed to save rent breakdown items
+        /// or
+        /// No Google file setting found for {nameof(ImportRentBreakdowns)}
+        /// </exception>
+        public async Task ImportGarage()
+        {
+            GoogleFileSettingDomain googleFileSetting =
+                (await _googleFileSettingsList.Execute().ConfigureAwait(false)).First(item
+                    => item.Label.Equals("Garage Database", StringComparison.CurrentCultureIgnoreCase));
+
+            if (googleFileSetting != null)
+            {
+                IList<GarageDomain> data = await _readGoogleSheetToEntitiesUseCase
+                    .ExecuteAsync<GarageDomain>(googleFileSetting.GoogleIdentifier, "Sheet1",
+                        "A:AC")
+                    .ConfigureAwait(false);
+
+                // Save data
+                var saveResult = await _saveGaragesUseCase.ExecuteAsync(data).ConfigureAwait(false);
+
+                if (saveResult <= 0)
+                {
+                    throw new Exception("Failed to save garage items");
+                }
+            }
+            else
+            {
+                throw new Exception($"No Google file setting found for {nameof(ImportGarage)}");
             }
         }
 
