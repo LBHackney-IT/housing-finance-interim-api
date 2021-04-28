@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System;
+using System.Globalization;
 
 namespace HousingFinanceInterimApi.JsonConverters
 {
@@ -38,7 +39,7 @@ namespace HousingFinanceInterimApi.JsonConverters
         {
             string value = reader.Value?.ToString();
 
-            if (decimal.TryParse(value, out decimal decimalValue))
+            if (decimal.TryParse(value, NumberStyles.Number, new CultureInfo("en-GB"), out decimal decimalValue))
             {
                 return decimalValue;
             }

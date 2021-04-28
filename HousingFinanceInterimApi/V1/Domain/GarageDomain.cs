@@ -48,10 +48,27 @@ namespace HousingFinanceInterimApi.V1.Domain
         public string Status { get; set; }
 
         /// <summary>
-        /// Gets or sets the void date.
+        /// Sets the assignment void date input.
         /// </summary>
         [JsonProperty("Void date")]
-        [JsonConverter(typeof(DateFormatConverter), "dd/MM/yyyy")]
+        public string VoidDateInput
+        {
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    VoidDate = DateTime.Parse(value, new CultureInfo("en-GB"));
+                }
+                else
+                {
+                    VoidDate = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the void date.
+        /// </summary>
         public DateTime? VoidDate { get; set; }
 
         /// <summary>
@@ -61,10 +78,27 @@ namespace HousingFinanceInterimApi.V1.Domain
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets the tenancy date.
+        /// Sets the assignment tenancy date input.
         /// </summary>
         [JsonProperty("Tenancy Date")]
-        [JsonConverter(typeof(DateFormatConverter), "dd/MM/yyyy")]
+        public string TenancyDateInput
+        {
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    TenancyDate = DateTime.Parse(value, new CultureInfo("en-GB"));
+                }
+                else
+                {
+                    TenancyDate = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the tenancy date.
+        /// </summary>
         public DateTime? TenancyDate { get; set; }
 
         /// <summary>

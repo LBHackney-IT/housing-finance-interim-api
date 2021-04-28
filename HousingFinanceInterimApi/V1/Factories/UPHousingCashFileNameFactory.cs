@@ -20,14 +20,18 @@ namespace HousingFinanceInterimApi.V1.Factories
         /// The list of file name domain objects.
         /// </returns>
         public static UPHousingCashFileNameDomain ToDomain(UPHousingCashDumpFileName fileName)
-            => new UPHousingCashFileNameDomain
+        {
+            if (fileName == null)
+                return null;
+
+            return new UPHousingCashFileNameDomain
             {
                 Id = fileName.Id,
                 FileName = fileName.FileName,
                 IsSuccess = fileName.IsSuccess,
                 Timestamp = fileName.Timestamp
             };
-
+        }
     }
 
 }

@@ -42,24 +42,75 @@ namespace HousingFinanceInterimApi.V1.Domain
         public string Tenure { get; set; }
 
         /// <summary>
-        /// Gets or sets the assignment start date.
+        /// Sets the assignment start date input.
         /// </summary>
         [JsonProperty("assignment_start")]
-        [JsonConverter(typeof(DateFormatConverter), "dd/MM/yyyy")]
+        public string AssignmentStartDateInput
+        {
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    AssignmentStartDate = DateTime.Parse(value, new CultureInfo("en-GB"));
+                }
+                else
+                {
+                    AssignmentStartDate = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the assignment start date.
+        /// </summary>
         public DateTime? AssignmentStartDate { get; set; }
+
+        /// <summary>
+        /// Sets the assignment end date input.
+        /// </summary>
+        [JsonProperty("assignment_end")]
+        public string AssignmentEndDateInput
+        {
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    AssignmentEndDate = DateTime.Parse(value, new CultureInfo("en-GB"));
+                }
+                else
+                {
+                    AssignmentEndDate = null;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the assignment end date.
         /// </summary>
-        [JsonProperty("assignment_end")]
-        [JsonConverter(typeof(DateFormatConverter), "dd/MM/yyyy")]
         public DateTime? AssignmentEndDate { get; set; }
+
+        /// <summary>
+        /// Sets the assignment start date input.
+        /// </summary>
+        [JsonProperty("date_sold_leased")]
+        public string SoldLeasedDateInput
+        {
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    SoldLeasedDate = DateTime.Parse(value, new CultureInfo("en-GB"));
+                }
+                else
+                {
+                    SoldLeasedDate = null;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the date sold leased.
         /// </summary>
-        [JsonProperty("date_sold_leased")]
-        [JsonConverter(typeof(DateFormatConverter), "dd/MM/yyyy")]
         public DateTime? SoldLeasedDate { get; set; }
 
         /// <summary>

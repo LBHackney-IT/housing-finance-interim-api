@@ -16,7 +16,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Google.Apis.Logging;
 using HousingFinanceInterimApi.V1.Domain.AutoMaps;
+using Microsoft.Extensions.Logging;
+using ILogger = Google.Apis.Logging.ILogger;
+using LogLevel = Google.Apis.Logging.LogLevel;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -129,6 +133,9 @@ namespace HousingFinanceInterimApi
             {
                 mapperConfiguration.AddProfile(new RentBreakdownMappingProfile());
                 mapperConfiguration.AddProfile(new CurrentRentPositionMappingProfile());
+                mapperConfiguration.AddProfile(new ServiceChargePaymentsReceivedMappingProfile());
+                mapperConfiguration.AddProfile(new LeaseholdAccountMappingProfile());
+                mapperConfiguration.AddProfile(new GarageMappingProfile());
             });
             IMapper autoMapper = mapperConfig.CreateMapper();
 
@@ -150,6 +157,18 @@ namespace HousingFinanceInterimApi
 
             _saveCurrentRentPositionsUseCase =
                 new SaveCurrentRentPositionsUseCase(autoMapper, currentRentPositionGateway);
+
+            // Service charges payments received use cases
+            IServiceChargePaymentsReceivedGateway serviceChargePaymentsReceivedGateway = new ServiceChargePaymentsReceivedGateway(context);
+            _saveServiceChargePaymentsReceivedUseCase = new SaveServiceChargePaymentsReceivedUseCase(autoMapper, serviceChargePaymentsReceivedGateway);
+
+            // Leasehold accounts use cases
+            ILeaseholdAccountsGateway leaseholdAccountsGateway = new LeaseholdAccountsGateway(context);
+            _saveLeaseholdAccountsUseCase = new SaveLeaseholdAccountsUseCase(autoMapper, leaseholdAccountsGateway);
+
+            // Garage use cases
+            IGarageGateway garageGateway = new GarageGateway(context);
+            _saveGaragesUseCase = new SaveGaragesUseCase(autoMapper, garageGateway);
 
             // File name use cases
             IUPCashFileNameGateway fileNameGateway = new UPCashFileNameGateway(context);
@@ -184,11 +203,11 @@ namespace HousingFinanceInterimApi
                     DriveService.Scope.DriveReadonly, SheetsService.Scope.SpreadsheetsReadonly
                 }
             });
-
+            
             // Google service use cases
-            IGoogleClientService googleClientService =
-                new GoogleClientServiceFactory(default, options, context).CreateGoogleClientServiceForApiKey(
-                    Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
+            IGoogleClientService googleClientService = 
+                new GoogleClientServiceFactory(default, options, context)
+                    .CreateGoogleClientServiceForApiKey(Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
             _getFilesInGoogleDriveUseCase = new GetFilesInGoogleDriveUseCase(googleClientService);
             _readGoogleFileLineDataUseCase = new ReadGoogleFileLineDataUseCase(googleClientService);
             _readGoogleSheetToEntitiesUseCase = new ReadGoogleSheetToEntities(googleClientService);
@@ -261,7 +280,7 @@ namespace HousingFinanceInterimApi
                 if (folderFiles.Any())
                 {
                     // Filter to file types
-                    folderFiles = folderFiles.Where(item => item.Name.EndsWith(googleFileSettingItem.FileType))
+                    folderFiles = folderFiles.Where(item => item.Name.StartsWith("rentpost") && item.Name.EndsWith(googleFileSettingItem.FileType))
                         .ToList();
 
                     await HandleDatHousingFileDownloads(folderFiles).ConfigureAwait(false);
