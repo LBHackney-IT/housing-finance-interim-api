@@ -60,6 +60,16 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<UPCashDump> UpCashDumps { get; set; }
 
         /// <summary>
+        /// Gets or sets the up cash dump file names.
+        /// </summary>
+        public DbSet<UPHousingCashDumpFileName> UpHousingCashDumpFileNames { get; set; }
+
+        /// <summary>
+        /// Gets or sets the up cash dumps.
+        /// </summary>
+        public DbSet<UPHousingCashDump> UpHousingCashDumps { get; set; }
+
+        /// <summary>
         /// Gets or sets the error logs.
         /// </summary>
         public DbSet<ErrorLog> ErrorLogs { get; set; }
@@ -73,6 +83,21 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the current rent positions.
         /// </summary>
         public DbSet<CurrentRentPosition> CurrentRentPositions { get; set; }
+
+        /// <summary>
+        /// Gets or sets the service charges payments received.
+        /// </summary>
+        public DbSet<ServiceChargePaymentsReceived> ServiceChargesPaymentsReceived { get; set; }
+
+        /// <summary>
+        /// Gets or sets the leasehold accounts.
+        /// </summary>
+        public DbSet<LeaseholdAccount> LeaseholdAccounts { get; set; }
+
+        /// <summary>
+        /// Gets or sets the garages.
+        /// </summary>
+        public DbSet<Garage> Garages { get; set; }
 
         /// <summary>
         /// Gets the operating balances.
@@ -153,13 +178,31 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Deletes the rent breakdowns.
         /// </summary>
         public async Task DeleteRentBreakdowns()
-            => await PerformTransactionStoredProcedure("usp_DeleteCurrentRentPosition").ConfigureAwait(false);
+            => await PerformTransactionStoredProcedure("usp_DeleteRentBreakdown").ConfigureAwait(false);
 
         /// <summary>
         /// Deletes the current rent positions.
         /// </summary>
         public async Task DeleteCurrentRentPositions()
             => await PerformTransactionStoredProcedure("usp_DeleteCurrentRentPosition").ConfigureAwait(false);
+
+        /// <summary>
+        /// Deletes the current rent positions.
+        /// </summary>
+        public async Task DeleteServiceChargePaymentsReceived()
+            => await PerformTransactionStoredProcedure("usp_DeleteServiceChargePaymentsReceived").ConfigureAwait(false);
+
+        /// <summary>
+        /// Deletes the rent breakdowns.
+        /// </summary>
+        public async Task DeleteLeaseholdAccounts()
+            => await PerformTransactionStoredProcedure("usp_DeleteLeaseholdAccounts").ConfigureAwait(false);
+
+        /// <summary>
+        /// Deletes the garages.
+        /// </summary>
+        public async Task DeleteGarages()
+            => await PerformTransactionStoredProcedure("usp_DeleteGarages").ConfigureAwait(false);
 
         /// <summary>
         /// Performs the transaction stored procedure execution.
