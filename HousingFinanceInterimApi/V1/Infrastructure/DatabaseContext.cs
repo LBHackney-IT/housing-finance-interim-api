@@ -178,7 +178,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Deletes the rent breakdowns.
         /// </summary>
         public async Task DeleteRentBreakdowns()
-            => await PerformTransactionStoredProcedure("usp_DeleteCurrentRentPosition").ConfigureAwait(false);
+            => await PerformTransactionStoredProcedure("usp_DeleteRentBreakdown").ConfigureAwait(false);
 
         /// <summary>
         /// Deletes the current rent positions.
