@@ -23,12 +23,16 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// </summary>
         /// <param name="startDate">The start date.</param>
         /// <param name="endDate">The end date.</param>
+        /// <param name="startWeek">The start week.</param>
+        /// <param name="startYear">The start year.</param>
+        /// <param name="endWeek">The end week.</param>
+        /// <param name="endYear">The end year.</param>
         /// <returns>
         /// The list of operating balances.
         /// </returns>
-        public async Task<IList<OperatingBalance>> ListAsync(DateTime startDate, DateTime endDate)
+        public async Task<IList<OperatingBalance>> ListAsync(DateTime? startDate, DateTime? endDate, int startWeek, int startYear, int endWeek, int endYear)
         {
-            var results = await _context.GetOperatingBalancesAsync(startDate, endDate).ConfigureAwait(false);
+            var results = await _context.GetOperatingBalancesAsync(startDate, endDate, startWeek, startYear, endWeek, endYear).ConfigureAwait(false);
 
             OperatingBalance totalBalance = new OperatingBalance
             {

@@ -17,9 +17,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> Get(DateTime startDate, DateTime endDate)
-            => Json(await _gateway.ListAsync(startDate, endDate).ConfigureAwait(false));
-
+        public async Task<JsonResult> Get(DateTime? startDate, DateTime? endDate, int startWeek, int startYear, int endWeek, int endYear)
+            => Json(await _gateway.ListAsync(startDate, endDate, startWeek, startYear, endWeek, endYear).ConfigureAwait(false));
     }
-
 }

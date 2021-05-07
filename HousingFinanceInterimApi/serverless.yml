@@ -41,7 +41,17 @@ functions:
       CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
       GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
     events:
-      - schedule: cron(35 9 * * ? *)
+      - schedule: cron(0 19 * * ? *)
+  importHousingFiles:
+    name: ${self:service}-${self:provider.stage}-housing-scheduled
+    description: "The scheduler to import housing files from Google drives."
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportHousingFiles
+    role: lambdaExecutionRole
+    environment:
+      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
+    events:
+      - schedule: cron(0 19 * * ? *)
   importRentBreakdowns:
     name: ${self:service}-${self:provider.stage}-rent-breakdown-scheduled
     description: "The scheduler to import rent breakdown data from the Google spreadsheet."
@@ -51,7 +61,7 @@ functions:
       CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
       GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
     events:
-      - schedule: cron(35 9 * * ? *)
+      - schedule: cron(0 19 * * ? *)
   importRentPositions:
     name: ${self:service}-${self:provider.stage}-rent-position-scheduled
     description: "The scheduler to import current rent position data from the Google spreadsheet."
@@ -61,7 +71,37 @@ functions:
       CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
       GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
     events:
-      - schedule: cron(35 9 * * ? *)
+      - schedule: cron(0 19 * * ? *)
+  importServiceChargePaymentsReceived:
+    name: ${self:service}-${self:provider.stage}-service-charge-payments-received-scheduled
+    description: "The scheduler to import service charge payments received data from the Google spreadsheet."
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportServiceChargePaymentsReceived
+    role: lambdaExecutionRole
+    environment:
+      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
+    events:
+      - schedule: cron(0 19 * * ? *)
+  importLeaseholdAccounts:
+    name: ${self:service}-${self:provider.stage}-leasehold-accounts-scheduled
+    description: "The scheduler to import leasehold accounts data from the Google spreadsheet."
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportLeaseholdAccounts
+    role: lambdaExecutionRole
+    environment:
+      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
+    events:
+      - schedule: cron(0 19 * * ? *)
+  importGarage:
+    name: ${self:service}-${self:provider.stage}-garage-position-scheduled
+    description: "The scheduler to import garage position data from the Google spreadsheet."
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportGarage
+    role: lambdaExecutionRole
+    environment:
+      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
+    events:
+      - schedule: cron(0 19 * * ? *)
 resources:
   Resources:
     lambdaExecutionRole:

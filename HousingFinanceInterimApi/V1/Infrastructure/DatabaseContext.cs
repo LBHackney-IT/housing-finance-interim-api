@@ -104,10 +104,14 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// </summary>
         /// <param name="startDate">The start date.</param>
         /// <param name="endDate">The end date.</param>
+        /// <param name="startWeek">The start week.</param>
+        /// <param name="startYear">The start year.</param>
+        /// <param name="endWeek">The end week.</param>
+        /// <param name="endYear">The end year.</param>
         /// <returns>The operating balances.</returns>
-        public async Task<IList<OperatingBalance>> GetOperatingBalancesAsync(DateTime startDate, DateTime endDate)
+        public async Task<IList<OperatingBalance>> GetOperatingBalancesAsync(DateTime? startDate, DateTime? endDate, int startWeek, int startYear, int endWeek, int endYear)
             => await OperatingBalancesValue
-                .FromSqlInterpolated($"usp_GetOperatingBalancesByRentGroup {startDate:yyyy-MM-dd}, {endDate:yyyy-MM-dd}")
+                .FromSqlInterpolated($"usp_GetOperatingBalancesByRentGroup {startDate:yyyy-MM-dd}, {endDate:yyyy-MM-dd}, {startWeek}, {startYear}, {endWeek}, {endYear}")
                 .ToListAsync()
                 .ConfigureAwait(false);
 
@@ -166,6 +170,21 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task<IList<TenancyTransaction>> GetTenancyTransactionsAsync(string tenancyAgreementRef, string rentAccount, string householdRef, int count, string order)
             => await TenancyTransactionValue
                 .FromSqlInterpolated($"usp_GetTenancyTransactions {tenancyAgreementRef}, {rentAccount}, {householdRef}, {count}, {order}")
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+        /// <summary>
+        /// Gets the tenancy details.
+        /// </summary>
+        /// <param name="tenancyAgreementRef">The tenancy agreement reference.</param>
+        /// <param name="rentAccount">The rent account number.</param>
+        /// <param name="householdRef">The household reference.</param>
+        /// <param name="startDate">Start date.</param>
+        /// <param name="endDate">End date.</param>
+        /// <returns>Tenancy transactions.</returns>
+        public async Task<IList<TenancyTransaction>> GetTenancyTransactionsByDateAsync(string tenancyAgreementRef, string rentAccount, string householdRef, DateTime startDate, DateTime endDate)
+            => await TenancyTransactionValue
+                .FromSqlInterpolated($"usp_GetTenancyTransactionsByDate {tenancyAgreementRef}, {rentAccount}, {householdRef}, {startDate}, {endDate}")
                 .ToListAsync()
                 .ConfigureAwait(false);
 
