@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Cors;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
-
+    
+    [EnableCors]
     public class PaymentController : BaseController
     {
 

@@ -2,10 +2,12 @@ using HousingFinanceInterimApi.V1.Gateways.Interface;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Cors;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
 
+    [EnableCors]
     public class OperatingBalanceController : BaseController
     {
 
