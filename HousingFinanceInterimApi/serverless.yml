@@ -93,7 +93,7 @@ functions:
     events:
       - schedule: cron(0 19 * * ? *)
   importGarage:
-    name: ${self:service}-${self:provider.stage}-garage-position-scheduled
+    name: ${self:service}-${self:provider.stage}-garage-pos-scheduled
     description: "The scheduler to import garage position data from the Google spreadsheet."
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportGarage
     role: lambdaExecutionRole
