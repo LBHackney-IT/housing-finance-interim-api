@@ -170,7 +170,7 @@ namespace HousingFinanceInterimApi
             }
 
             app.UseCors(
-                options => options.AllowAnyMethod().AllowAnyHeader()
+                options => options.AllowAnyMethod().AllowAnyHeader().AllowCredentials().AllowAnyOrigin()
             );
 
             // Get All ApiVersions,
