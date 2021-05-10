@@ -73,7 +73,7 @@ functions:
     events:
       - schedule: cron(0 19 * * ? *)
   importServiceChargePaymentsReceived:
-    name: ${self:service}-${self:provider.stage}-service-charge-payments-received-scheduled
+    name: ${self:service}-${self:provider.stage}-serv-charge-scheduled
     description: "The scheduler to import service charge payments received data from the Google spreadsheet."
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportServiceChargePaymentsReceived
     role: lambdaExecutionRole
@@ -83,7 +83,7 @@ functions:
     events:
       - schedule: cron(0 19 * * ? *)
   importLeaseholdAccounts:
-    name: ${self:service}-${self:provider.stage}-leasehold-accounts-scheduled
+    name: ${self:service}-${self:provider.stage}-lease-acc-scheduled
     description: "The scheduler to import leasehold accounts data from the Google spreadsheet."
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportLeaseholdAccounts
     role: lambdaExecutionRole
