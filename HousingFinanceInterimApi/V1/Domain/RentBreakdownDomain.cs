@@ -10,6 +10,17 @@ namespace HousingFinanceInterimApi.V1.Domain
     /// </summary>
     public class RentBreakdownDomain
     {
+        /// <summary>
+        /// Gets or sets the property reference.
+        /// </summary>
+        [JsonProperty("Property Ref")]
+        public string PropertyRef { get; set; }
+
+        /// <summary>
+        /// Gets or sets the tenancy agreement reference.
+        /// </summary>
+        [JsonProperty("UH Tenancy Ref")]
+        public string TenancyAgreementRef { get; set; }
 
         /// <summary>
         /// Gets or sets the area office.

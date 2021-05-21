@@ -74,9 +74,19 @@ namespace HousingFinanceInterimApi
         private readonly ISaveLeaseholdAccountsUseCase _saveLeaseholdAccountsUseCase;
 
         /// <summary>
+        /// The save other HRA use case
+        /// </summary>
+        private readonly ISaveOtherHRAUseCase _saveOtherHRAUseCase;
+
+        /// <summary>
         /// The save garages use case
         /// </summary>
         private readonly ISaveGaragesUseCase _saveGaragesUseCase;
+
+        /// <summary>
+        /// The refresh manage arrears use case
+        /// </summary>
+        private readonly IRefreshManageArrearsUseCase _refreshManageArrearsUseCase;
 
         /// <summary>
         /// The create bulk cash dumps use case
@@ -136,6 +146,7 @@ namespace HousingFinanceInterimApi
                 mapperConfiguration.AddProfile(new ServiceChargePaymentsReceivedMappingProfile());
                 mapperConfiguration.AddProfile(new LeaseholdAccountMappingProfile());
                 mapperConfiguration.AddProfile(new GarageMappingProfile());
+                mapperConfiguration.AddProfile(new OtherHRAMappingProfile());
             });
             IMapper autoMapper = mapperConfig.CreateMapper();
 
@@ -169,6 +180,14 @@ namespace HousingFinanceInterimApi
             // Garage use cases
             IGarageGateway garageGateway = new GarageGateway(context);
             _saveGaragesUseCase = new SaveGaragesUseCase(autoMapper, garageGateway);
+
+            // Other HRA use cases
+            IOtherHRAGateway otherHraGateway = new OtherHRAGateway(context);
+            _saveOtherHRAUseCase = new SaveOtherHRAUseCase(autoMapper, otherHraGateway);
+
+            // Other HRA use cases
+            IRefreshManageArrearsGateway refreshManageArrearsGateway = new RefreshManageArrearsGateway(context);
+            _refreshManageArrearsUseCase = new RefreshManageArrearsUseCase(refreshManageArrearsGateway);
 
             // File name use cases
             IUPCashFileNameGateway fileNameGateway = new UPCashFileNameGateway(context);
@@ -205,7 +224,7 @@ namespace HousingFinanceInterimApi
             });
             
             // Google service use cases
-            IGoogleClientService googleClientService = 
+            IGoogleClientService googleClientService =
                 new GoogleClientServiceFactory(default, options, context)
                     .CreateGoogleClientServiceForApiKey(Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
             _getFilesInGoogleDriveUseCase = new GetFilesInGoogleDriveUseCase(googleClientService);
@@ -429,6 +448,41 @@ namespace HousingFinanceInterimApi
         }
 
         /// <summary>
+        /// Imports temp accomm and garage charges.
+        /// </summary>
+        /// <exception cref="Exception">
+        /// Failed to save tem accomm and garages
+        /// or
+        /// No Google file setting found for {nameof(ImportTemporaryAccommodation)}
+        /// </exception>
+        public async Task ImportTemporaryAccommodation()
+        {
+            GoogleFileSettingDomain googleFileSetting =
+                (await _googleFileSettingsList.Execute().ConfigureAwait(false)).First(item
+                    => item.Label.Equals("Temp Acc And Garages", StringComparison.CurrentCultureIgnoreCase));
+
+            if (googleFileSetting != null)
+            {
+                IList<OtherHRADomain> data = await _readGoogleSheetToEntitiesUseCase
+                    .ExecuteAsync<OtherHRADomain>(googleFileSetting.GoogleIdentifier, "Sheet1",
+                        "A:BC")
+                    .ConfigureAwait(false);
+
+                // Save data
+                var saveResult = await _saveOtherHRAUseCase.ExecuteAsync(data).ConfigureAwait(false);
+
+                if (saveResult <= 0)
+                {
+                    throw new Exception("Failed to save leasehold accounts items");
+                }
+            }
+            else
+            {
+                throw new Exception($"No Google file setting found for {nameof(ImportLeaseholdAccounts)}");
+            }
+        }
+
+        /// <summary>
         /// Imports the rent breakdowns.
         /// </summary>
         /// <exception cref="Exception">
@@ -638,6 +692,26 @@ namespace HousingFinanceInterimApi
 
                     throw;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Imports the rent breakdowns.
+        /// </summary>
+        /// <exception cref="Exception">
+        /// Failed to save rent breakdown items
+        /// or
+        /// No Google file setting found for {nameof(ImportRentBreakdowns)}
+        /// </exception>
+        public async Task RefreshManageArrearsTable()
+        {
+            try
+            {
+                await _refreshManageArrearsUseCase.ExecuteAsync().ConfigureAwait(false);
+            }
+            catch (Exception exc)
+            {
+                throw new Exception("Failed to refresh manage arrears tables");
             }
         }
 

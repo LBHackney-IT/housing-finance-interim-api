@@ -159,49 +159,49 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// Gets or sets the balance at 11 Oct 2020.
         /// </summary>
         [JsonProperty("Balance @ 11 Oct 2020")]
-        [JsonConverter(typeof(DecimalOrNull))]
+        [JsonConverter(typeof(NullPoundCurrencyConverter))]
         public decimal? Balance11Oct20 { get; set; }
 
         /// <summary>
         /// Gets or sets the rent.
         /// </summary>
         [JsonProperty("rent")]
-        [JsonConverter(typeof(DecimalOrNull))]
+        [JsonConverter(typeof(NullPoundCurrencyConverter))]
         public decimal? Rent { get; set; }
 
         /// <summary>
         /// Gets or sets the VAT.
         /// </summary>
         [JsonProperty("VAT")]
-        [JsonConverter(typeof(DecimalOrNull))]
+        [JsonConverter(typeof(NullPoundCurrencyConverter))]
         public decimal? VAT { get; set; }
 
         /// <summary>
         /// Gets or sets the current total.
         /// </summary>
         [JsonProperty("Current Total")]
-        [JsonConverter(typeof(DecimalOrNull))]
+        [JsonConverter(typeof(NullPoundCurrencyConverter))]
         public decimal? CurrentTotal { get; set; }
 
         /// <summary>
         /// Gets or sets the new rent.
         /// </summary>
         [JsonProperty("New rent")]
-        [JsonConverter(typeof(DecimalOrNull))]
+        [JsonConverter(typeof(NullPoundCurrencyConverter))]
         public decimal? NewRent { get; set; }
 
         /// <summary>
         /// Gets or sets the new VAT.
         /// </summary>
         [JsonProperty("New Vat")]
-        [JsonConverter(typeof(DecimalOrNull))]
+        [JsonConverter(typeof(NullPoundCurrencyConverter))]
         public decimal? NewVAT { get; set; }
 
         /// <summary>
         /// Gets or sets the new total.
         /// </summary>
         [JsonProperty("New Total")]
-        [JsonConverter(typeof(DecimalOrNull))]
+        [JsonConverter(typeof(NullPoundCurrencyConverter))]
         public decimal? NewTotal { get; set; }
 
         /// <summary>

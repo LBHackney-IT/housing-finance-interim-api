@@ -100,6 +100,11 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<Garage> Garages { get; set; }
 
         /// <summary>
+        /// Gets or sets the garages.
+        /// </summary>
+        public DbSet<OtherHRA> OtherHRA { get; set; }
+
+        /// <summary>
         /// Gets the operating balances.
         /// </summary>
         /// <param name="startDate">The start date.</param>
@@ -222,6 +227,36 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// </summary>
         public async Task DeleteGarages()
             => await PerformTransactionStoredProcedure("usp_DeleteGarages").ConfigureAwait(false);
+
+        /// <summary>
+        /// Deletes the temp accomm and garaged (Other HRA).
+        /// </summary>
+        public async Task DeleteOtherHRA()
+            => await PerformTransactionStoredProcedure("usp_DeleteOtherHRA").ConfigureAwait(false);
+
+        /// <summary>
+        /// Generate table SSMiniTransaction using SpreadSheets tables.
+        /// </summary>
+        public async Task GenerateSpreadsheetTransaction()
+            => await PerformTransactionStoredProcedure("usp_GenerateSpreadsheetTransaction").ConfigureAwait(false);
+
+        /// <summary>
+        /// Copy information to MAMember using UHProperty and SpreadSheets tables.
+        /// </summary>
+        public async Task RefreshManageArrearsMember()
+            => await PerformTransactionStoredProcedure("usp_RefreshManageArrearsMember").ConfigureAwait(false);
+
+        /// <summary>
+        /// Copy information to MAProperty using UHProperty and SpreadSheets tables.
+        /// </summary>
+        public async Task RefreshManageArrearsProperty()
+            => await PerformTransactionStoredProcedure("usp_RefreshManageArrearsProperty").ConfigureAwait(false);
+
+        /// <summary>
+        /// Copy information to MATenancyAgreement using UHTenancyAgreement and SpreadSheets tables.
+        /// </summary>
+        public async Task RefreshManageArrearsTenancyAgreement()
+            => await PerformTransactionStoredProcedure("usp_RefreshManageArrearsTenancyAgreement").ConfigureAwait(false);
 
         /// <summary>
         /// Performs the transaction stored procedure execution.

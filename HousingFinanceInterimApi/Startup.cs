@@ -51,6 +51,10 @@ namespace HousingFinanceInterimApi
             {
                 mapperConfiguration.AddProfile(new RentBreakdownMappingProfile());
                 mapperConfiguration.AddProfile(new CurrentRentPositionMappingProfile());
+                mapperConfiguration.AddProfile(new LeaseholdAccountMappingProfile());
+                mapperConfiguration.AddProfile(new ServiceChargePaymentsReceivedMappingProfile());
+                mapperConfiguration.AddProfile(new GarageMappingProfile());
+                mapperConfiguration.AddProfile(new OtherHRAMappingProfile());
             });
             services.AddSingleton(mapperConfig.CreateMapper());
 

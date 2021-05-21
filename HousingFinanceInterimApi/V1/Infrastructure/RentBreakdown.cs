@@ -19,6 +19,16 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public long Id { get; set; }
 
         /// <summary>
+        /// Gets the property reference.
+        /// </summary>
+        public string PropertyRef { get; set; }
+
+        /// <summary>
+        /// Gets the tenancy agreement reference.
+        /// </summary>
+        public string TenancyAgreementRef { get; set; }
+
+        /// <summary>
         /// Gets the area office.
         /// </summary>
         public string AreaOffice { get; set; }
