@@ -31,7 +31,13 @@ functions:
       - http:
           path: /{proxy+}
           method: ANY
-          private: true
+          authorizer:
+            arn: ${ssm:/api-authenticator/${self:provider.stage}/arn}
+            type: request
+            resultTtlInSeconds: 0
+            identitySource: method.request.header.Authorization
+            managedExternally: true
+          cors: true
   importFiles:
     name: ${self:service}-${self:provider.stage}-scheduled
     description: "The scheduler to import finance files from Google drives."
