@@ -119,7 +119,7 @@ functions:
     events:
       - schedule: cron(0 19 * * ? *)
   refreshManageArrearsTables:
-    name: ${self:service}-${self:provider.stage}-refresh-ma-tables-scheduled
+    name: ${self:service}-${self:provider.stage}-refresh-ma-scheduled
     description: "The scheduler to refresh manager arrears from the Google spreadsheet tables."
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshManageArrearsTable
     role: lambdaExecutionRole
