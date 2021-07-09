@@ -6,8 +6,6 @@ using Microsoft.AspNetCore.Cors;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
-
-    [EnableCors]
     public class OperatingBalanceController : BaseController
     {
 
@@ -20,6 +18,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
 
         [HttpGet]
         public async Task<JsonResult> Get(DateTime? startDate, DateTime? endDate, int startWeek, int startYear, int endWeek, int endYear)
-            => Json(await _gateway.ListAsync(startDate, endDate, startWeek, startYear, endWeek, endYear).ConfigureAwait(false));
+            =>
+                Json(await _gateway.ListAsync(startDate, endDate, startWeek, startYear, endWeek, endYear).ConfigureAwait(false));
     }
 }

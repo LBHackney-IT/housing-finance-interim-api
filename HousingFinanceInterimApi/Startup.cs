@@ -173,9 +173,9 @@ namespace HousingFinanceInterimApi
                 app.UseHsts();
             }
 
-            app.UseCors(
-                options => options.AllowAnyMethod().AllowAnyHeader().AllowCredentials().AllowAnyOrigin()
-            );
+            app.UseCors(options => options.WithOrigins("http://localhost:44335", "https://dmg8fqy2zxv7c.cloudfront.net")
+                .AllowAnyMethod()
+                .AllowAnyHeader());
 
             // Get All ApiVersions,
             IApiVersionDescriptionProvider api = app.ApplicationServices.GetService<IApiVersionDescriptionProvider>();
