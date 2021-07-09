@@ -12,7 +12,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
     public interface IOperatingBalanceGateway
     {
 
-         /// <summary>
+        /// <summary>
         /// Lists the operating balances asynchronous.
         /// </summary>
         /// <param name="startDate">The start date.</param>

@@ -43,7 +43,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
             {
                 UPCashDump entry = new UPCashDump
                 {
-                    UPCashDumpFileNameId = fileId, FullText = line
+                    UPCashDumpFileNameId = fileId,
+                    FullText = line
                 };
                 await _context.UpCashDumps.AddAsync(entry).ConfigureAwait(false);
                 results.Add(entry);

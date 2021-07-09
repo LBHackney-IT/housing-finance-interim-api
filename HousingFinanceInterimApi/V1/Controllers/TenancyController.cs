@@ -8,8 +8,6 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
-
-    [EnableCors]
     public class TenancyController : BaseController
     {
 

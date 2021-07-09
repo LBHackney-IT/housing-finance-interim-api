@@ -19,14 +19,14 @@ namespace HousingFinanceInterimApi.V1.Factories
         /// <returns>The Google file settings domain objects.</returns>
         public static IList<GoogleFileSettingDomain> ToDomain(IList<GoogleFileSetting> settings)
             => settings.Select(item => new GoogleFileSettingDomain
-                {
-                    Id = item.Id,
-                    GoogleIdentifier = item.GoogleIdentifier,
-                    FileType = item.FileType,
-                    StartDate = item.StartDate,
-                    EndDate = item.EndDate,
-                    Label = item.Label
-                })
+            {
+                Id = item.Id,
+                GoogleIdentifier = item.GoogleIdentifier,
+                FileType = item.FileType,
+                StartDate = item.StartDate,
+                EndDate = item.EndDate,
+                Label = item.Label
+            })
                 .ToList();
 
     }

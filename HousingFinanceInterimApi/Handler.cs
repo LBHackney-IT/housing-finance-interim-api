@@ -222,7 +222,7 @@ namespace HousingFinanceInterimApi
                     DriveService.Scope.DriveReadonly, SheetsService.Scope.SpreadsheetsReadonly
                 }
             });
-            
+
             // Google service use cases
             IGoogleClientService googleClientService =
                 new GoogleClientServiceFactory(default, options, context)
@@ -259,7 +259,7 @@ namespace HousingFinanceInterimApi
                     // Filter to file types
                     folderFiles = folderFiles.Where(item => item.Name.EndsWith(googleFileSettingItem.FileType))
                         .ToList();
-                    
+
                     await HandleDatFileDownloads(folderFiles).ConfigureAwait(false);
                 }
             }
