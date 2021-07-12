@@ -1,33 +1,32 @@
 version: "3.2"
 
 services:
-  base-api:
-    image: base-api
+  housing-finance-interim-api:
+    image: housing-finance-interim-api
     build:
-      context: BaseApi/
+      context: HousingFinanceInterimApi/
       dockerfile: ./Dockerfile
     ports:
       - 3000:3000
     environment:
-      - CONNECTION_STRING=Host=dev-database;Port=5432;Database=testdb;Username=postgres;Password=mypassword
+      - CONNECTION_STRING=Server=dev-database;Database=testdb;User Id=myuser;Password=mypassword
     links:
       - dev-database
   dev-database:
     env_file:
       - database.env
-    image: postgres:12
+    image: microsoft/mssql-server-windows-express
     volumes:
       - ./database:/docker-entrypoint-initdb.d
 
-  base-api-test:
-    image: base-api-test
+  housing-finance-interim-api-test:
+    image: housing-finance-interim-api-test
     build:
       context: .
-      dockerfile: BaseApi.Tests/Dockerfile
+      dockerfile: HousingFinanceInterimApi.Tests/Dockerfile
     environment:
-      - DB_HOST=test-database
-      - DB_PORT=5432
-      - DB_USERNAME=postgres
+      - DB_SERVER=test-database
+      - DB_USERNAME=myuser
       - DB_PASSWORD=mypassword
       - DB_DATABASE=testdb
     links:
@@ -38,6 +37,6 @@ services:
       context: .
       dockerfile: database/Dockerfile
     ports:
-      - 5432:5432
+      - 1433:1433
     env_file:
       - database.env
