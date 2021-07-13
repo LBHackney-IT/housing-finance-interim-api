@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Extensions.Options;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
@@ -33,6 +35,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<Payment>().HasNoKey().ToView(null);
             modelBuilder.Entity<Tenancy>().HasNoKey().ToView(null);
             modelBuilder.Entity<TenancyTransaction>().HasNoKey().ToView(null);
+            modelBuilder.Entity<Transaction>().HasNoKey().ToView(null);
         }
 
         /// <summary>
@@ -124,6 +127,17 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the operating balances.
         /// </summary>
         private DbSet<OperatingBalance> OperatingBalancesValue { get; set; }
+
+        public async Task<IList<Transaction>> GetTransactionsAsync(DateTime? startDate, DateTime? endDate)
+            => await TransactionsValue
+                .FromSqlInterpolated($"usp_GetTransactions {startDate:yyyy-MM-dd}, {endDate:yyyy-MM-dd}")
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+        /// <summary>
+        /// Gets or sets the operating balances.
+        /// </summary>
+        private DbSet<Transaction> TransactionsValue { get; set; }
 
         /// <summary>
         /// Gets the payments.

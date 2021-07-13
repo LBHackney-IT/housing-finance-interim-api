@@ -147,7 +147,10 @@ namespace HousingFinanceInterimApi
         private static void ConfigureDbContext(IServiceCollection services)
         {
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-            services.AddDbContext<DatabaseContext>(opt => opt.UseSqlServer(connectionString));
+            services.AddDbContext<DatabaseContext>(opt => opt.UseSqlServer(connectionString, sqlOptions =>
+            {
+                sqlOptions.CommandTimeout(360);
+            }));
         }
 
         private static void RegisterGateways(IServiceCollection services)
@@ -155,6 +158,7 @@ namespace HousingFinanceInterimApi
             services.AddScoped<IOperatingBalanceGateway, OperatingBalanceGateway>();
             services.AddScoped<IPaymentGateway, PaymentGateway>();
             services.AddScoped<ITenancyGateway, TenancyGateway>();
+            services.AddScoped<ITransactionGateway, TransactionGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
