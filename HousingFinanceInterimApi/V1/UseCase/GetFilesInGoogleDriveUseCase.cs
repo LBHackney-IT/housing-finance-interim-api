@@ -1,10 +1,10 @@
-using Google.Apis.Drive.v3.Data;
-using HousingFinanceInterimApi.V1.Gateways.Interface;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Google.Apis.Drive.v3.Data;
+using HousingFinanceInterimApi.V1.Gateways.Interface;
+using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 
-namespace HousingFinanceInterimApi.V1.Gateways
+namespace HousingFinanceInterimApi.V1.UseCase
 {
 
     /// <summary>

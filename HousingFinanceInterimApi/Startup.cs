@@ -40,6 +40,19 @@ namespace HousingFinanceInterimApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //services.AddCors(options =>
+            //{
+            //    options.AddPolicy(_corsKey, builder =>
+            //    {
+            //        builder.WithOrigins("http://localhost:3000", "https://dmg8fqy2zxv7c.cloudfront.net")
+            //            .AllowAnyMethod()
+            //            .AllowAnyHeader();
+
+            //        //AllowCredentials();
+            //    });
+            //});
+            services.AddCors();
+
             // Setup configuration
             IConfigurationSection settingsSection = Configuration.GetSection("Settings");
             IConfigurationSection apiOptionsConfigSection = settingsSection.GetSection(nameof(ApiOptions));
@@ -57,8 +70,6 @@ namespace HousingFinanceInterimApi
                 mapperConfiguration.AddProfile(new OtherHRAMappingProfile());
             });
             services.AddSingleton(mapperConfig.CreateMapper());
-
-            services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddApiVersioning(o =>
@@ -165,6 +176,8 @@ namespace HousingFinanceInterimApi
         {
         }
 
+        private static string _corsKey = "FrontEndOrigins";
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public static void Configure(IApplicationBuilder app, IWebHostEnvironment env, IOptions<ApiOptions> apiOptions)
         {
@@ -185,6 +198,9 @@ namespace HousingFinanceInterimApi
             IApiVersionDescriptionProvider api = app.ApplicationServices.GetService<IApiVersionDescriptionProvider>();
             _apiVersions = api.ApiVersionDescriptions.ToList();
 
+            // global error handler
+            app.UseMiddleware<ErrorHandlerMiddleware>();
+
             // Swagger ui to view the swagger.json file
             app.UseSwaggerUI(c =>
             {
@@ -197,6 +213,7 @@ namespace HousingFinanceInterimApi
             });
             app.UseSwagger();
             app.UseRouting();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

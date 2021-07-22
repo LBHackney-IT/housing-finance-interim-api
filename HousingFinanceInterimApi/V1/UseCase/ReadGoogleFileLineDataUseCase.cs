@@ -1,6 +1,7 @@
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {

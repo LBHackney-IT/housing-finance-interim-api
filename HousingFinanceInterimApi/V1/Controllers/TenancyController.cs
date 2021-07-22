@@ -1,13 +1,12 @@
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Cors;
-using Microsoft.EntityFrameworkCore.Design;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
+
+    //[EnableCors]
     public class TenancyController : BaseController
     {
 
