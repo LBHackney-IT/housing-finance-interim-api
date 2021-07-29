@@ -164,7 +164,7 @@ workflows:
             branches:
               only: master
       - assume-role-production:
-          context: api-assume-role-housingproduction-context
+          context: api-assume-role-housing-production-context
           requires:
               - permit-production-release
           filters:
