@@ -16,7 +16,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the identifier.
         /// </summary>
         [Key]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the table.
