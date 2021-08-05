@@ -222,11 +222,10 @@ namespace HousingFinanceInterimApi
                     DriveService.Scope.DriveReadonly, SheetsService.Scope.SpreadsheetsReadonly
                 }
             });
-            
-            // Google service use cases
-            IGoogleClientService googleClientService =
+
+             IGoogleClientService googleClientService =
                 new GoogleClientServiceFactory(default, options, context)
-                    .CreateGoogleClientServiceForApiKey(Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
+                    .CreateGoogleClientServiceFromJson(Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
             _getFilesInGoogleDriveUseCase = new GetFilesInGoogleDriveUseCase(googleClientService);
             _readGoogleFileLineDataUseCase = new ReadGoogleFileLineDataUseCase(googleClientService);
             _readGoogleSheetToEntitiesUseCase = new ReadGoogleSheetToEntities(googleClientService);
@@ -237,11 +236,11 @@ namespace HousingFinanceInterimApi
         /// </summary>
         public async Task ImportFiles()
         {
-            const string DAT_FILE = ".dat";
+            const string FILE_LABEL = "Cash Files";
 
             IList<GoogleFileSettingDomain> googleFileSettings =
                 (await _googleFileSettingsList.Execute().ConfigureAwait(false)).Where(item
-                    => item.FileType.Equals(DAT_FILE, StringComparison.CurrentCultureIgnoreCase))
+                    => item.Label.Equals(FILE_LABEL, StringComparison.CurrentCultureIgnoreCase))
                 .ToList();
             Console.WriteLine($"{googleFileSettings.Count} google dat file settings found");
 
