@@ -147,7 +147,10 @@ namespace HousingFinanceInterimApi
         private static void ConfigureDbContext(IServiceCollection services)
         {
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-            services.AddDbContext<DatabaseContext>(opt => opt.UseSqlServer(connectionString));
+            services.AddDbContext<DatabaseContext>(opt => opt.UseSqlServer(connectionString, sqlOptions =>
+            {
+                sqlOptions.CommandTimeout(360);
+            }));
         }
 
         private static void RegisterGateways(IServiceCollection services)
@@ -155,6 +158,7 @@ namespace HousingFinanceInterimApi
             services.AddScoped<IOperatingBalanceGateway, OperatingBalanceGateway>();
             services.AddScoped<IPaymentGateway, PaymentGateway>();
             services.AddScoped<ITenancyGateway, TenancyGateway>();
+            services.AddScoped<ITransactionGateway, TransactionGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
@@ -173,9 +177,9 @@ namespace HousingFinanceInterimApi
                 app.UseHsts();
             }
 
-            app.UseCors(
-                options => options.AllowAnyMethod().AllowAnyHeader().AllowCredentials().AllowAnyOrigin()
-            );
+            app.UseCors(options => options.WithOrigins("http://localhost:44335", "https://dmg8fqy2zxv7c.cloudfront.net", "https://eoy-report-development.hackney.gov.uk")
+                .AllowAnyMethod()
+                .AllowAnyHeader());
 
             // Get All ApiVersions,
             IApiVersionDescriptionProvider api = app.ApplicationServices.GetService<IApiVersionDescriptionProvider>();

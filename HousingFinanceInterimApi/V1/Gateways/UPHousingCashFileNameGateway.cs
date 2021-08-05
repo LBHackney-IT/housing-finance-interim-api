@@ -55,7 +55,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 // Create and add
                 UPHousingCashDumpFileName newFileName = new UPHousingCashDumpFileName
                 {
-                    FileName = fileName, IsSuccess = isSuccess
+                    FileName = fileName,
+                    IsSuccess = isSuccess
                 };
                 await _context.UpHousingCashDumpFileNames.AddAsync(newFileName).ConfigureAwait(false);
 

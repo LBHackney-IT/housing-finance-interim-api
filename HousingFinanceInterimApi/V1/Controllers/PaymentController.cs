@@ -7,8 +7,6 @@ using Microsoft.AspNetCore.Cors;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
-    
-    [EnableCors]
     public class PaymentController : BaseController
     {
 

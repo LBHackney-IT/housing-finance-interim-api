@@ -31,7 +31,13 @@ functions:
       - http:
           path: /{proxy+}
           method: ANY
-          private: true
+          authorizer:
+            arn: ${ssm:/api-authenticator/${self:provider.stage}/arn}
+            type: request
+            resultTtlInSeconds: 0
+            identitySource: method.request.header.Authorization
+            managedExternally: true
+          cors: true
   importFiles:
     name: ${self:service}-${self:provider.stage}-scheduled
     description: "The scheduler to import finance files from Google drives."
@@ -113,7 +119,7 @@ functions:
     events:
       - schedule: cron(0 19 * * ? *)
   refreshManageArrearsTables:
-    name: ${self:service}-${self:provider.stage}-refresh-ma-tables-scheduled
+    name: ${self:service}-${self:provider.stage}-refresh-ma-scheduled
     description: "The scheduler to refresh manager arrears from the Google spreadsheet tables."
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshManageArrearsTable
     role: lambdaExecutionRole

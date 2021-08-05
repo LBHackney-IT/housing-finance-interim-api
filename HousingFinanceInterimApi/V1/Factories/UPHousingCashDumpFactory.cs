@@ -19,12 +19,12 @@ namespace HousingFinanceInterimApi.V1.Factories
         /// <returns>The UP cash dump domain objects.</returns>
         public static IList<UPHousingCashDumpDomain> ToDomain(IList<UPHousingCashDump> cashDumps)
             => cashDumps.Select(item => new UPHousingCashDumpDomain
-                {
-                    FullText = item.FullText,
-                    Id = item.Id,
-                    Timestamp = item.Timestamp,
-                    UPHousingCashDumpFileNameId = item.UPHousingCashDumpFileNameId
-                })
+            {
+                FullText = item.FullText,
+                Id = item.Id,
+                Timestamp = item.Timestamp,
+                UPHousingCashDumpFileNameId = item.UPHousingCashDumpFileNameId
+            })
                 .ToList();
 
     }

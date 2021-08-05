@@ -223,7 +223,8 @@ namespace HousingFinanceInterimApi
                 }
             });
 
-             IGoogleClientService googleClientService =
+            // Google service use cases
+            IGoogleClientService googleClientService =
                 new GoogleClientServiceFactory(default, options, context)
                     .CreateGoogleClientServiceFromJson(Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
             _getFilesInGoogleDriveUseCase = new GetFilesInGoogleDriveUseCase(googleClientService);
@@ -258,7 +259,7 @@ namespace HousingFinanceInterimApi
                     // Filter to file types
                     folderFiles = folderFiles.Where(item => item.Name.EndsWith(googleFileSettingItem.FileType))
                         .ToList();
-                    
+
                     await HandleDatFileDownloads(folderFiles).ConfigureAwait(false);
                 }
             }

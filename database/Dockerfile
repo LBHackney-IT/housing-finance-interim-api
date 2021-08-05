@@ -1,3 +1,3 @@
-FROM microsoft/mssql-server-linux
+FROM mcr.microsoft.com/mssql/server
 
 COPY ./database/schema.sql ./docker-entrypoint-initdb.d

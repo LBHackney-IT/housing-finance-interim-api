@@ -1,16 +1,22 @@
-using System;
+using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
-namespace HousingFinanceInterimApi.V1.Gateways.Interface
+namespace HousingFinanceInterimApi.V1.Gateways
 {
 
-    /// <summary>
-    /// The operating balance gateway.
-    /// </summary>
-    public interface IOperatingBalanceGateway
+    public class TransactionGateway : ITransactionGateway
     {
+
+        private readonly DatabaseContext _context;
+
+        public TransactionGateway(DatabaseContext context)
+        {
+            _context = context;
+        }
 
         /// <summary>
         /// Lists the operating balances asynchronous.
@@ -24,7 +30,12 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// <returns>
         /// The list of operating balances.
         /// </returns>
-        public Task<IList<OperatingBalance>> ListAsync(DateTime? startDate, DateTime? endDate, int startWeek, int startYear, int endWeek, int endYear);
+        public async Task<IList<Transaction>> ListAsync(DateTime? startDate, DateTime? endDate)
+        {
+            var results = await _context.GetTransactionsAsync(startDate, endDate).ConfigureAwait(false);
+
+            return results;
+        }
 
     }
 
