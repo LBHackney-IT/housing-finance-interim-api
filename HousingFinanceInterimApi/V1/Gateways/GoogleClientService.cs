@@ -101,12 +101,12 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
             if (progress.Status == DownloadStatus.Completed)
             {
-                if (!Directory.Exists("tempfiles"))
+                if (!Directory.Exists("/tmp/tempfiles"))
                 {
-                    Directory.CreateDirectory("tempfiles");
+                    Directory.CreateDirectory("/tmp/tempfiles");
                 }
 
-                string outputPath = $"tempfiles/{fileName}";
+                string outputPath = $"/tmp/tempfiles/{fileName}";
 
                 await using (FileStream file = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
                 {
