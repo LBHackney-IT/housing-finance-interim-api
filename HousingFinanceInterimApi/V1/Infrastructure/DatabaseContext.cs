@@ -273,6 +273,18 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             => await PerformTransactionStoredProcedure("usp_RefreshManageArrearsTenancyAgreement").ConfigureAwait(false);
 
         /// <summary>
+        /// Load UPCashLoad table.
+        /// </summary>
+        public async Task LoadCashFiles()
+            => await PerformTransactionStoredProcedure("usp_LoadCashFile").ConfigureAwait(false);
+
+        /// <summary>
+        /// Load SSMiniTransaction based on Cash Files.
+        /// </summary>
+        public async Task LoadCashFileTransactions()
+            => await PerformTransactionStoredProcedure("usp_LoadTransactionsCashFile").ConfigureAwait(false);
+
+        /// <summary>
         /// Performs the transaction stored procedure execution.
         /// </summary>
         /// <param name="storedProc">The stored proc.</param>

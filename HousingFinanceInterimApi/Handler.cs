@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Google.Apis.Logging;
 using HousingFinanceInterimApi.V1.Domain.AutoMaps;
+using Mapster;
 using Microsoft.Extensions.Logging;
 using ILogger = Google.Apis.Logging.ILogger;
 using LogLevel = Google.Apis.Logging.LogLevel;
@@ -128,6 +129,8 @@ namespace HousingFinanceInterimApi
         /// </summary>
         private readonly ISetUPHousingCashFileNameSuccessUseCase _setUpHousingCashFileNameSuccessUseCase;
 
+        private readonly ILoadTransactionsUseCase _loadTransactionsUseCase;
+
         /// <summary>
         /// The google file settings list use case
         /// </summary>
@@ -153,6 +156,7 @@ namespace HousingFinanceInterimApi
             // Create database context
             DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
             optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
+
             DatabaseContext context = new DatabaseContext(optionsBuilder.Options);
 
             // Error log use cases
@@ -213,6 +217,10 @@ namespace HousingFinanceInterimApi
             IGoogleFileSettingGateway settingGateway = new GoogleFileSettingGateway(context);
             _googleFileSettingsList = new ListGoogleFileSettingsUseCase(settingGateway);
 
+            ITransactionGateway transactionGateway = new TransactionGateway(context);
+            IUPCashLoadGateway upCashLoadGateway = new UPCashLoadGateway(context);
+            _loadTransactionsUseCase = new LoadTransactionsUseCase(transactionGateway, upCashLoadGateway);
+
             // Create a google client service factory and instance
             IOptions<GoogleClientServiceOptions> options = Options.Create(new GoogleClientServiceOptions
             {
@@ -227,13 +235,14 @@ namespace HousingFinanceInterimApi
             IGoogleClientService googleClientService =
                 new GoogleClientServiceFactory(default, options, context)
                     .CreateGoogleClientServiceFromJson(Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
+
             _getFilesInGoogleDriveUseCase = new GetFilesInGoogleDriveUseCase(googleClientService);
             _readGoogleFileLineDataUseCase = new ReadGoogleFileLineDataUseCase(googleClientService);
             _readGoogleSheetToEntitiesUseCase = new ReadGoogleSheetToEntities(googleClientService);
         }
 
         /// <summary>
-        /// Imports the files.
+        /// Imports the cash files.
         /// </summary>
         public async Task ImportFiles()
         {
@@ -265,16 +274,21 @@ namespace HousingFinanceInterimApi
             }
         }
 
+        public async Task LoadCashFileTransactions()
+        {
+            var transaction = await _loadTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
         /// <summary>
-        /// Imports the files.
+        /// Imports the housing benefit files.
         /// </summary>
         public async Task ImportHousingFiles()
         {
-            const string DAT_FILE = ".dat";
+            const string FILE_LABEL = "Housing Cash Files";
 
             IList<GoogleFileSettingDomain> googleFileSettings =
                 (await _googleFileSettingsList.Execute().ConfigureAwait(false)).Where(item
-                    => item.Label.Equals("Housing Cash Files", StringComparison.CurrentCultureIgnoreCase))
+                    => item.Label.Equals(FILE_LABEL, StringComparison.CurrentCultureIgnoreCase))
                 .ToList();
             Console.WriteLine($"{googleFileSettings.Count} google dat file settings found");
 
@@ -546,38 +560,22 @@ namespace HousingFinanceInterimApi
                             // Ensure no blank lines
                             fileLines = fileLines.Where(item => !string.IsNullOrWhiteSpace(item)).ToList();
 
-                            const int TAKE = 250;
-                            int skip = 0;
                             bool failure = false;
-                            IList<string> batch;
+                            IList<UPCashDumpDomain> result = await _createBulkCashDumpsUseCase
+                                .ExecuteAsync(createResult.Id, fileLines)
+                                .ConfigureAwait(false);
 
-                            do
+                            // Determine failure
+                            bool batchFailure = result == null;
+
+                            if (batchFailure)
                             {
-                                // Create a batch
-                                batch = fileLines.Skip(skip).Take(TAKE).ToList();
-
-                                if (batch.Any())
-                                {
-                                    // Bulk insert the lines
-                                    IList<UPCashDumpDomain> result = await _createBulkCashDumpsUseCase
-                                        .ExecuteAsync(createResult.Id, batch)
-                                        .ConfigureAwait(false);
-
-                                    // Determine failure
-                                    bool batchFailure = result == null;
-
-                                    if (batchFailure)
-                                    {
-                                        failure = true;
-                                    }
-
-                                    Console.WriteLine(batchFailure
-                                        ? $"File failure: {createResult.Id}"
-                                        : $"File lines created {result.Count} for file {createResult.Id}");
-                                    skip += TAKE;
-                                }
+                                failure = true;
                             }
-                            while (batch.Any());
+
+                            Console.WriteLine(batchFailure
+                                ? $"File failure: {createResult.Id}"
+                                : $"File lines created {result.Count} for file {createResult.Id}");
 
                             // If success, set the status
                             if (!failure)

@@ -38,86 +38,96 @@ functions:
             identitySource: method.request.header.Authorization
             managedExternally: true
           cors: true
-  importFiles:
-    name: ${self:service}-${self:provider.stage}-scheduled
-    description: "The scheduler to import finance files from Google drives."
+  importCashFile:
+    name: ${self:service}-${self:provider.stage}-cash-file
+    description: "The scheduler to import cash files from Google drives."
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportFiles
     role: lambdaExecutionRole
     environment:
       CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google_application_credentials_json}
+      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
     events:
-      - schedule: cron(0 19 * * ? *)
-  importHousingFiles:
-    name: ${self:service}-${self:provider.stage}-housing-scheduled
+      - schedule: cron(0 8-17 * * ? *)
+  importCashFileTransactions:
+    name: ${self:service}-${self:provider.stage}-cash-file-tran
+    description: "The scheduler to import cash files transactions from Cash File table."
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadCashFileTransactions
+    role: lambdaExecutionRole
+    environment:
+      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
+    events:
+      - schedule: cron(15 8-17 * * ? *)
+  importHousingFile:
+    name: ${self:service}-${self:provider.stage}-housing-file
     description: "The scheduler to import housing files from Google drives."
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportHousingFiles
     role: lambdaExecutionRole
     environment:
       CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
+      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
     events:
-      - schedule: cron(0 19 * * ? *)
-  importRentBreakdowns:
-    name: ${self:service}-${self:provider.stage}-rent-breakdown-scheduled
-    description: "The scheduler to import rent breakdown data from the Google spreadsheet."
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportRentBreakdowns
-    role: lambdaExecutionRole
-    environment:
-      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
-    events:
-      - schedule: cron(0 19 * * ? *)
-  importRentPositions:
-    name: ${self:service}-${self:provider.stage}-rent-position-scheduled
-    description: "The scheduler to import current rent position data from the Google spreadsheet."
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportRentPositions
-    role: lambdaExecutionRole
-    environment:
-      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
-    events:
-      - schedule: cron(0 19 * * ? *)
-  importServiceChargePaymentsReceived:
-    name: ${self:service}-${self:provider.stage}-serv-charge-scheduled
-    description: "The scheduler to import service charge payments received data from the Google spreadsheet."
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportServiceChargePaymentsReceived
-    role: lambdaExecutionRole
-    environment:
-      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
-    events:
-      - schedule: cron(0 19 * * ? *)
-  importLeaseholdAccounts:
-    name: ${self:service}-${self:provider.stage}-lease-acc-scheduled
-    description: "The scheduler to import leasehold accounts data from the Google spreadsheet."
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportLeaseholdAccounts
-    role: lambdaExecutionRole
-    environment:
-      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
-    events:
-      - schedule: cron(0 19 * * ? *)
-  importGarage:
-    name: ${self:service}-${self:provider.stage}-garage-pos-scheduled
-    description: "The scheduler to import garage position data from the Google spreadsheet."
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportGarage
-    role: lambdaExecutionRole
-    environment:
-      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
-    events:
-      - schedule: cron(0 19 * * ? *)
-  importOtherHRA:
-    name: ${self:service}-${self:provider.stage}-other-hra-pos-scheduled
-    description: "The scheduler to import other hra data from the Google spreadsheet."
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportTemporaryAccommodation
-    role: lambdaExecutionRole
-    environment:
-      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
-    events:
-      - schedule: cron(0 19 * * ? *)
+      - schedule: cron(15 8-17 * * ? *)
+  #importRentBreakdowns:
+  #  name: ${self:service}-${self:provider.stage}-rent-breakdown-scheduled
+  #  description: "The scheduler to import rent breakdown data from the Google spreadsheet."
+  #  handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportRentBreakdowns
+  #  role: lambdaExecutionRole
+  #  environment:
+  #    CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+  #    GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
+  #  events:
+  #    - schedule: cron(0 19 * * ? *)
+  #importRentPositions:
+  #  name: ${self:service}-${self:provider.stage}-rent-position-scheduled
+  #  description: "The scheduler to import current rent position data from the Google spreadsheet."
+  #  handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportRentPositions
+  #  role: lambdaExecutionRole
+  #  environment:
+  #    CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+  #    GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
+  #  events:
+  #    - schedule: cron(0 19 * * ? *)
+  #importServiceChargePaymentsReceived:
+  #  name: ${self:service}-${self:provider.stage}-serv-charge-scheduled
+  #  description: "The scheduler to import service charge payments received data from the Google spreadsheet."
+  #  handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportServiceChargePaymentsReceived
+  #  role: lambdaExecutionRole
+  #  environment:
+  #    CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+  #    GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
+  #  events:
+  #    - schedule: cron(0 19 * * ? *)
+  #importLeaseholdAccounts:
+  #  name: ${self:service}-${self:provider.stage}-lease-acc-scheduled
+  #  description: "The scheduler to import leasehold accounts data from the Google spreadsheet."
+  #  handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportLeaseholdAccounts
+  #  role: lambdaExecutionRole
+  #  environment:
+  #    CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+  #    GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
+  #  events:
+  #    - schedule: cron(0 19 * * ? *)
+  #importGarage:
+  #  name: ${self:service}-${self:provider.stage}-garage-pos-scheduled
+  #  description: "The scheduler to import garage position data from the Google spreadsheet."
+  #  handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportGarage
+  #  role: lambdaExecutionRole
+  #  environment:
+  #    CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+  #    GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
+  #  events:
+  #    - schedule: cron(0 19 * * ? *)
+  #importOtherHRA:
+  #  name: ${self:service}-${self:provider.stage}-other-hra-pos-scheduled
+  #  description: "The scheduler to import other hra data from the Google spreadsheet."
+  #  handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportTemporaryAccommodation
+  #  role: lambdaExecutionRole
+  #  environment:
+  #    CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+  #    GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
+  #  events:
+  #    - schedule: cron(0 19 * * ? *)
   refreshManageArrearsTables:
     name: ${self:service}-${self:provider.stage}-refresh-ma-scheduled
     description: "The scheduler to refresh manager arrears from the Google spreadsheet tables."

@@ -7,7 +7,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
 {
 
     /// <summary>
-    /// The operating balance gateway.
+    /// The transaction gateway.
     /// </summary>
     public interface ITransactionGateway
     {
@@ -21,6 +21,8 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// The list of operating balances.
         /// </returns>
         public Task<IList<Transaction>> ListAsync(DateTime? startDate, DateTime? endDate);
+
+        public Task<bool> LoadCashFilesTransactions();
 
     }
 

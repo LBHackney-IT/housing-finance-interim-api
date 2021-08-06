@@ -37,6 +37,12 @@ namespace HousingFinanceInterimApi.V1.Gateways
             return results;
         }
 
+        public async Task<bool> LoadCashFilesTransactions()
+        {
+            await _context.LoadCashFileTransactions().ConfigureAwait(false);
+            return true;
+        }
+
     }
 
 }
