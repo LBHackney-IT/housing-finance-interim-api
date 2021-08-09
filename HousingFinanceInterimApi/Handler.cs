@@ -219,7 +219,8 @@ namespace HousingFinanceInterimApi
 
             ITransactionGateway transactionGateway = new TransactionGateway(context);
             IUPCashLoadGateway upCashLoadGateway = new UPCashLoadGateway(context);
-            _loadTransactionsUseCase = new LoadTransactionsUseCase(transactionGateway, upCashLoadGateway);
+            IUPHousingCashLoadGateway upHousingCashLoadGateway = new UPHousingCashLoadGateway(context);
+            _loadTransactionsUseCase = new LoadTransactionsUseCase(transactionGateway, upCashLoadGateway, upHousingCashLoadGateway);
 
             // Create a google client service factory and instance
             IOptions<GoogleClientServiceOptions> options = Options.Create(new GoogleClientServiceOptions
