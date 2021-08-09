@@ -149,6 +149,7 @@ functions:
     role: lambdaExecutionRole
     environment:
       CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
     events:
       - schedule: cron(0 20 * * ? *)
 resources:

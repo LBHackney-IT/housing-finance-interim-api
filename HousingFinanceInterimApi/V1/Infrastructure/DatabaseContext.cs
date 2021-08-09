@@ -270,7 +270,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Copy information to MATenancyAgreement using UHTenancyAgreement and SpreadSheets tables.
         /// </summary>
         public async Task RefreshManageArrearsTenancyAgreement()
-            => await PerformTransactionStoredProcedure("usp_RefreshManageArrearsTenancyAgreement").ConfigureAwait(false);
+            => await PerformTransactionStoredProcedure("usp_RefreshManageArrearsTenancyAgreement", 300).ConfigureAwait(false);
 
         /// <summary>
         /// Load UPCashLoad table.
