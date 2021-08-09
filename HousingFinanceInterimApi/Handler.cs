@@ -567,22 +567,38 @@ namespace HousingFinanceInterimApi
                             // Ensure no blank lines
                             fileLines = fileLines.Where(item => !string.IsNullOrWhiteSpace(item)).ToList();
 
+                            const int TAKE = 250;
+                            int skip = 0;
                             bool failure = false;
-                            IList<UPCashDumpDomain> result = await _createBulkCashDumpsUseCase
-                                .ExecuteAsync(createResult.Id, fileLines)
-                                .ConfigureAwait(false);
+                            IList<string> batch;
 
-                            // Determine failure
-                            bool batchFailure = result == null;
-
-                            if (batchFailure)
+                            do
                             {
-                                failure = true;
-                            }
+                                // Create a batch
+                                batch = fileLines.Skip(skip).Take(TAKE).ToList();
 
-                            Console.WriteLine(batchFailure
-                                ? $"File failure: {createResult.Id}"
-                                : $"File lines created {result.Count} for file {createResult.Id}");
+                                if (batch.Any())
+                                {
+                                    // Bulk insert the lines
+                                    IList<UPCashDumpDomain> result = await _createBulkCashDumpsUseCase
+                                        .ExecuteAsync(createResult.Id, batch)
+                                        .ConfigureAwait(false);
+
+                                    // Determine failure
+                                    bool batchFailure = result == null;
+
+                                    if (batchFailure)
+                                    {
+                                        failure = true;
+                                    }
+
+                                    Console.WriteLine(batchFailure
+                                        ? $"File failure: {createResult.Id}"
+                                        : $"File lines created {result.Count} for file {createResult.Id}");
+                                    skip += TAKE;
+                                }
+                            }
+                            while (batch.Any());
 
                             // If success, set the status
                             if (!failure)
@@ -640,55 +656,38 @@ namespace HousingFinanceInterimApi
                             // Ensure no blank lines
                             fileLines = fileLines.Where(item => !string.IsNullOrWhiteSpace(item)).ToList();
 
+                            const int TAKE = 250;
+                            int skip = 0;
                             bool failure = false;
-                            IList<UPHousingCashDumpDomain> result = await _createBulkHousingCashDumpsUseCase
-                                .ExecuteAsync(createResult.Id, fileLines)
-                                .ConfigureAwait(false);
+                            IList<string> batch;
 
-                            // Determine failure
-                            bool batchFailure = result == null;
-
-                            if (batchFailure)
+                            do
                             {
-                                failure = true;
+                                // Create a batch
+                                batch = fileLines.Skip(skip).Take(TAKE).ToList();
+
+                                if (batch.Any())
+                                {
+                                    // Bulk insert the lines
+                                    IList<UPHousingCashDumpDomain> result = await _createBulkHousingCashDumpsUseCase
+                                        .ExecuteAsync(createResult.Id, batch)
+                                        .ConfigureAwait(false);
+
+                                    // Determine failure
+                                    bool batchFailure = result == null;
+
+                                    if (batchFailure)
+                                    {
+                                        failure = true;
+                                    }
+
+                                    Console.WriteLine(batchFailure
+                                        ? $"File failure: {createResult.Id}"
+                                        : $"File lines created {result.Count} for file {createResult.Id}");
+                                    skip += TAKE;
+                                }
                             }
-
-                            Console.WriteLine(batchFailure
-                                ? $"File failure: {createResult.Id}"
-                                : $"File lines created {result.Count} for file {createResult.Id}");
-
-                            //const int TAKE = 250;
-                            //int skip = 0;
-                            //bool failure = false;
-                            //IList<string> batch;
-
-                            //do
-                            //{
-                            //    // Create a batch
-                            //    batch = fileLines.Skip(skip).Take(TAKE).ToList();
-
-                            //    if (batch.Any())
-                            //    {
-                            //        // Bulk insert the lines
-                            //        IList<UPHousingCashDumpDomain> result = await _createBulkHousingCashDumpsUseCase
-                            //            .ExecuteAsync(createResult.Id, batch)
-                            //            .ConfigureAwait(false);
-
-                            //        // Determine failure
-                            //        bool batchFailure = result == null;
-
-                            //        if (batchFailure)
-                            //        {
-                            //            failure = true;
-                            //        }
-
-                            //        Console.WriteLine(batchFailure
-                            //            ? $"File failure: {createResult.Id}"
-                            //            : $"File lines created {result.Count} for file {createResult.Id}");
-                            //        skip += TAKE;
-                            //    }
-                            //}
-                            //while (batch.Any());
+                            while (batch.Any());
 
                             // If success, set the status
                             if (!failure)

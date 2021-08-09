@@ -50,7 +50,7 @@ functions:
     events:
       - schedule: cron(0 8-17 * * ? *)
   importCashFileTransactions:
-    name: ${self:service}-${self:provider.stage}-cash-file-tran
+    name: ${self:service}-${self:provider.stage}-cash-file-trans
     description: "The scheduler to import cash files transactions from Cash File table."
     timeout: 600
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadCashFileTransactions
@@ -61,7 +61,7 @@ functions:
     events:
       - schedule: cron(15 8-17 * * ? *)
   importHousingFile:
-    name: ${self:service}-${self:provider.stage}-housing-file
+    name: ${self:service}-${self:provider.stage}-hb-file
     description: "The scheduler to import housing files from Google drives."
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportHousingFiles
@@ -72,7 +72,7 @@ functions:
     events:
       - schedule: cron(15 8-17 * * ? *)
   importHousingFileTransactions:
-    name: ${self:service}-${self:provider.stage}-hb-file-tran
+    name: ${self:service}-${self:provider.stage}-hb-file-trans
     description: "The scheduler to import housing files transactions from Housing File table."
     timeout: 600
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadHousinghFileTransactions
