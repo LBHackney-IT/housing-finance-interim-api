@@ -41,6 +41,7 @@ functions:
   importCashFile:
     name: ${self:service}-${self:provider.stage}-cash-file
     description: "The scheduler to import cash files from Google drives."
+    timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportFiles
     role: lambdaExecutionRole
     environment:
@@ -51,6 +52,7 @@ functions:
   importCashFileTransactions:
     name: ${self:service}-${self:provider.stage}-cash-file-tran
     description: "The scheduler to import cash files transactions from Cash File table."
+    timeout: 600
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadCashFileTransactions
     role: lambdaExecutionRole
     environment:
@@ -61,6 +63,7 @@ functions:
   importHousingFile:
     name: ${self:service}-${self:provider.stage}-housing-file
     description: "The scheduler to import housing files from Google drives."
+    timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportHousingFiles
     role: lambdaExecutionRole
     environment:
