@@ -75,7 +75,7 @@ functions:
     name: ${self:service}-${self:provider.stage}-hb-file-trans
     description: "The scheduler to import housing files transactions from Housing File table."
     timeout: 600
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadHousinghFileTransactions
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadHousingFileTransactions
     role: lambdaExecutionRole
     environment:
       CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
