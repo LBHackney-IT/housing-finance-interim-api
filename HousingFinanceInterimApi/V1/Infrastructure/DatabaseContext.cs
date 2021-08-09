@@ -279,10 +279,22 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             => await PerformTransactionStoredProcedure("usp_LoadCashFile", 600).ConfigureAwait(false);
 
         /// <summary>
+        /// Load UPCashLoad table.
+        /// </summary>
+        public async Task LoadHousingFiles()
+            => await PerformTransactionStoredProcedure("usp_LoadHousingFile", 600).ConfigureAwait(false);
+
+        /// <summary>
         /// Load SSMiniTransaction based on Cash Files.
         /// </summary>
         public async Task LoadCashFileTransactions()
             => await PerformTransactionStoredProcedure("usp_LoadTransactionsCashFile", 600).ConfigureAwait(false);
+
+        /// <summary>
+        /// Load SSMiniTransaction based on Cash Files.
+        /// </summary>
+        public async Task LoadHousingFileTransactions()
+            => await PerformTransactionStoredProcedure("usp_LoadTransactionsHousingFile", 600).ConfigureAwait(false);
 
         /// <summary>
         /// Performs the transaction stored procedure execution.

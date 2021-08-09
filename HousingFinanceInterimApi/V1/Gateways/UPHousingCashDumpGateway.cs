@@ -1,6 +1,8 @@
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.Gateways
@@ -37,23 +39,32 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// </returns>
         public async Task<IList<UPHousingCashDump>> CreateBulkAsync(long fileId, IList<string> lines)
         {
-            IList<UPHousingCashDump> results = new List<UPHousingCashDump>();
-
-            foreach (string line in lines)
+            var destObject = lines.Select(c => new UPHousingCashDump
             {
-                UPHousingCashDump entry = new UPHousingCashDump
-                {
-                    UPHousingCashDumpFileNameId = fileId,
-                    FullText = line
-                };
-                await _context.UpHousingCashDumps.AddAsync(entry).ConfigureAwait(false);
-                results.Add(entry);
-            }
+                UPHousingCashDumpFileNameId = fileId,
+                FullText = c
+            }).ToList();
 
+            _context.UpHousingCashDumps.AddRange(destObject);
             bool success = await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
 
+            //IList<UPHousingCashDump> results = new List<UPHousingCashDump>();
+
+            //foreach (string line in lines)
+            //{
+            //    UPHousingCashDump entry = new UPHousingCashDump
+            //    {
+            //        UPHousingCashDumpFileNameId = fileId,
+            //        FullText = line
+            //    };
+            //    await _context.UpHousingCashDumps.AddAsync(entry).ConfigureAwait(false);
+            //    results.Add(entry);
+            //}
+
+            //bool success = await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
+
             return success
-                ? results
+                ? destObject
                 : null;
         }
 

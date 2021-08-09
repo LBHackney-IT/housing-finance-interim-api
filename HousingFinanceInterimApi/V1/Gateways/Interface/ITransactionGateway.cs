@@ -24,6 +24,8 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
 
         public Task<bool> LoadCashFilesTransactions();
 
+        public Task<bool> LoadHousingFilesTransactions();
+
     }
 
 }
