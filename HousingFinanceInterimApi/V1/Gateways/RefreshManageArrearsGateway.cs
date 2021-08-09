@@ -32,13 +32,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// </summary>
         public async Task RefreshManageArrearsItems()
         {
-            // Delete data first
-            await _context.GenerateSpreadsheetTransaction().ConfigureAwait(false);
-
-            await _context.RefreshManageArrearsMember().ConfigureAwait(false);
-
-            await _context.RefreshManageArrearsProperty().ConfigureAwait(false);
-
             await _context.RefreshManageArrearsTenancyAgreement().ConfigureAwait(false);
         }
 
