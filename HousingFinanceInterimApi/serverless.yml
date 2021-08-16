@@ -93,7 +93,7 @@ stepFunctions:
                 Next: ImportCashFile
               - Variable: $.ExistFile
                 BooleanEquals: false
-                Next: ImportCashFileTransaction
+                Next: ImportCashFileTransactions
           ImportCashFile:
             Type: Task
             Resource:
