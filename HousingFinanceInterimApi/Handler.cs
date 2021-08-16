@@ -273,30 +273,30 @@ namespace HousingFinanceInterimApi
             _renameGoogleFileUseCase = new RenameGoogleFileUseCase(googleClientService);
         }
 
-        public async Task<CheckFileResponse> CheckCashFiles()
+        public async Task<ProcessResponse> CheckCashFiles()
         {
             LoggingHandler.LogInfo($"CHECKING IF EXIST PENDING CASH FILES");
             string label = "CashFile";
             var existFile = await CheckExistFiles(label).ConfigureAwait(false);
             LoggingHandler.LogInfo($"EXIST PENDING CASH FILES: {existFile}");
 
-            return new CheckFileResponse()
+            return new ProcessResponse()
             {
-                ExistFile = existFile,
+                Continue = existFile,
                 NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration))
             };
         }
 
-        public async Task<CheckFileResponse> CheckHousingBenefitFiles()
+        public async Task<ProcessResponse> CheckHousingBenefitFiles()
         {
             LoggingHandler.LogInfo($"CHECKING IF EXISTS PENDING HOUSING BENEFIT FILES");
             string label = "HousingBenefitFiles";
             var existFile = await CheckExistFiles(label).ConfigureAwait(false);
             LoggingHandler.LogInfo($"EXIST PENDING HOUSING BENEFIT FILES: {existFile}");
 
-            return new CheckFileResponse()
+            return new ProcessResponse()
             {
-                ExistFile = existFile,
+                Continue = existFile,
                 NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration))
             };
         }
@@ -348,7 +348,7 @@ namespace HousingFinanceInterimApi
             return false;
         }
 
-        public async Task ImportCashFile()
+        public async Task<ProcessResponse> ImportCashFile()
         {
             string label = "CashFile";
             var listNotStart = new List<string>();
@@ -380,6 +380,12 @@ namespace HousingFinanceInterimApi
 
             await _setBatchLogSuccessUseCase.ExecuteAsync(batch.Id).ConfigureAwait(false);
             LoggingHandler.LogInfo($"END CASH FILE IMPORT");
+
+            return new ProcessResponse()
+            {
+                Continue = true,
+                NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration))
+            };
         }
 
         private async Task HandleCashFile(long batchId, IEnumerable<File> files)
