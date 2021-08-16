@@ -38,10 +38,9 @@ functions:
             managedExternally: true
           cors: true
   checkCashFiles:
+    name: ${self:service}-${self:provider.stage}-check-cash-files
     description: "The scheduler to check if exists cash files and start cash files step function. Run at 01:00 AM, 07:00 AM, 01:00 PM and 07:00 PM"
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckCashFiles
-    events:
-      - schedule: cron(0 1,7,13,19 * * ? *)
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckCashFiles  
   importCashFile:
     name: ${self:service}-${self:provider.stage}-cash-file
     description: "The scheduler to import cash files from Google drives."
@@ -65,6 +64,8 @@ stepFunctions:
   stateMachines:
     hfstepfunccashfile:
       name: HFCashFileStateMachine
+      events:
+        - schedule: cron(0 1,7,13,19 * * ? *)
       definition:
         Comment: "Cash files process step function deployed via serverless"
         StartAt: CheckCashFiles
