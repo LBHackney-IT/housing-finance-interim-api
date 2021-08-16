@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.Boundary.Response
 {
-    public class CheckFileResponse
+    public class ProcessResponse
     {
-        public bool ExistFile { get; set; }
+        public bool Continue { get; set; }
         public DateTime NextStepTime { get; set; }
     }
 }
