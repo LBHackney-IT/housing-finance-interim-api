@@ -14,19 +14,18 @@ provider:
         throttle:
           burstLimit: 200
           rateLimit: 100
+  environment:
+    CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+    GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
 
 package:
-# TODO: Rename zipfile in build.sh and build.cmd to match this
-  artifact: ./bin/release/netcoreapp3.1/your-api-name.zip
+  artifact: ./bin/release/netcoreapp3.1/housing-finance-interim-api.zip
 
 functions:
-  baseApi:
+  housingFinanceInterimApi:
     name: ${self:service}-${self:provider.stage}
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.LambdaEntryPoint::FunctionHandlerAsync
     role: lambdaExecutionRole
-    environment:
-# TODO: Create ssm variables for this API's postgres mirror then rename base-api below to match api name
-      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
     events:
       - http:
           path: /{proxy+}
@@ -38,121 +37,94 @@ functions:
             identitySource: method.request.header.Authorization
             managedExternally: true
           cors: true
+  checkCashFiles:
+    description: "The scheduler to check if exists cash files and start cash files step function. Run at 01:00 AM, 07:00 AM, 01:00 PM and 07:00 PM"
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckCashFiles
+    events:
+      - schedule: cron(0 1,7,13,19 * * ? *)
   importCashFile:
     name: ${self:service}-${self:provider.stage}-cash-file
     description: "The scheduler to import cash files from Google drives."
     timeout: 900
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportFiles
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportCashFile
     role: lambdaExecutionRole
-    environment:
-      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
-    events:
-      - schedule: cron(0 8-17 * * ? *)
   importCashFileTransactions:
     name: ${self:service}-${self:provider.stage}-cash-file-trans
     description: "The scheduler to import cash files transactions from Cash File table."
     timeout: 600
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadCashFileTransactions
-    role: lambdaExecutionRole
-    environment:
-      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
-    events:
-      - schedule: cron(15 8-17 * * ? *)
-  importHousingFile:
-    name: ${self:service}-${self:provider.stage}-hb-file
-    description: "The scheduler to import housing files from Google drives."
-    timeout: 900
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportHousingFiles
-    role: lambdaExecutionRole
-    environment:
-      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
-    events:
-      - schedule: cron(15 8-17 * * ? *)
-  importHousingFileTransactions:
-    name: ${self:service}-${self:provider.stage}-hb-file-trans
-    description: "The scheduler to import housing files transactions from Housing File table."
-    timeout: 600
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadHousingFileTransactions
-    role: lambdaExecutionRole
-    environment:
-      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
-    events:
-      - schedule: cron(30 8-17 * * ? *)
-  #importRentBreakdowns:
-  #  name: ${self:service}-${self:provider.stage}-rent-breakdown-scheduled
-  #  description: "The scheduler to import rent breakdown data from the Google spreadsheet."
-  #  handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportRentBreakdowns
-  #  role: lambdaExecutionRole
-  #  environment:
-  #    CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-  #    GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
-  #  events:
-  #    - schedule: cron(0 19 * * ? *)
-  #importRentPositions:
-  #  name: ${self:service}-${self:provider.stage}-rent-position-scheduled
-  #  description: "The scheduler to import current rent position data from the Google spreadsheet."
-  #  handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportRentPositions
-  #  role: lambdaExecutionRole
-  #  environment:
-  #    CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-  #    GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
-  #  events:
-  #    - schedule: cron(0 19 * * ? *)
-  #importServiceChargePaymentsReceived:
-  #  name: ${self:service}-${self:provider.stage}-serv-charge-scheduled
-  #  description: "The scheduler to import service charge payments received data from the Google spreadsheet."
-  #  handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportServiceChargePaymentsReceived
-  #  role: lambdaExecutionRole
-  #  environment:
-  #    CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-  #    GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
-  #  events:
-  #    - schedule: cron(0 19 * * ? *)
-  #importLeaseholdAccounts:
-  #  name: ${self:service}-${self:provider.stage}-lease-acc-scheduled
-  #  description: "The scheduler to import leasehold accounts data from the Google spreadsheet."
-  #  handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportLeaseholdAccounts
-  #  role: lambdaExecutionRole
-  #  environment:
-  #    CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-  #    GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
-  #  events:
-  #    - schedule: cron(0 19 * * ? *)
-  #importGarage:
-  #  name: ${self:service}-${self:provider.stage}-garage-pos-scheduled
-  #  description: "The scheduler to import garage position data from the Google spreadsheet."
-  #  handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportGarage
-  #  role: lambdaExecutionRole
-  #  environment:
-  #    CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-  #    GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
-  #  events:
-  #    - schedule: cron(0 19 * * ? *)
-  #importOtherHRA:
-  #  name: ${self:service}-${self:provider.stage}-other-hra-pos-scheduled
-  #  description: "The scheduler to import other hra data from the Google spreadsheet."
-  #  handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportTemporaryAccommodation
-  #  role: lambdaExecutionRole
-  #  environment:
-  #    CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-  #    GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-api-key}
-  #  events:
-  #    - schedule: cron(0 19 * * ? *)
+    role: lambdaExecutionRole 
   refreshManageArrearsTables:
     name: ${self:service}-${self:provider.stage}-refresh-ma-scheduled
     description: "The scheduler to refresh manager arrears from the Google spreadsheet tables."
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshManageArrearsTable
-    role: lambdaExecutionRole
-    environment:
-      CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-      GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
+    role: lambdaExecutionRole    
     events:
       - schedule: cron(0 20 * * ? *)
-resources:
+stepFunctions:
+  stateMachines:
+    hfstepfunccashfile:
+      name: HFCashFileStateMachine
+      definition:
+        Comment: "Cash files process step function deployed via serverless"
+        StartAt: CheckCashFiles
+        States:
+          CheckCashFiles:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ checkCashFiles, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: Wait_1
+          Wait_1:
+              Type: Wait
+              TimestampPath: $.NextStepTime
+              Next: Choice_1
+          Choice_1:
+            Type: Choice
+            Choices:
+              - Variable: $.ExistFile
+                BooleanEquals: true
+                Next: ImportCashFile
+              - Variable: $.ExistFile
+                BooleanEquals: false
+                Next: EndStep
+          ImportCashFile:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ importCashFile, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: Wait_2
+          Wait_2:
+            Type: Wait
+            TimestampPath: $.NextStepTime
+            Next: ImportCashFileTransactions
+          ImportCashFileTransactions:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ importCashFileTransactions, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: EndStep
+          EndStep:
+            Type: Succeed
+      dependsOn: lambdaExecutionRole
+      tags:
+        Team: HousingFinance
+resources:  
   Resources:
     lambdaExecutionRole:
       Type: AWS::IAM::Role
@@ -223,3 +195,6 @@ custom:
       subnetIds:
         - subnet-0beb266003a56ca82
         - subnet-06a697d86a9b6ed01
+
+plugins:
+  - serverless-step-functions

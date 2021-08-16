@@ -121,10 +121,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
                 return results;
             }
-            else
-            {
-                // TODO log
-            }
 
             return results;
         }
@@ -161,7 +157,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
 
             FileList requestResult = await listRequest.ExecuteAsync().ConfigureAwait(false);
-            ;
 
             if (requestResult.Files?.Any() ?? false)
             {
@@ -175,6 +170,18 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
 
             return results;
+        }
+
+        public async Task<bool> RenameFileInDrive(string fileId, string newName)
+        {
+            File newFileName = new File();
+            newFileName.Name = newName;
+
+
+            var updateRequest = _driveService.Files.Update(newFileName, fileId);
+            var renamedFile = updateRequest.Execute();
+
+            return renamedFile.Name == newName;
         }
 
         #endregion

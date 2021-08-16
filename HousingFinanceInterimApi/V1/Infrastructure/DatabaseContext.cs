@@ -38,19 +38,16 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<Transaction>().HasNoKey().ToView(null);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseContext"/> class.
-        /// </summary>
-        /// <param name="options">The options for this context.</param>
         public DatabaseContext(DbContextOptions options)
             : base(options)
         {
         }
 
-        /// <summary>
-        /// Gets or sets the google file settings.
-        /// </summary>
+
         public DbSet<GoogleFileSetting> GoogleFileSettings { get; set; }
+
+        public DbSet<BatchLog> BatchLogs { get; set; }
+        public DbSet<BatchLogError> BatchLogErrors { get; set; }
 
         /// <summary>
         /// Gets or sets the up cash dump file names.

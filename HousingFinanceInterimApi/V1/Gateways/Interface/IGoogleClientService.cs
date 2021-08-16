@@ -39,6 +39,8 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         public Task<IList<_TEntity>> ReadSheetToEntitiesAsync<_TEntity>(string spreadSheetId, string sheetName,
             string sheetRange) where _TEntity : class;
 
+        public Task<bool> RenameFileInDrive(string fileId, string newName);
+
     }
 
 }
