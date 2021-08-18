@@ -23,7 +23,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IUPHousingCashDumpGateway _upHousingCashDumpGateway;
 
         private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
-        private readonly string _housingBenefitFileRegex = Environment.GetEnvironmentVariable("CASH_FILE_REGEX");
+        private readonly string _housingBenefitFileRegex = Environment.GetEnvironmentVariable("HOUSING_FILE_REGEX");
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
 
         private readonly string _housingBenefitFileLabel = "HousingBenefitFile";
