@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using HousingFinanceInterimApi.V1.UseCase;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [Route("error")]
         public void ThrowError()
         {
-            ThrowOpsErrorUsecase.Execute();
+            throw new Exception("health check error");
         }
 
     }

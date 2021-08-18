@@ -33,6 +33,7 @@
   <ItemGroup>
     <Folder Include="Properties\" />
     <Folder Include="terraform\" />
+    <Folder Include="V1\Domain\AutoMaps\" />
   </ItemGroup>
 
 </Project>

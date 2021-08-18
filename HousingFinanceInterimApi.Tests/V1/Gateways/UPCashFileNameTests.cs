@@ -11,7 +11,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
     public class UPCashFileNameTests : DatabaseTests
     {
 
-        private readonly IUPCashFileNameGateway _fileNameGateway;
+        private readonly IUPCashDumpFileNameGateway _fileNameGateway;
 
         public UPCashFileNameTests()
         {
@@ -27,7 +27,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             }
 
             DatabaseContext.SaveChanges();
-            _fileNameGateway = new UPCashFileNameGateway(DatabaseContext);
+            _fileNameGateway = new UPCashDumpFileNameGateway(DatabaseContext);
         }
 
         /// <summary>
