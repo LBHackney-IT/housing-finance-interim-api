@@ -153,7 +153,7 @@ stepFunctions:
         Comment: "Housing files process step function deployed via serverless. Run at 01:00 AM, 07:00 AM, 01:00 PM and 07:00 PM"
         StartAt: CheckHousingFiles
         States:
-          CheckCashFiles:
+          CheckHousingFiles:
             Type: Task
             Resource:
               Fn::GetAtt: [ checkHousingFiles, Arn ]
