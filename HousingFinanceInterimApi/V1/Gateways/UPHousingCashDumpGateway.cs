@@ -1,9 +1,13 @@
+using System;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using HousingFinanceInterimApi.V1.Domain;
+using HousingFinanceInterimApi.V1.Factories;
+using HousingFinanceInterimApi.V1.Handlers;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -37,35 +41,29 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// <returns>
         /// The list of UP cash dumps.
         /// </returns>
-        public async Task<IList<UPHousingCashDump>> CreateBulkAsync(long fileId, IList<string> lines)
+        public async Task<IList<UPHousingCashDumpDomain>> CreateBulkAsync(long fileId, IList<string> lines)
         {
-            var destObject = lines.Select(c => new UPHousingCashDump
+            try
             {
-                UPHousingCashDumpFileNameId = fileId,
-                FullText = c
-            }).ToList();
+                var listUpHousingCashDump = lines.Select(c => new UPHousingCashDump
+                {
+                    UPHousingCashDumpFileNameId = fileId,
+                    FullText = c
+                }).ToList();
 
-            _context.UpHousingCashDumps.AddRange(destObject);
-            bool success = await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
+                _context.UpHousingCashDumps.AddRange(listUpHousingCashDump);
+                bool success = await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
 
-            //IList<UPHousingCashDump> results = new List<UPHousingCashDump>();
-
-            //foreach (string line in lines)
-            //{
-            //    UPHousingCashDump entry = new UPHousingCashDump
-            //    {
-            //        UPHousingCashDumpFileNameId = fileId,
-            //        FullText = line
-            //    };
-            //    await _context.UpHousingCashDumps.AddAsync(entry).ConfigureAwait(false);
-            //    results.Add(entry);
-            //}
-
-            //bool success = await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
-
-            return success
-                ? destObject
-                : null;
+                return success
+                    ? listUpHousingCashDump.ToDomain()
+                    : null;
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
         }
 
     }

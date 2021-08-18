@@ -9,7 +9,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
     /// </summary>
     public interface IUPCashLoadGateway
     {
-        public Task<bool> LoadCashFiles();
+        public Task LoadCashFiles();
     }
 
 }

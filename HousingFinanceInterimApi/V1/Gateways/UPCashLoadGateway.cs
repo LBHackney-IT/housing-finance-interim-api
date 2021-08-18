@@ -1,7 +1,9 @@
+using System;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using HousingFinanceInterimApi.V1.Handlers;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -27,10 +29,18 @@ namespace HousingFinanceInterimApi.V1.Gateways
             _context = context;
         }
 
-        public async Task<bool> LoadCashFiles()
+        public async Task LoadCashFiles()
         {
-            await _context.LoadCashFiles().ConfigureAwait(false);
-            return true;
+            try
+            {
+                await _context.LoadCashFiles().ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
         }
 
     }

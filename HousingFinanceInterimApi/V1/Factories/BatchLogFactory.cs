@@ -7,7 +7,7 @@ namespace HousingFinanceInterimApi.V1.Factories
 {
     public static class BatchLogFactory
     {
-        public static BatchLogDomain ToDomain(BatchLog batchLog)
+        public static BatchLogDomain ToDomain(this BatchLog batchLog)
         {
             if (batchLog == null)
                 return null;
@@ -20,6 +20,12 @@ namespace HousingFinanceInterimApi.V1.Factories
                 EndTime = batchLog.EndTime,
                 IsSuccess = batchLog.IsSuccess
             };
+        }
+
+        public static List<BatchLogDomain> ToDomain(
+            this ICollection<BatchLog> batchLog)
+        {
+            return batchLog?.Select(b => b.ToDomain()).ToList();
         }
     }
 }

@@ -3,6 +3,9 @@ using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using HousingFinanceInterimApi.V1.Domain;
+using HousingFinanceInterimApi.V1.Factories;
+using HousingFinanceInterimApi.V1.Handlers;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -15,31 +18,49 @@ namespace HousingFinanceInterimApi.V1.Gateways
             _context = context;
         }
 
-        public async Task<BatchLog> CreateAsync(string type, bool isSuccess = false)
+        public async Task<BatchLogDomain> CreateAsync(string type, bool isSuccess = false)
         {
-            var newBatch = new BatchLog
+            try
             {
-                Type = type,
-                IsSuccess = isSuccess
-            };
-            await _context.BatchLogs.AddAsync(newBatch).ConfigureAwait(false);
+                var newBatch = new BatchLog
+                {
+                    Type = type,
+                    IsSuccess = isSuccess
+                };
+                await _context.BatchLogs.AddAsync(newBatch).ConfigureAwait(false);
 
-            return await _context.SaveChangesAsync().ConfigureAwait(false) == 1
-                    ? newBatch
+                return await _context.SaveChangesAsync().ConfigureAwait(false) == 1
+                    ? newBatch.ToDomain()
                     : null;
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
         }
 
         public async Task<bool> SetToSuccessAsync(long batchId)
         {
-            var batchLog = await _context.BatchLogs.FirstOrDefaultAsync(item => item.Id == batchId)
-                .ConfigureAwait(false);
+            try
+            {
+                var batchLog = await _context.BatchLogs.FirstOrDefaultAsync(item => item.Id == batchId)
+                    .ConfigureAwait(false);
 
-            if (batchLog == null)
-                return false;
+                if (batchLog == null)
+                    return false;
 
-            batchLog.IsSuccess = true;
-            batchLog.EndTime = DateTimeOffset.Now;
-            return await _context.SaveChangesAsync().ConfigureAwait(false) == 1;
+                batchLog.IsSuccess = true;
+                batchLog.EndTime = DateTimeOffset.Now;
+                return await _context.SaveChangesAsync().ConfigureAwait(false) == 1;
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
         }
     }
 }

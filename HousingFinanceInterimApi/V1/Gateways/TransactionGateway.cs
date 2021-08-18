@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HousingFinanceInterimApi.V1.Handlers;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -37,16 +38,32 @@ namespace HousingFinanceInterimApi.V1.Gateways
             return results;
         }
 
-        public async Task<bool> LoadCashFilesTransactions()
+        public async Task LoadCashFilesTransactions()
         {
-            await _context.LoadCashFileTransactions().ConfigureAwait(false);
-            return true;
+            try
+            {
+                await _context.LoadCashFileTransactions().ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
         }
 
-        public async Task<bool> LoadHousingFilesTransactions()
+        public async Task LoadHousingFilesTransactions()
         {
-            await _context.LoadHousingFileTransactions().ConfigureAwait(false);
-            return true;
+            try
+            {
+                await _context.LoadHousingFileTransactions().ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
         }
 
     }

@@ -7,7 +7,7 @@ namespace HousingFinanceInterimApi.V1.Factories
 {
     public static class BatchLogErrorFactory
     {
-        public static BatchLogErrorDomain ToDomain(BatchLogError batchLogError)
+        public static BatchLogErrorDomain ToDomain(this BatchLogError batchLogError)
         {
             if (batchLogError == null)
                 return null;
@@ -20,6 +20,12 @@ namespace HousingFinanceInterimApi.V1.Factories
                 Message = batchLogError.Message,
                 Timestamp = batchLogError.Timestamp
             };
+        }
+
+        public static List<BatchLogErrorDomain> ToDomain(
+            this ICollection<BatchLogError> batchLogError)
+        {
+            return batchLogError?.Select(b => b.ToDomain()).ToList();
         }
     }
 }

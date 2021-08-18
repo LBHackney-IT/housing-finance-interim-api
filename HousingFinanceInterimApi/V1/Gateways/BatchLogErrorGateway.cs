@@ -1,7 +1,11 @@
+using System;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using HousingFinanceInterimApi.V1.Domain;
+using HousingFinanceInterimApi.V1.Factories;
+using HousingFinanceInterimApi.V1.Handlers;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -14,19 +18,28 @@ namespace HousingFinanceInterimApi.V1.Gateways
             _context = context;
         }
 
-        public async Task<BatchLogError> CreateAsync(long batchId, string type, string message)
+        public async Task<BatchLogErrorDomain> CreateAsync(long batchId, string type, string message)
         {
-            var newBatchError = new BatchLogError()
+            try
             {
-                Type = type,
-                BatchLogId = batchId,
-                Message = message
-            };
-            await _context.BatchLogErrors.AddAsync(newBatchError).ConfigureAwait(false);
+                var newBatchError = new BatchLogError()
+                {
+                    Type = type,
+                    BatchLogId = batchId,
+                    Message = message
+                };
+                await _context.BatchLogErrors.AddAsync(newBatchError).ConfigureAwait(false);
 
-            return await _context.SaveChangesAsync().ConfigureAwait(false) == 1
-                    ? newBatchError
+                return await _context.SaveChangesAsync().ConfigureAwait(false) == 1
+                    ? newBatchError.ToDomain()
                     : null;
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
         }
     }
 }

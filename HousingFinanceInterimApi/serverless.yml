@@ -17,6 +17,10 @@ provider:
   environment:
     CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
     GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
+    WAIT_DURATION: ${ssm:/housing-finance/${self:provider.stage}/step-function-wait-duration}
+    BATCH_SIZE: ${ssm:/housing-finance/${self:provider.stage}/bulk-insert-batch-size}
+    CASH_FILE_REGEX: ${ssm:/housing-finance/${self:provider.stage}/cash-file-regex}
+    HOUSING_FILE_REGEX: ${ssm:/housing-finance/${self:provider.stage}/housing-benefit-file-regex}
 
 package:
   artifact: ./bin/release/netcoreapp3.1/housing-finance-interim-api.zip
@@ -39,7 +43,7 @@ functions:
           cors: true
   checkCashFiles:
     name: ${self:service}-${self:provider.stage}-check-cash-files
-    description: "The scheduler to check if exists cash files and start cash files step function. Run at 01:00 AM, 07:00 AM, 01:00 PM and 07:00 PM"
+    description: "The scheduler to check if exists cash files. "
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckCashFiles  
   importCashFile:
     name: ${self:service}-${self:provider.stage}-cash-file
@@ -52,7 +56,23 @@ functions:
     description: "The scheduler to import cash files transactions from Cash File table."
     timeout: 600
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadCashFileTransactions
-    role: lambdaExecutionRole 
+    role: lambdaExecutionRole
+  checkHousingFiles:
+    name: ${self:service}-${self:provider.stage}-check-housing-files
+    description: "The scheduler to check if exists housing benefit files. "
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckHousingBenefitFiles  
+  importHousingFile:
+    name: ${self:service}-${self:provider.stage}-housing-file
+    description: "The scheduler to import housing files from Google drives."
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ImportHousingBenefitFile
+    role: lambdaExecutionRole
+  importHousingFileTransactions:
+    name: ${self:service}-${self:provider.stage}-housing-file-trans
+    description: "The scheduler to import housing files transactions from Housing File table."
+    timeout: 600
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadHousingBenefitFileTransactions
+    role: lambdaExecutionRole
   refreshManageArrearsTables:
     name: ${self:service}-${self:provider.stage}-refresh-ma-scheduled
     description: "The scheduler to refresh manager arrears from the Google spreadsheet tables."
@@ -67,7 +87,7 @@ stepFunctions:
       events:
         - schedule: cron(0 1,7,13,19 * * ? *)
       definition:
-        Comment: "Cash files process step function deployed via serverless"
+        Comment: "Cash files process step function deployed via serverless. Run at 01:00 AM, 07:00 AM, 01:00 PM and 07:00 PM"
         StartAt: CheckCashFiles
         States:
           CheckCashFiles:
@@ -113,6 +133,69 @@ stepFunctions:
             Type: Task
             Resource:
               Fn::GetAtt: [ importCashFileTransactions, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: EndStep
+          EndStep:
+            Type: Succeed
+      dependsOn: lambdaExecutionRole
+      tags:
+        Team: HousingFinance
+    hfstepfunchousingfile:
+      name: HFHousingFileStateMachine
+      events:
+        - schedule: cron(0 1,7,13,19 * * ? *)
+      definition:
+        Comment: "Housing files process step function deployed via serverless. Run at 01:00 AM, 07:00 AM, 01:00 PM and 07:00 PM"
+        StartAt: CheckHousingFiles
+        States:
+          CheckCashFiles:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ checkHousingFiles, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: Wait_1
+          Wait_1:
+              Type: Wait
+              TimestampPath: $.NextStepTime
+              Next: Choice_1
+          Choice_1:
+            Type: Choice
+            Choices:
+              - Variable: $.Continue
+                BooleanEquals: true
+                Next: ImportHousingFile
+              - Variable: $.Continue
+                BooleanEquals: false
+                Next: ImportHousingFileTransactions
+          ImportHousingFile:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ importHousingFile, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: Wait_2
+          Wait_2:
+            Type: Wait
+            TimestampPath: $.NextStepTime
+            Next: ImportHousingFileTransactions
+          ImportHousingFileTransactions:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ importHousingFileTransactions, Arn ]
             Retry:
               - ErrorEquals:
                   - States.All

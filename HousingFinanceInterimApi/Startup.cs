@@ -20,7 +20,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using AutoMapper;
-using HousingFinanceInterimApi.V1.Domain.AutoMaps;
 
 namespace HousingFinanceInterimApi
 {
@@ -46,17 +45,6 @@ namespace HousingFinanceInterimApi
             services.Configure<ApiOptions>(apiOptionsConfigSection);
             ApiOptions apiOptions = apiOptionsConfigSection.Get<ApiOptions>();
 
-            // Add auto mapper
-            var mapperConfig = new MapperConfiguration(mapperConfiguration =>
-            {
-                mapperConfiguration.AddProfile(new RentBreakdownMappingProfile());
-                mapperConfiguration.AddProfile(new CurrentRentPositionMappingProfile());
-                mapperConfiguration.AddProfile(new LeaseholdAccountMappingProfile());
-                mapperConfiguration.AddProfile(new ServiceChargePaymentsReceivedMappingProfile());
-                mapperConfiguration.AddProfile(new GarageMappingProfile());
-                mapperConfiguration.AddProfile(new OtherHRAMappingProfile());
-            });
-            services.AddSingleton(mapperConfig.CreateMapper());
 
             services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);

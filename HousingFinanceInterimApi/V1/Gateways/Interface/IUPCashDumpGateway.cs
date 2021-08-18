@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using System.Threading.Tasks;
+using HousingFinanceInterimApi.V1.Domain;
 
 namespace HousingFinanceInterimApi.V1.Gateways.Interface
 {
@@ -19,7 +20,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// <returns>
         /// The list of UP cash dumps.
         /// </returns>
-        public Task<IList<UPCashDump>> CreateBulkAsync(long fileId, IList<string> lines);
+        public Task<List<UPCashDumpDomain>> CreateBulkAsync(long fileId, IList<string> lines);
 
     }
 

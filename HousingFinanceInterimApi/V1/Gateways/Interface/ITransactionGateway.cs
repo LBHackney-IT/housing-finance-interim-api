@@ -22,9 +22,9 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// </returns>
         public Task<IList<Transaction>> ListAsync(DateTime? startDate, DateTime? endDate);
 
-        public Task<bool> LoadCashFilesTransactions();
+        public Task LoadCashFilesTransactions();
 
-        public Task<bool> LoadHousingFilesTransactions();
+        public Task LoadHousingFilesTransactions();
 
     }
 
