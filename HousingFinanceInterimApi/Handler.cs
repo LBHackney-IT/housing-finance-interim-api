@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -23,6 +24,7 @@ using HousingFinanceInterimApi.V1.Handlers;
 using Mapster;
 using Microsoft.Extensions.Http.Logging;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using ILogger = Google.Apis.Logging.ILogger;
 using LogLevel = Google.Apis.Logging.LogLevel;
 
@@ -138,8 +140,9 @@ namespace HousingFinanceInterimApi
             return await _loadDirectDebitUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
-        public async Task<StepResponse> LoadDirectDebitTransactions(DateTime? processingDate)
+        public async Task<StepResponse> LoadDirectDebitTransactions(JObject input, ILambdaContext context)
         {
+            DateTime? processingDate = Convert.ToDateTime(input["processingDate"]);
             return await _loadDirectDebitTransactionsUseCase.ExecuteAsync(processingDate).ConfigureAwait(false);
         }
     }
