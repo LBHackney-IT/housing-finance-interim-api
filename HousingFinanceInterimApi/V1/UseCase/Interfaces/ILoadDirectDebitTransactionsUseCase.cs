@@ -1,12 +1,13 @@
+using System;
 using HousingFinanceInterimApi.V1.Domain;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Boundary.Response;
 
 namespace HousingFinanceInterimApi.V1.UseCase.Interfaces
 {
-    public interface IRefreshManageArrearsUseCase
+    public interface ILoadDirectDebitTransactionsUseCase
     {
-        public Task<StepResponse> ExecuteAsync();
+        public Task<StepResponse> ExecuteAsync(DateTime? retroactiveDate = null);
     }
+
 }

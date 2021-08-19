@@ -66,6 +66,18 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
         }
 
+        public async Task LoadDirectDebitTransactions()
+        {
+            try
+            {
+                await _context.LoadDirectDebitTransactions().ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
+        }
     }
-
 }

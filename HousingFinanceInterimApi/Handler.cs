@@ -33,22 +33,24 @@ namespace HousingFinanceInterimApi
     public class Handler
     {
         private readonly IRefreshManageArrearsUseCase _refreshManageArrearsUseCase;
+        private readonly IRefreshCurrentBalanceUseCase _refreshCurrentBalanceUseCase;
         private readonly ICheckExistFileUseCase _checkExistFileUseCase;
         private readonly IImportCashFileUseCase _importCashFileUseCase;
         private readonly ILoadCashFileTransactionsUseCase _loadCashFileTransactionsUseCase;
         private readonly IImportHousingFileUseCase _importHousingFileUseCase;
         private readonly ILoadHousingFileTransactionsUseCase _loadHousingFileTransactionsUseCase;
+        private readonly ILoadDirectDebitUseCase _loadDirectDebitUseCase;
+        private readonly ILoadDirectDebitTransactionsUseCase _loadDirectDebitTransactionsUseCase;
 
         private readonly string _cashFileLabel = "CashFile";
         private readonly string _housingBenefitFileLabel = "HousingBenefitFile";
 
         public Handler()
         {
-            DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
+            var optionsBuilder = new DbContextOptionsBuilder();
             optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
-            DatabaseContext context = new DatabaseContext(optionsBuilder.Options);
-
-            IOptions<GoogleClientServiceOptions> options = Options.Create(new GoogleClientServiceOptions
+            var context = new DatabaseContext(optionsBuilder.Options);
+            var options = Options.Create(new GoogleClientServiceOptions
             {
                 ApplicationName = "Hackney Finance Interim Solution",
                 Scopes = new List<string>
@@ -62,7 +64,7 @@ namespace HousingFinanceInterimApi
 
             IBatchLogErrorGateway batchLogErrorGateway = new BatchLogErrorGateway(context);
             IBatchLogGateway batchLogGateway = new BatchLogGateway(context);
-            IRefreshManageArrearsGateway refreshManageArrearsGateway = new RefreshManageArrearsGateway(context);
+            IManageArrearsGateway refreshManageArrearsGateway = new ManageArrearsGateway(context);
             ITransactionGateway transactionGateway = new TransactionGateway(context);
             IUPCashLoadGateway upCashLoadGateway = new UPCashLoadGateway(context);
             IUPHousingCashLoadGateway upHousingCashLoadGateway = new UPHousingCashLoadGateway(context);
@@ -71,6 +73,8 @@ namespace HousingFinanceInterimApi
             IUPCashDumpGateway upCashDumpGateway = new UPCashDumpGateway(context);
             IUPHousingCashDumpFileNameGateway upHousingCashDumpFileNameGateway = new UPHousingCashDumpFileNameGateway(context);
             IUPHousingCashDumpGateway upHousingCashDumpGateway = new UPHousingCashDumpGateway(context);
+            ICurrentBalanceGateway currentBalanceGateway = new CurrentBalanceGateway(context);
+            IDirectDebitGateway directDebitGateway = new DirectDebitGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _importCashFileUseCase = new ImportCashFileUseCase(batchLogGateway, batchLogErrorGateway,
@@ -81,7 +85,12 @@ namespace HousingFinanceInterimApi
                 googleFileSettingGateway, googleClientService, upHousingCashDumpFileNameGateway, upHousingCashDumpGateway);
             _loadHousingFileTransactionsUseCase = new LoadHousingFileTransactionsUseCase(batchLogGateway,
                 batchLogErrorGateway, upHousingCashLoadGateway, transactionGateway);
+            _refreshCurrentBalanceUseCase = new RefreshCurrentBalanceUseCase(currentBalanceGateway);
             _refreshManageArrearsUseCase = new RefreshManageArrearsUseCase(refreshManageArrearsGateway);
+            _loadDirectDebitUseCase = new LoadDirectDebitUseCase(batchLogGateway, batchLogErrorGateway,
+                directDebitGateway, googleFileSettingGateway, googleClientService);
+            _loadDirectDebitTransactionsUseCase = new LoadDirectDebitTransactionsUseCase(batchLogGateway,
+                batchLogErrorGateway, directDebitGateway, transactionGateway);
         }
 
         public async Task<StepResponse> CheckCashFiles()
@@ -114,18 +123,25 @@ namespace HousingFinanceInterimApi
             return await _loadHousingFileTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
-        public async Task RefreshManageArrearsTable()
+        public async Task<StepResponse> RefreshCurrentBalance()
         {
-            try
-            {
-                await _refreshManageArrearsUseCase.ExecuteAsync().ConfigureAwait(false);
-            }
-            catch (Exception exc)
-            {
-                throw new Exception("Failed to refresh manage arrears tables");
-            }
+            return await _refreshCurrentBalanceUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
+        public async Task<StepResponse> RefreshManageArrears()
+        {
+            return await _refreshManageArrearsUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadDirectDebit()
+        {
+            return await _loadDirectDebitUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadDirectDebitTransactions(DateTime? processingDate)
+        {
+            return await _loadDirectDebitTransactionsUseCase.ExecuteAsync(processingDate).ConfigureAwait(false);
+        }
     }
 
 }

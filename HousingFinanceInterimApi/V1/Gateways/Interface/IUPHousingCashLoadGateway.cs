@@ -1,4 +1,3 @@
-using HousingFinanceInterimApi.V1.Infrastructure;
 using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.Gateways.Interface

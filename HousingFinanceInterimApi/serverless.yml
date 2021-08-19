@@ -73,21 +73,36 @@ functions:
     timeout: 600
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadHousingBenefitFileTransactions
     role: lambdaExecutionRole
-  refreshManageArrearsTables:
-    name: ${self:service}-${self:provider.stage}-refresh-ma-scheduled
-    description: "The scheduler to refresh manager arrears from the Google spreadsheet tables."
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshManageArrearsTable
+  refreshCurrentBalance:
+    name: ${self:service}-${self:provider.stage}-refresh-cur_bal
+    description: "The scheduler to refresh currant balance table."
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshCurrentBalance
     role: lambdaExecutionRole    
-    events:
-      - schedule: cron(0 20 * * ? *)
+  refreshManageArrearsTables:
+    name: ${self:service}-${self:provider.stage}-refresh-ma-cur_bal
+    description: "The scheduler to refresh manager arrears balance based on current balance table."
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshManageArrears
+    role: lambdaExecutionRole
+  importDirectDebit:
+    name: ${self:service}-${self:provider.stage}-direct-debit
+    description: "The scheduler to import direct debit from Google Spreadshet."
+    timeout: 600
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadDirectDebit
+    role: lambdaExecutionRole
+  importDirectDebitTransactions:
+    name: ${self:service}-${self:provider.stage}-direct-debit-trans
+    description: "The scheduler to import direct debit transactions from DirectDebit table."
+    timeout: 600
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadDirectDebitTransactions
+    role: lambdaExecutionRole
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:
       name: HFCashFileStateMachine
       events:
-        - schedule: cron(0 1,7,13,19 * * ? *)
+        - schedule: cron(0 1,7 * * ? *)
       definition:
-        Comment: "Cash files process step function deployed via serverless. Run at 01:00 AM, 07:00 AM, 01:00 PM and 07:00 PM"
+        Comment: "Cash files process step function deployed via serverless. Run at 01:00 AM, 07:00 AM"
         StartAt: CheckCashFiles
         States:
           CheckCashFiles:
@@ -148,9 +163,9 @@ stepFunctions:
     hfstepfunchousingfile:
       name: HFHousingFileStateMachine
       events:
-        - schedule: cron(0 1,7,13,19 * * ? *)
+        - schedule: cron(5 1,7 * * ? *)
       definition:
-        Comment: "Housing files process step function deployed via serverless. Run at 01:00 AM, 07:00 AM, 01:00 PM and 07:00 PM"
+        Comment: "Housing files process step function deployed via serverless. Run at 01:05 AM, 07:05 AM"
         StartAt: CheckHousingFiles
         States:
           CheckHousingFiles:
@@ -196,6 +211,84 @@ stepFunctions:
             Type: Task
             Resource:
               Fn::GetAtt: [ importHousingFileTransactions, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: EndStep
+          EndStep:
+            Type: Succeed
+      dependsOn: lambdaExecutionRole
+      tags:
+        Team: HousingFinance
+    hfstepfuncdirectdebit:
+      name: HFDirectDebitStateMachine
+      events:
+        - schedule: cron(10 1,7 * * ? *)
+      definition:
+        Comment: "Direct debit process step function deployed via serverless. Run at 01:10 AM, 07:10 AM"
+        StartAt: ImportDirectDebit
+        States:          
+          ImportDirectDebit:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ importDirectDebit, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: Wait_1
+          Wait_1:
+            Type: Wait
+            TimestampPath: $.NextStepTime
+            Next: ImportDirectDebitTransactions
+          ImportDirectDebitTransactions:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ importDirectDebitTransactions, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: EndStep
+          EndStep:
+            Type: Succeed
+      dependsOn: lambdaExecutionRole
+      tags:
+        Team: HousingFinance
+    hfstepfunccurentbalance:
+      name: HFCurrentBalanceStateMachine
+      events:
+        - schedule: cron(30 1,7 * * ? *)
+      definition:
+        Comment: "Current balance process step function deployed via serverless. Run at 01:30 AM, 07:30 AM"
+        StartAt: RefreshCurrentBalance
+        States:          
+          RefreshCurrentBalance:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ refreshCurrentBalance, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: Wait_1
+          Wait_1:
+            Type: Wait
+            TimestampPath: $.NextStepTime
+            Next: RefreshManageArrears
+          RefreshManageArrears:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ refreshManageArrearsTables, Arn ]
             Retry:
               - ErrorEquals:
                   - States.All

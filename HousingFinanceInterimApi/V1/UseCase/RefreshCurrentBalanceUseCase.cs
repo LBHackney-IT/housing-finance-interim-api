@@ -11,25 +11,25 @@ using HousingFinanceInterimApi.V1.Handlers;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
-    public class RefreshManageArrearsUseCase : IRefreshManageArrearsUseCase
+    public class RefreshCurrentBalanceUseCase : IRefreshCurrentBalanceUseCase
     {
-        private readonly IManageArrearsGateway _manageArrearsGateway;
+        private readonly ICurrentBalanceGateway _currentBalanceGateway;
 
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
 
-        public RefreshManageArrearsUseCase(IManageArrearsGateway manageArrearsGateway)
+        public RefreshCurrentBalanceUseCase(ICurrentBalanceGateway currentBalanceGateway)
         {
-            _manageArrearsGateway = manageArrearsGateway;
+            _currentBalanceGateway = currentBalanceGateway;
         }
 
         public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"STARTING REFRESH MANAGE ARREARS CURRENT BALANCE");
+            LoggingHandler.LogInfo($"STARTING REFRESH CURRENT BALANCE");
             try
             {
-                await _manageArrearsGateway.RefreshManageArrearsTenancyAgreement().ConfigureAwait(false);
+                await _currentBalanceGateway.UpdateCurrentBalance().ConfigureAwait(false);
 
-                LoggingHandler.LogInfo($"END REFRESH MANAGE ARREARS CURRENT BALANCE");
+                LoggingHandler.LogInfo($"END REFRESH CURRENT BALANCE");
                 return new StepResponse()
                 {
                     Continue = true,

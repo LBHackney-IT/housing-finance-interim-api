@@ -13,6 +13,7 @@ using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using HousingFinanceInterimApi.V1.Handlers;
 using File = Google.Apis.Drive.v3.Data.File;
 
 namespace HousingFinanceInterimApi.V1.Gateways
@@ -208,15 +209,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
             if (values == null || !values.Any())
             {
-                _logger.LogInformation("No data found.");
-
+                LoggingHandler.LogInfo($"NO DATA FOUND. SPREADSHEET ID: {spreadSheetId}, SHEET NAME: {sheetName}, SHEET RANGE: {sheetRange}");
                 return null;
             }
 
             // Get the headers
             IList<string> headers = values.First().Select(cell => cell.ToString()).ToList();
             IList<object> rowObjects = new List<object>();
-            _logger.LogInformation($"Writing row values to objects, {headers.Count} headers found");
+            LoggingHandler.LogInfo($"WRITING ROW VALUES TO OBJECTS, {headers.Count} HEADERS FOUND");
 
             // For each row of actual data
             foreach (var row in values.Skip(1))
@@ -239,14 +239,13 @@ namespace HousingFinanceInterimApi.V1.Gateways
                         rowItemAccessor[propertyName] = row[cellIterator++];
                     }
                 }
-
                 rowObjects.Add(rowItem);
             }
 
             // Attempt to serialize to JSON, then into the desired entity type
             try
             {
-                _logger.LogInformation("Writing values to object and serializing");
+                LoggingHandler.LogInfo($"WRITING VALUES TO OBJECTS AND SERIALIZING");
                 string convertedJson = JsonConvert.SerializeObject(rowObjects);
                 var entities = JsonConvert.DeserializeObject<IList<_TEntity>>(convertedJson);
 
@@ -254,7 +253,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
             catch (Exception exc)
             {
-                _logger.LogError("Error writing values to object and serializing", exc);
+                LoggingHandler.LogInfo($"ERROR WRITING VALUES TO OBJECTS AND SERIALIZING");
+                LoggingHandler.LogInfo(exc.ToString());
 
                 throw;
             }

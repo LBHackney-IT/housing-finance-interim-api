@@ -33,6 +33,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<BatchLogError> BatchLogErrors { get; set; }
         public DbSet<UPCashDumpFileName> UpCashDumpFileNames { get; set; }
         public DbSet<UPCashDump> UpCashDumps { get; set; }
+        public DbSet<DirectDebitAux> DirectDebitsAux { get; set; }
         public DbSet<UPHousingCashDumpFileName> UpHousingCashDumpFileNames { get; set; }
         public DbSet<UPHousingCashDump> UpHousingCashDumps { get; set; }
         private DbSet<TenancyTransaction> TenancyTransactionValue { get; set; }
@@ -77,22 +78,40 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
                 .ToListAsync()
                 .ConfigureAwait(false);
 
-        public async Task RefreshManageArrearsTenancyAgreement()
-            => await PerformTransactionStoredProcedure("usp_RefreshManageArrearsTenancyAgreement", 300).ConfigureAwait(false);
-
         public async Task LoadCashFiles()
-            => await PerformTransactionStoredProcedure("usp_LoadCashFile", 600).ConfigureAwait(false);
+            => await PerformTransaction("usp_LoadCashFile", 600).ConfigureAwait(false);
 
         public async Task LoadHousingFiles()
-            => await PerformTransactionStoredProcedure("usp_LoadHousingFile", 600).ConfigureAwait(false);
+            => await PerformTransaction("usp_LoadHousingFile", 600).ConfigureAwait(false);
 
         public async Task LoadCashFileTransactions()
-            => await PerformTransactionStoredProcedure("usp_LoadTransactionsCashFile", 600).ConfigureAwait(false);
+            => await PerformTransaction("usp_LoadTransactionsCashFile", 600).ConfigureAwait(false);
 
         public async Task LoadHousingFileTransactions()
-            => await PerformTransactionStoredProcedure("usp_LoadTransactionsHousingFile", 600).ConfigureAwait(false);
+            => await PerformTransaction("usp_LoadTransactionsHousingFile", 600).ConfigureAwait(false);
 
-        private async Task PerformTransactionStoredProcedure(string storedProcedure, int timeout = 0)
+        public async Task LoadDirectDebitHistory(DateTime? processingDate)
+            => await PerformInterpolatedTransaction($"usp_LoadDirectDebitHistory {processingDate:yyyy-MM-dd}", 600).ConfigureAwait(false);
+
+        public async Task LoadDirectDebitTransactions()
+            => await PerformTransaction($"usp_LoadTransactionsDirectDebit", 600).ConfigureAwait(false);
+
+        public async Task UpdateCurrentBalance()
+            => await PerformTransaction("usp_UpdateCurrentBalance", 300).ConfigureAwait(false);
+
+        public async Task RefreshManageArrearsTenancyAgreement()
+            => await PerformTransaction("usp_RefreshManageArrearsTenancyAgreement", 300).ConfigureAwait(false);
+
+        public async Task LoadDirectDebit(long batchLogId)
+            => await PerformTransaction($"usp_LoadDirectDebit {batchLogId}", 600).ConfigureAwait(false);
+
+        public async Task TruncateDirectDebitAuxiliary()
+        {
+            var sql = "TRUNCATE TABLE DirectDebitAux";
+            await PerformTransaction(sql).ConfigureAwait(false);
+        }
+
+        private async Task PerformTransaction(string sql, int timeout = 0)
         {
             await using var transaction = await Database.BeginTransactionAsync().ConfigureAwait(false);
 
@@ -100,7 +119,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             {
                 if (timeout != 0)
                     Database.SetCommandTimeout(timeout);
-                await Database.ExecuteSqlRawAsync(storedProcedure).ConfigureAwait(false);
+                await Database.ExecuteSqlRawAsync(sql).ConfigureAwait(false);
                 await transaction.CommitAsync().ConfigureAwait(false);
             }
             catch
@@ -110,6 +129,22 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             }
         }
 
-    }
+        private async Task PerformInterpolatedTransaction(FormattableString sql, int timeout = 0)
+        {
+            await using var transaction = await Database.BeginTransactionAsync().ConfigureAwait(false);
 
+            try
+            {
+                if (timeout != 0)
+                    Database.SetCommandTimeout(timeout);
+                await Database.ExecuteSqlInterpolatedAsync(sql).ConfigureAwait(false);
+                await transaction.CommitAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                await transaction.RollbackAsync().ConfigureAwait(false);
+                throw;
+            }
+        }
+    }
 }
