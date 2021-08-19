@@ -140,10 +140,9 @@ namespace HousingFinanceInterimApi
             return await _loadDirectDebitUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
-        public async Task<StepResponse> LoadDirectDebitTransactions(JObject input, ILambdaContext context)
+        public async Task<StepResponse> LoadDirectDebitTransactions()
         {
-            DateTime? processingDate = Convert.ToDateTime(input["processingDate"]);
-            return await _loadDirectDebitTransactionsUseCase.ExecuteAsync(processingDate).ConfigureAwait(false);
+            return await _loadDirectDebitTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 
