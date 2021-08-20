@@ -189,7 +189,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         #endregion
 
         #region Google Sheets
-        
+
         public async Task<IList<_TEntity>> ReadSheetToEntitiesAsync<_TEntity>(string spreadSheetId, string sheetName,
             string sheetRange) where _TEntity : class
         {
@@ -198,7 +198,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
             SpreadsheetsResource.ValuesResource.GetRequest getter =
                 _sheetsService.Spreadsheets.Values.Get(spreadSheetId, $"{sheetName}!{sheetRange}");
-            
+
             ValueRange response = await getter.ExecuteAsync().ConfigureAwait(false);
             IList<IList<object>> values = response.Values;
 
@@ -259,7 +259,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             // How the input data should be interpreted.
             SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum valueInputOption =
-                (SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum)1;  // TODO: Update placeholder value.
+                (SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum) 1;  // TODO: Update placeholder value.
 
             // TODO: Assign values to desired properties of `requestBody`. All existing
             // properties will be replaced:
