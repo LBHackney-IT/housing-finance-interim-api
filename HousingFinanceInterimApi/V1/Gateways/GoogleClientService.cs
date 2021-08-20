@@ -15,6 +15,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Handlers;
 using File = Google.Apis.Drive.v3.Data.File;
+using Data = Google.Apis.Sheets.v4.Data;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -188,22 +189,16 @@ namespace HousingFinanceInterimApi.V1.Gateways
         #endregion
 
         #region Google Sheets
-
-        /// <summary>
-        /// Reads the given spreadsheet to a JSON file asynchronous.
-        /// </summary>
-        /// <typeparam name="_TEntity"></typeparam>
-        /// <param name="spreadSheetId">The spread sheet identifier.</param>
-        /// <param name="sheetName">Name of the sheet to read.</param>
-        /// <param name="sheetRange">The sheet range to read.</param>
-        /// <returns>
-        /// An async task.
-        /// </returns>
+        
         public async Task<IList<_TEntity>> ReadSheetToEntitiesAsync<_TEntity>(string spreadSheetId, string sheetName,
             string sheetRange) where _TEntity : class
         {
+            await UpdateSheet(spreadSheetId, sheetName, "Z1").ConfigureAwait(false);
+            await ClearSheet(spreadSheetId, sheetName, "Z1").ConfigureAwait(false);
+
             SpreadsheetsResource.ValuesResource.GetRequest getter =
                 _sheetsService.Spreadsheets.Values.Get(spreadSheetId, $"{sheetName}!{sheetRange}");
+            
             ValueRange response = await getter.ExecuteAsync().ConfigureAwait(false);
             IList<IList<object>> values = response.Values;
 
@@ -242,7 +237,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 rowObjects.Add(rowItem);
             }
 
-            // Attempt to serialize to JSON, then into the desired entity type
+
             try
             {
                 LoggingHandler.LogInfo($"WRITING VALUES TO OBJECTS AND SERIALIZING");
@@ -258,6 +253,34 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
                 throw;
             }
+        }
+
+        public async Task UpdateSheet(string spreadSheetId, string sheetName, string sheetRange)
+        {
+            // How the input data should be interpreted.
+            SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum valueInputOption =
+                (SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum)1;  // TODO: Update placeholder value.
+
+            // TODO: Assign values to desired properties of `requestBody`. All existing
+            // properties will be replaced:
+            Data.ValueRange requestBody = new Data.ValueRange();
+            var oblist = new List<object>() { "DD" };
+            requestBody.Values = new List<IList<object>> { oblist };
+
+            SpreadsheetsResource.ValuesResource.UpdateRequest request = _sheetsService.Spreadsheets.Values.Update(requestBody, spreadSheetId, $"{sheetName}!{sheetRange}");
+            request.ValueInputOption = valueInputOption;
+
+            Data.UpdateValuesResponse response = await request.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task ClearSheet(string spreadSheetId, string sheetName, string sheetRange)
+        {
+            Data.ClearValuesRequest requestBody = new Data.ClearValuesRequest();
+
+            SpreadsheetsResource.ValuesResource.ClearRequest request = _sheetsService.Spreadsheets.Values.Clear(requestBody, spreadSheetId, $"{sheetName}!{sheetRange}");
+
+            // To execute asynchronously in an async method, replace `request.Execute()` as shown:
+            Data.ClearValuesResponse response = await request.ExecuteAsync().ConfigureAwait(false);
         }
 
         #endregion
