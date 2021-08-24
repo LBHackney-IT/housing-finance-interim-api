@@ -14,5 +14,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         public Task LoadHousingFilesTransactions();
 
         public Task LoadDirectDebitTransactions();
+
+        public Task LoadChargesTransactions();
     }
 }

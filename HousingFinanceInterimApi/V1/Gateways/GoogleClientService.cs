@@ -193,8 +193,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
         public async Task<IList<_TEntity>> ReadSheetToEntitiesAsync<_TEntity>(string spreadSheetId, string sheetName,
             string sheetRange) where _TEntity : class
         {
-            await UpdateSheet(spreadSheetId, sheetName, "Z1").ConfigureAwait(false);
-            await ClearSheet(spreadSheetId, sheetName, "Z1").ConfigureAwait(false);
+            //await UpdateSheet(spreadSheetId, sheetName, "Z1").ConfigureAwait(false);
+            //await ClearSheet(spreadSheetId, sheetName, "Z1").ConfigureAwait(false);
 
             SpreadsheetsResource.ValuesResource.GetRequest getter =
                 _sheetsService.Spreadsheets.Values.Get(spreadSheetId, $"{sheetName}!{sheetRange}");

@@ -41,6 +41,14 @@ functions:
             identitySource: method.request.header.Authorization
             managedExternally: true
           cors: true
+  loadTenancyAgreement:
+    name: ${self:service}-${self:provider.stage}-load-tenagree
+    description: "The scheduler to update and add new tenancy agreements. Run at 12:15 AM"
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadTenancyAgreement
+    role: lambdaExecutionRole
+    events:
+        - schedule: cron(15 0 * * ? *)   
   checkCashFiles:
     name: ${self:service}-${self:provider.stage}-check-cash-files
     description: "The scheduler to check if exists cash files. "
@@ -74,10 +82,19 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadHousingBenefitFileTransactions
     role: lambdaExecutionRole
   refreshCurrentBalance:
-    name: ${self:service}-${self:provider.stage}-refresh-cur_bal
-    description: "The scheduler to refresh currant balance table."
+    name: ${self:service}-${self:provider.stage}-refresh-cur-bal
+    description: "The scheduler to refresh current balance table."
+    timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshCurrentBalance
-    role: lambdaExecutionRole    
+    role: lambdaExecutionRole
+  refreshOperatingBalance:
+    name: ${self:service}-${self:provider.stage}-refresh-op-bal
+    description: "The scheduler to refresh operating balance table. Run at 04:00 AM"
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshOperatingBalance
+    role: lambdaExecutionRole
+    events:
+        - schedule: cron(0 4 * * ? *)    
   refreshManageArrearsTables:
     name: ${self:service}-${self:provider.stage}-refresh-ma-cur_bal
     description: "The scheduler to refresh manager arrears balance based on current balance table."
@@ -95,14 +112,26 @@ functions:
     timeout: 600
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadDirectDebitTransactions
     role: lambdaExecutionRole
+  importCharges:
+    name: ${self:service}-${self:provider.stage}-charges
+    description: "The scheduler to import charges from Google Spreadshet."
+    timeout: 600
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadCharges
+    role: lambdaExecutionRole
+  importChargesTransactions:
+    name: ${self:service}-${self:provider.stage}-charges-trans
+    description: "The scheduler to import charges transactions from Charges table."
+    timeout: 600
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadChargesTransactions
+    role: lambdaExecutionRole
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:
       name: HFCashFileStateMachine
       events:
-        - schedule: cron(0 1,7 * * ? *)
+        - schedule: cron(0 1 * * ? *)
       definition:
-        Comment: "Cash files process step function deployed via serverless. Run at 01:00 AM, 07:00 AM"
+        Comment: "Cash files process step function deployed via serverless. Run at 01:00 AM"
         StartAt: CheckCashFiles
         States:
           CheckCashFiles:
@@ -163,9 +192,9 @@ stepFunctions:
     hfstepfunchousingfile:
       name: HFHousingFileStateMachine
       events:
-        - schedule: cron(5 1,7 * * ? *)
+        - schedule: cron(5 1 * * ? *)
       definition:
-        Comment: "Housing files process step function deployed via serverless. Run at 01:05 AM, 07:05 AM"
+        Comment: "Housing files process step function deployed via serverless. Run at 01:05 AM"
         StartAt: CheckHousingFiles
         States:
           CheckHousingFiles:
@@ -226,9 +255,9 @@ stepFunctions:
     hfstepfuncdirectdebit:
       name: HFDirectDebitStateMachine
       events:
-        - schedule: cron(10 1,7 * * ? *)
+        - schedule: cron(10 1 * * ? *)
       definition:
-        Comment: "Direct debit process step function deployed via serverless. Run at 01:10 AM, 07:10 AM"
+        Comment: "Direct debit process step function deployed via serverless. Run at 01:10 AM"
         StartAt: ImportDirectDebit
         States:          
           ImportDirectDebit:
@@ -262,12 +291,51 @@ stepFunctions:
       dependsOn: lambdaExecutionRole
       tags:
         Team: HousingFinance
+    hfstepfunccharges:
+      name: HFChargesStateMachine
+      events:
+        - schedule: cron(15 1 * * ? *)
+      definition:
+        Comment: "Charges process step function deployed via serverless. Run at 01:15 AM"
+        StartAt: ImportCharges
+        States:          
+          ImportCharges:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ importCharges, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: Wait_1
+          Wait_1:
+            Type: Wait
+            TimestampPath: $.NextStepTime
+            Next: ImportChargesTransactions
+          ImportDirectDebitTransactions:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ importChargesTransactions, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: EndStep
+          EndStep:
+            Type: Succeed
+      dependsOn: lambdaExecutionRole
+      tags:
+        Team: HousingFinance
     hfstepfunccurentbalance:
       name: HFCurrentBalanceStateMachine
       events:
-        - schedule: cron(30 1,7 * * ? *)
+        - schedule: cron(0 2 * * ? *)
       definition:
-        Comment: "Current balance process step function deployed via serverless. Run at 01:30 AM, 07:30 AM"
+        Comment: "Current balance process step function deployed via serverless. Run at 02:00 AM"
         StartAt: RefreshCurrentBalance
         States:          
           RefreshCurrentBalance:

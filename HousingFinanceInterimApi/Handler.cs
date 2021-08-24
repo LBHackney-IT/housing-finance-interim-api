@@ -36,6 +36,7 @@ namespace HousingFinanceInterimApi
     {
         private readonly IRefreshManageArrearsUseCase _refreshManageArrearsUseCase;
         private readonly IRefreshCurrentBalanceUseCase _refreshCurrentBalanceUseCase;
+        private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
         private readonly ICheckExistFileUseCase _checkExistFileUseCase;
         private readonly IImportCashFileUseCase _importCashFileUseCase;
         private readonly ILoadCashFileTransactionsUseCase _loadCashFileTransactionsUseCase;
@@ -43,6 +44,9 @@ namespace HousingFinanceInterimApi
         private readonly ILoadHousingFileTransactionsUseCase _loadHousingFileTransactionsUseCase;
         private readonly ILoadDirectDebitUseCase _loadDirectDebitUseCase;
         private readonly ILoadDirectDebitTransactionsUseCase _loadDirectDebitTransactionsUseCase;
+        private readonly ILoadChargesUseCase _loadChargesUseCase;
+        private readonly ILoadTenancyAgreementUseCase _loadTenancyAgreementUseCase;
+        private readonly ILoadChargesTransactionsUseCase _loadChargesTransactionsUseCase;
 
         private readonly string _cashFileLabel = "CashFile";
         private readonly string _housingBenefitFileLabel = "HousingBenefitFile";
@@ -62,7 +66,7 @@ namespace HousingFinanceInterimApi
             });
 
             IGoogleClientService googleClientService = new GoogleClientServiceFactory(default, options, context)
-                .CreateGoogleClientServiceFromJson(Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
+             .CreateGoogleClientServiceFromJson(Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
 
             IBatchLogErrorGateway batchLogErrorGateway = new BatchLogErrorGateway(context);
             IBatchLogGateway batchLogGateway = new BatchLogGateway(context);
@@ -77,6 +81,9 @@ namespace HousingFinanceInterimApi
             IUPHousingCashDumpGateway upHousingCashDumpGateway = new UPHousingCashDumpGateway(context);
             ICurrentBalanceGateway currentBalanceGateway = new CurrentBalanceGateway(context);
             IDirectDebitGateway directDebitGateway = new DirectDebitGateway(context);
+            IChargesGateway chargesGateway = new ChargesGateway(context);
+            ITenancyAgreementGateway tenancyAgreementGateway = new TenancyAgreementGateway(context);
+            IOperatingBalanceGateway operatingBalanceGateway = new OperatingBalanceGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _importCashFileUseCase = new ImportCashFileUseCase(batchLogGateway, batchLogErrorGateway,
@@ -93,6 +100,13 @@ namespace HousingFinanceInterimApi
                 directDebitGateway, googleFileSettingGateway, googleClientService);
             _loadDirectDebitTransactionsUseCase = new LoadDirectDebitTransactionsUseCase(batchLogGateway,
                 batchLogErrorGateway, directDebitGateway, transactionGateway);
+            _loadChargesUseCase = new LoadChargesUseCase(batchLogGateway, batchLogErrorGateway,
+                chargesGateway, googleFileSettingGateway, googleClientService);
+            _loadTenancyAgreementUseCase = new LoadTenancyAgreementUseCase(batchLogGateway, batchLogErrorGateway,
+                tenancyAgreementGateway, googleFileSettingGateway, googleClientService);
+            _loadChargesTransactionsUseCase = new LoadChargesTransactionsUseCase(batchLogGateway, batchLogErrorGateway,
+                chargesGateway, transactionGateway);
+            _refreshOperatingBalanceUseCase = new RefreshOperatingBalanceUseCase(operatingBalanceGateway);
         }
 
         public async Task<StepResponse> CheckCashFiles()
@@ -130,6 +144,11 @@ namespace HousingFinanceInterimApi
             return await _refreshCurrentBalanceUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
+        public async Task<StepResponse> RefreshOperatingBalance()
+        {
+            return await _refreshOperatingBalanceUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
         public async Task<StepResponse> RefreshManageArrears()
         {
             return await _refreshManageArrearsUseCase.ExecuteAsync().ConfigureAwait(false);
@@ -144,6 +163,20 @@ namespace HousingFinanceInterimApi
         {
             return await _loadDirectDebitTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
-    }
 
+        public async Task<StepResponse> LoadCharges()
+        {
+            return await _loadChargesUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadChargesTransactions()
+        {
+            return await _loadChargesTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadTenancyAgreement()
+        {
+            return await _loadTenancyAgreementUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+    }
 }

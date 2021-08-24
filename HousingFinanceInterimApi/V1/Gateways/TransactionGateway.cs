@@ -79,5 +79,19 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 throw;
             }
         }
+
+        public async Task LoadChargesTransactions()
+        {
+            try
+            {
+                await _context.LoadChargesTransactions().ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
+        }
     }
 }

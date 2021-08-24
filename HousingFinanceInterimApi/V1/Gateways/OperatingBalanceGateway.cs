@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HousingFinanceInterimApi.V1.Handlers;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -47,6 +48,20 @@ namespace HousingFinanceInterimApi.V1.Gateways
             results.Add(totalBalance);
 
             return results;
+        }
+
+        public async Task GenerateOperatingBalance()
+        {
+            try
+            {
+                await _context.GenerateOperatingBalance().ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
         }
 
     }
