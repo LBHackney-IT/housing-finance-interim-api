@@ -314,7 +314,7 @@ stepFunctions:
             Type: Wait
             TimestampPath: $.NextStepTime
             Next: ImportChargesTransactions
-          ImportDirectDebitTransactions:
+          ImportChargesTransactions:
             Type: Task
             Resource:
               Fn::GetAtt: [ importChargesTransactions, Arn ]
