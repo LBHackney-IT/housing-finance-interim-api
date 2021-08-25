@@ -35,6 +35,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<UPCashDumpFileName> UpCashDumpFileNames { get; set; }
         public DbSet<UPCashDump> UpCashDumps { get; set; }
         public DbSet<DirectDebitAux> DirectDebitsAux { get; set; }
+        public DbSet<ActionDiaryAux> ActionsDiaryAux { get; set; }
         public DbSet<UPHousingCashDumpFileName> UpHousingCashDumpFileNames { get; set; }
         public DbSet<UPHousingCashDump> UpHousingCashDumps { get; set; }
         public DbSet<TenancyAgreementAux> TenancyAgreementsAux { get; set; }
@@ -116,6 +117,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task LoadCharges()
             => await PerformTransaction($"usp_LoadCharges", 300).ConfigureAwait(false);
 
+        public async Task LoadActionDiary()
+            => await PerformTransaction($"usp_LoadActionDiary", 300).ConfigureAwait(false);
+
         public async Task RefreshTenancyAgreementTables()
             => await PerformTransaction($"usp_RefreshTenancyAgreement", 600).ConfigureAwait(false);
 
@@ -137,6 +141,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task TruncateTenancyAgreementAuxiliary()
         {
             var sql = "DELETE FROM TenancyAgreementAux";
+            await PerformTransaction(sql).ConfigureAwait(false);
+        }
+
+        public async Task TruncateActionDiaryAuxiliary()
+        {
+            var sql = "DELETE FROM ActionDiaryAux";
             await PerformTransaction(sql).ConfigureAwait(false);
         }
 
