@@ -324,6 +324,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             await PerformTransaction(sql).ConfigureAwait(false);
         }
 
+        public async Task CreateCashFileSuspenseAccountTransaction(long id, string newRentAccount)
+            => await PerformInterpolatedTransaction($"usp_UpdateCashFileSuspenseAccountResolved {id}, {newRentAccount}").ConfigureAwait(false);
+
+        public async Task CreateHousingFileSuspenseAccountTransaction(long id, string newRentAccount)
+            => await PerformInterpolatedTransaction($"usp_UpdateHousingCashFileSuspenseAccountResolved {id}, {newRentAccount}").ConfigureAwait(false);
+
         public async Task TruncateDirectDebitAuxiliary()
         {
             var sql = "DELETE FROM DirectDebitAux";
