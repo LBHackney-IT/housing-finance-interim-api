@@ -25,7 +25,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<IList<BatchLogResponse>> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"GETTING GOOGLE FILE SETTINGS FOR '{0}' LABEL");
+            LoggingHandler.LogInfo($"GETTING BATCH LOG ERROR");
 
             var batchLogs = await _batchLogGateway.ListLastMonthAsync().ConfigureAwait(false);
             var batchLogErrors = await _batchLogErrorGateway.ListLastMonthAsync().ConfigureAwait(false);
@@ -37,7 +37,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             batchLogs = batchLogs.Where(item => item.BatchLogErrors.Count > 0).ToList();
 
-            LoggingHandler.LogInfo($"{0} GOOGLE FILE SETTINGS FOUND");
+            LoggingHandler.LogInfo($"{batchLogs}");
 
             return batchLogs.ToResponse();
         }

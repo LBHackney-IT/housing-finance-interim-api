@@ -39,6 +39,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<UPHousingCashDumpFileName> UpHousingCashDumpFileNames { get; set; }
         public DbSet<UPHousingCashDump> UpHousingCashDumps { get; set; }
         public DbSet<TenancyAgreementAux> TenancyAgreementsAux { get; set; }
+        public DbSet<UPCashLoadSuspenseAccounts> UPCashLoadSuspenseAccounts { get; set; }
+        public DbSet<UPHousingCashLoadSuspenseAccounts> UPHousingCashLoadSuspenseAccounts { get; set; }
         private DbSet<TenancyTransaction> TenancyTransactionValue { get; set; }
         private DbSet<Transaction> TransactionsValue { get; set; }
         private DbSet<OperatingBalance> OperatingBalancesValue { get; set; }

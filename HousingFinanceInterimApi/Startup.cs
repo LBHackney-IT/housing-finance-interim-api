@@ -151,11 +151,13 @@ namespace HousingFinanceInterimApi
             services.AddScoped<ITransactionGateway, TransactionGateway>();
             services.AddScoped<IBatchLogGateway, BatchLogGateway>();
             services.AddScoped<IBatchLogErrorGateway, BatchLogErrorGateway>();
+            services.AddScoped<ISuspenseAccountGateway, SuspenseAccountGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
         {
             services.AddScoped<IGetBatchLogErrorUseCase, GetBatchLogErrorUseCase>();
+            services.AddScoped<IGetSuspenseAccountsUseCase, GetSuspenseAccountsUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -170,7 +172,7 @@ namespace HousingFinanceInterimApi
                 app.UseHsts();
             }
 
-            app.UseCors(options => options.WithOrigins("http://localhost:44335", "https://dmg8fqy2zxv7c.cloudfront.net", "https://eoy-report-development.hackney.gov.uk")
+            app.UseCors(options => options.WithOrigins("http://localhost:3000", "https://dmg8fqy2zxv7c.cloudfront.net", "https://eoy-report-development.hackney.gov.uk")
                 .AllowAnyMethod()
                 .AllowAnyHeader());
 
