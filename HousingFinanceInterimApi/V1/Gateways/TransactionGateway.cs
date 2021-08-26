@@ -93,5 +93,33 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 throw;
             }
         }
+
+        public async Task CreateCashFileSuspenseAccountTransaction(long id, string newRentAccount)
+        {
+            try
+            {
+                await _context.CreateCashFileSuspenseAccountTransaction(id, newRentAccount).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
+        }
+
+        public async Task CreateHousingFileSuspenseAccountTransaction(long id, string newRentAccount)
+        {
+            try
+            {
+                await _context.CreateHousingFileSuspenseAccountTransaction(id, newRentAccount).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
+        }
     }
 }

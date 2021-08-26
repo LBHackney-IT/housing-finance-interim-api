@@ -138,9 +138,9 @@ namespace HousingFinanceInterimApi
         {
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             services.AddDbContext<DatabaseContext>(opt => opt.UseSqlServer(connectionString, sqlOptions =>
-            {
-                sqlOptions.CommandTimeout(360);
-            }));
+             {
+                 sqlOptions.CommandTimeout(360);
+             }));
         }
 
         private static void RegisterGateways(IServiceCollection services)
@@ -158,6 +158,7 @@ namespace HousingFinanceInterimApi
         {
             services.AddScoped<IGetBatchLogErrorUseCase, GetBatchLogErrorUseCase>();
             services.AddScoped<IGetSuspenseAccountsUseCase, GetSuspenseAccountsUseCase>();
+            services.AddScoped<IUpdateSuspenseAccountsUseCase, UpdateSuspenseAccountsUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -177,7 +178,7 @@ namespace HousingFinanceInterimApi
             //    .AllowAnyHeader());
 
             app.UseCors(
-                options => options.AllowAnyMethod().AllowAnyHeader().AllowCredentials().AllowAnyOrigin()
+                options => options.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin()
             );
 
             // Get All ApiVersions,
