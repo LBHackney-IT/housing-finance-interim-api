@@ -13,6 +13,5 @@ namespace HousingFinanceInterimApi.V1.Domain
         public string Message { get; set; }
 
         public DateTimeOffset Timestamp { get; set; }
-
     }
 }

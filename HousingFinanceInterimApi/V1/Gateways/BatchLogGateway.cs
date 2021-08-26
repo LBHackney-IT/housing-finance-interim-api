@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -22,11 +24,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             try
             {
-                var newBatch = new BatchLog
-                {
-                    Type = type,
-                    IsSuccess = isSuccess
-                };
+                var newBatch = new BatchLog { Type = type, IsSuccess = isSuccess };
                 await _context.BatchLogs.AddAsync(newBatch).ConfigureAwait(false);
 
                 return await _context.SaveChangesAsync().ConfigureAwait(false) == 1
@@ -61,6 +59,13 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 LoggingHandler.LogError(e.StackTrace);
                 throw;
             }
+        }
+
+        public async Task<IList<BatchLogDomain>> ListLastMonthAsync()
+        {
+            var results = await _context.BatchLogs.Where(item => item.StartTime >= DateTimeOffset.Now.AddMonths(-1))
+                .ToListAsync().ConfigureAwait(false);
+            return results.ToDomain();
         }
     }
 }

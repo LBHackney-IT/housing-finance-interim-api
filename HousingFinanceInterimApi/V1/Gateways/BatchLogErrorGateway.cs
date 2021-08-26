@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +42,13 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 LoggingHandler.LogError(e.StackTrace);
                 throw;
             }
+        }
+
+        public async Task<IList<BatchLogErrorDomain>> ListLastMonthAsync()
+        {
+            var results = await _context.BatchLogErrors.Where(item => item.Timestamp >= DateTimeOffset.Now.AddMonths(-1))
+                .ToListAsync().ConfigureAwait(false);
+            return results.ToDomain();
         }
     }
 }

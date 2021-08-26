@@ -20,6 +20,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using AutoMapper;
+using HousingFinanceInterimApi.V1.UseCase;
+using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 
 namespace HousingFinanceInterimApi
 {
@@ -147,10 +149,13 @@ namespace HousingFinanceInterimApi
             services.AddScoped<IPaymentGateway, PaymentGateway>();
             services.AddScoped<ITenancyGateway, TenancyGateway>();
             services.AddScoped<ITransactionGateway, TransactionGateway>();
+            services.AddScoped<IBatchLogGateway, BatchLogGateway>();
+            services.AddScoped<IBatchLogErrorGateway, BatchLogErrorGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
         {
+            services.AddScoped<IGetBatchLogErrorUseCase, GetBatchLogErrorUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

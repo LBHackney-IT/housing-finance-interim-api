@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using HousingFinanceInterimApi.V1.Infrastructure;
 
 namespace HousingFinanceInterimApi.V1.Domain
 {
@@ -14,5 +16,6 @@ namespace HousingFinanceInterimApi.V1.Domain
 
         public bool IsSuccess { get; set; }
 
+        public IList<BatchLogErrorDomain> BatchLogErrors { get; set; }
     }
 }
