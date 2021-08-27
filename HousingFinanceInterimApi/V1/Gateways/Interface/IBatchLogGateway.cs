@@ -11,5 +11,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         public Task<bool> SetToSuccessAsync(long batchId);
 
         public Task<IList<BatchLogDomain>> ListLastMonthAsync();
+
+        public Task<BatchLogDomain> GetAsync(string type);
     }
 }

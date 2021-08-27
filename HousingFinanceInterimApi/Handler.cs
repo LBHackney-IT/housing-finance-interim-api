@@ -1,8 +1,6 @@
 using Amazon.Lambda.Core;
 using Google.Apis.Drive.v3;
-using Google.Apis.Drive.v3.Data;
 using Google.Apis.Sheets.v4;
-using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Gateways.Options;
@@ -13,20 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using AutoMapper;
-using Google.Apis.Logging;
 using HousingFinanceInterimApi.V1.Boundary.Response;
-using HousingFinanceInterimApi.V1.Handlers;
-using Mapster;
-using Microsoft.Extensions.Http.Logging;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
-using ILogger = Google.Apis.Logging.ILogger;
-using LogLevel = Google.Apis.Logging.LogLevel;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -49,8 +35,8 @@ namespace HousingFinanceInterimApi
         private readonly ILoadChargesTransactionsUseCase _loadChargesTransactionsUseCase;
         private readonly ILoadActionDiaryUseCase _loadActionDiaryUseCase;
 
-        private readonly string _cashFileLabel = "CashFile";
-        private readonly string _housingBenefitFileLabel = "HousingBenefitFile";
+        private const string CashFileLabel = "CashFile";
+        private const string HousingBenefitFileLabel = "HousingBenefitFile";
 
         public Handler()
         {
@@ -115,7 +101,7 @@ namespace HousingFinanceInterimApi
 
         public async Task<StepResponse> CheckCashFiles()
         {
-            return await _checkExistFileUseCase.ExecuteAsync(_cashFileLabel).ConfigureAwait(false);
+            return await _checkExistFileUseCase.ExecuteAsync(CashFileLabel).ConfigureAwait(false);
         }
 
         public async Task<StepResponse> ImportCashFile()
@@ -130,7 +116,7 @@ namespace HousingFinanceInterimApi
 
         public async Task<StepResponse> CheckHousingBenefitFiles()
         {
-            return await _checkExistFileUseCase.ExecuteAsync(_housingBenefitFileLabel).ConfigureAwait(false);
+            return await _checkExistFileUseCase.ExecuteAsync(HousingBenefitFileLabel).ConfigureAwait(false);
         }
 
         public async Task<StepResponse> ImportHousingBenefitFile()

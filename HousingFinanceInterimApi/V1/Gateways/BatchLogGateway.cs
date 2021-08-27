@@ -67,5 +67,16 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 .ToListAsync().ConfigureAwait(false);
             return results.ToDomain();
         }
+
+        public async Task<BatchLogDomain> GetAsync(string type)
+        {
+            var batchLog = await _context.BatchLogs.FirstOrDefaultAsync(item =>
+                    item.Type.Equals(type) &&
+                    item.StartTime.Date.Equals(DateTime.Now.Date) &&
+                    item.IsSuccess.Equals(true))
+                .ConfigureAwait(false);
+
+            return batchLog.ToDomain();
+        }
     }
 }

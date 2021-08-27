@@ -24,7 +24,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
 
-        private readonly string _chargesLabel = "Charges";
+        private const string ChargesLabel = "Charges";
 
         public LoadChargesUseCase(
             IBatchLogGateway batchLogGateway,
@@ -44,11 +44,18 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             LoggingHandler.LogInfo($"STARTING CHARGES IMPORT");
 
+            var existBatchToday = await _batchLogGateway.GetAsync(ChargesLabel).ConfigureAwait(false);
+            if (existBatchToday == null)
+            {
+                LoggingHandler.LogInfo($"EXISTS A DIRECT DEBIT LOAD PROCESS TODAY");
+                return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(0) };
+            }
+
             const string sheetName = "Active";
             const string sheetRange = "A:AZ";
 
-            var batch = await _batchLogGateway.CreateAsync(_chargesLabel).ConfigureAwait(false);
-            var googleFileSettings = await GetGoogleFileSetting(_chargesLabel).ConfigureAwait(false);
+            var batch = await _batchLogGateway.CreateAsync(ChargesLabel).ConfigureAwait(false);
+            var googleFileSettings = await GetGoogleFileSetting(ChargesLabel).ConfigureAwait(false);
 
             if (googleFileSettings == null)
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
@@ -104,7 +111,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         failure = true;
                         const string message = "FAILURE TO LOAD ALL ROWS";
                         LoggingHandler.LogError(message);
-                        await _batchLogErrorGateway.CreateAsync(batchId, _chargesLabel, message).ConfigureAwait(false);
+                        await _batchLogErrorGateway.CreateAsync(batchId, ChargesLabel, message).ConfigureAwait(false);
                         continue;
                     }
                     LoggingHandler.LogInfo($"FILE LINES CREATED {bulkResult.Count}");
@@ -121,7 +128,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(HandleSpreadSheet)}";
 
-                await _batchLogErrorGateway.CreateAsync(batchId, _chargesLabel, $"APPLICATION ERROR. NOT POSSIBLE TO LOAD CHARGES").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batchId, ChargesLabel, $"APPLICATION ERROR. NOT POSSIBLE TO LOAD CHARGES").ConfigureAwait(false);
 
                 LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
                 LoggingHandler.LogError(exc.ToString());

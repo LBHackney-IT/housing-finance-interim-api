@@ -24,7 +24,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
 
-        private readonly string _directDebitLabel = "DirectDebit";
+        private const string DirectDebitLabel = "DirectDebit";
 
         public LoadDirectDebitUseCase(
             IBatchLogGateway batchLogGateway,
@@ -44,14 +44,24 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             LoggingHandler.LogInfo($"STARTING DIRECT DEBIT IMPORT");
 
-            var batch = await _batchLogGateway.CreateAsync(_directDebitLabel).ConfigureAwait(false);
-            var googleFileSettings = await GetGoogleFileSetting(_directDebitLabel).ConfigureAwait(false);
+            var existBatchToday = await _batchLogGateway.GetAsync(DirectDebitLabel).ConfigureAwait(false);
+            if (existBatchToday == null)
+            {
+                LoggingHandler.LogInfo($"EXISTS A DIRECT DEBIT LOAD PROCESS TODAY");
+                return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(0) };
+            }
+
+            const string sheetName = "Active";
+            const string sheetRange = "A:C";
+
+            var batch = await _batchLogGateway.CreateAsync(DirectDebitLabel).ConfigureAwait(false);
+            var googleFileSettings = await GetGoogleFileSetting(DirectDebitLabel).ConfigureAwait(false);
 
             if (googleFileSettings == null)
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(0) };
 
             var directDebits = await _googleClientService
-                .ReadSheetToEntitiesAsync<DirectDebitAuxDomain>(googleFileSettings.GoogleIdentifier, "Active", "A:C")
+                .ReadSheetToEntitiesAsync<DirectDebitAuxDomain>(googleFileSettings.GoogleIdentifier, sheetName, sheetRange)
                 .ConfigureAwait(false);
 
             if (!directDebits.Any())
