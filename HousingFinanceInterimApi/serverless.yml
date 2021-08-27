@@ -128,7 +128,7 @@ functions:
     name: ${self:service}-${self:provider.stage}-action-diary
     description: "The scheduler to refresh operating balance table. Run at 03:00 AM"
     timeout: 900
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshOperatingBalance
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadActionDiary
     role: lambdaExecutionRole
     events:
         - schedule: cron(0 3 * * ? *)
