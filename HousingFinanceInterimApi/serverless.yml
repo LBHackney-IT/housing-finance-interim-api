@@ -278,11 +278,20 @@ stepFunctions:
                 IntervalSeconds: 30
                 MaxAttempts: 3
                 BackoffRate: 2
-            Next: Wait_1
+            Next: Wait_1         
           Wait_1:
-            Type: Wait
-            TimestampPath: $.NextStepTime
-            Next: ImportDirectDebitTransactions
+              Type: Wait
+              TimestampPath: $.NextStepTime
+              Next: Choice_1
+          Choice_1:
+            Type: Choice
+            Choices:
+              - Variable: $.Continue
+                BooleanEquals: true
+                Next: ImportDirectDebitTransactions
+              - Variable: $.Continue
+                BooleanEquals: false
+                Next: EndStep
           ImportDirectDebitTransactions:
             Type: Task
             Resource:
@@ -317,11 +326,20 @@ stepFunctions:
                 IntervalSeconds: 30
                 MaxAttempts: 3
                 BackoffRate: 2
-            Next: Wait_1
+            Next: Wait_1          
           Wait_1:
-            Type: Wait
-            TimestampPath: $.NextStepTime
-            Next: ImportChargesTransactions
+              Type: Wait
+              TimestampPath: $.NextStepTime
+              Next: Choice_1
+          Choice_1:
+            Type: Choice
+            Choices:
+              - Variable: $.Continue
+                BooleanEquals: true
+                Next: ImportChargesTransactions
+              - Variable: $.Continue
+                BooleanEquals: false
+                Next: EndStep
           ImportChargesTransactions:
             Type: Task
             Resource:
