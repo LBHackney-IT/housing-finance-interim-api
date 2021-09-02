@@ -4,9 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Handlers;
+using Microsoft.Data.SqlClient;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -81,12 +83,12 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     WON = c.WON ?? 0,
                 }).ToList();
 
-                _context.ChargesAux.AddRange(chargesAux);
-                bool success = await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
+                await _context.BulkInsertAsync(chargesAux, new BulkConfig { BatchSize = 250 }).ConfigureAwait(false);
 
-                return success
-                    ? chargesAux.ToDomain()
-                    : null;
+                //_context.ChargesAux.AddRange(chargesAux);
+                //bool success = await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
+
+                return chargesAux.ToDomain();
             }
             catch (Exception e)
             {

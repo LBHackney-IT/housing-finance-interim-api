@@ -90,39 +90,20 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             try
             {
+                LoggingHandler.LogInfo($"CLEAR AUX TABLE");
                 await _chargesGateway.ClearChargesAuxiliary().ConfigureAwait(false);
 
                 var skip = 0;
                 var failure = false;
                 List<ChargesAuxDomain> batchCharges;
 
-                do
-                {
-                    batchCharges = chargesAux.Skip(skip).Take(_batchSize).ToList();
-                    skip += _batchSize;
+                LoggingHandler.LogInfo($"STARTING BULK INSERT");
 
-                    if (!batchCharges.Any()) continue;
+                var bulkResult = await _chargesGateway.CreateBulkAsync(chargesAux)
+                    .ConfigureAwait(false);
 
-                    var bulkResult = await _chargesGateway.CreateBulkAsync(batchCharges)
-                        .ConfigureAwait(false);
-
-                    if (bulkResult == null)
-                    {
-                        failure = true;
-                        const string message = "FAILURE TO LOAD ALL ROWS";
-                        LoggingHandler.LogError(message);
-                        await _batchLogErrorGateway.CreateAsync(batchId, ChargesLabel, message).ConfigureAwait(false);
-                        continue;
-                    }
-                    LoggingHandler.LogInfo($"FILE LINES CREATED {bulkResult.Count}");
-                }
-                while (batchCharges.Any() && !failure);
-
-                if (!failure)
-                {
-                    await _chargesGateway.LoadCharges().ConfigureAwait(false);
-                    LoggingHandler.LogInfo("FILE SUCCESS");
-                }
+                await _chargesGateway.LoadCharges().ConfigureAwait(false);
+                LoggingHandler.LogInfo("FILE SUCCESS");
             }
             catch (Exception exc)
             {
