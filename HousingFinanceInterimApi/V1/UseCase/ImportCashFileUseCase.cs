@@ -22,7 +22,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IUPCashDumpFileNameGateway _upCashDumpFileNameGateway;
         private readonly IUPCashDumpGateway _upCashDumpGateway;
 
-        private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
         private readonly string _cashFileRegex = Environment.GetEnvironmentVariable("CASH_FILE_REGEX");
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
 
@@ -146,43 +145,12 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
                     LoggingHandler.LogInfo($"ROW COUNT: {fileLines.Count}");
 
-                    var skip = 0;
-                    var failure = false;
-                    var batch = new List<string>();
+                    LoggingHandler.LogInfo($"STARTING BULK INSERT");
+                    await _upCashDumpGateway.CreateBulkAsync(upCashDumpFileName.Id, fileLines).ConfigureAwait(false);
 
-                    do
-                    {
-                        batch = fileLines.Skip(skip).Take(_batchSize).ToList();
-                        skip += _batchSize;
-
-                        if (batch.Any())
-                        {
-                            var bulkResult = await _upCashDumpGateway.CreateBulkAsync(upCashDumpFileName.Id, batch)
-                                .ConfigureAwait(false);
-
-                            if (bulkResult == null)
-                            {
-                                failure = true;
-
-                                await LogAndRenameFileError(batchId,
-                                        $"FAILURE TO LOAD ALL ROWS (FILENAME: {upCashDumpFileName.FileName}, ID: {upCashDumpFileName.Id})",
-                                        "ERROR",
-                                        fileItem)
-                                    .ConfigureAwait(false);
-
-                                continue;
-                            }
-                            LoggingHandler.LogInfo($"FILE LINES CREATED {bulkResult.Count} FOR FILE {upCashDumpFileName.FileName} (ID: {upCashDumpFileName.Id})");
-                        }
-                    }
-                    while (batch.Any() && !failure);
-
-                    if (!failure)
-                    {
-                        LoggingHandler.LogInfo("FILE SUCCESS");
-                        await _googleClientService.RenameFileInDrive(fileItem.Id, $"OK_{fileItem.Name}").ConfigureAwait(false);
-                        await _upCashDumpFileNameGateway.SetToSuccessAsync(upCashDumpFileName.Id).ConfigureAwait(false);
-                    }
+                    LoggingHandler.LogInfo("FILE SUCCESS");
+                    await _googleClientService.RenameFileInDrive(fileItem.Id, $"OK_{fileItem.Name}").ConfigureAwait(false);
+                    await _upCashDumpFileNameGateway.SetToSuccessAsync(upCashDumpFileName.Id).ConfigureAwait(false);
                 }
                 catch (Exception exc)
                 {

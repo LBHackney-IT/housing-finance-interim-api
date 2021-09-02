@@ -15,15 +15,16 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
     public class ChargesGateway : IChargesGateway
     {
-
         private readonly DatabaseContext _context;
+
+        private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
 
         public ChargesGateway(DatabaseContext context)
         {
             _context = context;
         }
 
-        public async Task<List<ChargesAuxDomain>> CreateBulkAsync(IList<ChargesAuxDomain> chargesAuxDomain)
+        public async Task CreateBulkAsync(IList<ChargesAuxDomain> chargesAuxDomain)
         {
             try
             {
@@ -83,12 +84,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     WON = c.WON ?? 0,
                 }).ToList();
 
-                await _context.BulkInsertAsync(chargesAux, new BulkConfig { BatchSize = 250 }).ConfigureAwait(false);
-
-                //_context.ChargesAux.AddRange(chargesAux);
-                //bool success = await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
-
-                return chargesAux.ToDomain();
+                await _context.BulkInsertAsync(chargesAux, new BulkConfig { BatchSize = _batchSize }).ConfigureAwait(false);
             }
             catch (Exception e)
             {

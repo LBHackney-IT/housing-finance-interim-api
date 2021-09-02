@@ -4,6 +4,7 @@ using HousingFinanceInterimApi.V1.Infrastructure;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Handlers;
@@ -14,12 +15,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
     {
         private readonly DatabaseContext _context;
 
+        private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
+
         public UPCashDumpGateway(DatabaseContext context)
         {
             _context = context;
         }
 
-        public async Task<List<UPCashDumpDomain>> CreateBulkAsync(long fileId, IList<string> lines)
+        public async Task CreateBulkAsync(long fileId, IList<string> lines)
         {
             try
             {
@@ -29,12 +32,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     FullText = c
                 }).ToList();
 
-                _context.UpCashDumps.AddRange(listUpCashDump);
-                bool success = await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
-
-                return success
-                    ? listUpCashDump.ToDomain()
-                    : null;
+                await _context.BulkInsertAsync(listUpCashDump, new BulkConfig { BatchSize = _batchSize }).ConfigureAwait(false);
             }
             catch (Exception e)
             {

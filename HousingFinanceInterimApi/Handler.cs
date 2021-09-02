@@ -42,6 +42,7 @@ namespace HousingFinanceInterimApi
         {
             var optionsBuilder = new DbContextOptionsBuilder();
             optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
+
             var context = new DatabaseContext(optionsBuilder.Options);
             var options = Options.Create(new GoogleClientServiceOptions
             {

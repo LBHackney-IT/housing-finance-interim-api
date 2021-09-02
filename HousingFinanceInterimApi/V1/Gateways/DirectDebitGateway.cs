@@ -4,6 +4,7 @@ using HousingFinanceInterimApi.V1.Infrastructure;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Handlers;
@@ -14,28 +15,25 @@ namespace HousingFinanceInterimApi.V1.Gateways
     {
         private readonly DatabaseContext _context;
 
+        private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
+
         public DirectDebitGateway(DatabaseContext context)
         {
             _context = context;
         }
 
-        public async Task<List<DirectDebitAuxDomain>> CreateBulkAsync(IList<DirectDebitAuxDomain> directDebitsDomain)
+        public async Task CreateBulkAsync(IList<DirectDebitAuxDomain> directDebitsDomain)
         {
             try
             {
-                var directDebits = directDebitsDomain.Select(dd => new DirectDebitAux
+                var directDebitsAux = directDebitsDomain.Select(dd => new DirectDebitAux
                 {
                     RentAccount = dd.RentAccount,
                     DueDay = dd.DueDay,
                     Amount = dd.Amount
                 }).ToList();
 
-                _context.DirectDebitsAux.AddRange(directDebits);
-                bool success = await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
-
-                return success
-                    ? directDebits.ToDomain()
-                    : null;
+                await _context.BulkInsertAsync(directDebitsAux, new BulkConfig { BatchSize = _batchSize }).ConfigureAwait(false);
             }
             catch (Exception e)
             {

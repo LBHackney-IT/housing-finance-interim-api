@@ -21,7 +21,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IGoogleFileSettingGateway _googleFileSettingGateway;
         private readonly IGoogleClientService _googleClientService;
 
-        private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
 
         private const string DirectDebitLabel = "DirectDebit";
@@ -74,7 +73,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
             LoggingHandler.LogInfo($"END DIRECT DEBIT IMPORT");
-            return new StepResponse() { Continue = true, NextStepTime = DateTime.Now.AddSeconds(0) };
+            return new StepResponse() { Continue = true, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
         }
 
         private async Task<GoogleFileSettingDomain> GetGoogleFileSetting(string label)
@@ -90,39 +89,16 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             try
             {
+                LoggingHandler.LogInfo($"CLEAR AUX TABLE");
                 await _directDebitGateway.ClearDirectDebitAuxiliary().ConfigureAwait(false);
 
-                var skip = 0;
-                var failure = false;
-                List<DirectDebitAuxDomain> batchDirectDebit;
+                LoggingHandler.LogInfo($"STARTING BULK INSERT");
+                await _directDebitGateway.CreateBulkAsync(directDebits).ConfigureAwait(false);
 
-                do
-                {
-                    batchDirectDebit = directDebits.Skip(skip).Take(_batchSize).ToList();
-                    skip += _batchSize;
+                LoggingHandler.LogInfo($"STARTING MERGE DIRECT DEBIT");
+                await _directDebitGateway.LoadDirectDebit(batchId).ConfigureAwait(false);
 
-                    if (!batchDirectDebit.Any()) continue;
-
-                    var bulkResult = await _directDebitGateway.CreateBulkAsync(batchDirectDebit)
-                        .ConfigureAwait(false);
-
-                    if (bulkResult == null)
-                    {
-                        failure = true;
-                        const string message = "FAILURE TO LOAD ALL ROWS";
-                        LoggingHandler.LogError(message);
-                        await _batchLogErrorGateway.CreateAsync(batchId, "ERROR", message).ConfigureAwait(false);
-                        continue;
-                    }
-                    LoggingHandler.LogInfo($"FILE LINES CREATED {bulkResult.Count}");
-                }
-                while (batchDirectDebit.Any() && !failure);
-
-                if (!failure)
-                {
-                    await _directDebitGateway.LoadDirectDebit(batchId).ConfigureAwait(false);
-                    LoggingHandler.LogInfo("FILE SUCCESS");
-                }
+                LoggingHandler.LogInfo("FILE SUCCESS");
             }
             catch (Exception exc)
             {

@@ -114,7 +114,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public decimal WON { get; set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTimeOffset TimeStamp { get; set; }
     }
 }

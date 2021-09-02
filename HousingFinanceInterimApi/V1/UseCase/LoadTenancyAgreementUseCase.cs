@@ -21,7 +21,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IGoogleFileSettingGateway _googleFileSettingGateway;
         private readonly IGoogleClientService _googleClientService;
 
-        private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
 
         private readonly string _tenancyAgreementLabel = "TenancyAgreement";
@@ -83,39 +82,16 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             try
             {
+                LoggingHandler.LogInfo($"CLEAR AUX TABLE");
                 await _tenancyAgreementGateway.ClearTenancyAgreementAuxiliary().ConfigureAwait(false);
 
-                var skip = 0;
-                var failure = false;
-                List<TenancyAgreementAuxDomain> batchTenancyAgreement;
+                LoggingHandler.LogInfo($"STARTING BULK INSERT");
+                await _tenancyAgreementGateway.CreateBulkAsync(tenancyAgreementAux).ConfigureAwait(false);
 
-                do
-                {
-                    batchTenancyAgreement = tenancyAgreementAux.Skip(skip).Take(_batchSize).ToList();
-                    skip += _batchSize;
+                LoggingHandler.LogInfo($"STARTING MERGE TENANCY AGREEMENTS");
+                await _tenancyAgreementGateway.RefreshTenancyAgreement().ConfigureAwait(false);
 
-                    if (!batchTenancyAgreement.Any()) continue;
-
-                    var bulkResult = await _tenancyAgreementGateway.CreateBulkAsync(batchTenancyAgreement)
-                        .ConfigureAwait(false);
-
-                    if (bulkResult == null)
-                    {
-                        failure = true;
-                        const string message = "FAILURE TO LOAD ALL ROWS";
-                        LoggingHandler.LogError(message);
-                        await _batchLogErrorGateway.CreateAsync(batchId, _tenancyAgreementLabel, message).ConfigureAwait(false);
-                        continue;
-                    }
-                    LoggingHandler.LogInfo($"FILE LINES CREATED {bulkResult.Count}");
-                }
-                while (batchTenancyAgreement.Any() && !failure);
-
-                if (!failure)
-                {
-                    await _tenancyAgreementGateway.RefreshTenancyAgreement().ConfigureAwait(false);
-                    LoggingHandler.LogInfo("FILE SUCCESS");
-                }
+                LoggingHandler.LogInfo("FILE SUCCESS");
             }
             catch (Exception exc)
             {

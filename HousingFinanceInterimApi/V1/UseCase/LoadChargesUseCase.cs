@@ -21,7 +21,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IGoogleFileSettingGateway _googleFileSettingGateway;
         private readonly IGoogleClientService _googleClientService;
 
-        private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
 
         private const string ChargesLabel = "Charges";
@@ -93,16 +92,12 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 LoggingHandler.LogInfo($"CLEAR AUX TABLE");
                 await _chargesGateway.ClearChargesAuxiliary().ConfigureAwait(false);
 
-                var skip = 0;
-                var failure = false;
-                List<ChargesAuxDomain> batchCharges;
-
                 LoggingHandler.LogInfo($"STARTING BULK INSERT");
+                await _chargesGateway.CreateBulkAsync(chargesAux).ConfigureAwait(false);
 
-                var bulkResult = await _chargesGateway.CreateBulkAsync(chargesAux)
-                    .ConfigureAwait(false);
-
+                LoggingHandler.LogInfo($"STARTING MERGE CHARGES");
                 await _chargesGateway.LoadCharges().ConfigureAwait(false);
+
                 LoggingHandler.LogInfo("FILE SUCCESS");
             }
             catch (Exception exc)

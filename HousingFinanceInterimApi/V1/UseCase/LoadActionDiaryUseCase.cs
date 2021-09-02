@@ -21,7 +21,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IGoogleFileSettingGateway _googleFileSettingGateway;
         private readonly IGoogleClientService _googleClientService;
 
-        private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
 
         private readonly string _actionDiaryLabel = "ActionDiary";
@@ -83,39 +82,16 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             try
             {
+                LoggingHandler.LogInfo($"CLEAR AUX TABLE");
                 await _actionDiaryGateway.ClearActionDiaryAuxiliary().ConfigureAwait(false);
 
-                var skip = 0;
-                var failure = false;
-                List<ActionDiaryAuxDomain> batchActionDiary;
+                LoggingHandler.LogInfo($"STARTING BULK INSERT");
+                await _actionDiaryGateway.CreateBulkAsync(actionDiaryAux).ConfigureAwait(false);
 
-                do
-                {
-                    batchActionDiary = actionDiaryAux.Skip(skip).Take(_batchSize).ToList();
-                    skip += _batchSize;
+                LoggingHandler.LogInfo($"STARTING MERGE ACTION DIARY");
+                await _actionDiaryGateway.LoadActionDiary().ConfigureAwait(false);
 
-                    if (!batchActionDiary.Any()) continue;
-
-                    var bulkResult = await _actionDiaryGateway.CreateBulkAsync(batchActionDiary)
-                        .ConfigureAwait(false);
-
-                    if (bulkResult == null)
-                    {
-                        failure = true;
-                        const string message = "FAILURE TO LOAD ALL ROWS";
-                        LoggingHandler.LogError(message);
-                        await _batchLogErrorGateway.CreateAsync(batchId, _actionDiaryLabel, message).ConfigureAwait(false);
-                        continue;
-                    }
-                    LoggingHandler.LogInfo($"FILE LINES CREATED {bulkResult.Count}");
-                }
-                while (batchActionDiary.Any() && !failure);
-
-                if (!failure)
-                {
-                    await _actionDiaryGateway.LoadActionDiary().ConfigureAwait(false);
-                    LoggingHandler.LogInfo("FILE SUCCESS");
-                }
+                LoggingHandler.LogInfo("FILE SUCCESS");
             }
             catch (Exception exc)
             {

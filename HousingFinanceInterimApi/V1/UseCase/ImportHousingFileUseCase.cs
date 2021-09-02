@@ -22,7 +22,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IUPHousingCashDumpFileNameGateway _upHousingCashDumpFileNameGateway;
         private readonly IUPHousingCashDumpGateway _upHousingCashDumpGateway;
 
-        private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
         private readonly string _housingBenefitFileRegex = Environment.GetEnvironmentVariable("HOUSING_FILE_REGEX");
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
 
@@ -146,43 +145,14 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
                     LoggingHandler.LogInfo($"ROW COUNT: {fileLines.Count}");
 
-                    var skip = 0;
-                    var failure = false;
-                    var batch = new List<string>();
+                    LoggingHandler.LogInfo($"STARTING BULK INSERT");
+                    await _upHousingCashDumpGateway.CreateBulkAsync(upHousingashDumpFileName.Id, fileLines).ConfigureAwait(false);
 
-                    do
-                    {
-                        batch = fileLines.Skip(skip).Take(_batchSize).ToList();
-                        skip += _batchSize;
+                    LoggingHandler.LogInfo("FILE SUCCESS");
 
-                        if (batch.Any())
-                        {
-                            var bulkResult = await _upHousingCashDumpGateway.CreateBulkAsync(upHousingashDumpFileName.Id, batch)
-                                .ConfigureAwait(false);
+                    await _googleClientService.RenameFileInDrive(fileItem.Id, $"OK_{fileItem.Name}").ConfigureAwait(false);
+                    await _upHousingCashDumpFileNameGateway.SetToSuccessAsync(upHousingashDumpFileName.Id).ConfigureAwait(false);
 
-                            if (bulkResult == null)
-                            {
-                                failure = true;
-
-                                await LogAndRenameFileError(batchId,
-                                        $"FAILURE TO LOAD ALL ROWS (FILENAME: {upHousingashDumpFileName.FileName}, ID: {upHousingashDumpFileName.Id})",
-                                        "ERROR",
-                                        fileItem)
-                                    .ConfigureAwait(false);
-
-                                continue;
-                            }
-                            LoggingHandler.LogInfo($"FILE LINES CREATED {bulkResult.Count} FOR FILE {upHousingashDumpFileName.FileName} (ID: {upHousingashDumpFileName.Id})");
-                        }
-                    }
-                    while (batch.Any() && !failure);
-
-                    if (!failure)
-                    {
-                        LoggingHandler.LogInfo("FILE SUCCESS");
-                        await _googleClientService.RenameFileInDrive(fileItem.Id, $"OK_{fileItem.Name}").ConfigureAwait(false);
-                        await _upHousingCashDumpFileNameGateway.SetToSuccessAsync(upHousingashDumpFileName.Id).ConfigureAwait(false);
-                    }
                 }
                 catch (Exception exc)
                 {

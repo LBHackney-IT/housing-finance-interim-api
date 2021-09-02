@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Handlers;
@@ -13,15 +14,16 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
     public class TenancyAgreementGateway : ITenancyAgreementGateway
     {
-
         private readonly DatabaseContext _context;
+
+        private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
 
         public TenancyAgreementGateway(DatabaseContext context)
         {
             _context = context;
         }
 
-        public async Task<List<TenancyAgreementAuxDomain>> CreateBulkAsync(
+        public async Task CreateBulkAsync(
             IList<TenancyAgreementAuxDomain> tenancyAgreementAuxDomain)
         {
             try
@@ -50,12 +52,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     ContactPhone = t.ContactPhone
                 }).ToList();
 
-                _context.TenancyAgreementsAux.AddRange(tenancyAgreementAux);
-                bool success = await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
-
-                return success
-                    ? tenancyAgreementAux.ToDomain()
-                    : null;
+                await _context.BulkInsertAsync(tenancyAgreementAux, new BulkConfig { BatchSize = _batchSize }).ConfigureAwait(false);
             }
             catch (Exception e)
             {

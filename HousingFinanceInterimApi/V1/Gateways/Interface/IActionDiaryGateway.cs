@@ -7,12 +7,10 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
 {
     public interface IActionDiaryGateway
     {
-        public Task<List<ActionDiaryAuxDomain>> CreateBulkAsync(IList<ActionDiaryAuxDomain> actionsDiaryDomain);
+        public Task CreateBulkAsync(IList<ActionDiaryAuxDomain> actionsDiaryDomain);
 
         public Task ClearActionDiaryAuxiliary();
 
         public Task LoadActionDiary();
-
-        //public Task LoadActionDiaryHistory(DateTime? processingDate);
     }
 }

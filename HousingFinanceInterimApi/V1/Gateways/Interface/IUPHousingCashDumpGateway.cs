@@ -19,7 +19,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// <returns>
         /// The list of UP housing cash dumps.
         /// </returns>
-        public Task<IList<UPHousingCashDumpDomain>> CreateBulkAsync(long fileId, IList<string> lines);
+        public Task CreateBulkAsync(long fileId, IList<string> lines);
 
     }
 
