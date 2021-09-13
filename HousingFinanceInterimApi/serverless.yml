@@ -118,6 +118,12 @@ functions:
     timeout: 600
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadCharges
     role: lambdaExecutionRole
+  importChargesOnDemand:
+    name: ${self:service}-${self:provider.stage}-charges-deman
+    description: "The scheduler to import charges from Google Spreadshet."
+    timeout: 600
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadChargesOnDemand
+    role: lambdaExecutionRole
   importChargesTransactions:
     name: ${self:service}-${self:provider.stage}-charges-trans
     description: "The scheduler to import charges transactions from Charges table."
