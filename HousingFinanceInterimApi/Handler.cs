@@ -168,9 +168,9 @@ namespace HousingFinanceInterimApi
             return await _loadChargesTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
-        public async Task<OnDemandRequest> LoadChargesOnDemand(OnDemandRequest input, ILambdaContext context)
+        public async Task<StepResponse> LoadChargesTransactionsOnDemand(OnDemandRequest input, ILambdaContext context)
         {
-            return input;
+            return await _loadChargesTransactionsUseCase.ExecuteOnDemandAsync(input.StartDate, input.EndDate).ConfigureAwait(false);
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()

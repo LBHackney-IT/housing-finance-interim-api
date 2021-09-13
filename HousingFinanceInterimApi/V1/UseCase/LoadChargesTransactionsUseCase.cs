@@ -59,7 +59,49 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
 
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"APPLICATION ERROR. NOT POSSIBLE TO LOAD CHARGES TRANSACTIONS").ConfigureAwait(false);
+                await _batchLogErrorGateway
+                    .CreateAsync(batch.Id, "ERROR", $"APPLICATION ERROR. NOT POSSIBLE TO LOAD CHARGES TRANSACTIONS")
+                    .ConfigureAwait(false);
+
+                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError(exc.ToString());
+
+                throw;
+            }
+        }
+
+        public async Task<StepResponse> ExecuteOnDemandAsync(DateTime startDate, DateTime endDate)
+        {
+            LoggingHandler.LogInfo($"STARTING CHARGES TRANSACTIONS ON DEMAND IMPORT");
+            var batch = await _batchLogGateway.CreateAsync(_label).ConfigureAwait(false);
+            try
+            {
+                LoggingHandler.LogInfo($"LOAD ChargesHistory TABLE");
+
+                while (startDate <= endDate)
+                {
+                    await _chargesGateway.LoadChargesHistory(startDate).ConfigureAwait(false);
+                    startDate = startDate.Date.AddDays(1);
+                }
+
+                LoggingHandler.LogInfo($"CONVERT ChargesHistory IN TRANSACTIONS");
+                await _transactionGateway.LoadChargesTransactions().ConfigureAwait(false);
+
+                await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
+                LoggingHandler.LogInfo($"END CASH FILE TRANSACTIONS ON DEMAND IMPORT");
+                return new StepResponse()
+                {
+                    Continue = true,
+                    NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration))
+                };
+            }
+            catch (Exception exc)
+            {
+                var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
+
+                await _batchLogErrorGateway
+                    .CreateAsync(batch.Id, "ERROR", $"APPLICATION ERROR. NOT POSSIBLE TO LOAD CHARGES TRANSACTIONS ON DEMAND")
+                    .ConfigureAwait(false);
 
                 LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
                 LoggingHandler.LogError(exc.ToString());
