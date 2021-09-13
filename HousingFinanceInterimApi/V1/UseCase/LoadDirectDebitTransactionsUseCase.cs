@@ -67,5 +67,45 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 throw;
             }
         }
+
+        public async Task<StepResponse> ExecuteOnDemandAsync(DateTime startDate, DateTime endDate)
+        {
+            LoggingHandler.LogInfo($"STARTING DIRECT DEBIT TRANSACTIONS ON DEMAND IMPORT");
+            var batch = await _batchLogGateway.CreateAsync(_label).ConfigureAwait(false);
+            try
+            {
+
+
+                while (startDate <= endDate)
+                {
+                    LoggingHandler.LogInfo($"LOAD DirectDebitHistory TABLE");
+                    await _directDebitGateway.LoadDirectDebitHistory(startDate).ConfigureAwait(false);
+
+                    LoggingHandler.LogInfo($"CONVERT DirectDebitHistory IN TRANSACTIONS");
+                    await _transactionGateway.LoadDirectDebitTransactions().ConfigureAwait(false);
+
+                    startDate = startDate.Date.AddDays(1);
+                }
+
+                await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
+                LoggingHandler.LogInfo($"END DIRECT DEBIT TRANSACTIONS ON DEMAND IMPORT");
+                return new StepResponse()
+                {
+                    Continue = true,
+                    NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration))
+                };
+            }
+            catch (Exception exc)
+            {
+                var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
+
+                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"APPLICATION ERROR. NOT POSSIBLE TO LOAD DIRECT DEBIT TRANSACTIONS ON DEMAND").ConfigureAwait(false);
+
+                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError(exc.ToString());
+
+                throw;
+            }
+        }
     }
 }

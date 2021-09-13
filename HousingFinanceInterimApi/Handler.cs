@@ -158,6 +158,11 @@ namespace HousingFinanceInterimApi
             return await _loadDirectDebitTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
+        public async Task<StepResponse> LoadDirectDebitTransactionsOnDemand(OnDemandRequest input, ILambdaContext context)
+        {
+            return await _loadDirectDebitTransactionsUseCase.ExecuteOnDemandAsync(input.StartDate, input.EndDate).ConfigureAwait(false);
+        }
+
         public async Task<StepResponse> LoadCharges()
         {
             return await _loadChargesUseCase.ExecuteAsync().ConfigureAwait(false);

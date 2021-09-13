@@ -76,16 +76,16 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var batch = await _batchLogGateway.CreateAsync(_label).ConfigureAwait(false);
             try
             {
-                LoggingHandler.LogInfo($"LOAD ChargesHistory TABLE");
-
                 while (startDate <= endDate)
                 {
+                    LoggingHandler.LogInfo($"LOAD ChargesHistory TABLE");
                     await _chargesGateway.LoadChargesHistory(startDate).ConfigureAwait(false);
+
+                    LoggingHandler.LogInfo($"CONVERT ChargesHistory IN TRANSACTIONS");
+                    await _transactionGateway.LoadChargesTransactions().ConfigureAwait(false);
+
                     startDate = startDate.Date.AddDays(1);
                 }
-
-                LoggingHandler.LogInfo($"CONVERT ChargesHistory IN TRANSACTIONS");
-                await _transactionGateway.LoadChargesTransactions().ConfigureAwait(false);
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
                 LoggingHandler.LogInfo($"END CASH FILE TRANSACTIONS ON DEMAND IMPORT");

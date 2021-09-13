@@ -8,6 +8,8 @@ namespace HousingFinanceInterimApi.V1.UseCase.Interfaces
     public interface ILoadDirectDebitTransactionsUseCase
     {
         public Task<StepResponse> ExecuteAsync(DateTime? retroactiveDate = null);
+
+        public Task<StepResponse> ExecuteOnDemandAsync(DateTime startDate, DateTime endDate);
     }
 
 }

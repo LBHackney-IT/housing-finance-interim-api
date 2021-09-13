@@ -112,6 +112,12 @@ functions:
     timeout: 600
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadDirectDebitTransactions
     role: lambdaExecutionRole
+  importDirectDebitTransactionsOnDemand:
+    name: ${self:service}-${self:provider.stage}-direct-debit-trans-dem
+    description: "The scheduler to import direct debit transactions on demand from Google Spreadshet."
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadDirectDebitTransactionsOnDemand
+    role: lambdaExecutionRole
   importCharges:
     name: ${self:service}-${self:provider.stage}-charges
     description: "The scheduler to import charges from Google Spreadshet."
@@ -126,8 +132,8 @@ functions:
     role: lambdaExecutionRole
   importChargesTransactionsOnDemand:
     name: ${self:service}-${self:provider.stage}-charges-trans-dem
-    description: "The scheduler to import charges from Google Spreadshet."
-    timeout: 600
+    description: "The scheduler to import charges transactions on demand from Google Spreadshet."
+    timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadChargesTransactionsOnDemand
     role: lambdaExecutionRole
   loadActionDiary:
