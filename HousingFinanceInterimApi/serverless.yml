@@ -96,7 +96,7 @@ functions:
     events:
         - schedule: cron(0 4 * * ? *)    
   refreshManageArrearsTables:
-    name: ${self:service}-${self:provider.stage}-refresh-ma-cur_bal
+    name: ${self:service}-${self:provider.stage}-refresh-ma-cur-bal
     description: "The scheduler to refresh manager arrears balance based on current balance table."
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshManageArrears
     role: lambdaExecutionRole
@@ -117,18 +117,18 @@ functions:
     description: "The scheduler to import charges from Google Spreadshet."
     timeout: 600
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadCharges
-    role: lambdaExecutionRole
-  importChargesOnDemand:
-    name: ${self:service}-${self:provider.stage}-charges-deman
-    description: "The scheduler to import charges from Google Spreadshet."
-    timeout: 600
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadChargesOnDemand
-    role: lambdaExecutionRole
+    role: lambdaExecutionRole  
   importChargesTransactions:
     name: ${self:service}-${self:provider.stage}-charges-trans
     description: "The scheduler to import charges transactions from Charges table."
     timeout: 600
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadChargesTransactions
+    role: lambdaExecutionRole
+  importChargesTransactionsOnDemand:
+    name: ${self:service}-${self:provider.stage}-charges-trans-dem
+    description: "The scheduler to import charges from Google Spreadshet."
+    timeout: 600
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadChargesTransactionsOnDemand
     role: lambdaExecutionRole
   loadActionDiary:
     name: ${self:service}-${self:provider.stage}-action-diary
