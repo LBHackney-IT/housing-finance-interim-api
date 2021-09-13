@@ -168,10 +168,9 @@ namespace HousingFinanceInterimApi
             return await _loadChargesTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
-        public async Task<OnDemandRequest> LoadChargesOnDemand(APIGatewayProxyRequest request, ILambdaContext context)
+        public async Task<OnDemandRequest> LoadChargesOnDemand(OnDemandRequest input, ILambdaContext context)
         {
-            var requestBody = JsonConvert.DeserializeObject<OnDemandRequest>(request.Body);
-            return requestBody;
+            return input;
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()
