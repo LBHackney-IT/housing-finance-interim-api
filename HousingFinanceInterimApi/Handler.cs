@@ -12,7 +12,10 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Amazon.Lambda.APIGatewayEvents;
+using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Boundary.Response;
+using Newtonsoft.Json;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -163,6 +166,12 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> LoadChargesTransactions()
         {
             return await _loadChargesTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<OnDemandRequest> LoadChargesOnDemand(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            var requestBody = JsonConvert.DeserializeObject<OnDemandRequest>(request.Body);
+            return requestBody;
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()
