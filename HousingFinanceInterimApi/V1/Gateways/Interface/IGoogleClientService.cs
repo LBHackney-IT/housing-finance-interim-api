@@ -41,6 +41,10 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
 
         public Task<bool> RenameFileInDrive(string fileId, string newName);
 
+        public Task<bool> UploadCsvFile(List<string[]> table, string fileName, string folderId);
+
+        public Task DeleteFileInDrive(string fileId);
+
     }
 
 }

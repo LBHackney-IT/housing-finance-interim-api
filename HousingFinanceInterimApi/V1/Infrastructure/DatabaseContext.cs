@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 using Microsoft.EntityFrameworkCore.SqlServer;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
@@ -35,7 +37,6 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public DatabaseContext(DbContextOptions options)
             : base(options) { }
-
         public DbSet<GoogleFileSetting> GoogleFileSettings { get; set; }
         public DbSet<BatchLog> BatchLogs { get; set; }
         public DbSet<BatchLogError> BatchLogErrors { get; set; }
@@ -90,6 +91,39 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
                 .FromSqlInterpolated($"usp_GetTenancyTransactionsByDate {tenancyAgreementRef}, {rentAccount}, {householdRef}, {startDate}, {endDate}")
                 .ToListAsync()
                 .ConfigureAwait(false);
+
+        public async Task<List<string[]>> GetRentPosition()
+        {
+            var results = new List<string[]>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetRentPosition", dbConnection);
+            command.CommandTimeout = 300;
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    var result = new string[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        result[i] = reader[i].ToString();
+                    }
+
+                    results.Add(result);
+                }
+            }
+            dbConnection.Close();
+
+            return results;
+        }
 
         public async Task LoadCashFiles()
             => await PerformTransaction("usp_LoadCashFile", 600).ConfigureAwait(false);

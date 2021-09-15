@@ -13,6 +13,7 @@ using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Google.Apis.Upload;
 using HousingFinanceInterimApi.V1.Handlers;
 using File = Google.Apis.Drive.v3.Data.File;
 using Data = Google.Apis.Sheets.v4.Data;
@@ -186,6 +187,65 @@ namespace HousingFinanceInterimApi.V1.Gateways
             return renamedFile.Name == newName;
         }
 
+        public async Task DeleteFileInDrive(string fileId)
+        {
+            var deleteRequest = _driveService.Files.Delete(fileId);
+            var deletedFile = await deleteRequest.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<bool> UploadCsvFile(List<string[]> table, string fileName, string folderId)
+        {
+            IUploadProgress createdFile = null;
+            try
+            {
+                LoggingHandler.LogInfo($"UPLOADING CSV FILE");
+
+                var path = "/tmp/tempfiles";
+                var outputPath = $"{path}/{fileName}";
+
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                if (System.IO.File.Exists(outputPath))
+                    System.IO.File.Delete(outputPath);
+
+                using (var w = new StreamWriter(outputPath))
+                {
+                    foreach (var row in table)
+                    {
+                        var newRow = string.Join(";", row);
+                        await w.WriteLineAsync(newRow).ConfigureAwait(false);
+                        await w.FlushAsync().ConfigureAwait(false);
+                    }
+                }
+
+                File newFile = new File()
+                {
+                    Name = fileName,
+                    MimeType = "text/csv",
+                    Parents = new List<string> { folderId }
+                };
+
+                using (var stream = new System.IO.FileStream(outputPath, FileMode.Open))
+                {
+                    var createRequest = _driveService.Files.Create(newFile, stream, "text/csv");
+                    createdFile = await createRequest.UploadAsync().ConfigureAwait(false);
+                }
+
+                LoggingHandler.LogInfo($"UPLOAD PROGRESS: { createdFile }");
+
+                return createdFile.Status == UploadStatus.Completed;
+            }
+            catch (Exception exc)
+            {
+                LoggingHandler.LogError($"ERROR UPLOADING CSV FILE");
+                LoggingHandler.LogError($"UPLOAD PROGRESS: { createdFile }");
+                LoggingHandler.LogError(exc.ToString());
+
+                throw;
+            }
+        }
+
         #endregion
 
         #region Google Sheets
@@ -254,34 +314,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
                 throw;
             }
-        }
-
-        public async Task UpdateSheet(string spreadSheetId, string sheetName, string sheetRange)
-        {
-            // How the input data should be interpreted.
-            SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum valueInputOption =
-                (SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum) 1;  // TODO: Update placeholder value.
-
-            // TODO: Assign values to desired properties of `requestBody`. All existing
-            // properties will be replaced:
-            Data.ValueRange requestBody = new Data.ValueRange();
-            var oblist = new List<object>() { "DD" };
-            requestBody.Values = new List<IList<object>> { oblist };
-
-            SpreadsheetsResource.ValuesResource.UpdateRequest request = _sheetsService.Spreadsheets.Values.Update(requestBody, spreadSheetId, $"{sheetName}!{sheetRange}");
-            request.ValueInputOption = valueInputOption;
-
-            Data.UpdateValuesResponse response = await request.ExecuteAsync().ConfigureAwait(false);
-        }
-
-        public async Task ClearSheet(string spreadSheetId, string sheetName, string sheetRange)
-        {
-            Data.ClearValuesRequest requestBody = new Data.ClearValuesRequest();
-
-            SpreadsheetsResource.ValuesResource.ClearRequest request = _sheetsService.Spreadsheets.Values.Clear(requestBody, spreadSheetId, $"{sheetName}!{sheetRange}");
-
-            // To execute asynchronously in an async method, replace `request.Execute()` as shown:
-            Data.ClearValuesResponse response = await request.ExecuteAsync().ConfigureAwait(false);
         }
 
         #endregion

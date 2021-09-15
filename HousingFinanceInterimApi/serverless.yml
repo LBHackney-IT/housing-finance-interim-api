@@ -144,6 +144,14 @@ functions:
     role: lambdaExecutionRole
     events:
         - schedule: cron(0 3 * * ? *)
+  generateRentPosition:
+    name: ${self:service}-${self:provider.stage}-rent-position
+    description: "The scheduler to generate rent position csv file. Run at 05:00 AM"
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::GenerateRentPosition
+    role: lambdaExecutionRole
+    events:
+        - schedule: cron(0 5 * * ? *)
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:
