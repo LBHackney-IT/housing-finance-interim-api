@@ -89,7 +89,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 await _tenancyAgreementGateway.CreateBulkAsync(tenancyAgreementAux).ConfigureAwait(false);
 
                 LoggingHandler.LogInfo($"STARTING MERGE TENANCY AGREEMENTS");
-                await _tenancyAgreementGateway.RefreshTenancyAgreement().ConfigureAwait(false);
+                await _tenancyAgreementGateway.RefreshTenancyAgreement(batchId).ConfigureAwait(false);
 
                 LoggingHandler.LogInfo("FILE SUCCESS");
             }

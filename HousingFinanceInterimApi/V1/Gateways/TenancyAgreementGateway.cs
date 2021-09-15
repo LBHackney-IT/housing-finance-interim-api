@@ -76,11 +76,11 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
         }
 
-        public async Task RefreshTenancyAgreement()
+        public async Task RefreshTenancyAgreement(long batchLogId)
         {
             try
             {
-                await _context.RefreshTenancyAgreementTables().ConfigureAwait(false);
+                await _context.RefreshTenancyAgreementTables(batchLogId).ConfigureAwait(false);
             }
             catch (Exception e)
             {

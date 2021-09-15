@@ -130,8 +130,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task LoadActionDiary()
             => await PerformTransaction($"usp_LoadActionDiary", 300).ConfigureAwait(false);
 
-        public async Task RefreshTenancyAgreementTables()
-            => await PerformTransaction($"usp_RefreshTenancyAgreement", 600).ConfigureAwait(false);
+        public async Task RefreshTenancyAgreementTables(long batchLogId)
+            => await PerformTransaction($"usp_RefreshTenancyAgreement {batchLogId}", 600).ConfigureAwait(false);
 
         public async Task GenerateOperatingBalance()
             => await PerformTransaction("usp_GenerateOperatingBalance", 600).ConfigureAwait(false);

@@ -11,6 +11,6 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
 
         public Task ClearTenancyAgreementAuxiliary();
 
-        public Task RefreshTenancyAgreement();
+        public Task RefreshTenancyAgreement(long batchLogId);
     }
 }
