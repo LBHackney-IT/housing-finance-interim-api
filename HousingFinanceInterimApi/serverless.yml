@@ -152,6 +152,12 @@ functions:
     role: lambdaExecutionRole
     events:
         - schedule: cron(0 5 * * ? *)
+  importAdjustmentsTransactions:
+    name: ${self:service}-${self:provider.stage}-adjustments-trans
+    description: "The scheduler to import adjustments transactions from spreadsheet."
+    timeout: 600
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadAdjustmentsTransactions
+    role: lambdaExecutionRole
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:
