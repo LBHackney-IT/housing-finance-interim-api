@@ -109,8 +109,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var batch = await _batchLogGateway.CreateAsync(_label).ConfigureAwait(false);
             try
             {
-
-
                 while (startDate <= endDate)
                 {
                     LoggingHandler.LogInfo($"LOAD DirectDebitHistory TABLE");
