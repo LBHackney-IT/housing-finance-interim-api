@@ -33,6 +33,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<TenancyAgreementAux>().Property(x => x.TimeStamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<UPCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<UPHousingCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
+            modelBuilder.Entity<Adjustment>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
         }
 
         public DatabaseContext(DbContextOptions options)
@@ -55,6 +56,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         private DbSet<OperatingBalance> OperatingBalancesValue { get; set; }
         private DbSet<Payment> PaymentsValue { get; set; }
         private DbSet<Tenancy> TenanciesValue { get; set; }
+        private DbSet<Adjustment> Adjustments { get; set; }
 
         public async Task<IList<OperatingBalance>> GetOperatingBalancesAsync(DateTime? startDate, DateTime? endDate, int startWeek, int startYear, int endWeek, int endYear)
             => await OperatingBalancesValue
@@ -163,6 +165,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public async Task LoadActionDiary()
             => await PerformTransaction($"usp_LoadActionDiary", 300).ConfigureAwait(false);
+
+        public async Task LoadAdjustmentTransactions()
+            => await PerformTransaction("usp_LoadTransactionsAdjustment", 600).ConfigureAwait(false);
 
         public async Task RefreshTenancyAgreementTables(long batchLogId)
             => await PerformTransaction($"usp_RefreshTenancyAgreement {batchLogId}", 600).ConfigureAwait(false);

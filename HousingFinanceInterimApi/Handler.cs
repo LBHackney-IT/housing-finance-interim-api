@@ -38,6 +38,7 @@ namespace HousingFinanceInterimApi
         private readonly ILoadChargesTransactionsUseCase _loadChargesTransactionsUseCase;
         private readonly ILoadActionDiaryUseCase _loadActionDiaryUseCase;
         private readonly IGenerateRentPositionUseCase _generateRentPositionUseCase;
+        private readonly ILoadAdjustmentUseCase _loadAdjustmentUseCase;
 
         private const string CashFileLabel = "CashFile";
         private const string HousingBenefitFileLabel = "HousingBenefitFile";
@@ -78,6 +79,7 @@ namespace HousingFinanceInterimApi
             IOperatingBalanceGateway operatingBalanceGateway = new OperatingBalanceGateway(context);
             IActionDiaryGateway actionDiaryGateway = new ActionDiaryGateway(context);
             IRentPositionGateway rentPositionGateway = new RentPositionGateway(context);
+            IAdjustmentGateway adjustmentGateway = new AdjustmentGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _importCashFileUseCase = new ImportCashFileUseCase(batchLogGateway, batchLogErrorGateway,
@@ -103,8 +105,10 @@ namespace HousingFinanceInterimApi
             _refreshOperatingBalanceUseCase = new RefreshOperatingBalanceUseCase(operatingBalanceGateway);
             _loadActionDiaryUseCase = new LoadActionDiaryUseCase(batchLogGateway, batchLogErrorGateway,
                 actionDiaryGateway, googleFileSettingGateway, googleClientService);
-            _generateRentPositionUseCase =
-                new GenerateRentPositionUseCase(rentPositionGateway, batchLogGateway, batchLogErrorGateway, googleFileSettingGateway, googleClientService);
+            _generateRentPositionUseCase = new GenerateRentPositionUseCase(rentPositionGateway, batchLogGateway,
+                batchLogErrorGateway, googleFileSettingGateway, googleClientService);
+            _loadAdjustmentUseCase = new LoadAdjustmentUseCase(batchLogGateway, batchLogErrorGateway, adjustmentGateway,
+                googleFileSettingGateway, googleClientService);
         }
 
         public async Task<StepResponse> CheckCashFiles()
@@ -195,6 +199,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> GenerateRentPosition()
         {
             return await _generateRentPositionUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadAdjustmentsTransactions()
+        {
+            return await _loadAdjustmentUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 }
