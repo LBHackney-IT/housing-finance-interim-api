@@ -35,6 +35,7 @@ namespace HousingFinanceInterimApi
     {
         private readonly ICheckExistFileUseCase _checkExistFileUseCase;
         private readonly IImportCashFileUseCase _importCashFileUseCase;
+        private readonly IImportHousingFileUseCase _importHousingFileUseCase;
         private readonly ILoadTenancyAgreementUseCase _loadTenancyAgreementUseCase;
 
         /// <summary>
@@ -106,11 +107,6 @@ namespace HousingFinanceInterimApi
         /// The set up cash file name success use case
         /// </summary>
         private readonly ISetUPCashFileNameSuccessUseCase _setUpCashFileNameSuccessUseCase;
-
-        /// <summary>
-        /// The create bulk housing cash dumps use case
-        /// </summary>
-        private readonly ICreateBulkHousingCashDumpsUseCase _createBulkHousingCashDumpsUseCase;
 
         /// <summary>
         /// The get up housing cash file name use case
@@ -203,10 +199,6 @@ namespace HousingFinanceInterimApi
             _createUpHousingCashFileNameUseCase = new CreateUPHousingCashFileNameUseCase(housingFileNameGateway);
             _setUpHousingCashFileNameSuccessUseCase = new SetUPHousingCashFileNameSuccessUseCase(housingFileNameGateway);
 
-            // Housing cash dump use cases
-            IUPHousingCashDumpGateway housingCashDumpGateway = new UPHousingCashDumpGateway(context);
-            _createBulkHousingCashDumpsUseCase = new CreateBulkHousingCashDumpsUseCase(housingCashDumpGateway);
-
             // Google file setting use cases
             IGoogleFileSettingGateway settingGateway = new GoogleFileSettingGateway(context);
             _googleFileSettingsList = new ListGoogleFileSettingsUseCase(settingGateway);
@@ -235,55 +227,18 @@ namespace HousingFinanceInterimApi
             ITenancyAgreementGateway tenancyAgreementGateway = new TenancyAgreementGateway(context);
             IUPCashDumpFileNameGateway upCashDumpFileNameGateway = new UPCashDumpFileNameGateway(context);
             IUPCashDumpGateway upCashDumpGateway = new UPCashDumpGateway(context);
+            IUPHousingCashDumpFileNameGateway upHousingCashDumpFileNameGateway = new UPHousingCashDumpFileNameGateway(context);
+            IUPHousingCashDumpGateway upHousingCashDumpGateway = new UPHousingCashDumpGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _importCashFileUseCase = new ImportCashFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService, upCashDumpFileNameGateway, upCashDumpGateway);
+            _importHousingFileUseCase = new ImportHousingFileUseCase(batchLogGateway, batchLogErrorGateway,
+                googleFileSettingGateway, googleClientService, upHousingCashDumpFileNameGateway, upHousingCashDumpGateway);
             _loadTenancyAgreementUseCase = new LoadTenancyAgreementUseCase(batchLogGateway, batchLogErrorGateway,
                 tenancyAgreementGateway, googleFileSettingGateway, googleClientService);
         }
 
-        /// <summary>
-        /// Imports the files.
-        /// </summary>
-        public async Task ImportHousingFiles()
-        {
-            const string DAT_FILE = ".dat";
-
-            IList<GoogleFileSettingDomain> googleFileSettings =
-                (await _googleFileSettingsList.Execute().ConfigureAwait(false)).Where(item
-                    => item.Label.Equals("Housing Cash Files", StringComparison.CurrentCultureIgnoreCase))
-                .ToList();
-            Console.WriteLine($"{googleFileSettings.Count} google dat file settings found");
-
-
-
-            // Sequentially execute, for parallel execution, each will need a database context
-            foreach (GoogleFileSettingDomain googleFileSettingItem in googleFileSettings)
-            {
-                // Retrieve files from this folder
-                IList<File> folderFiles = await _getFilesInGoogleDriveUseCase
-                    .ExecuteAsync(googleFileSettingItem.GoogleIdentifier)
-                    .ConfigureAwait(false);
-
-                foreach (var folder in folderFiles.Where(f => f.MimeType.Equals("application/vnd.google-apps.folder")).ToList())
-                {
-                    var files = await _getFilesInGoogleDriveUseCase.ExecuteAsync(folder.Id);
-                    foreach (var file in files)
-                        folderFiles.Add(file);
-                }
-
-                // If we have folder files
-                if (folderFiles.Any())
-                {
-                    // Filter to file types
-                    folderFiles = folderFiles.Where(item => item.Name.StartsWith("rentpost") && item.Name.EndsWith(googleFileSettingItem.FileType))
-                        .ToList();
-
-                    await HandleDatHousingFileDownloads(folderFiles).ConfigureAwait(false);
-                }
-            }
-        }
 
         /// <summary>
         /// Imports the rent breakdowns.
@@ -497,95 +452,6 @@ namespace HousingFinanceInterimApi
 
 
         /// <summary>
-        /// Handles the dat housing file downloads.
-        /// </summary>
-        /// <param name="files">The files to download from.</param>
-        private async Task HandleDatHousingFileDownloads(IEnumerable<File> files)
-        {
-            foreach (File fileItem in files)
-            {
-                try
-                {
-                    // Check if entry already made
-                    UPHousingCashFileNameDomain getResult =
-                        await _getUpHousingCashFileNameUseCase.ExecuteAsync(fileItem.Name).ConfigureAwait(false);
-
-                    if (getResult == null)
-                    {
-                        // Create file entry
-                        UPHousingCashFileNameDomain createResult = await _createUpHousingCashFileNameUseCase.ExecuteAsync(fileItem.Name)
-                            .ConfigureAwait(false);
-
-                        if (createResult != null)
-                        {
-                            IList<string> fileLines = await _readGoogleFileLineDataUseCase
-                                .ExecuteAsync(fileItem.Name, fileItem.Id, fileItem.MimeType)
-                                .ConfigureAwait(false);
-
-                            // Ensure no blank lines
-                            fileLines = fileLines.Where(item => !string.IsNullOrWhiteSpace(item)).ToList();
-
-                            const int TAKE = 250;
-                            int skip = 0;
-                            bool failure = false;
-                            IList<string> batch;
-
-                            do
-                            {
-                                // Create a batch
-                                batch = fileLines.Skip(skip).Take(TAKE).ToList();
-
-                                if (batch.Any())
-                                {
-                                    // Bulk insert the lines
-                                    IList<UPHousingCashDumpDomain> result = await _createBulkHousingCashDumpsUseCase
-                                        .ExecuteAsync(createResult.Id, batch)
-                                        .ConfigureAwait(false);
-
-                                    // Determine failure
-                                    bool batchFailure = result == null;
-
-                                    if (batchFailure)
-                                    {
-                                        failure = true;
-                                    }
-
-                                    Console.WriteLine(batchFailure
-                                        ? $"File failure: {createResult.Id}"
-                                        : $"File lines created {result.Count} for file {createResult.Id}");
-                                    skip += TAKE;
-                                }
-                            }
-                            while (batch.Any());
-
-                            // If success, set the status
-                            if (!failure)
-                            {
-                                Console.WriteLine("File success");
-
-                                await _setUpHousingCashFileNameSuccessUseCase.ExecuteAsync(createResult.Id)
-                                    .ConfigureAwait(false);
-                            }
-                        }
-                    }
-                }
-                catch (Exception exc)
-                {
-                    string namespaceLabel =
-                        $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(HandleDatHousingFileDownloads)}";
-
-                    // Log error
-                    await _logErrorUseCase
-                        .ExecuteAsync($"{nameof(UPHousingCashDumpFileName)} -- {nameof(UPHousingCashDump)} -- {fileItem.Name}", null,
-                            $"{namespaceLabel} application error", exc.ToString())
-                        .ConfigureAwait(false);
-
-                    throw;
-                }
-            }
-        }
-
-        /// <summary>
         /// Imports the rent breakdowns.
         /// </summary>
         /// <exception cref="Exception">
@@ -623,6 +489,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> CheckHousingBenefitFiles()
         {
             return await _checkExistFileUseCase.ExecuteAsync(HousingBenefitFileLabel).ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> ImportHousingBenefitFile()
+        {
+            return await _importHousingFileUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 
