@@ -205,79 +205,104 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Deletes the rent breakdowns.
         /// </summary>
         public async Task DeleteRentBreakdowns()
-            => await PerformTransactionStoredProcedure("usp_DeleteRentBreakdown").ConfigureAwait(false);
+            => await PerformTransaction("usp_DeleteRentBreakdown").ConfigureAwait(false);
 
         /// <summary>
         /// Deletes the current rent positions.
         /// </summary>
         public async Task DeleteCurrentRentPositions()
-            => await PerformTransactionStoredProcedure("usp_DeleteCurrentRentPosition").ConfigureAwait(false);
+            => await PerformTransaction("usp_DeleteCurrentRentPosition").ConfigureAwait(false);
 
         /// <summary>
         /// Deletes the current rent positions.
         /// </summary>
         public async Task DeleteServiceChargePaymentsReceived()
-            => await PerformTransactionStoredProcedure("usp_DeleteServiceChargePaymentsReceived").ConfigureAwait(false);
+            => await PerformTransaction("usp_DeleteServiceChargePaymentsReceived").ConfigureAwait(false);
 
         /// <summary>
         /// Deletes the rent breakdowns.
         /// </summary>
         public async Task DeleteLeaseholdAccounts()
-            => await PerformTransactionStoredProcedure("usp_DeleteLeaseholdAccounts").ConfigureAwait(false);
+            => await PerformTransaction("usp_DeleteLeaseholdAccounts").ConfigureAwait(false);
 
         /// <summary>
         /// Deletes the garages.
         /// </summary>
         public async Task DeleteGarages()
-            => await PerformTransactionStoredProcedure("usp_DeleteGarages").ConfigureAwait(false);
+            => await PerformTransaction("usp_DeleteGarages").ConfigureAwait(false);
 
         /// <summary>
         /// Deletes the temp accomm and garaged (Other HRA).
         /// </summary>
         public async Task DeleteOtherHRA()
-            => await PerformTransactionStoredProcedure("usp_DeleteOtherHRA").ConfigureAwait(false);
+            => await PerformTransaction("usp_DeleteOtherHRA").ConfigureAwait(false);
 
         /// <summary>
         /// Generate table SSMiniTransaction using SpreadSheets tables.
         /// </summary>
         public async Task GenerateSpreadsheetTransaction()
-            => await PerformTransactionStoredProcedure("usp_GenerateSpreadsheetTransaction").ConfigureAwait(false);
+            => await PerformTransaction("usp_GenerateSpreadsheetTransaction").ConfigureAwait(false);
 
         /// <summary>
         /// Copy information to MAMember using UHProperty and SpreadSheets tables.
         /// </summary>
         public async Task RefreshManageArrearsMember()
-            => await PerformTransactionStoredProcedure("usp_RefreshManageArrearsMember").ConfigureAwait(false);
+            => await PerformTransaction("usp_RefreshManageArrearsMember").ConfigureAwait(false);
 
         /// <summary>
         /// Copy information to MAProperty using UHProperty and SpreadSheets tables.
         /// </summary>
         public async Task RefreshManageArrearsProperty()
-            => await PerformTransactionStoredProcedure("usp_RefreshManageArrearsProperty").ConfigureAwait(false);
+            => await PerformTransaction("usp_RefreshManageArrearsProperty").ConfigureAwait(false);
 
         /// <summary>
         /// Copy information to MATenancyAgreement using UHTenancyAgreement and SpreadSheets tables.
         /// </summary>
         public async Task RefreshManageArrearsTenancyAgreement()
-            => await PerformTransactionStoredProcedure("usp_RefreshManageArrearsTenancyAgreement").ConfigureAwait(false);
+            => await PerformTransaction("usp_RefreshManageArrearsTenancyAgreement").ConfigureAwait(false);
 
-        /// <summary>
-        /// Performs the transaction stored procedure execution.
-        /// </summary>
-        /// <param name="storedProc">The stored proc.</param>
-        private async Task PerformTransactionStoredProcedure(string storedProc)
+
+        public async Task RefreshTenancyAgreementTables(long batchLogId)
+            => await PerformTransaction($"usp_RefreshTenancyAgreement {batchLogId}", 600).ConfigureAwait(false);
+
+        public async Task TruncateTenancyAgreementAuxiliary()
+        {
+            var sql = "DELETE FROM TenancyAgreementAux";
+            await PerformTransaction(sql).ConfigureAwait(false);
+        }
+
+        private async Task PerformTransaction(string sql, int timeout = 0)
         {
             await using var transaction = await Database.BeginTransactionAsync().ConfigureAwait(false);
 
             try
             {
-                await Database.ExecuteSqlRawAsync(storedProc).ConfigureAwait(false);
+                if (timeout != 0)
+                    Database.SetCommandTimeout(timeout);
+                await Database.ExecuteSqlRawAsync(sql).ConfigureAwait(false);
                 await transaction.CommitAsync().ConfigureAwait(false);
             }
             catch
             {
                 await transaction.RollbackAsync().ConfigureAwait(false);
+                throw;
+            }
+        }
 
+        private async Task PerformInterpolatedTransaction(FormattableString sql, int timeout = 0)
+        {
+            await using var transaction = await Database.BeginTransactionAsync().ConfigureAwait(false);
+
+            try
+            {
+                if (timeout != 0)
+                    Database.SetCommandTimeout(timeout);
+                await Database.ExecuteSqlInterpolatedAsync(sql).ConfigureAwait(false);
+                await transaction.CommitAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                await transaction.RollbackAsync().ConfigureAwait(false);
                 throw;
             }
         }

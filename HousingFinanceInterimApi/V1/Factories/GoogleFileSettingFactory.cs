@@ -5,29 +5,26 @@ using System.Linq;
 
 namespace HousingFinanceInterimApi.V1.Factories
 {
-
-    /// <summary>
-    /// The Google file setting factory.
-    /// </summary>
     public static class GoogleFileSettingFactory
     {
-
-        /// <summary>
-        /// Converts the given list of Google file settings to domain objects.
-        /// </summary>
-        /// <param name="settings">The settings.</param>
-        /// <returns>The Google file settings domain objects.</returns>
-        public static IList<GoogleFileSettingDomain> ToDomain(IList<GoogleFileSetting> settings)
-            => settings.Select(item => new GoogleFileSettingDomain
+        public static GoogleFileSettingDomain ToDomain(this GoogleFileSetting googleFileSetting)
+        {
+            return new GoogleFileSettingDomain
             {
-                Id = item.Id,
-                GoogleIdentifier = item.GoogleIdentifier,
-                FileType = item.FileType,
-                StartDate = item.StartDate,
-                EndDate = item.EndDate,
-                Label = item.Label
-            })
-                .ToList();
+                Id = googleFileSetting.Id,
+                Label = googleFileSetting.Label,
+                FileType = googleFileSetting.FileType,
+                GoogleIdentifier = googleFileSetting.GoogleIdentifier,
+                StartDate = googleFileSetting.StartDate,
+                EndDate = googleFileSetting.EndDate
+            };
+        }
+
+        public static List<GoogleFileSettingDomain> ToDomain(
+            this ICollection<GoogleFileSetting> googleFileSetting)
+        {
+            return googleFileSetting?.Select(uO => uO.ToDomain()).ToList();
+        }
 
     }
 

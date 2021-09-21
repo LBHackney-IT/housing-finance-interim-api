@@ -17,6 +17,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Google.Apis.Logging;
+using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Domain.AutoMaps;
 using Microsoft.Extensions.Logging;
 using ILogger = Google.Apis.Logging.ILogger;
@@ -32,6 +33,7 @@ namespace HousingFinanceInterimApi
     /// </summary>
     public class Handler
     {
+        private readonly ILoadTenancyAgreementUseCase _loadTenancyAgreementUseCase;
 
         /// <summary>
         /// The log error use case
@@ -230,6 +232,14 @@ namespace HousingFinanceInterimApi
             _getFilesInGoogleDriveUseCase = new GetFilesInGoogleDriveUseCase(googleClientService);
             _readGoogleFileLineDataUseCase = new ReadGoogleFileLineDataUseCase(googleClientService);
             _readGoogleSheetToEntitiesUseCase = new ReadGoogleSheetToEntities(googleClientService);
+
+            IBatchLogErrorGateway batchLogErrorGateway = new BatchLogErrorGateway(context);
+            IBatchLogGateway batchLogGateway = new BatchLogGateway(context);
+            ITenancyAgreementGateway tenancyAgreementGateway = new TenancyAgreementGateway(context);
+            IGoogleFileSettingGateway googleFileSettingGateway = new GoogleFileSettingGateway(context);
+
+            _loadTenancyAgreementUseCase = new LoadTenancyAgreementUseCase(batchLogGateway, batchLogErrorGateway,
+                tenancyAgreementGateway, googleFileSettingGateway, googleClientService);
         }
 
         /// <summary>
@@ -713,6 +723,11 @@ namespace HousingFinanceInterimApi
             {
                 throw new Exception("Failed to refresh manage arrears tables");
             }
+        }
+
+        public async Task<StepResponse> LoadTenancyAgreement()
+        {
+            return await _loadTenancyAgreementUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
     }
