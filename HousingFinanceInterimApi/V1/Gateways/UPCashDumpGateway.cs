@@ -1,62 +1,45 @@
+using System;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
+using HousingFinanceInterimApi.V1.Domain;
+using HousingFinanceInterimApi.V1.Factories;
+using HousingFinanceInterimApi.V1.Handlers;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
-
-    /// <summary>
-    /// The UP Cash dump gateway implementation.
-    /// </summary>
-    /// <seealso cref="IUPCashDumpGateway" />
     public class UPCashDumpGateway : IUPCashDumpGateway
     {
-
-        /// <summary>
-        /// The database context
-        /// </summary>
         private readonly DatabaseContext _context;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UPCashDumpGateway"/> class.
-        /// </summary>
-        /// <param name="context">The context.</param>
+        private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
+
         public UPCashDumpGateway(DatabaseContext context)
         {
             _context = context;
         }
 
-        /// <summary>
-        /// Creates bulk file line entries asynchronous.
-        /// </summary>
-        /// <param name="fileId">The file identifier.</param>
-        /// <param name="lines">The lines.</param>
-        /// <returns>
-        /// The list of UP cash dumps.
-        /// </returns>
-        public async Task<IList<UPCashDump>> CreateBulkAsync(long fileId, IList<string> lines)
+        public async Task CreateBulkAsync(long fileId, IList<string> lines)
         {
-            IList<UPCashDump> results = new List<UPCashDump>();
-
-            foreach (string line in lines)
+            try
             {
-                UPCashDump entry = new UPCashDump
+                var listUpCashDump = lines.Select(c => new UPCashDump
                 {
                     UPCashDumpFileNameId = fileId,
-                    FullText = line
-                };
-                await _context.UpCashDumps.AddAsync(entry).ConfigureAwait(false);
-                results.Add(entry);
+                    FullText = c
+                }).ToList();
+
+                await _context.BulkInsertAsync(listUpCashDump, new BulkConfig { BatchSize = _batchSize }).ConfigureAwait(false);
             }
-
-            bool success = await _context.SaveChangesAsync().ConfigureAwait(false) > 0;
-
-            return success
-                ? results
-                : null;
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
         }
-
     }
-
 }
