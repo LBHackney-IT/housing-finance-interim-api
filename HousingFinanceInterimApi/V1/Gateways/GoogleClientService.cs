@@ -13,7 +13,10 @@ using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Google.Apis.Upload;
+using HousingFinanceInterimApi.V1.Handlers;
 using File = Google.Apis.Drive.v3.Data.File;
+using Data = Google.Apis.Sheets.v4.Data;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -101,12 +104,12 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
             if (progress.Status == DownloadStatus.Completed)
             {
-                if (!Directory.Exists("tempfiles"))
+                if (!Directory.Exists("/tmp/tempfiles"))
                 {
-                    Directory.CreateDirectory("tempfiles");
+                    Directory.CreateDirectory("/tmp/tempfiles");
                 }
 
-                string outputPath = $"tempfiles/{fileName}";
+                string outputPath = $"/tmp/tempfiles/{fileName}";
 
                 await using (FileStream file = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
                 {
@@ -120,10 +123,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 }
 
                 return results;
-            }
-            else
-            {
-                // TODO log
             }
 
             return results;
@@ -161,7 +160,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
 
             FileList requestResult = await listRequest.ExecuteAsync().ConfigureAwait(false);
-            ;
 
             if (requestResult.Files?.Any() ?? false)
             {
@@ -177,39 +175,104 @@ namespace HousingFinanceInterimApi.V1.Gateways
             return results;
         }
 
+        public async Task<bool> RenameFileInDrive(string fileId, string newName)
+        {
+            File newFileName = new File();
+            newFileName.Name = newName;
+
+
+            var updateRequest = _driveService.Files.Update(newFileName, fileId);
+            var renamedFile = updateRequest.Execute();
+
+            return renamedFile.Name == newName;
+        }
+
+        public async Task DeleteFileInDrive(string fileId)
+        {
+            var deleteRequest = _driveService.Files.Delete(fileId);
+            var deletedFile = await deleteRequest.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<bool> UploadCsvFile(List<string[]> table, string fileName, string folderId)
+        {
+            IUploadProgress createdFile = null;
+            try
+            {
+                LoggingHandler.LogInfo($"Uploading csv file");
+
+                var path = "/tmp/tempfiles";
+                var outputPath = $"{path}/{fileName}";
+
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                if (System.IO.File.Exists(outputPath))
+                    System.IO.File.Delete(outputPath);
+
+                using (var w = new StreamWriter(outputPath))
+                {
+                    foreach (var row in table)
+                    {
+                        var newRow = string.Join(";", row);
+                        await w.WriteLineAsync(newRow).ConfigureAwait(false);
+                        await w.FlushAsync().ConfigureAwait(false);
+                    }
+                }
+
+                File newFile = new File()
+                {
+                    Name = fileName,
+                    MimeType = "text/csv",
+                    Parents = new List<string> { folderId }
+                };
+
+                using (var stream = new System.IO.FileStream(outputPath, FileMode.Open))
+                {
+                    var createRequest = _driveService.Files.Create(newFile, stream, "text/csv");
+                    createdFile = await createRequest.UploadAsync().ConfigureAwait(false);
+                }
+
+                LoggingHandler.LogInfo($"Upload progress: { JsonConvert.SerializeObject(createdFile) }");
+
+                return createdFile.Status == UploadStatus.Completed;
+            }
+            catch (Exception exc)
+            {
+                LoggingHandler.LogError($"Error uploading csv file");
+                LoggingHandler.LogError($"Upload progress: { JsonConvert.SerializeObject(createdFile) }");
+                LoggingHandler.LogError(exc.ToString());
+
+                throw;
+            }
+        }
+
         #endregion
 
         #region Google Sheets
 
-        /// <summary>
-        /// Reads the given spreadsheet to a JSON file asynchronous.
-        /// </summary>
-        /// <typeparam name="_TEntity"></typeparam>
-        /// <param name="spreadSheetId">The spread sheet identifier.</param>
-        /// <param name="sheetName">Name of the sheet to read.</param>
-        /// <param name="sheetRange">The sheet range to read.</param>
-        /// <returns>
-        /// An async task.
-        /// </returns>
         public async Task<IList<_TEntity>> ReadSheetToEntitiesAsync<_TEntity>(string spreadSheetId, string sheetName,
             string sheetRange) where _TEntity : class
         {
+            //await UpdateSheet(spreadSheetId, sheetName, "Z1").ConfigureAwait(false);
+            //await ClearSheet(spreadSheetId, sheetName, "Z1").ConfigureAwait(false);
+
             SpreadsheetsResource.ValuesResource.GetRequest getter =
                 _sheetsService.Spreadsheets.Values.Get(spreadSheetId, $"{sheetName}!{sheetRange}");
+
             ValueRange response = await getter.ExecuteAsync().ConfigureAwait(false);
             IList<IList<object>> values = response.Values;
 
             if (values == null || !values.Any())
             {
-                _logger.LogInformation("No data found.");
-
+                LoggingHandler.LogInfo($"No data found. Spreadsheet id: {spreadSheetId}, sheet name: {sheetName}, sheet range: {sheetRange}");
                 return null;
             }
+            LoggingHandler.LogInfo($"Rows {values.Count} found");
 
             // Get the headers
             IList<string> headers = values.First().Select(cell => cell.ToString()).ToList();
             IList<object> rowObjects = new List<object>();
-            _logger.LogInformation($"Writing row values to objects, {headers.Count} headers found");
+            LoggingHandler.LogInfo($"Writing row values to objects, {headers.Count} headers found");
 
             // For each row of actual data
             foreach (var row in values.Skip(1))
@@ -232,14 +295,13 @@ namespace HousingFinanceInterimApi.V1.Gateways
                         rowItemAccessor[propertyName] = row[cellIterator++];
                     }
                 }
-
                 rowObjects.Add(rowItem);
             }
 
-            // Attempt to serialize to JSON, then into the desired entity type
+
             try
             {
-                _logger.LogInformation("Writing values to object and serializing");
+                LoggingHandler.LogInfo($"Writing values to objects and serializing");
                 string convertedJson = JsonConvert.SerializeObject(rowObjects);
                 var entities = JsonConvert.DeserializeObject<IList<_TEntity>>(convertedJson);
 
@@ -247,7 +309,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
             catch (Exception exc)
             {
-                _logger.LogError("Error writing values to object and serializing", exc);
+                LoggingHandler.LogInfo($"Error writing values to objects and serializing");
+                LoggingHandler.LogInfo(exc.ToString());
 
                 throw;
             }
