@@ -11,22 +11,25 @@ namespace HousingFinanceInterimApi.V1.Factories
     /// </summary>
     public static class UPHousingCashDumpFactory
     {
+        public static UPHousingCashDumpDomain ToDomain(this UPHousingCashDump housingCashDump)
+        {
+            if (housingCashDump == null)
+                return null;
 
-        /// <summary>
-        /// Converts the given cash dumps to domain objects.
-        /// </summary>
-        /// <param name="cashDumps">The cash dumps.</param>
-        /// <returns>The UP cash dump domain objects.</returns>
-        public static IList<UPHousingCashDumpDomain> ToDomain(IList<UPHousingCashDump> cashDumps)
-            => cashDumps.Select(item => new UPHousingCashDumpDomain
+            return new UPHousingCashDumpDomain
             {
-                FullText = item.FullText,
-                Id = item.Id,
-                Timestamp = item.Timestamp,
-                UPHousingCashDumpFileNameId = item.UPHousingCashDumpFileNameId
-            })
-                .ToList();
+                FullText = housingCashDump.FullText,
+                Id = housingCashDump.Id,
+                Timestamp = housingCashDump.Timestamp,
+                UPHousingCashDumpFileNameId = housingCashDump.UPHousingCashDumpFileNameId
+            };
+        }
 
+        public static List<UPHousingCashDumpDomain> ToDomain(
+            this ICollection<UPHousingCashDump> housingCashDump)
+        {
+            return housingCashDump?.Select(d => d.ToDomain()).ToList();
+        }
     }
 
 }
