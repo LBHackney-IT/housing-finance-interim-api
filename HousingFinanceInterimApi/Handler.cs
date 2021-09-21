@@ -33,6 +33,7 @@ namespace HousingFinanceInterimApi
     /// </summary>
     public class Handler
     {
+        private readonly ICheckExistFileUseCase _checkExistFileUseCase;
         private readonly ILoadTenancyAgreementUseCase _loadTenancyAgreementUseCase;
 
         /// <summary>
@@ -134,6 +135,9 @@ namespace HousingFinanceInterimApi
         /// The google file settings list use case
         /// </summary>
         private readonly IListGoogleFileSettingsUseCase _googleFileSettingsList;
+
+        private const string CashFileLabel = "CashFile";
+        private const string HousingBenefitFileLabel = "HousingBenefitFile";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Handler"/> class.
@@ -238,6 +242,7 @@ namespace HousingFinanceInterimApi
             ITenancyAgreementGateway tenancyAgreementGateway = new TenancyAgreementGateway(context);
             IGoogleFileSettingGateway googleFileSettingGateway = new GoogleFileSettingGateway(context);
 
+            _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _loadTenancyAgreementUseCase = new LoadTenancyAgreementUseCase(batchLogGateway, batchLogErrorGateway,
                 tenancyAgreementGateway, googleFileSettingGateway, googleClientService);
         }
@@ -730,6 +735,15 @@ namespace HousingFinanceInterimApi
             return await _loadTenancyAgreementUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
+        public async Task<StepResponse> CheckCashFiles()
+        {
+            return await _checkExistFileUseCase.ExecuteAsync(CashFileLabel).ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> CheckHousingBenefitFiles()
+        {
+            return await _checkExistFileUseCase.ExecuteAsync(HousingBenefitFileLabel).ConfigureAwait(false);
+        }
     }
 
 }
