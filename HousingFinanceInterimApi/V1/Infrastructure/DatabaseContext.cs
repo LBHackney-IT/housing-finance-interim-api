@@ -44,6 +44,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         {
         }
 
+        public DbSet<BatchLog> BatchLogs { get; set; }
+        public DbSet<BatchLogError> BatchLogErrors { get; set; }
+
         /// <summary>
         /// Gets or sets the google file settings.
         /// </summary>
