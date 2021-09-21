@@ -33,6 +33,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<Payment>().HasNoKey().ToView(null);
             modelBuilder.Entity<Tenancy>().HasNoKey().ToView(null);
             modelBuilder.Entity<TenancyTransaction>().HasNoKey().ToView(null);
+            modelBuilder.Entity<TenancyAgreementAux>().Property(x => x.TimeStamp).HasDefaultValueSql("GETDATE()");
+            modelBuilder.Entity<UPCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
+            modelBuilder.Entity<UPHousingCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
         }
 
         /// <summary>
@@ -46,6 +49,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public DbSet<BatchLog> BatchLogs { get; set; }
         public DbSet<BatchLogError> BatchLogErrors { get; set; }
+        private DbSet<Transaction> Transactions { get; set; }
 
         /// <summary>
         /// Gets or sets the google file settings.
@@ -262,8 +266,36 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             => await PerformTransaction("usp_RefreshManageArrearsTenancyAgreement").ConfigureAwait(false);
 
 
+
+        public async Task<IList<Transaction>> GetTransactionsAsync(DateTime? startDate, DateTime? endDate)
+            => await Transactions
+                .FromSqlInterpolated($"usp_GetTransactions {startDate:yyyy-MM-dd}, {endDate:yyyy-MM-dd}")
+                .ToListAsync()
+                .ConfigureAwait(false);
+
         public async Task RefreshTenancyAgreementTables(long batchLogId)
             => await PerformTransaction($"usp_RefreshTenancyAgreement {batchLogId}", 600).ConfigureAwait(false);
+
+        public async Task LoadCashFiles()
+            => await PerformTransaction("usp_LoadCashFile", 600).ConfigureAwait(false);
+
+        public async Task LoadCashFileTransactions()
+            => await PerformTransaction("usp_LoadTransactionsCashFile", 600).ConfigureAwait(false);
+
+        public async Task LoadChargesTransactions()
+            => await PerformTransaction("usp_LoadTransactionsCharges", 600).ConfigureAwait(false);
+
+        public async Task LoadHousingFileTransactions()
+            => await PerformTransaction("usp_LoadTransactionsHousingFile", 600).ConfigureAwait(false);
+
+        public async Task LoadDirectDebitTransactions()
+            => await PerformTransaction($"usp_LoadTransactionsDirectDebit", 600).ConfigureAwait(false);
+
+        public async Task CreateCashFileSuspenseAccountTransaction(long id, string newRentAccount)
+            => await PerformInterpolatedTransaction($"usp_UpdateCashFileSuspenseAccountResolved {id}, {newRentAccount}").ConfigureAwait(false);
+
+        public async Task CreateHousingFileSuspenseAccountTransaction(long id, string newRentAccount)
+            => await PerformInterpolatedTransaction($"usp_UpdateHousingCashFileSuspenseAccountResolved {id}, {newRentAccount}").ConfigureAwait(false);
 
         public async Task TruncateTenancyAgreementAuxiliary()
         {

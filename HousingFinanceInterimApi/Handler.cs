@@ -36,6 +36,7 @@ namespace HousingFinanceInterimApi
         private readonly ICheckExistFileUseCase _checkExistFileUseCase;
         private readonly IImportCashFileUseCase _importCashFileUseCase;
         private readonly IImportHousingFileUseCase _importHousingFileUseCase;
+        private readonly ILoadCashFileTransactionsUseCase _loadCashFileTransactionsUseCase;
         private readonly ILoadTenancyAgreementUseCase _loadTenancyAgreementUseCase;
 
         /// <summary>
@@ -225,8 +226,10 @@ namespace HousingFinanceInterimApi
             IBatchLogGateway batchLogGateway = new BatchLogGateway(context);
             IGoogleFileSettingGateway googleFileSettingGateway = new GoogleFileSettingGateway(context);
             ITenancyAgreementGateway tenancyAgreementGateway = new TenancyAgreementGateway(context);
+            ITransactionGateway transactionGateway = new TransactionGateway(context);
             IUPCashDumpFileNameGateway upCashDumpFileNameGateway = new UPCashDumpFileNameGateway(context);
             IUPCashDumpGateway upCashDumpGateway = new UPCashDumpGateway(context);
+            IUPCashLoadGateway upCashLoadGateway = new UPCashLoadGateway(context);
             IUPHousingCashDumpFileNameGateway upHousingCashDumpFileNameGateway = new UPHousingCashDumpFileNameGateway(context);
             IUPHousingCashDumpGateway upHousingCashDumpGateway = new UPHousingCashDumpGateway(context);
 
@@ -235,6 +238,8 @@ namespace HousingFinanceInterimApi
                 googleFileSettingGateway, googleClientService, upCashDumpFileNameGateway, upCashDumpGateway);
             _importHousingFileUseCase = new ImportHousingFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService, upHousingCashDumpFileNameGateway, upHousingCashDumpGateway);
+            _loadCashFileTransactionsUseCase = new LoadCashFileTransactionsUseCase(batchLogGateway,
+                batchLogErrorGateway, upCashLoadGateway, transactionGateway);
             _loadTenancyAgreementUseCase = new LoadTenancyAgreementUseCase(batchLogGateway, batchLogErrorGateway,
                 tenancyAgreementGateway, googleFileSettingGateway, googleClientService);
         }
@@ -484,6 +489,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> ImportCashFile()
         {
             return await _importCashFileUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadCashFileTransactions()
+        {
+            return await _loadCashFileTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
         public async Task<StepResponse> CheckHousingBenefitFiles()
