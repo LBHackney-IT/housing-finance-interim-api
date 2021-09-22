@@ -38,6 +38,7 @@ namespace HousingFinanceInterimApi
         private readonly IImportCashFileUseCase _importCashFileUseCase;
         private readonly IImportHousingFileUseCase _importHousingFileUseCase;
         private readonly ILoadActionDiaryUseCase _loadActionDiaryUseCase;
+        private readonly ILoadAdjustmentUseCase _loadAdjustmentUseCase;
         private readonly ILoadCashFileTransactionsUseCase _loadCashFileTransactionsUseCase;
         private readonly ILoadChargesTransactionsUseCase _loadChargesTransactionsUseCase;
         private readonly ILoadChargesUseCase _loadChargesUseCase;
@@ -230,6 +231,7 @@ namespace HousingFinanceInterimApi
             _readGoogleSheetToEntitiesUseCase = new ReadGoogleSheetToEntities(googleClientService);
 
             IActionDiaryGateway actionDiaryGateway = new ActionDiaryGateway(context);
+            IAdjustmentGateway adjustmentGateway = new AdjustmentGateway(context);
             IBatchLogErrorGateway batchLogErrorGateway = new BatchLogErrorGateway(context);
             IBatchLogGateway batchLogGateway = new BatchLogGateway(context);
             IChargesGateway chargesGateway = new ChargesGateway(context);
@@ -251,6 +253,8 @@ namespace HousingFinanceInterimApi
                 googleFileSettingGateway, googleClientService, upHousingCashDumpFileNameGateway, upHousingCashDumpGateway);
             _loadActionDiaryUseCase = new LoadActionDiaryUseCase(batchLogGateway, batchLogErrorGateway,
                 actionDiaryGateway, googleFileSettingGateway, googleClientService);
+            _loadAdjustmentUseCase = new LoadAdjustmentUseCase(batchLogGateway, batchLogErrorGateway, adjustmentGateway,
+                googleFileSettingGateway, googleClientService);
             _loadCashFileTransactionsUseCase = new LoadCashFileTransactionsUseCase(batchLogGateway,
                 batchLogErrorGateway, upCashLoadGateway, transactionGateway);
             _loadChargesTransactionsUseCase = new LoadChargesTransactionsUseCase(batchLogGateway, batchLogErrorGateway,
@@ -567,6 +571,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> LoadActionDiary()
         {
             return await _loadActionDiaryUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadAdjustmentsTransactions()
+        {
+            return await _loadAdjustmentUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 
