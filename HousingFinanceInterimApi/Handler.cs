@@ -17,6 +17,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Google.Apis.Logging;
+using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Domain.AutoMaps;
 using Microsoft.Extensions.Logging;
@@ -38,6 +39,7 @@ namespace HousingFinanceInterimApi
         private readonly IImportHousingFileUseCase _importHousingFileUseCase;
         private readonly ILoadCashFileTransactionsUseCase _loadCashFileTransactionsUseCase;
         private readonly ILoadChargesUseCase _loadChargesUseCase;
+        private readonly ILoadDirectDebitTransactionsUseCase _loadDirectDebitTransactionsUseCase;
         private readonly ILoadDirectDebitUseCase _loadDirectDebitUseCase;
         private readonly ILoadHousingFileTransactionsUseCase _loadHousingFileTransactionsUseCase;
         private readonly ILoadTenancyAgreementUseCase _loadTenancyAgreementUseCase;
@@ -248,6 +250,8 @@ namespace HousingFinanceInterimApi
                 batchLogErrorGateway, upCashLoadGateway, transactionGateway);
             _loadChargesUseCase = new LoadChargesUseCase(batchLogGateway, batchLogErrorGateway,
                 chargesGateway, googleFileSettingGateway, googleClientService);
+            _loadDirectDebitTransactionsUseCase = new LoadDirectDebitTransactionsUseCase(batchLogGateway,
+                batchLogErrorGateway, directDebitGateway, transactionGateway);
             _loadDirectDebitUseCase = new LoadDirectDebitUseCase(batchLogGateway, batchLogErrorGateway,
                 directDebitGateway, googleFileSettingGateway, googleClientService);
             _loadHousingFileTransactionsUseCase = new LoadHousingFileTransactionsUseCase(batchLogGateway,
@@ -526,6 +530,16 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> LoadDirectDebit()
         {
             return await _loadDirectDebitUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadDirectDebitTransactions()
+        {
+            return await _loadDirectDebitTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadDirectDebitTransactionsOnDemand(OnDemandRequest input, ILambdaContext context)
+        {
+            return await _loadDirectDebitTransactionsUseCase.ExecuteOnDemandAsync(input.StartDate, input.EndDate).ConfigureAwait(false);
         }
 
         public async Task<StepResponse> LoadCharges()
