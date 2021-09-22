@@ -35,6 +35,7 @@ namespace HousingFinanceInterimApi
     public class Handler
     {
         private readonly ICheckExistFileUseCase _checkExistFileUseCase;
+        private readonly IGenerateRentPositionUseCase _generateRentPositionUseCase;
         private readonly IImportCashFileUseCase _importCashFileUseCase;
         private readonly IImportHousingFileUseCase _importHousingFileUseCase;
         private readonly ILoadActionDiaryUseCase _loadActionDiaryUseCase;
@@ -237,6 +238,7 @@ namespace HousingFinanceInterimApi
             IChargesGateway chargesGateway = new ChargesGateway(context);
             IDirectDebitGateway directDebitGateway = new DirectDebitGateway(context);
             IGoogleFileSettingGateway googleFileSettingGateway = new GoogleFileSettingGateway(context);
+            IRentPositionGateway rentPositionGateway = new RentPositionGateway(context);
             ITenancyAgreementGateway tenancyAgreementGateway = new TenancyAgreementGateway(context);
             ITransactionGateway transactionGateway = new TransactionGateway(context);
             IUPCashDumpFileNameGateway upCashDumpFileNameGateway = new UPCashDumpFileNameGateway(context);
@@ -247,6 +249,8 @@ namespace HousingFinanceInterimApi
             IUPHousingCashLoadGateway upHousingCashLoadGateway = new UPHousingCashLoadGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
+            _generateRentPositionUseCase = new GenerateRentPositionUseCase(rentPositionGateway, batchLogGateway,
+                batchLogErrorGateway, googleFileSettingGateway, googleClientService);
             _importCashFileUseCase = new ImportCashFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService, upCashDumpFileNameGateway, upCashDumpGateway);
             _importHousingFileUseCase = new ImportHousingFileUseCase(batchLogGateway, batchLogErrorGateway,
@@ -576,6 +580,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> LoadAdjustmentsTransactions()
         {
             return await _loadAdjustmentUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> GenerateRentPosition()
+        {
+            return await _generateRentPositionUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 
