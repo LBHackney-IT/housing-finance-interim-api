@@ -33,10 +33,13 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<Payment>().HasNoKey().ToView(null);
             modelBuilder.Entity<Tenancy>().HasNoKey().ToView(null);
             modelBuilder.Entity<TenancyTransaction>().HasNoKey().ToView(null);
+            modelBuilder.Entity<ChargesAux>().Property(x => x.TimeStamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<DirectDebitAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
+            modelBuilder.Entity<ActionDiaryAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<TenancyAgreementAux>().Property(x => x.TimeStamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<UPCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<UPHousingCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
+            modelBuilder.Entity<Adjustment>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
         }
 
         /// <summary>
@@ -303,6 +306,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public async Task LoadDirectDebitTransactions()
             => await PerformTransaction($"usp_LoadTransactionsDirectDebit", 600).ConfigureAwait(false);
+
+        public async Task LoadAdjustmentTransactions()
+            => await PerformTransaction("usp_LoadTransactionsAdjustment", 600).ConfigureAwait(false);
 
         public async Task LoadDirectDebitHistory(DateTime? processingDate)
             => await PerformInterpolatedTransaction($"usp_LoadDirectDebitHistory {processingDate:yyyy-MM-dd}", 600).ConfigureAwait(false);
