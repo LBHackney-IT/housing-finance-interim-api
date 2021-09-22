@@ -262,11 +262,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task RefreshManageArrearsProperty()
             => await PerformTransaction("usp_RefreshManageArrearsProperty").ConfigureAwait(false);
 
-        /// <summary>
-        /// Copy information to MATenancyAgreement using UHTenancyAgreement and SpreadSheets tables.
-        /// </summary>
-        public async Task RefreshManageArrearsTenancyAgreement()
-            => await PerformTransaction("usp_RefreshManageArrearsTenancyAgreement").ConfigureAwait(false);
+
 
 
 
@@ -350,6 +346,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public async Task GenerateOperatingBalance()
             => await PerformTransaction("usp_GenerateOperatingBalance", 600).ConfigureAwait(false);
+
+        public async Task RefreshManageArrearsTenancyAgreement()
+            => await PerformTransaction("usp_RefreshManageArrearsTenancyAgreement", 300).ConfigureAwait(false);
 
         public async Task<List<string[]>> GetRentPosition()
         {

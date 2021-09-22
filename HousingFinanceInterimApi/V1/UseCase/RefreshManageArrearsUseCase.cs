@@ -1,3 +1,4 @@
+using System;
 using AutoMapper;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Factories;
@@ -5,38 +6,45 @@ using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using HousingFinanceInterimApi.V1.Boundary.Response;
+using HousingFinanceInterimApi.V1.Handlers;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
-
-    /// <summary>
-    /// The refresh manage arrears use case.
-    /// </summary>
-    /// <seealso cref="IRefreshManageArrearsUseCase" />
     public class RefreshManageArrearsUseCase : IRefreshManageArrearsUseCase
     {
-        /// <summary>
-        /// The gateway
-        /// </summary>
-        private readonly IRefreshManageArrearsGateway _gateway;
+        private readonly IManageArrearsGateway _manageArrearsGateway;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RefreshManageArrearsUseCase" /> class.
-        /// </summary>
-        /// <param name="gateway">The gateway.</param>
-        public RefreshManageArrearsUseCase(IRefreshManageArrearsGateway gateway)
+        private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
+
+        public RefreshManageArrearsUseCase(IManageArrearsGateway manageArrearsGateway)
         {
-            _gateway = gateway;
+            _manageArrearsGateway = manageArrearsGateway;
         }
 
-        /// <summary>
-        /// Executes the instance asynchronous.
-        /// </summary>
-        public async Task ExecuteAsync()
+        public async Task<StepResponse> ExecuteAsync()
         {
-            await _gateway.RefreshManageArrearsItems().ConfigureAwait(false);
-        }
+            LoggingHandler.LogInfo($"Starting refresh manage arrears current balance");
+            try
+            {
+                await _manageArrearsGateway.RefreshManageArrearsTenancyAgreement().ConfigureAwait(false);
 
+                LoggingHandler.LogInfo($"End refresh manage arrears current balance");
+                return new StepResponse()
+                {
+                    Continue = true,
+                    NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration))
+                };
+            }
+            catch (Exception exc)
+            {
+                var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
+
+                LoggingHandler.LogError($"{namespaceLabel} Application error");
+                LoggingHandler.LogError(exc.ToString());
+
+                throw;
+            }
+        }
     }
-
 }
