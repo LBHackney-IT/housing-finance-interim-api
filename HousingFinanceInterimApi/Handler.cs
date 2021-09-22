@@ -38,6 +38,7 @@ namespace HousingFinanceInterimApi
         private readonly IImportCashFileUseCase _importCashFileUseCase;
         private readonly IImportHousingFileUseCase _importHousingFileUseCase;
         private readonly ILoadCashFileTransactionsUseCase _loadCashFileTransactionsUseCase;
+        private readonly ILoadChargesTransactionsUseCase _loadChargesTransactionsUseCase;
         private readonly ILoadChargesUseCase _loadChargesUseCase;
         private readonly ILoadDirectDebitTransactionsUseCase _loadDirectDebitTransactionsUseCase;
         private readonly ILoadDirectDebitUseCase _loadDirectDebitUseCase;
@@ -248,6 +249,8 @@ namespace HousingFinanceInterimApi
                 googleFileSettingGateway, googleClientService, upHousingCashDumpFileNameGateway, upHousingCashDumpGateway);
             _loadCashFileTransactionsUseCase = new LoadCashFileTransactionsUseCase(batchLogGateway,
                 batchLogErrorGateway, upCashLoadGateway, transactionGateway);
+            _loadChargesTransactionsUseCase = new LoadChargesTransactionsUseCase(batchLogGateway, batchLogErrorGateway,
+                chargesGateway, transactionGateway);
             _loadChargesUseCase = new LoadChargesUseCase(batchLogGateway, batchLogErrorGateway,
                 chargesGateway, googleFileSettingGateway, googleClientService);
             _loadDirectDebitTransactionsUseCase = new LoadDirectDebitTransactionsUseCase(batchLogGateway,
@@ -545,6 +548,16 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> LoadCharges()
         {
             return await _loadChargesUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadChargesTransactions()
+        {
+            return await _loadChargesTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadChargesTransactionsOnDemand(OnDemandRequest input, ILambdaContext context)
+        {
+            return await _loadChargesTransactionsUseCase.ExecuteOnDemandAsync(input.StartDate, input.EndDate).ConfigureAwait(false);
         }
     }
 
