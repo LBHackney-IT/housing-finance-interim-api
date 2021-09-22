@@ -64,7 +64,8 @@ commands:
       - run:
           name: Deploy lambda
           command: |
-            cd ./HousingFinanceInterimApi/
+            cd ./HousingFinanceInterimApi/           
+            sls plugin install --name serverless-step-functions
             sls deploy --stage <<parameters.stage>> --conceal
 
 jobs:
