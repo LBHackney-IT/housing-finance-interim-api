@@ -26,6 +26,8 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// </returns>
         public Task<IList<OperatingBalance>> ListAsync(DateTime? startDate, DateTime? endDate, int startWeek, int startYear, int endWeek, int endYear);
 
+        public Task GenerateOperatingBalance();
+
     }
 
 }

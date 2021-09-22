@@ -348,6 +348,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task UpdateCurrentBalance()
             => await PerformTransaction("usp_UpdateCurrentBalance", 300).ConfigureAwait(false);
 
+        public async Task GenerateOperatingBalance()
+            => await PerformTransaction("usp_GenerateOperatingBalance", 600).ConfigureAwait(false);
+
         public async Task<List<string[]>> GetRentPosition()
         {
             var results = new List<string[]>();
