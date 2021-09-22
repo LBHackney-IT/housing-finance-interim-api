@@ -48,6 +48,7 @@ namespace HousingFinanceInterimApi
         private readonly ILoadHousingFileTransactionsUseCase _loadHousingFileTransactionsUseCase;
         private readonly ILoadTenancyAgreementUseCase _loadTenancyAgreementUseCase;
         private readonly IRefreshCurrentBalanceUseCase _refreshCurrentBalanceUseCase;
+        private readonly IRefreshManageArrearsUseCase _refreshManageArrearsUseCase;
         private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
 
         /// <summary>
@@ -99,11 +100,6 @@ namespace HousingFinanceInterimApi
         /// The save garages use case
         /// </summary>
         private readonly ISaveGaragesUseCase _saveGaragesUseCase;
-
-        /// <summary>
-        /// The refresh manage arrears use case
-        /// </summary>
-        private readonly IRefreshManageArrearsUseCase _refreshManageArrearsUseCase;
 
         /// <summary>
         /// The get up cash file name use case
@@ -195,10 +191,6 @@ namespace HousingFinanceInterimApi
             IOtherHRAGateway otherHraGateway = new OtherHRAGateway(context);
             _saveOtherHRAUseCase = new SaveOtherHRAUseCase(autoMapper, otherHraGateway);
 
-            // Other HRA use cases
-            IRefreshManageArrearsGateway refreshManageArrearsGateway = new RefreshManageArrearsGateway(context);
-            _refreshManageArrearsUseCase = new RefreshManageArrearsUseCase(refreshManageArrearsGateway);
-
             // File name use cases
             IUPCashFileNameGateway fileNameGateway = new UPCashFileNameGateway(context);
             _getUpCashFileNameUseCase = new GetUPCashFileNameUseCase(fileNameGateway);
@@ -241,6 +233,7 @@ namespace HousingFinanceInterimApi
             ICurrentBalanceGateway currentBalanceGateway = new CurrentBalanceGateway(context);
             IDirectDebitGateway directDebitGateway = new DirectDebitGateway(context);
             IGoogleFileSettingGateway googleFileSettingGateway = new GoogleFileSettingGateway(context);
+            IManageArrearsGateway manageArrearsGateway = new ManageArrearsGateway(context);
             IOperatingBalanceGateway operatingBalanceGateway = new OperatingBalanceGateway(context);
             IRentPositionGateway rentPositionGateway = new RentPositionGateway(context);
             ITenancyAgreementGateway tenancyAgreementGateway = new TenancyAgreementGateway(context);
@@ -278,6 +271,7 @@ namespace HousingFinanceInterimApi
             _loadTenancyAgreementUseCase = new LoadTenancyAgreementUseCase(batchLogGateway, batchLogErrorGateway,
                 tenancyAgreementGateway, googleFileSettingGateway, googleClientService);
             _refreshCurrentBalanceUseCase = new RefreshCurrentBalanceUseCase(currentBalanceGateway);
+            _refreshManageArrearsUseCase = new RefreshManageArrearsUseCase(manageArrearsGateway);
             _refreshOperatingBalanceUseCase = new RefreshOperatingBalanceUseCase(operatingBalanceGateway);
         }
 
@@ -492,27 +486,6 @@ namespace HousingFinanceInterimApi
             }
         }
 
-
-        /// <summary>
-        /// Imports the rent breakdowns.
-        /// </summary>
-        /// <exception cref="Exception">
-        /// Failed to save rent breakdown items
-        /// or
-        /// No Google file setting found for {nameof(ImportRentBreakdowns)}
-        /// </exception>
-        public async Task RefreshManageArrearsTable()
-        {
-            try
-            {
-                await _refreshManageArrearsUseCase.ExecuteAsync().ConfigureAwait(false);
-            }
-            catch (Exception exc)
-            {
-                throw new Exception("Failed to refresh manage arrears tables");
-            }
-        }
-
         public async Task<StepResponse> LoadTenancyAgreement()
         {
             return await _loadTenancyAgreementUseCase.ExecuteAsync().ConfigureAwait(false);
@@ -601,6 +574,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> RefreshOperatingBalance()
         {
             return await _refreshOperatingBalanceUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> RefreshManageArrears()
+        {
+            return await _refreshManageArrearsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 
