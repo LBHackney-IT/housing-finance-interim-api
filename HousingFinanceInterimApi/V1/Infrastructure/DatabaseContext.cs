@@ -286,6 +286,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task LoadDirectDebit(long batchLogId)
             => await PerformTransaction($"usp_LoadDirectDebit {batchLogId}", 300).ConfigureAwait(false);
 
+        public async Task LoadCharges()
+            => await PerformTransaction($"usp_LoadCharges", 300).ConfigureAwait(false);
+
         public async Task LoadCashFileTransactions()
             => await PerformTransaction("usp_LoadTransactionsCashFile", 600).ConfigureAwait(false);
 
@@ -300,6 +303,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public async Task LoadDirectDebitHistory(DateTime? processingDate)
             => await PerformInterpolatedTransaction($"usp_LoadDirectDebitHistory {processingDate:yyyy-MM-dd}", 600).ConfigureAwait(false);
+
+        public async Task LoadChargesHistory(DateTime? processingDate)
+            => await PerformInterpolatedTransaction($"usp_LoadChargesHistory {processingDate:yyyy-MM-dd}", 600).ConfigureAwait(false);
 
         public async Task CreateCashFileSuspenseAccountTransaction(long id, string newRentAccount)
             => await PerformInterpolatedTransaction($"usp_UpdateCashFileSuspenseAccountResolved {id}, {newRentAccount}").ConfigureAwait(false);
@@ -316,6 +322,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task TruncateDirectDebitAuxiliary()
         {
             var sql = "DELETE FROM DirectDebitAux";
+            await PerformTransaction(sql).ConfigureAwait(false);
+        }
+
+        public async Task TruncateChargesAuxiliary()
+        {
+            var sql = "DELETE FROM ChargesAux";
             await PerformTransaction(sql).ConfigureAwait(false);
         }
 

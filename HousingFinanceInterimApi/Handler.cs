@@ -37,6 +37,7 @@ namespace HousingFinanceInterimApi
         private readonly IImportCashFileUseCase _importCashFileUseCase;
         private readonly IImportHousingFileUseCase _importHousingFileUseCase;
         private readonly ILoadCashFileTransactionsUseCase _loadCashFileTransactionsUseCase;
+        private readonly ILoadChargesUseCase _loadChargesUseCase;
         private readonly ILoadDirectDebitUseCase _loadDirectDebitUseCase;
         private readonly ILoadHousingFileTransactionsUseCase _loadHousingFileTransactionsUseCase;
         private readonly ILoadTenancyAgreementUseCase _loadTenancyAgreementUseCase;
@@ -226,6 +227,7 @@ namespace HousingFinanceInterimApi
 
             IBatchLogErrorGateway batchLogErrorGateway = new BatchLogErrorGateway(context);
             IBatchLogGateway batchLogGateway = new BatchLogGateway(context);
+            IChargesGateway chargesGateway = new ChargesGateway(context);
             IDirectDebitGateway directDebitGateway = new DirectDebitGateway(context);
             IGoogleFileSettingGateway googleFileSettingGateway = new GoogleFileSettingGateway(context);
             ITenancyAgreementGateway tenancyAgreementGateway = new TenancyAgreementGateway(context);
@@ -244,6 +246,8 @@ namespace HousingFinanceInterimApi
                 googleFileSettingGateway, googleClientService, upHousingCashDumpFileNameGateway, upHousingCashDumpGateway);
             _loadCashFileTransactionsUseCase = new LoadCashFileTransactionsUseCase(batchLogGateway,
                 batchLogErrorGateway, upCashLoadGateway, transactionGateway);
+            _loadChargesUseCase = new LoadChargesUseCase(batchLogGateway, batchLogErrorGateway,
+                chargesGateway, googleFileSettingGateway, googleClientService);
             _loadDirectDebitUseCase = new LoadDirectDebitUseCase(batchLogGateway, batchLogErrorGateway,
                 directDebitGateway, googleFileSettingGateway, googleClientService);
             _loadHousingFileTransactionsUseCase = new LoadHousingFileTransactionsUseCase(batchLogGateway,
@@ -522,6 +526,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> LoadDirectDebit()
         {
             return await _loadDirectDebitUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadCharges()
+        {
+            return await _loadChargesUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 
