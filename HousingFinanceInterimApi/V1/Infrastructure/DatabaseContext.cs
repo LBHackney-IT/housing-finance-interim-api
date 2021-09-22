@@ -33,6 +33,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<Payment>().HasNoKey().ToView(null);
             modelBuilder.Entity<Tenancy>().HasNoKey().ToView(null);
             modelBuilder.Entity<TenancyTransaction>().HasNoKey().ToView(null);
+            modelBuilder.Entity<DirectDebitAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<TenancyAgreementAux>().Property(x => x.TimeStamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<UPCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<UPHousingCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
@@ -282,6 +283,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task LoadHousingFiles()
             => await PerformTransaction("usp_LoadHousingFile", 600).ConfigureAwait(false);
 
+        public async Task LoadDirectDebit(long batchLogId)
+            => await PerformTransaction($"usp_LoadDirectDebit {batchLogId}", 300).ConfigureAwait(false);
+
         public async Task LoadCashFileTransactions()
             => await PerformTransaction("usp_LoadTransactionsCashFile", 600).ConfigureAwait(false);
 
@@ -294,6 +298,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task LoadDirectDebitTransactions()
             => await PerformTransaction($"usp_LoadTransactionsDirectDebit", 600).ConfigureAwait(false);
 
+        public async Task LoadDirectDebitHistory(DateTime? processingDate)
+            => await PerformInterpolatedTransaction($"usp_LoadDirectDebitHistory {processingDate:yyyy-MM-dd}", 600).ConfigureAwait(false);
+
         public async Task CreateCashFileSuspenseAccountTransaction(long id, string newRentAccount)
             => await PerformInterpolatedTransaction($"usp_UpdateCashFileSuspenseAccountResolved {id}, {newRentAccount}").ConfigureAwait(false);
 
@@ -303,6 +310,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task TruncateTenancyAgreementAuxiliary()
         {
             var sql = "DELETE FROM TenancyAgreementAux";
+            await PerformTransaction(sql).ConfigureAwait(false);
+        }
+
+        public async Task TruncateDirectDebitAuxiliary()
+        {
+            var sql = "DELETE FROM DirectDebitAux";
             await PerformTransaction(sql).ConfigureAwait(false);
         }
 

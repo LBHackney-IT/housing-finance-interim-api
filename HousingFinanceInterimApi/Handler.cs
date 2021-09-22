@@ -37,6 +37,7 @@ namespace HousingFinanceInterimApi
         private readonly IImportCashFileUseCase _importCashFileUseCase;
         private readonly IImportHousingFileUseCase _importHousingFileUseCase;
         private readonly ILoadCashFileTransactionsUseCase _loadCashFileTransactionsUseCase;
+        private readonly ILoadDirectDebitUseCase _loadDirectDebitUseCase;
         private readonly ILoadHousingFileTransactionsUseCase _loadHousingFileTransactionsUseCase;
         private readonly ILoadTenancyAgreementUseCase _loadTenancyAgreementUseCase;
 
@@ -225,6 +226,7 @@ namespace HousingFinanceInterimApi
 
             IBatchLogErrorGateway batchLogErrorGateway = new BatchLogErrorGateway(context);
             IBatchLogGateway batchLogGateway = new BatchLogGateway(context);
+            IDirectDebitGateway directDebitGateway = new DirectDebitGateway(context);
             IGoogleFileSettingGateway googleFileSettingGateway = new GoogleFileSettingGateway(context);
             ITenancyAgreementGateway tenancyAgreementGateway = new TenancyAgreementGateway(context);
             ITransactionGateway transactionGateway = new TransactionGateway(context);
@@ -242,6 +244,8 @@ namespace HousingFinanceInterimApi
                 googleFileSettingGateway, googleClientService, upHousingCashDumpFileNameGateway, upHousingCashDumpGateway);
             _loadCashFileTransactionsUseCase = new LoadCashFileTransactionsUseCase(batchLogGateway,
                 batchLogErrorGateway, upCashLoadGateway, transactionGateway);
+            _loadDirectDebitUseCase = new LoadDirectDebitUseCase(batchLogGateway, batchLogErrorGateway,
+                directDebitGateway, googleFileSettingGateway, googleClientService);
             _loadHousingFileTransactionsUseCase = new LoadHousingFileTransactionsUseCase(batchLogGateway,
                 batchLogErrorGateway, upHousingCashLoadGateway, transactionGateway);
             _loadTenancyAgreementUseCase = new LoadTenancyAgreementUseCase(batchLogGateway, batchLogErrorGateway,
@@ -513,6 +517,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> LoadHousingBenefitFileTransactions()
         {
             return await _loadHousingFileTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadDirectDebit()
+        {
+            return await _loadDirectDebitUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 
