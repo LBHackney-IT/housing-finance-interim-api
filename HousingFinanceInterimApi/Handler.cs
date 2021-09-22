@@ -55,7 +55,6 @@ namespace HousingFinanceInterimApi
                     DriveService.Scope.Drive, SheetsService.Scope.SpreadsheetsReadonly
                 }
             });
-
             IGoogleClientService googleClientService = new GoogleClientServiceFactory(default, options, context)
                 .CreateGoogleClientServiceFromJson(Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
 
