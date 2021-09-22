@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Data.SqlClient;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
@@ -344,6 +343,39 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         {
             var sql = "DELETE FROM ActionDiaryAux";
             await PerformTransaction(sql).ConfigureAwait(false);
+        }
+
+        public async Task<List<string[]>> GetRentPosition()
+        {
+            var results = new List<string[]>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetRentPosition", dbConnection);
+            command.CommandTimeout = 300;
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    var result = new string[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        result[i] = reader[i].ToString();
+                    }
+
+                    results.Add(result);
+                }
+            }
+            dbConnection.Close();
+
+            return results;
         }
 
         private async Task PerformTransaction(string sql, int timeout = 0)
