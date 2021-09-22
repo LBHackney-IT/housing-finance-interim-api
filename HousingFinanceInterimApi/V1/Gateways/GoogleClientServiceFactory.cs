@@ -1,10 +1,13 @@
 using System;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Auth.OAuth2.Responses;
+using Google.Apis.Drive.v3;
+using Google.Apis.Json;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
@@ -110,6 +113,18 @@ namespace HousingFinanceInterimApi.V1.Gateways
             return new GoogleClientService(_logger, initializer);
         }
 
+        public IGoogleClientService CreateGoogleClientServiceFromJson(string jsonKey)
+        {
+            var credential = GoogleCredential.FromJson(jsonKey).CreateScoped(_options.Scopes);
+
+            var baseClientService = new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = _options.ApplicationName
+            };
+
+            return new GoogleClientService(_logger, baseClientService);
+        }
     }
 
 }
