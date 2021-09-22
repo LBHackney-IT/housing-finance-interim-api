@@ -48,6 +48,7 @@ namespace HousingFinanceInterimApi
         private readonly ILoadHousingFileTransactionsUseCase _loadHousingFileTransactionsUseCase;
         private readonly ILoadTenancyAgreementUseCase _loadTenancyAgreementUseCase;
         private readonly IRefreshCurrentBalanceUseCase _refreshCurrentBalanceUseCase;
+        private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
 
         /// <summary>
         /// The log error use case
@@ -240,6 +241,7 @@ namespace HousingFinanceInterimApi
             ICurrentBalanceGateway currentBalanceGateway = new CurrentBalanceGateway(context);
             IDirectDebitGateway directDebitGateway = new DirectDebitGateway(context);
             IGoogleFileSettingGateway googleFileSettingGateway = new GoogleFileSettingGateway(context);
+            IOperatingBalanceGateway operatingBalanceGateway = new OperatingBalanceGateway(context);
             IRentPositionGateway rentPositionGateway = new RentPositionGateway(context);
             ITenancyAgreementGateway tenancyAgreementGateway = new TenancyAgreementGateway(context);
             ITransactionGateway transactionGateway = new TransactionGateway(context);
@@ -276,6 +278,7 @@ namespace HousingFinanceInterimApi
             _loadTenancyAgreementUseCase = new LoadTenancyAgreementUseCase(batchLogGateway, batchLogErrorGateway,
                 tenancyAgreementGateway, googleFileSettingGateway, googleClientService);
             _refreshCurrentBalanceUseCase = new RefreshCurrentBalanceUseCase(currentBalanceGateway);
+            _refreshOperatingBalanceUseCase = new RefreshOperatingBalanceUseCase(operatingBalanceGateway);
         }
 
 
@@ -593,6 +596,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> RefreshCurrentBalance()
         {
             return await _refreshCurrentBalanceUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> RefreshOperatingBalance()
+        {
+            return await _refreshOperatingBalanceUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 
