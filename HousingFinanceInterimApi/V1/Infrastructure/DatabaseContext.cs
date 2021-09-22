@@ -289,6 +289,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task LoadCharges()
             => await PerformTransaction($"usp_LoadCharges", 300).ConfigureAwait(false);
 
+        public async Task LoadActionDiary()
+            => await PerformTransaction($"usp_LoadActionDiary", 300).ConfigureAwait(false);
+
         public async Task LoadCashFileTransactions()
             => await PerformTransaction("usp_LoadTransactionsCashFile", 600).ConfigureAwait(false);
 
@@ -328,6 +331,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task TruncateChargesAuxiliary()
         {
             var sql = "DELETE FROM ChargesAux";
+            await PerformTransaction(sql).ConfigureAwait(false);
+        }
+
+        public async Task TruncateActionDiaryAuxiliary()
+        {
+            var sql = "DELETE FROM ActionDiaryAux";
             await PerformTransaction(sql).ConfigureAwait(false);
         }
 
