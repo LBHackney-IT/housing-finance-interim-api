@@ -37,6 +37,7 @@ namespace HousingFinanceInterimApi
         private readonly ICheckExistFileUseCase _checkExistFileUseCase;
         private readonly IImportCashFileUseCase _importCashFileUseCase;
         private readonly IImportHousingFileUseCase _importHousingFileUseCase;
+        private readonly ILoadActionDiaryUseCase _loadActionDiaryUseCase;
         private readonly ILoadCashFileTransactionsUseCase _loadCashFileTransactionsUseCase;
         private readonly ILoadChargesTransactionsUseCase _loadChargesTransactionsUseCase;
         private readonly ILoadChargesUseCase _loadChargesUseCase;
@@ -228,6 +229,7 @@ namespace HousingFinanceInterimApi
             _readGoogleFileLineDataUseCase = new ReadGoogleFileLineDataUseCase(googleClientService);
             _readGoogleSheetToEntitiesUseCase = new ReadGoogleSheetToEntities(googleClientService);
 
+            IActionDiaryGateway actionDiaryGateway = new ActionDiaryGateway(context);
             IBatchLogErrorGateway batchLogErrorGateway = new BatchLogErrorGateway(context);
             IBatchLogGateway batchLogGateway = new BatchLogGateway(context);
             IChargesGateway chargesGateway = new ChargesGateway(context);
@@ -247,6 +249,8 @@ namespace HousingFinanceInterimApi
                 googleFileSettingGateway, googleClientService, upCashDumpFileNameGateway, upCashDumpGateway);
             _importHousingFileUseCase = new ImportHousingFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService, upHousingCashDumpFileNameGateway, upHousingCashDumpGateway);
+            _loadActionDiaryUseCase = new LoadActionDiaryUseCase(batchLogGateway, batchLogErrorGateway,
+                actionDiaryGateway, googleFileSettingGateway, googleClientService);
             _loadCashFileTransactionsUseCase = new LoadCashFileTransactionsUseCase(batchLogGateway,
                 batchLogErrorGateway, upCashLoadGateway, transactionGateway);
             _loadChargesTransactionsUseCase = new LoadChargesTransactionsUseCase(batchLogGateway, batchLogErrorGateway,
@@ -558,6 +562,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> LoadChargesTransactionsOnDemand(OnDemandRequest input, ILambdaContext context)
         {
             return await _loadChargesTransactionsUseCase.ExecuteOnDemandAsync(input.StartDate, input.EndDate).ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadActionDiary()
+        {
+            return await _loadActionDiaryUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 
