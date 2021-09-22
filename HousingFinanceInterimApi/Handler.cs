@@ -47,6 +47,7 @@ namespace HousingFinanceInterimApi
         private readonly ILoadDirectDebitUseCase _loadDirectDebitUseCase;
         private readonly ILoadHousingFileTransactionsUseCase _loadHousingFileTransactionsUseCase;
         private readonly ILoadTenancyAgreementUseCase _loadTenancyAgreementUseCase;
+        private readonly IRefreshCurrentBalanceUseCase _refreshCurrentBalanceUseCase;
 
         /// <summary>
         /// The log error use case
@@ -236,6 +237,7 @@ namespace HousingFinanceInterimApi
             IBatchLogErrorGateway batchLogErrorGateway = new BatchLogErrorGateway(context);
             IBatchLogGateway batchLogGateway = new BatchLogGateway(context);
             IChargesGateway chargesGateway = new ChargesGateway(context);
+            ICurrentBalanceGateway currentBalanceGateway = new CurrentBalanceGateway(context);
             IDirectDebitGateway directDebitGateway = new DirectDebitGateway(context);
             IGoogleFileSettingGateway googleFileSettingGateway = new GoogleFileSettingGateway(context);
             IRentPositionGateway rentPositionGateway = new RentPositionGateway(context);
@@ -273,6 +275,7 @@ namespace HousingFinanceInterimApi
                 batchLogErrorGateway, upHousingCashLoadGateway, transactionGateway);
             _loadTenancyAgreementUseCase = new LoadTenancyAgreementUseCase(batchLogGateway, batchLogErrorGateway,
                 tenancyAgreementGateway, googleFileSettingGateway, googleClientService);
+            _refreshCurrentBalanceUseCase = new RefreshCurrentBalanceUseCase(currentBalanceGateway);
         }
 
 
@@ -585,6 +588,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> GenerateRentPosition()
         {
             return await _generateRentPositionUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> RefreshCurrentBalance()
+        {
+            return await _refreshCurrentBalanceUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 
