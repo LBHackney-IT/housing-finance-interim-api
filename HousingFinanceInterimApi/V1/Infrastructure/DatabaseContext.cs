@@ -289,7 +289,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             => await PerformTransaction($"usp_LoadCharges", 300).ConfigureAwait(false);
 
         public async Task LoadActionDiary()
-            => await PerformTransaction($"usp_LoadActionDiary", 300).ConfigureAwait(false);
+            => await PerformTransaction($"usp_LoadActionDiary", 900).ConfigureAwait(false);
 
         public async Task LoadCashFileTransactions()
             => await PerformTransaction("usp_LoadTransactionsCashFile", 600).ConfigureAwait(false);
@@ -357,7 +357,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
             var dbConnection = Database.GetDbConnection() as SqlConnection;
             var command = new SqlCommand($"dbo.usp_GetRentPosition", dbConnection);
-            command.CommandTimeout = 300;
+            command.CommandTimeout = 900;
 
             dbConnection.Open();
             await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
