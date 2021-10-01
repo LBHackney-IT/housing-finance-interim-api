@@ -378,6 +378,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
                     results.Add(result);
                 }
+
+                results.Insert(0, columnNames);
             }
             dbConnection.Close();
 
