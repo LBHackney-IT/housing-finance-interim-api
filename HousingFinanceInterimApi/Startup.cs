@@ -20,7 +20,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using AutoMapper;
-using HousingFinanceInterimApi.V1.Domain.AutoMaps;
+using HousingFinanceInterimApi.V1.UseCase;
+using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 
 namespace HousingFinanceInterimApi
 {
@@ -46,17 +47,6 @@ namespace HousingFinanceInterimApi
             services.Configure<ApiOptions>(apiOptionsConfigSection);
             ApiOptions apiOptions = apiOptionsConfigSection.Get<ApiOptions>();
 
-            // Add auto mapper
-            var mapperConfig = new MapperConfiguration(mapperConfiguration =>
-            {
-                mapperConfiguration.AddProfile(new RentBreakdownMappingProfile());
-                mapperConfiguration.AddProfile(new CurrentRentPositionMappingProfile());
-                mapperConfiguration.AddProfile(new LeaseholdAccountMappingProfile());
-                mapperConfiguration.AddProfile(new ServiceChargePaymentsReceivedMappingProfile());
-                mapperConfiguration.AddProfile(new GarageMappingProfile());
-                mapperConfiguration.AddProfile(new OtherHRAMappingProfile());
-            });
-            services.AddSingleton(mapperConfig.CreateMapper());
 
             services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
@@ -147,7 +137,10 @@ namespace HousingFinanceInterimApi
         private static void ConfigureDbContext(IServiceCollection services)
         {
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-            services.AddDbContext<DatabaseContext>(opt => opt.UseSqlServer(connectionString));
+            services.AddDbContext<DatabaseContext>(opt => opt.UseSqlServer(connectionString, sqlOptions =>
+            {
+                sqlOptions.CommandTimeout(360);
+            }));
         }
 
         private static void RegisterGateways(IServiceCollection services)
@@ -155,10 +148,14 @@ namespace HousingFinanceInterimApi
             services.AddScoped<IOperatingBalanceGateway, OperatingBalanceGateway>();
             services.AddScoped<IPaymentGateway, PaymentGateway>();
             services.AddScoped<ITenancyGateway, TenancyGateway>();
+            services.AddScoped<ITransactionGateway, TransactionGateway>();
+            services.AddScoped<IBatchLogGateway, BatchLogGateway>();
+            services.AddScoped<IBatchLogErrorGateway, BatchLogErrorGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
         {
+            services.AddScoped<IGetBatchLogErrorUseCase, GetBatchLogErrorUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -173,7 +170,7 @@ namespace HousingFinanceInterimApi
                 app.UseHsts();
             }
 
-            app.UseCors(options => options.WithOrigins("http://localhost:44335", "https://dmg8fqy2zxv7c.cloudfront.net")
+            app.UseCors(options => options.WithOrigins("http://localhost:3000", "https://dmg8fqy2zxv7c.cloudfront.net", "https://eoy-report-development.hackney.gov.uk")
                 .AllowAnyMethod()
                 .AllowAnyHeader());
 
