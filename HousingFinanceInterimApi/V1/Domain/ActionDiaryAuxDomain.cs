@@ -21,14 +21,15 @@ namespace HousingFinanceInterimApi.V1.Domain
         public string Action { get; set; }
 
         [JsonProperty("Action Date")]
-        [JsonConverter(typeof(DateFormatConverter), "dd/MM/yyyy")]
-        public DateTime ActionDate { get; set; }
+        [JsonConverter(typeof(DateTimeFormat))]
+        public DateTime? ActionDate { get; set; }
 
         [JsonProperty("Username")]
         public string Username { get; set; }
 
         [JsonProperty("Balance")]
-        public decimal Balance { get; set; }
+        [JsonConverter(typeof(DecimalOrNull))]
+        public decimal? Balance { get; set; }
 
         [JsonProperty("Action Comment")]
         public string ActionComment { get; set; }

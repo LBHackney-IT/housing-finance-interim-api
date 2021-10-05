@@ -21,6 +21,7 @@ provider:
     BATCH_SIZE: ${ssm:/housing-finance/${self:provider.stage}/bulk-insert-batch-size}
     CASH_FILE_REGEX: ${ssm:/housing-finance/${self:provider.stage}/cash-file-regex}
     HOUSING_FILE_REGEX: ${ssm:/housing-finance/${self:provider.stage}/housing-benefit-file-regex}
+    ACCEPTED_ORIGINS: ${ssm:/housing-finance/${self:provider.stage}/cors-accepted-origins}
 
 package:
   artifact: ./bin/release/netcoreapp3.1/housing-finance-interim-api.zip

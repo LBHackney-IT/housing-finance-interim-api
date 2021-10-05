@@ -10,7 +10,7 @@ namespace HousingFinanceInterimApi.JsonConverters
     /// This allows us to convert invalid values to null instead of throwing an exception.
     /// </summary>
     /// <seealso cref="JsonConverter" />
-    public class DecimalOrNull : JsonConverter
+    public class DateTimeFormat : JsonConverter
     {
 
         /// <summary>
@@ -37,11 +37,17 @@ namespace HousingFinanceInterimApi.JsonConverters
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
             JsonSerializer serializer)
         {
-            string value = reader.Value?.ToString()?.Replace("£", "");
+            string value = reader.Value.ToString();
 
-            if (decimal.TryParse(value, NumberStyles.Number, new CultureInfo("en-GB"), out decimal decimalValue))
+            string[] formats = { "dd/MM/yyyy HH:mm:ss", "dd/MM/yyyy" };
+            DateTime dt;
+            if (DateTime.TryParseExact(value, formats, CultureInfo.CurrentCulture,
+                DateTimeStyles.None, out dt))
             {
-                return decimalValue;
+                if (dt.Date.Year >= 1900 && dt <= new DateTime(2079, 6, 6))
+                {
+                    return dt;
+                }
             }
 
             return null;
