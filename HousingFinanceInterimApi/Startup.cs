@@ -170,7 +170,8 @@ namespace HousingFinanceInterimApi
                 app.UseHsts();
             }
 
-            app.UseCors(options => options.WithOrigins("http://localhost:3000", "https://dmg8fqy2zxv7c.cloudfront.net", "https://eoy-report-development.hackney.gov.uk")
+            var origins = Environment.GetEnvironmentVariable("ACCEPTED_ORIGINS").Split(",");
+            app.UseCors(options => options.WithOrigins(origins)
                 .AllowAnyMethod()
                 .AllowAnyHeader());
 

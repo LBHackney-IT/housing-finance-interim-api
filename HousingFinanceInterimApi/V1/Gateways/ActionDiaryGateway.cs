@@ -35,7 +35,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     ActionDate = ad.ActionDate,
                     Username = ad.Username,
                     ActionComment = ad.ActionComment,
-                    Balance = ad.Balance
+                    Balance = ad.Balance ?? 0
                 }).ToList();
 
                 await _context.BulkInsertAsync(actionsDiaryAux, new BulkConfig { BatchSize = _batchSize }).ConfigureAwait(false);

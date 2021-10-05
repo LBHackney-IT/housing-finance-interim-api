@@ -21,7 +21,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public string Action { get; set; }
 
-        public DateTime ActionDate { get; set; }
+        public DateTime? ActionDate { get; set; }
 
         public string Username { get; set; }
 
