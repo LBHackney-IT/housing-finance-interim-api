@@ -29,7 +29,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 var directDebitsAux = directDebitsDomain.Select(dd => new DirectDebitAux
                 {
                     RentAccount = dd.RentAccount,
-                    DueDay = dd.DueDay,
+                    Date = dd.Date,
                     Amount = dd.Amount
                 }).ToList();
 

@@ -14,7 +14,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public string RentAccount { get; set; }
 
         [Required]
-        public byte DueDay { get; set; }
+        public DateTime Date { get; set; }
 
         [Required]
         public decimal Amount { get; set; }

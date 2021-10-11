@@ -41,9 +41,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var batch = await _batchLogGateway.CreateAsync(_label).ConfigureAwait(false);
             try
             {
-                LoggingHandler.LogInfo($"Load DirectDebitHistory table");
-
-                await _directDebitGateway.LoadDirectDebitHistory(processingDate).ConfigureAwait(false);
                 LoggingHandler.LogInfo($"Convert DirectDebitHistory in transactions");
                 await _transactionGateway.LoadDirectDebitTransactions().ConfigureAwait(false);
 

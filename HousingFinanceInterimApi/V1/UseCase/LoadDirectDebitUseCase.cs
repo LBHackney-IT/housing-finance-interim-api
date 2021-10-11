@@ -43,13 +43,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             LoggingHandler.LogInfo($"Starting direct debit import");
 
-            var existBatchToday = await _batchLogGateway.GetAsync(DirectDebitLabel).ConfigureAwait(false);
-            if (existBatchToday != null)
-            {
-                LoggingHandler.LogInfo($"Exists a direct debit load process today");
-                return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(0) };
-            }
-
             const string sheetName = "Active";
             const string sheetRange = "A:C";
 
