@@ -16,7 +16,7 @@ namespace HousingFinanceInterimApi.V1.Factories
             {
                 Id = directDebitAux.Id,
                 RentAccount = directDebitAux.RentAccount,
-                DueDay = directDebitAux.DueDay,
+                Date = directDebitAux.Date,
                 Amount = directDebitAux.Amount,
                 Timestamp = directDebitAux.Timestamp
             };
