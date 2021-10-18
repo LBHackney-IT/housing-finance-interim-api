@@ -37,17 +37,17 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"STARTING HOUSING BENEFIT FILE TRANSACTIONS IMPORT");
+            LoggingHandler.LogInfo($"Starting housing benefit file transactions import");
             var batch = await _batchLogGateway.CreateAsync(_label).ConfigureAwait(false);
             try
             {
-                LoggingHandler.LogInfo($"LOAD UpHousingCashLoad TABLE");
+                LoggingHandler.LogInfo($"Load UpHousingCashLoad table");
                 await _upHousingCashLoadGateway.LoadHousingFiles().ConfigureAwait(false);
-                LoggingHandler.LogInfo($"CONVERT UpHousingCashLoad IN TRANSACTIONS");
+                LoggingHandler.LogInfo($"Convert UpHousingCashLoad in transactions");
                 await _transactionGateway.LoadHousingFilesTransactions().ConfigureAwait(false);
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-                LoggingHandler.LogInfo($"END HOUSING BENEFIT FILE TRANSACTIONS IMPORT");
+                LoggingHandler.LogInfo($"End housing benefit file transactions import");
                 return new StepResponse()
                 {
                     Continue = true,
@@ -58,9 +58,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
 
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"APPLICATION ERROR. NOT POSSIBLE TO LOAD CASH FILES TRANSACTIONS").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"Application error. Not possible to load housing files transactions").ConfigureAwait(false);
 
-                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError($"{namespaceLabel} application error");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;

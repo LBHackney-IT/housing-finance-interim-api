@@ -41,7 +41,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"STARTING TENANCY AGREEMENT IMPORT");
+            LoggingHandler.LogInfo($"Starting tenancy agreement import");
 
             const string sheetName = "Active";
             const string sheetRange = "A:T";
@@ -58,22 +58,22 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             if (!tenancyAgreementAux.Any())
             {
-                LoggingHandler.LogInfo($"NO TENANCY AGREEMENT DATA TO IMPORT");
+                LoggingHandler.LogInfo($"No tenancy agreement data to import");
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
             }
 
             await HandleSpreadSheet(batch.Id, tenancyAgreementAux).ConfigureAwait(false);
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"END TENANCY AGREEMENT IMPORT");
+            LoggingHandler.LogInfo($"End tenancy agreement import");
             return new StepResponse() { Continue = true, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
         }
 
         private async Task<GoogleFileSettingDomain> GetGoogleFileSetting(string label)
         {
-            LoggingHandler.LogInfo($"GETTING GOOGLE FILE SETTING FOR '{label}' LABEL");
+            LoggingHandler.LogInfo($"Getting Google file setting for '{label}' label");
             var googleFileSettings = await _googleFileSettingGateway.GetSettingsByLabel(label).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"{googleFileSettings.Count} GOOGLE FILE SETTINGS FOUND");
+            LoggingHandler.LogInfo($"{googleFileSettings.Count} Google file settings found");
 
             return googleFileSettings.FirstOrDefault();
         }
@@ -82,24 +82,24 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             try
             {
-                LoggingHandler.LogInfo($"CLEAR AUX TABLE");
+                LoggingHandler.LogInfo($"Clear aux table");
                 await _tenancyAgreementGateway.ClearTenancyAgreementAuxiliary().ConfigureAwait(false);
 
-                LoggingHandler.LogInfo($"STARTING BULK INSERT");
+                LoggingHandler.LogInfo($"Starting bulk insert");
                 await _tenancyAgreementGateway.CreateBulkAsync(tenancyAgreementAux).ConfigureAwait(false);
 
-                LoggingHandler.LogInfo($"STARTING MERGE TENANCY AGREEMENTS");
+                LoggingHandler.LogInfo($"Starting merge tenancy agreements");
                 await _tenancyAgreementGateway.RefreshTenancyAgreement(batchId).ConfigureAwait(false);
 
-                LoggingHandler.LogInfo("FILE SUCCESS");
+                LoggingHandler.LogInfo("File success");
             }
             catch (Exception exc)
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(HandleSpreadSheet)}";
 
-                await _batchLogErrorGateway.CreateAsync(batchId, _tenancyAgreementLabel, $"APPLICATION ERROR. NOT POSSIBLE TO LOAD TENANCY AGREEMENT").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batchId, _tenancyAgreementLabel, $"Application error. Not possible to load tenancy agreement").ConfigureAwait(false);
 
-                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;

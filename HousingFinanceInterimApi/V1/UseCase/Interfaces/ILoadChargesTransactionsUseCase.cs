@@ -7,7 +7,7 @@ namespace HousingFinanceInterimApi.V1.UseCase.Interfaces
 {
     public interface ILoadChargesTransactionsUseCase
     {
-        public Task<StepResponse> ExecuteAsync(DateTime? retroactiveDate = null);
+        public Task<StepResponse> ExecuteAsync();
 
         public Task<StepResponse> ExecuteOnDemandAsync(DateTime startDate, DateTime endDate);
     }

@@ -35,20 +35,20 @@ namespace HousingFinanceInterimApi.V1.UseCase
             _transactionGateway = transactionGateway;
         }
 
-        public async Task<StepResponse> ExecuteAsync(DateTime? processingDate = null)
+        public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"STARTING CHARGES TRANSACTIONS IMPORT");
+            LoggingHandler.LogInfo($"Starting charges transactions import");
             var batch = await _batchLogGateway.CreateAsync(_label).ConfigureAwait(false);
             try
             {
-                LoggingHandler.LogInfo($"LOAD ChargesHistory TABLE");
+                LoggingHandler.LogInfo($"Load ChargesHistory table");
 
-                await _chargesGateway.LoadChargesHistory(processingDate).ConfigureAwait(false);
-                LoggingHandler.LogInfo($"CONVERT ChargesHistory IN TRANSACTIONS");
+                await _chargesGateway.LoadChargesHistory(null).ConfigureAwait(false);
+                LoggingHandler.LogInfo($"Convert ChargesHistory in Transactions");
                 await _transactionGateway.LoadChargesTransactions().ConfigureAwait(false);
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-                LoggingHandler.LogInfo($"END CASH FILE TRANSACTIONS IMPORT");
+                LoggingHandler.LogInfo($"End cash file transactions import");
                 return new StepResponse()
                 {
                     Continue = true,
@@ -60,10 +60,10 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
 
                 await _batchLogErrorGateway
-                    .CreateAsync(batch.Id, "ERROR", $"APPLICATION ERROR. NOT POSSIBLE TO LOAD CHARGES TRANSACTIONS")
+                    .CreateAsync(batch.Id, "ERROR", $"Application error. Not possible to load charges transactions")
                     .ConfigureAwait(false);
 
-                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;
@@ -72,23 +72,23 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteOnDemandAsync(DateTime startDate, DateTime endDate)
         {
-            LoggingHandler.LogInfo($"STARTING CHARGES TRANSACTIONS ON DEMAND IMPORT");
+            LoggingHandler.LogInfo($"Starting charges transactions on demand import");
             var batch = await _batchLogGateway.CreateAsync(_label).ConfigureAwait(false);
             try
             {
                 while (startDate <= endDate)
                 {
-                    LoggingHandler.LogInfo($"LOAD ChargesHistory TABLE");
+                    LoggingHandler.LogInfo($"Load ChargesHistory table");
                     await _chargesGateway.LoadChargesHistory(startDate).ConfigureAwait(false);
 
-                    LoggingHandler.LogInfo($"CONVERT ChargesHistory IN TRANSACTIONS");
+                    LoggingHandler.LogInfo($"Convert ChargesHistory in transactions");
                     await _transactionGateway.LoadChargesTransactions().ConfigureAwait(false);
 
                     startDate = startDate.Date.AddDays(1);
                 }
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-                LoggingHandler.LogInfo($"END CASH FILE TRANSACTIONS ON DEMAND IMPORT");
+                LoggingHandler.LogInfo($"End cash file transactions on demand import");
                 return new StepResponse()
                 {
                     Continue = true,
@@ -100,10 +100,10 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
 
                 await _batchLogErrorGateway
-                    .CreateAsync(batch.Id, "ERROR", $"APPLICATION ERROR. NOT POSSIBLE TO LOAD CHARGES TRANSACTIONS ON DEMAND")
+                    .CreateAsync(batch.Id, "ERROR", $"Application error. Not possible to load charges transactions on demand")
                     .ConfigureAwait(false);
 
-                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;

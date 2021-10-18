@@ -43,7 +43,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 TotalBalance = results.Sum(item => item.TotalBalance),
                 ChargedYTD = results.Sum(item => item.ChargedYTD),
                 PaidYTD = results.Sum(item => item.PaidYTD),
-                ArrearsYTD = results.Sum(item => item.ArrearsYTD),
+                ArrearsYTD = results.Sum(item => item.ArrearsYTD)
             };
             results.Add(totalBalance);
 

@@ -198,7 +198,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
             IUploadProgress createdFile = null;
             try
             {
-                LoggingHandler.LogInfo($"UPLOADING CSV FILE");
+                LoggingHandler.LogInfo($"Uploading csv file");
 
                 var path = "/tmp/tempfiles";
                 var outputPath = $"{path}/{fileName}";
@@ -232,14 +232,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     createdFile = await createRequest.UploadAsync().ConfigureAwait(false);
                 }
 
-                LoggingHandler.LogInfo($"UPLOAD PROGRESS: { createdFile }");
+                LoggingHandler.LogInfo($"Upload progress: { JsonConvert.SerializeObject(createdFile) }");
 
                 return createdFile.Status == UploadStatus.Completed;
             }
             catch (Exception exc)
             {
-                LoggingHandler.LogError($"ERROR UPLOADING CSV FILE");
-                LoggingHandler.LogError($"UPLOAD PROGRESS: { createdFile }");
+                LoggingHandler.LogError($"Error uploading csv file");
+                LoggingHandler.LogError($"Upload progress: { JsonConvert.SerializeObject(createdFile) }");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;
@@ -264,15 +264,15 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
             if (values == null || !values.Any())
             {
-                LoggingHandler.LogInfo($"NO DATA FOUND. SPREADSHEET ID: {spreadSheetId}, SHEET NAME: {sheetName}, SHEET RANGE: {sheetRange}");
+                LoggingHandler.LogInfo($"No data found. Spreadsheet id: {spreadSheetId}, sheet name: {sheetName}, sheet range: {sheetRange}");
                 return null;
             }
-            LoggingHandler.LogInfo($"ROWS {values.Count} FOUND");
+            LoggingHandler.LogInfo($"Rows {values.Count} found");
 
             // Get the headers
             IList<string> headers = values.First().Select(cell => cell.ToString()).ToList();
             IList<object> rowObjects = new List<object>();
-            LoggingHandler.LogInfo($"WRITING ROW VALUES TO OBJECTS, {headers.Count} HEADERS FOUND");
+            LoggingHandler.LogInfo($"Writing row values to objects, {headers.Count} headers found");
 
             // For each row of actual data
             foreach (var row in values.Skip(1))
@@ -301,7 +301,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
             try
             {
-                LoggingHandler.LogInfo($"WRITING VALUES TO OBJECTS AND SERIALIZING");
+                LoggingHandler.LogInfo($"Writing values to objects and serializing");
                 string convertedJson = JsonConvert.SerializeObject(rowObjects);
                 var entities = JsonConvert.DeserializeObject<IList<_TEntity>>(convertedJson);
 
@@ -309,7 +309,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
             catch (Exception exc)
             {
-                LoggingHandler.LogInfo($"ERROR WRITING VALUES TO OBJECTS AND SERIALIZING");
+                LoggingHandler.LogInfo($"Error writing values to objects and serializing");
                 LoggingHandler.LogInfo(exc.ToString());
 
                 throw;

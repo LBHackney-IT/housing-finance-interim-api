@@ -15,9 +15,7 @@
     <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="5.1.1" />
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
-    <PackageReference Include="AWSSDK.StepFunctions" Version="3.7.0.51" />
     <PackageReference Include="EFCore.BulkExtensions" Version="5.3.8" />
-    <PackageReference Include="Mapster" Version="7.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.HealthChecks" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="4.1.1" />
@@ -35,7 +33,6 @@
   <ItemGroup>
     <Folder Include="Properties\" />
     <Folder Include="terraform\" />
-    <Folder Include="V1\Domain\AutoMaps\" />
   </ItemGroup>
 
 </Project>

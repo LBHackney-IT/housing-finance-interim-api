@@ -41,14 +41,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"STARTING DIRECT DEBIT IMPORT");
-
-            var existBatchToday = await _batchLogGateway.GetAsync(DirectDebitLabel).ConfigureAwait(false);
-            if (existBatchToday != null)
-            {
-                LoggingHandler.LogInfo($"EXISTS A DIRECT DEBIT LOAD PROCESS TODAY");
-                return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(0) };
-            }
+            LoggingHandler.LogInfo($"Starting direct debit import");
 
             const string sheetName = "Active";
             const string sheetRange = "A:C";
@@ -65,22 +58,22 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             if (!directDebits.Any())
             {
-                LoggingHandler.LogInfo($"NO DIRECT DEBIT DATA TO IMPORT");
+                LoggingHandler.LogInfo($"No direct debit data to import");
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
             }
 
             await HandleSpreadSheet(batch.Id, directDebits).ConfigureAwait(false);
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"END DIRECT DEBIT IMPORT");
+            LoggingHandler.LogInfo($"End direct debit import");
             return new StepResponse() { Continue = true, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
         }
 
         private async Task<GoogleFileSettingDomain> GetGoogleFileSetting(string label)
         {
-            LoggingHandler.LogInfo($"GETTING GOOGLE FILE SETTING FOR '{label}' LABEL");
+            LoggingHandler.LogInfo($"Getting Google file setting for '{label}' label");
             var googleFileSettings = await _googleFileSettingGateway.GetSettingsByLabel(label).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"{googleFileSettings.Count} GOOGLE FILE SETTINGS FOUND");
+            LoggingHandler.LogInfo($"{googleFileSettings.Count} Google file settings found");
 
             return googleFileSettings.FirstOrDefault();
         }
@@ -89,24 +82,24 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             try
             {
-                LoggingHandler.LogInfo($"CLEAR AUX TABLE");
+                LoggingHandler.LogInfo($"Clear aux table");
                 await _directDebitGateway.ClearDirectDebitAuxiliary().ConfigureAwait(false);
 
-                LoggingHandler.LogInfo($"STARTING BULK INSERT");
+                LoggingHandler.LogInfo($"Starting bulk insert");
                 await _directDebitGateway.CreateBulkAsync(directDebits).ConfigureAwait(false);
 
-                LoggingHandler.LogInfo($"STARTING MERGE DIRECT DEBIT");
+                LoggingHandler.LogInfo($"Starting merge direct debit");
                 await _directDebitGateway.LoadDirectDebit(batchId).ConfigureAwait(false);
 
-                LoggingHandler.LogInfo("FILE SUCCESS");
+                LoggingHandler.LogInfo("File success");
             }
             catch (Exception exc)
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(HandleSpreadSheet)}";
 
-                await _batchLogErrorGateway.CreateAsync(batchId, "ERROR", $"APPLICATION ERROR. NOT POSSIBLE TO LOAD DIRECT DEBITS").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batchId, "ERROR", $"Application error. Not possible to load direct debits").ConfigureAwait(false);
 
-                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;

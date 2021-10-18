@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Factories;
+using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Handlers;
+using Microsoft.EntityFrameworkCore;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {

@@ -40,7 +40,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"STARTING GENERATE RENT POSITION");
+            LoggingHandler.LogInfo($"Starting generate rent position");
 
             var fileName = "RentPosition.csv";
             var batch = await _batchLogGateway.CreateAsync(_rentPositionLabel).ConfigureAwait(false);
@@ -68,10 +68,10 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     var folderFiles = await _googleClientService.GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier)
                         .ConfigureAwait(false);
 
-                    LoggingHandler.LogInfo($"FOLDER ID: {googleFileSetting.GoogleIdentifier}");
-                    LoggingHandler.LogInfo($"FILE COUNT: {folderFiles.Count}");
+                    LoggingHandler.LogInfo($"Folder ID: {googleFileSetting.GoogleIdentifier}");
+                    LoggingHandler.LogInfo($"File count: {folderFiles.Count}");
 
-                    LoggingHandler.LogInfo($"DELETING OLD FILES");
+                    LoggingHandler.LogInfo($"Deleting old files");
                     foreach (var file in folderFiles.Where(f => f.Name.Equals(fileName)).ToList())
                     {
                         await _googleClientService.DeleteFileInDrive(file.Id).ConfigureAwait(false);
@@ -89,16 +89,16 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 }
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-                LoggingHandler.LogInfo($"END GENERATE RENT POSITION");
+                LoggingHandler.LogInfo($"End generate rent position");
                 return new StepResponse() { Continue = true, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
             }
             catch (Exception exc)
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
 
-                await _batchLogErrorGateway.CreateAsync(batch.Id, _rentPositionLabel, $"APPLICATION ERROR. NOT POSSIBLE TO GENERATE RENT POSITION CSV FILE").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batch.Id, _rentPositionLabel, $"Application error. Not possible to generate rent position csv file").ConfigureAwait(false);
 
-                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;
@@ -107,9 +107,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         private async Task<List<GoogleFileSettingDomain>> GetGoogleFileSetting(string label)
         {
-            LoggingHandler.LogInfo($"GETTING GOOGLE FILE SETTINGS FOR '{label}' LABEL");
+            LoggingHandler.LogInfo($"Getting Google file settings for '{label}' label");
             var googleFileSettings = await _googleFileSettingGateway.GetSettingsByLabel(label).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"{googleFileSettings.Count} GOOGLE FILE SETTINGS FOUND");
+            LoggingHandler.LogInfo($"{googleFileSettings.Count} google file settings found");
 
             return googleFileSettings;
         }

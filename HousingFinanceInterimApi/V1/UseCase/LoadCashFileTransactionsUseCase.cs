@@ -37,17 +37,17 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"STARTING CASH FILE TRANSACTIONS IMPORT");
+            LoggingHandler.LogInfo($"Starting cash file transactions import");
             var batch = await _batchLogGateway.CreateAsync(_label).ConfigureAwait(false);
             try
             {
-                LoggingHandler.LogInfo($"LOAD UpCashLoad TABLE");
+                LoggingHandler.LogInfo($"Load UpCashLoad table");
                 await _upCashLoadGateway.LoadCashFiles().ConfigureAwait(false);
-                LoggingHandler.LogInfo($"CONVERT UpCashLoad IN TRANSACTIONS");
+                LoggingHandler.LogInfo($"Convert UpCashLoad in transactions");
                 await _transactionGateway.LoadCashFilesTransactions().ConfigureAwait(false);
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-                LoggingHandler.LogInfo($"END CASH FILE TRANSACTIONS IMPORT");
+                LoggingHandler.LogInfo($"End cash file transactions import");
                 return new StepResponse()
                 {
                     Continue = true,
@@ -58,9 +58,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
 
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"APPLICATION ERROR. NOT POSSIBLE TO LOAD CASH FILES TRANSACTIONS").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"Application error. Not possible to load cash files transactions").ConfigureAwait(false);
 
-                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;

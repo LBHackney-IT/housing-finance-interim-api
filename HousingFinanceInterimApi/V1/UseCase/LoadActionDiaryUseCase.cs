@@ -41,7 +41,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"STARTING ACTION DIARY IMPORT");
+            LoggingHandler.LogInfo($"Starting action diary import");
 
             const string sheetName = "Active";
             const string sheetRange = "A:H";
@@ -58,22 +58,22 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             if (!actionDiaryAux.Any())
             {
-                LoggingHandler.LogInfo($"NO ACTION DIARY DATA TO IMPORT");
+                LoggingHandler.LogInfo($"No action diary data to import");
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
             }
 
             await HandleSpreadSheet(batch.Id, actionDiaryAux).ConfigureAwait(false);
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"END ACTION DIARY IMPORT");
+            LoggingHandler.LogInfo($"End action diary import");
             return new StepResponse() { Continue = true, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
         }
 
         private async Task<GoogleFileSettingDomain> GetGoogleFileSetting(string label)
         {
-            LoggingHandler.LogInfo($"GETTING GOOGLE FILE SETTING FOR '{label}' LABEL");
+            LoggingHandler.LogInfo($"Getting Google file setting for '{label}' label");
             var googleFileSettings = await _googleFileSettingGateway.GetSettingsByLabel(label).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"{googleFileSettings.Count} GOOGLE FILE SETTINGS FOUND");
+            LoggingHandler.LogInfo($"{googleFileSettings.Count} Google file settings found");
 
             return googleFileSettings.FirstOrDefault();
         }
@@ -82,24 +82,24 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             try
             {
-                LoggingHandler.LogInfo($"CLEAR AUX TABLE");
+                LoggingHandler.LogInfo($"Clear aux table");
                 await _actionDiaryGateway.ClearActionDiaryAuxiliary().ConfigureAwait(false);
 
-                LoggingHandler.LogInfo($"STARTING BULK INSERT");
+                LoggingHandler.LogInfo($"Starting bulk insert");
                 await _actionDiaryGateway.CreateBulkAsync(actionDiaryAux).ConfigureAwait(false);
 
-                LoggingHandler.LogInfo($"STARTING MERGE ACTION DIARY");
+                LoggingHandler.LogInfo($"Starting merge action diary");
                 await _actionDiaryGateway.LoadActionDiary().ConfigureAwait(false);
 
-                LoggingHandler.LogInfo("FILE SUCCESS");
+                LoggingHandler.LogInfo("File success");
             }
             catch (Exception exc)
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(HandleSpreadSheet)}";
 
-                await _batchLogErrorGateway.CreateAsync(batchId, _actionDiaryLabel, $"APPLICATION ERROR. NOT POSSIBLE TO LOAD ACTION DIARY").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batchId, _actionDiaryLabel, $"Application error. Not possible to load action diary").ConfigureAwait(false);
 
-                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;

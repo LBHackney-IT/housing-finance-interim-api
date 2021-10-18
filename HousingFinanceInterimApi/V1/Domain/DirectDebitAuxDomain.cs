@@ -1,4 +1,5 @@
 using System;
+using HousingFinanceInterimApi.JsonConverters;
 using Newtonsoft.Json;
 
 namespace HousingFinanceInterimApi.V1.Domain
@@ -10,8 +11,9 @@ namespace HousingFinanceInterimApi.V1.Domain
         [JsonProperty("Rent Account")]
         public string RentAccount { get; set; }
 
-        [JsonProperty("Due Day")]
-        public byte DueDay { get; set; }
+        [JsonProperty("Date")]
+        [JsonConverter(typeof(DateTimeFormat))]
+        public DateTime Date { get; set; }
 
         [JsonProperty("Amount")]
         public decimal Amount { get; set; }

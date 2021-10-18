@@ -41,12 +41,12 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"STARTING CHARGES IMPORT");
+            LoggingHandler.LogInfo($"Starting charges import");
 
             var existBatchToday = await _batchLogGateway.GetAsync(ChargesLabel).ConfigureAwait(false);
             if (existBatchToday != null)
             {
-                LoggingHandler.LogInfo($"EXISTS A DIRECT DEBIT LOAD PROCESS TODAY");
+                LoggingHandler.LogInfo($"Exists a charges load process today");
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(0) };
             }
 
@@ -65,22 +65,22 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             if (!chargesAux.Any())
             {
-                LoggingHandler.LogInfo($"NO CHARGES DATA TO IMPORT");
+                LoggingHandler.LogInfo($"No charges data to import");
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
             }
 
             await HandleSpreadSheet(batch.Id, chargesAux).ConfigureAwait(false);
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"END CHARGES IMPORT");
+            LoggingHandler.LogInfo($"End charges import");
             return new StepResponse() { Continue = true, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
         }
 
         private async Task<GoogleFileSettingDomain> GetGoogleFileSetting(string label)
         {
-            LoggingHandler.LogInfo($"GETTING GOOGLE FILE SETTING FOR '{label}' LABEL");
+            LoggingHandler.LogInfo($"Getting Google file setting for '{label}' label");
             var googleFileSettings = await _googleFileSettingGateway.GetSettingsByLabel(label).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"{googleFileSettings.Count} GOOGLE FILE SETTINGS FOUND");
+            LoggingHandler.LogInfo($"{googleFileSettings.Count} Google file settings found");
 
             return googleFileSettings.FirstOrDefault();
         }
@@ -89,24 +89,24 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             try
             {
-                LoggingHandler.LogInfo($"CLEAR AUX TABLE");
+                LoggingHandler.LogInfo($"Clear aux table");
                 await _chargesGateway.ClearChargesAuxiliary().ConfigureAwait(false);
 
-                LoggingHandler.LogInfo($"STARTING BULK INSERT");
+                LoggingHandler.LogInfo($"Starting bulk insert");
                 await _chargesGateway.CreateBulkAsync(chargesAux).ConfigureAwait(false);
 
-                LoggingHandler.LogInfo($"STARTING MERGE CHARGES");
+                LoggingHandler.LogInfo($"Starting merge charges");
                 await _chargesGateway.LoadCharges().ConfigureAwait(false);
 
-                LoggingHandler.LogInfo("FILE SUCCESS");
+                LoggingHandler.LogInfo("File success");
             }
             catch (Exception exc)
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(HandleSpreadSheet)}";
 
-                await _batchLogErrorGateway.CreateAsync(batchId, ChargesLabel, $"APPLICATION ERROR. NOT POSSIBLE TO LOAD CHARGES").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batchId, ChargesLabel, $"Application error. Not possible to load charges").ConfigureAwait(false);
 
-                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;

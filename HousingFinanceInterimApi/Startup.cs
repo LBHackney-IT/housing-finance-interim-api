@@ -138,9 +138,9 @@ namespace HousingFinanceInterimApi
         {
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             services.AddDbContext<DatabaseContext>(opt => opt.UseSqlServer(connectionString, sqlOptions =>
-             {
-                 sqlOptions.CommandTimeout(360);
-             }));
+            {
+                sqlOptions.CommandTimeout(360);
+            }));
         }
 
         private static void RegisterGateways(IServiceCollection services)
@@ -151,14 +151,11 @@ namespace HousingFinanceInterimApi
             services.AddScoped<ITransactionGateway, TransactionGateway>();
             services.AddScoped<IBatchLogGateway, BatchLogGateway>();
             services.AddScoped<IBatchLogErrorGateway, BatchLogErrorGateway>();
-            services.AddScoped<ISuspenseAccountGateway, SuspenseAccountGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
         {
             services.AddScoped<IGetBatchLogErrorUseCase, GetBatchLogErrorUseCase>();
-            services.AddScoped<IGetSuspenseAccountsUseCase, GetSuspenseAccountsUseCase>();
-            services.AddScoped<IUpdateSuspenseAccountsUseCase, UpdateSuspenseAccountsUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -173,7 +170,8 @@ namespace HousingFinanceInterimApi
                 app.UseHsts();
             }
 
-            app.UseCors(options => options.WithOrigins("http://localhost:3000", "https://dmg8fqy2zxv7c.cloudfront.net", "https://eoy-report-development.hackney.gov.uk")
+            var origins = Environment.GetEnvironmentVariable("ACCEPTED_ORIGINS").Split(",");
+            app.UseCors(options => options.WithOrigins(origins)
                 .AllowAnyMethod()
                 .AllowAnyHeader());
 

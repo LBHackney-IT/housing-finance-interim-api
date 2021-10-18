@@ -37,18 +37,15 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync(DateTime? processingDate = null)
         {
-            LoggingHandler.LogInfo($"STARTING DIRECT DEBIT TRANSACTIONS IMPORT");
+            LoggingHandler.LogInfo($"Starting direct debit transactions import");
             var batch = await _batchLogGateway.CreateAsync(_label).ConfigureAwait(false);
             try
             {
-                LoggingHandler.LogInfo($"LOAD DirectDebitHistory TABLE");
-
-                await _directDebitGateway.LoadDirectDebitHistory(processingDate).ConfigureAwait(false);
-                LoggingHandler.LogInfo($"CONVERT DirectDebitHistory IN TRANSACTIONS");
+                LoggingHandler.LogInfo($"Convert DirectDebitHistory in transactions");
                 await _transactionGateway.LoadDirectDebitTransactions().ConfigureAwait(false);
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-                LoggingHandler.LogInfo($"END CASH FILE TRANSACTIONS IMPORT");
+                LoggingHandler.LogInfo($"End direct debit transactions import");
                 return new StepResponse()
                 {
                     Continue = true,
@@ -59,9 +56,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
 
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"APPLICATION ERROR. NOT POSSIBLE TO LOAD DIRECT DEBIT TRANSACTIONS").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"Application error. Not possible to load direct debit transactions").ConfigureAwait(false);
 
-                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;
@@ -70,23 +67,23 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteOnDemandAsync(DateTime startDate, DateTime endDate)
         {
-            LoggingHandler.LogInfo($"STARTING DIRECT DEBIT TRANSACTIONS ON DEMAND IMPORT");
+            LoggingHandler.LogInfo($"Starting direct debit transactions on demand import");
             var batch = await _batchLogGateway.CreateAsync(_label).ConfigureAwait(false);
             try
             {
                 while (startDate <= endDate)
                 {
-                    LoggingHandler.LogInfo($"LOAD DirectDebitHistory TABLE");
+                    LoggingHandler.LogInfo($"Load DirectDebitHistory table");
                     await _directDebitGateway.LoadDirectDebitHistory(startDate).ConfigureAwait(false);
 
-                    LoggingHandler.LogInfo($"CONVERT DirectDebitHistory IN TRANSACTIONS");
+                    LoggingHandler.LogInfo($"Convert DirectDebitHistory in transactions");
                     await _transactionGateway.LoadDirectDebitTransactions().ConfigureAwait(false);
 
                     startDate = startDate.Date.AddDays(1);
                 }
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-                LoggingHandler.LogInfo($"END DIRECT DEBIT TRANSACTIONS ON DEMAND IMPORT");
+                LoggingHandler.LogInfo($"End direct debit transactions on demand import");
                 return new StepResponse()
                 {
                     Continue = true,
@@ -97,9 +94,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
 
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"APPLICATION ERROR. NOT POSSIBLE TO LOAD DIRECT DEBIT TRANSACTIONS ON DEMAND").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"Application error. Not possible to load direct debit transactions on demand").ConfigureAwait(false);
 
-                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;

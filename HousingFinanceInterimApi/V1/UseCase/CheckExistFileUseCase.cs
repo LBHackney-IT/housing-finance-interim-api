@@ -29,7 +29,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync(string label)
         {
-            LoggingHandler.LogInfo($"CHECKING IF EXIST PENDING FOR {label} LABEL");
+            LoggingHandler.LogInfo($"Checking if exist pending for {label} label");
             var existFile = false;
             var googleFileSettings = await GetGoogleFileSetting(label).ConfigureAwait(false);
 
@@ -48,7 +48,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 }
             }
 
-            LoggingHandler.LogInfo($"EXIST PENDING FOR {label} LABEL: {existFile}");
+            LoggingHandler.LogInfo($"Exist pending for {label} label: {existFile}");
             return new StepResponse()
             {
                 Continue = existFile,
@@ -58,9 +58,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         private async Task<List<GoogleFileSettingDomain>> GetGoogleFileSetting(string label)
         {
-            LoggingHandler.LogInfo($"GETTING GOOGLE FILE SETTINGS FOR '{label}' LABEL");
+            LoggingHandler.LogInfo($"Getting google file settings for '{label}' label");
             var googleFileSettings = await _googleFileSettingGateway.GetSettingsByLabel(label).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"{googleFileSettings.Count} GOOGLE FILE SETTINGS FOUND");
+            LoggingHandler.LogInfo($"{googleFileSettings.Count} Google file settings found");
 
             return googleFileSettings;
         }

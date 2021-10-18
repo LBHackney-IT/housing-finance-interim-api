@@ -24,12 +24,12 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"STARTING REFRESH CURRENT BALANCE");
+            LoggingHandler.LogInfo($"Starting refresh current balance");
             try
             {
                 await _currentBalanceGateway.UpdateCurrentBalance().ConfigureAwait(false);
 
-                LoggingHandler.LogInfo($"END REFRESH CURRENT BALANCE");
+                LoggingHandler.LogInfo($"End refresh current balance");
                 return new StepResponse()
                 {
                     Continue = true,
@@ -40,7 +40,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
 
-                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;

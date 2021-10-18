@@ -42,7 +42,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"STARTING ADJUSTMENT IMPORT");
+            LoggingHandler.LogInfo($"Starting adjustment import");
 
             const string sheetName = "Active";
             const string sheetRange = "A:G";
@@ -59,22 +59,22 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             if (!adjustment.Any())
             {
-                LoggingHandler.LogInfo($"NO ADJUSTMENT DATA TO IMPORT");
+                LoggingHandler.LogInfo($"No adjustment data to import");
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
             }
 
             await HandleSpreadSheet(batch.Id, adjustment).ConfigureAwait(false);
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"END ADJUSTMENT IMPORT");
+            LoggingHandler.LogInfo($"End adjustment import");
             return new StepResponse() { Continue = true, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
         }
 
         private async Task<GoogleFileSettingDomain> GetGoogleFileSetting(string label)
         {
-            LoggingHandler.LogInfo($"GETTING GOOGLE FILE SETTING FOR '{label}' LABEL");
+            LoggingHandler.LogInfo($"Getting Google file setting for '{label}' label");
             var googleFileSettings = await _googleFileSettingGateway.GetSettingsByLabel(label).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"{googleFileSettings.Count} GOOGLE FILE SETTINGS FOUND");
+            LoggingHandler.LogInfo($"{googleFileSettings.Count} Google file settings found");
 
             return googleFileSettings.FirstOrDefault();
         }
@@ -83,21 +83,21 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             try
             {
-                LoggingHandler.LogInfo($"STARTING BULK INSERT");
+                LoggingHandler.LogInfo($"Starting bulk insert");
                 await _adjustmentGateway.CreateBulkAsync(adjustment).ConfigureAwait(false);
 
-                LoggingHandler.LogInfo($"STARTING MERGE ADJUSTMENT");
+                LoggingHandler.LogInfo($"Starting merge adjustment");
                 await _adjustmentGateway.LoadTransactions().ConfigureAwait(false);
 
-                LoggingHandler.LogInfo("FILE SUCCESS");
+                LoggingHandler.LogInfo("File success");
             }
             catch (Exception exc)
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(HandleSpreadSheet)}";
 
-                await _batchLogErrorGateway.CreateAsync(batchId, _adjustmentLabel, $"APPLICATION ERROR. NOT POSSIBLE TO LOAD ADJUSTMENT").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batchId, _adjustmentLabel, $"Application error. Not possible to load adjustment").ConfigureAwait(false);
 
-                LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;

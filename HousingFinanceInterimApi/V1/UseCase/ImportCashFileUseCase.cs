@@ -45,7 +45,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"STARTING CASH FILE IMPORT");
+            LoggingHandler.LogInfo($"Starting cash file import");
 
             var batch = await _batchLogGateway.CreateAsync(_cashFileLabel).ConfigureAwait(false);
             var googleFileSettings = await GetGoogleFileSetting(_cashFileLabel).ConfigureAwait(false);
@@ -58,14 +58,14 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     item.Name.EndsWith(googleFileSetting.FileType) &&
                     !_listExcludedFileStartWith.Any(y => item.Name.StartsWith(y))).ToList();
 
-                LoggingHandler.LogInfo($"FOLDER ID: {googleFileSetting.GoogleIdentifier}");
-                LoggingHandler.LogInfo($"FILE COUNT: {folderFiles.Count}");
+                LoggingHandler.LogInfo($"Folder Id: {googleFileSetting.GoogleIdentifier}");
+                LoggingHandler.LogInfo($"File count: {folderFiles.Count}");
 
                 await HandleCashFile(batch.Id, folderFiles).ConfigureAwait(false);
             }
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"END CASH FILE IMPORT");
+            LoggingHandler.LogInfo($"End cash file import");
             return new StepResponse()
             {
                 Continue = true,
@@ -75,9 +75,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         private async Task<List<GoogleFileSettingDomain>> GetGoogleFileSetting(string label)
         {
-            LoggingHandler.LogInfo($"GETTING GOOGLE FILE SETTINGS FOR '{label}' LABEL");
+            LoggingHandler.LogInfo($"Getting google file settings for '{label}' label");
             var googleFileSettings = await _googleFileSettingGateway.GetSettingsByLabel(label).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"{googleFileSettings.Count} GOOGLE FILE SETTINGS FOUND");
+            LoggingHandler.LogInfo($"{googleFileSettings.Count} Google file settings found");
 
             return googleFileSettings;
         }
@@ -98,15 +98,15 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 if (_listExcludedFileStartWith.Any(y => fileItem.Name.StartsWith(y)))
                     continue;
 
-                LoggingHandler.LogInfo($"FILE NAME: {fileItem.Name}");
+                LoggingHandler.LogInfo($"Filename: {fileItem.Name}");
                 try
                 {
-                    LoggingHandler.LogInfo($"CHECKING IF FILE NAME IS CORRECT");
+                    LoggingHandler.LogInfo($"Checking if filename is correct");
                     var checkFileName = CheckFileName(fileItem.Name, _cashFileRegex);
                     if (!checkFileName)
                     {
                         await LogAndRenameFileError(batchId,
-                            $"NON-STANDARD CASH FILENAME (CashFileYYYYMMDD). CHECK FILE NAME: {fileItem.Name}",
+                            $"Non-standard cash filename (CashFileYYYYMMDD). Check file name: {fileItem.Name}",
                             "WARNING",
                             fileItem)
                             .ConfigureAwait(false);
@@ -114,12 +114,12 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         continue;
                     }
 
-                    LoggingHandler.LogInfo($"CHECKING IF THE FILE HAS ALREADY LOADED");
+                    LoggingHandler.LogInfo($"Checking if the file has already loaded");
                     var getResult = await _upCashDumpFileNameGateway.GetProcessedFileByName(fileItem.Name).ConfigureAwait(false);
                     if (getResult != null)
                     {
                         await LogAndRenameFileError(batchId,
-                                $"FILE {fileItem.Name} ALREADY EXIST",
+                                $"File {fileItem.Name} already exist",
                                 "WARNING",
                                 fileItem)
                             .ConfigureAwait(false);
@@ -127,12 +127,12 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         continue;
                     }
 
-                    LoggingHandler.LogInfo($"CREATING FILE ENTRY");
+                    LoggingHandler.LogInfo($"Creating file entry");
                     var upCashDumpFileName = await _upCashDumpFileNameGateway.CreateAsync(fileItem.Name).ConfigureAwait(false);
                     if (upCashDumpFileName == null)
                     {
                         await LogAndRenameFileError(batchId,
-                                $"FILE ENTRY {fileItem.Name} NOT CREATED",
+                                $"File entry {fileItem.Name} not created",
                                 "WARNING",
                                 fileItem)
                             .ConfigureAwait(false);
@@ -143,12 +143,12 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     var fileLines = await _googleClientService.ReadFileLineDataAsync(fileItem.Name, fileItem.Id, fileItem.MimeType).ConfigureAwait(false);
                     fileLines = fileLines.Where(item => !string.IsNullOrWhiteSpace(item)).ToList();
 
-                    LoggingHandler.LogInfo($"ROW COUNT: {fileLines.Count}");
+                    LoggingHandler.LogInfo($"Row count: {fileLines.Count}");
 
-                    LoggingHandler.LogInfo($"STARTING BULK INSERT");
+                    LoggingHandler.LogInfo($"Starting bulk insert");
                     await _upCashDumpGateway.CreateBulkAsync(upCashDumpFileName.Id, fileLines).ConfigureAwait(false);
 
-                    LoggingHandler.LogInfo("FILE SUCCESS");
+                    LoggingHandler.LogInfo("File success");
                     await _googleClientService.RenameFileInDrive(fileItem.Id, $"OK_{fileItem.Name}").ConfigureAwait(false);
                     await _upCashDumpFileNameGateway.SetToSuccessAsync(upCashDumpFileName.Id).ConfigureAwait(false);
                 }
@@ -156,10 +156,10 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 {
                     var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(HandleCashFile)}";
 
-                    await _batchLogErrorGateway.CreateAsync(batchId, "ERROR", $"APPLICATION ERROR. NOT POSSIBLE TO LOAD CASH FILES ({fileItem.Name})").ConfigureAwait(false);
+                    await _batchLogErrorGateway.CreateAsync(batchId, "ERROR", $"Application error. Not possible to load cash files ({fileItem.Name})").ConfigureAwait(false);
                     await _googleClientService.RenameFileInDrive(fileItem.Id, $"NOK_{fileItem.Name}").ConfigureAwait(false);
 
-                    LoggingHandler.LogError($"{namespaceLabel} APPLICATION ERROR");
+                    LoggingHandler.LogError($"{namespaceLabel} Application error");
                     LoggingHandler.LogError(exc.ToString());
 
                     throw;
