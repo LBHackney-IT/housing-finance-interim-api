@@ -131,10 +131,7 @@ workflows:
             - build-and-test
       - deploy-to-development:
           requires:
-            - assume-role-development
-          filters:
-            branches:
-              only: development
+            - assume-role-development          
   check-and-deploy-staging-and-production:
     jobs:
       - build-and-test:
