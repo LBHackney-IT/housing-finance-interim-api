@@ -47,8 +47,6 @@ namespace HousingFinanceInterimApi
             services.Configure<ApiOptions>(apiOptionsConfigSection);
             ApiOptions apiOptions = apiOptionsConfigSection.Get<ApiOptions>();
 
-
-            services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddApiVersioning(o =>
@@ -169,11 +167,6 @@ namespace HousingFinanceInterimApi
             {
                 app.UseHsts();
             }
-
-            var origins = Environment.GetEnvironmentVariable("ACCEPTED_ORIGINS").Split(",");
-            app.UseCors(options => options.WithOrigins(origins)
-                .AllowAnyMethod()
-                .AllowAnyHeader());
 
             // Get All ApiVersions,
             IApiVersionDescriptionProvider api = app.ApplicationServices.GetService<IApiVersionDescriptionProvider>();
