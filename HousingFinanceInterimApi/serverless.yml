@@ -41,7 +41,8 @@ functions:
             resultTtlInSeconds: 0
             identitySource: method.request.header.Authorization
             managedExternally: true
-          cors: true
+          cors:
+            origin: '*'
   loadTenancyAgreement:
     name: ${self:service}-${self:provider.stage}-load-tenagree
     description: "The scheduler to update and add new tenancy agreements. Run at 12:15 AM"
