@@ -43,6 +43,15 @@ functions:
             managedExternally: true
           cors:
             origin: '*'
+            headers:
+              - Content-Type
+              - If-Match
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
   loadTenancyAgreement:
     name: ${self:service}-${self:provider.stage}-load-tenagree
     description: "The scheduler to update and add new tenancy agreements. Run at 12:15 AM"
