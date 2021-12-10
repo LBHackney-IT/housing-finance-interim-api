@@ -21,11 +21,11 @@ namespace HousingFinanceInterimApi.V1.Domain
         public string Tenure { get; set; }
 
         [JsonProperty("Start Date")]
-        [JsonConverter(typeof(DateFormatConverter), "dd/MM/yyyy")]
+        [JsonConverter(typeof(DateTimeFormat))]
         public DateTime? StartDate { get; set; }
 
         [JsonProperty("End Date")]
-        [JsonConverter(typeof(DateFormatConverter), "dd/MM/yyyy")]
+        [JsonConverter(typeof(DateTimeFormat))]
         public DateTime? EndDate { get; set; }
 
         [JsonProperty("Property Ref")]
