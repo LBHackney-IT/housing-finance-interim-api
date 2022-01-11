@@ -10,9 +10,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         [Key]
         public long Id { get; set; }
 
-        public string TenancyAgreementRef { get; set; }
-
-        public string RentAccount { get; set; }
+        public string PaymentRef { get; set; }
 
         public string RentGroup { get; set; }
 
@@ -30,9 +28,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public string PostCode { get; set; }
 
-        public int NumBedrooms { get; set; }
-
-        public string HouseholdRef { get; set; }
+        public int? NumBedrooms { get; set; }
 
         public string Title { get; set; }
 
@@ -40,15 +36,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public string Surname { get; set; }
 
-        public int Age { get; set; }
-
-        public string ContactName { get; set; }
-
-        public string ContactAddress { get; set; }
-
-        public string ContactPostCode { get; set; }
-
-        public string ContactPhone { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTimeOffset TimeStamp { get; set; }

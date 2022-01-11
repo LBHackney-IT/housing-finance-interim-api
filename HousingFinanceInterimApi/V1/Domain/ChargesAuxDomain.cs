@@ -7,14 +7,8 @@ namespace HousingFinanceInterimApi.V1.Domain
     {
         public long Id { get; set; }
 
-        [JsonProperty("Tenancy Agreement Ref")]
-        public string TenancyAgreementRef { get; set; }
-
         [JsonProperty("Property Ref")]
         public string PropertyRef { get; set; }
-
-        [JsonProperty("Charge Period")]
-        public string ChargePeriod { get; set; }
 
         [JsonProperty("Assignment SC Trans")]
         public decimal? DAT { get; set; }

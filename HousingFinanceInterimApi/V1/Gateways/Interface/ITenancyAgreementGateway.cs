@@ -7,7 +7,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
 {
     public interface ITenancyAgreementGateway
     {
-        public Task CreateBulkAsync(IList<TenancyAgreementAuxDomain> directDebitsDomain);
+        public Task CreateBulkAsync(IList<TenancyAgreementAuxDomain> directDebitsDomain, string rentGroup);
 
         public Task ClearTenancyAgreementAuxiliary();
 

@@ -11,7 +11,6 @@ using HousingFinanceInterimApi.V1.Handlers;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
-
     public class TenancyAgreementGateway : ITenancyAgreementGateway
     {
         private readonly DatabaseContext _context;
@@ -24,15 +23,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
         }
 
         public async Task CreateBulkAsync(
-            IList<TenancyAgreementAuxDomain> tenancyAgreementAuxDomain)
+            IList<TenancyAgreementAuxDomain> tenancyAgreementAuxDomain, string rentGroup)
         {
             try
             {
                 var tenancyAgreementAux = tenancyAgreementAuxDomain.Select(t => new TenancyAgreementAux()
                 {
-                    TenancyAgreementRef = t.TenancyAgreementRef,
-                    RentAccount = t.RentAccount,
-                    RentGroup = t.RentGroup,
+                    PaymentRef = t.PaymentRef,
+                    RentGroup = rentGroup,
                     Tenure = t.Tenure,
                     StartDate = t.StartDate ?? null,
                     EndDate = t.EndDate ?? null,
@@ -41,15 +39,10 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     Address = t.Address,
                     PostCode = t.PostCode,
                     NumBedrooms = t.NumBedrooms ?? 0,
-                    HouseholdRef = t.HouseholdRef,
                     Title = t.Title,
                     Forename = t.Forename,
                     Surname = t.Surname,
-                    Age = t.Age ?? 0,
-                    ContactName = t.ContactName,
-                    ContactAddress = t.ContactAddress,
-                    ContactPostCode = t.ContactPostCode,
-                    ContactPhone = t.ContactPhone
+                    DateOfBirth = t.DateOfBirth
                 }).ToList();
 
                 await _context.BulkInsertAsync(tenancyAgreementAux, new BulkConfig { BatchSize = _batchSize }).ConfigureAwait(false);

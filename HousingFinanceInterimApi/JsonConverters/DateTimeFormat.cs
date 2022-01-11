@@ -39,7 +39,7 @@ namespace HousingFinanceInterimApi.JsonConverters
         {
             string value = reader.Value.ToString();
 
-            string[] formats = { "dd/MM/yyyy HH:mm:ss", "dd/MM/yyyy" };
+            string[] formats = { "dd/MM/yyyy HH:mm:ss", "dd/MM/yyyy", "dd/M/yyyy HH:mm:ss", "dd/M/yyyy" };
             DateTime dt;
             if (DateTime.TryParseExact(value, formats, CultureInfo.CurrentCulture,
                 DateTimeStyles.None, out dt))

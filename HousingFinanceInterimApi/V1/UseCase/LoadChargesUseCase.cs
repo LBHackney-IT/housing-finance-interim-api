@@ -50,8 +50,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(0) };
             }
 
-            const string sheetName = "Active";
-            const string sheetRange = "A:AZ";
+            const string sheetRange = "A:AX";
 
             var batch = await _batchLogGateway.CreateAsync(ChargesLabel).ConfigureAwait(false);
             var googleFileSettings = await GetGoogleFileSetting(ChargesLabel).ConfigureAwait(false);
@@ -59,17 +58,20 @@ namespace HousingFinanceInterimApi.V1.UseCase
             if (googleFileSettings == null)
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
 
-            var chargesAux = await _googleClientService
-                .ReadSheetToEntitiesAsync<ChargesAuxDomain>(googleFileSettings.GoogleIdentifier, sheetName, sheetRange)
-                .ConfigureAwait(false);
-
-            if (!chargesAux.Any())
+            foreach (var sheetName in Enum.GetValues(typeof(RentGroup)))
             {
-                LoggingHandler.LogInfo($"No charges data to import");
-                return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
-            }
+                var chargesAux = await _googleClientService
+                    .ReadSheetToEntitiesAsync<ChargesAuxDomain>(googleFileSettings.GoogleIdentifier, sheetName.ToString(), sheetRange)
+                    .ConfigureAwait(false);
 
-            await HandleSpreadSheet(batch.Id, chargesAux).ConfigureAwait(false);
+                if (!chargesAux.Any())
+                {
+                    LoggingHandler.LogInfo($"No charges data to import. Sheet name: {sheetName}");
+                    continue;
+                }
+
+                await HandleSpreadSheet(batch.Id, chargesAux, sheetName.ToString()).ConfigureAwait(false);
+            }
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
             LoggingHandler.LogInfo($"End charges import");
@@ -85,7 +87,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             return googleFileSettings.FirstOrDefault();
         }
 
-        private async Task HandleSpreadSheet(long batchId, IList<ChargesAuxDomain> chargesAux)
+        private async Task HandleSpreadSheet(long batchId, IList<ChargesAuxDomain> chargesAux, string rentGroup)
         {
             try
             {
@@ -93,7 +95,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 await _chargesGateway.ClearChargesAuxiliary().ConfigureAwait(false);
 
                 LoggingHandler.LogInfo($"Starting bulk insert");
-                await _chargesGateway.CreateBulkAsync(chargesAux).ConfigureAwait(false);
+                await _chargesGateway.CreateBulkAsync(chargesAux, rentGroup).ConfigureAwait(false);
 
                 LoggingHandler.LogInfo($"Starting merge charges");
                 await _chargesGateway.LoadCharges().ConfigureAwait(false);
