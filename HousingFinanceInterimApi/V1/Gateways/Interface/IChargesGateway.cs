@@ -7,7 +7,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
 {
     public interface IChargesGateway
     {
-        public Task CreateBulkAsync(IList<ChargesAuxDomain> directDebitsDomain);
+        public Task CreateBulkAsync(IList<ChargesAuxDomain> directDebitsDomain, string rentGroup);
 
         public Task ClearChargesAuxiliary();
 

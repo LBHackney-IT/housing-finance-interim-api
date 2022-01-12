@@ -10,11 +10,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         [Key]
         public long Id { get; set; }
 
-        public string TenancyAgreementRef { get; set; }
-
         public string PropertyRef { get; set; }
 
-        public string ChargePeriod { get; set; }
+        public string RentGroup { get; set; }
 
         public decimal DAT { get; set; }
 

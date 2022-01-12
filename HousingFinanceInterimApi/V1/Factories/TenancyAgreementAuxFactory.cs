@@ -15,9 +15,7 @@ namespace HousingFinanceInterimApi.V1.Factories
             return new TenancyAgreementAuxDomain
             {
                 Id = tenancyAgreementAux.Id,
-                TenancyAgreementRef = tenancyAgreementAux.TenancyAgreementRef,
-                RentAccount = tenancyAgreementAux.RentAccount,
-                RentGroup = tenancyAgreementAux.RentGroup,
+                PaymentRef = tenancyAgreementAux.PaymentRef,
                 Tenure = tenancyAgreementAux.Tenure,
                 StartDate = tenancyAgreementAux.StartDate,
                 EndDate = tenancyAgreementAux.EndDate,
@@ -26,15 +24,10 @@ namespace HousingFinanceInterimApi.V1.Factories
                 Address = tenancyAgreementAux.Address,
                 PostCode = tenancyAgreementAux.PostCode,
                 NumBedrooms = tenancyAgreementAux.NumBedrooms,
-                HouseholdRef = tenancyAgreementAux.HouseholdRef,
                 Title = tenancyAgreementAux.Title,
                 Forename = tenancyAgreementAux.Forename,
                 Surname = tenancyAgreementAux.Surname,
-                Age = tenancyAgreementAux.Age,
-                ContactName = tenancyAgreementAux.ContactName,
-                ContactAddress = tenancyAgreementAux.ContactAddress,
-                ContactPostCode = tenancyAgreementAux.ContactPostCode,
-                ContactPhone = tenancyAgreementAux.ContactPhone,
+                DateOfBirth = tenancyAgreementAux.DateOfBirth,
                 Timestamp = tenancyAgreementAux.TimeStamp
             };
         }

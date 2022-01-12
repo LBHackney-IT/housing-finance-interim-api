@@ -8,14 +8,8 @@ namespace HousingFinanceInterimApi.V1.Domain
     {
         public long Id { get; set; }
 
-        [JsonProperty("Tenancy Agreement Ref")]
-        public string TenancyAgreementRef { get; set; }
-
-        [JsonProperty("Rent Account")]
-        public string RentAccount { get; set; }
-
-        [JsonProperty("Rent Group")]
-        public string RentGroup { get; set; }
+        [JsonProperty("Payment Ref")]
+        public string PaymentRef { get; set; }
 
         [JsonProperty("Tenure")]
         public string Tenure { get; set; }
@@ -43,9 +37,6 @@ namespace HousingFinanceInterimApi.V1.Domain
         [JsonProperty("Num Bedrooms")]
         public int? NumBedrooms { get; set; }
 
-        [JsonProperty("Household Ref")]
-        public string HouseholdRef { get; set; }
-
         [JsonProperty("Title")]
         public string Title { get; set; }
 
@@ -55,20 +46,9 @@ namespace HousingFinanceInterimApi.V1.Domain
         [JsonProperty("Surname")]
         public string Surname { get; set; }
 
-        [JsonProperty("Age")]
-        public int? Age { get; set; }
-
-        [JsonProperty("Contact Name")]
-        public string ContactName { get; set; }
-
-        [JsonProperty("Contact Address")]
-        public string ContactAddress { get; set; }
-
-        [JsonProperty("Contact PostCode")]
-        public string ContactPostCode { get; set; }
-
-        [JsonProperty("Contact Phone")]
-        public string ContactPhone { get; set; }
+        [JsonProperty("Date Of Birth")]
+        [JsonConverter(typeof(DateTimeFormat))]
+        public DateTime? DateOfBirth { get; set; }
 
         public DateTimeOffset Timestamp { get; set; }
     }

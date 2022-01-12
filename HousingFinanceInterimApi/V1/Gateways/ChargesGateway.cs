@@ -24,15 +24,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
             _context = context;
         }
 
-        public async Task CreateBulkAsync(IList<ChargesAuxDomain> chargesAuxDomain)
+        public async Task CreateBulkAsync(IList<ChargesAuxDomain> chargesAuxDomain, string rentGroup)
         {
             try
             {
                 var chargesAux = chargesAuxDomain.Select(c => new ChargesAux()
                 {
-                    TenancyAgreementRef = c.TenancyAgreementRef,
                     PropertyRef = c.PropertyRef,
-                    ChargePeriod = c.ChargePeriod,
+                    RentGroup = rentGroup,
                     DAT = c.DAT ?? 0,
                     DBR = c.DBR ?? 0,
                     DC4 = c.DC4 ?? 0,

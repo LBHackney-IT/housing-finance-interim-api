@@ -15,9 +15,7 @@ namespace HousingFinanceInterimApi.V1.Factories
             return new ChargesAuxDomain
             {
                 Id = chargesAux.Id,
-                TenancyAgreementRef = chargesAux.TenancyAgreementRef,
                 PropertyRef = chargesAux.PropertyRef,
-                ChargePeriod = chargesAux.ChargePeriod,
                 DAT = chargesAux.DAT,
                 DBR = chargesAux.DBR,
                 DC4 = chargesAux.DC4,

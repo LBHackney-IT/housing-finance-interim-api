@@ -43,8 +43,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             LoggingHandler.LogInfo($"Starting tenancy agreement import");
 
-            const string sheetName = "Active";
-            const string sheetRange = "A:T";
+            const string sheetRange = "A:M";
 
             var batch = await _batchLogGateway.CreateAsync(_tenancyAgreementLabel).ConfigureAwait(false);
             var googleFileSettings = await GetGoogleFileSetting(_tenancyAgreementLabel).ConfigureAwait(false);
@@ -52,17 +51,20 @@ namespace HousingFinanceInterimApi.V1.UseCase
             if (googleFileSettings == null)
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
 
-            var tenancyAgreementAux = await _googleClientService
-                .ReadSheetToEntitiesAsync<TenancyAgreementAuxDomain>(googleFileSettings.GoogleIdentifier, sheetName, sheetRange)
-                .ConfigureAwait(false);
-
-            if (!tenancyAgreementAux.Any())
+            foreach (var sheetName in Enum.GetValues(typeof(RentGroup)))
             {
-                LoggingHandler.LogInfo($"No tenancy agreement data to import");
-                return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
-            }
+                var tenancyAgreementAux = await _googleClientService
+                    .ReadSheetToEntitiesAsync<TenancyAgreementAuxDomain>(googleFileSettings.GoogleIdentifier, sheetName.ToString(), sheetRange)
+                    .ConfigureAwait(false);
 
-            await HandleSpreadSheet(batch.Id, tenancyAgreementAux).ConfigureAwait(false);
+                if (!tenancyAgreementAux.Any())
+                {
+                    LoggingHandler.LogInfo($"No tenancy agreement data to import. Sheet name: {sheetName}");
+                    continue;
+                }
+
+                await HandleSpreadSheet(batch.Id, tenancyAgreementAux, sheetName.ToString()).ConfigureAwait(false);
+            }
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
             LoggingHandler.LogInfo($"End tenancy agreement import");
@@ -78,7 +80,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             return googleFileSettings.FirstOrDefault();
         }
 
-        private async Task HandleSpreadSheet(long batchId, IList<TenancyAgreementAuxDomain> tenancyAgreementAux)
+        private async Task HandleSpreadSheet(long batchId, IList<TenancyAgreementAuxDomain> tenancyAgreementAux, string rentGroup)
         {
             try
             {
@@ -86,7 +88,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 await _tenancyAgreementGateway.ClearTenancyAgreementAuxiliary().ConfigureAwait(false);
 
                 LoggingHandler.LogInfo($"Starting bulk insert");
-                await _tenancyAgreementGateway.CreateBulkAsync(tenancyAgreementAux).ConfigureAwait(false);
+                await _tenancyAgreementGateway.CreateBulkAsync(tenancyAgreementAux, rentGroup).ConfigureAwait(false);
 
                 LoggingHandler.LogInfo($"Starting merge tenancy agreements");
                 await _tenancyAgreementGateway.RefreshTenancyAgreement(batchId).ConfigureAwait(false);
