@@ -39,7 +39,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<TenancyAgreementAux>().Property(x => x.TimeStamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<UPCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<UPHousingCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
-            modelBuilder.Entity<Adjustment>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
+            modelBuilder.Entity<AdjustmentAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
         }
 
         /// <summary>
@@ -339,6 +339,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task TruncateActionDiaryAuxiliary()
         {
             var sql = "DELETE FROM ActionDiaryAux";
+            await PerformTransaction(sql).ConfigureAwait(false);
+        }
+
+        public async Task TruncateAdjustmentsAuxiliary()
+        {
+            var sql = "DELETE FROM AdjustmentAux";
             await PerformTransaction(sql).ConfigureAwait(false);
         }
 
