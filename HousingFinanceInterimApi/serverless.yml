@@ -1,4 +1,4 @@
-service: housing-finance-interim-api
+ service: housing-finance-interim-api
 provider:
   name: aws
   timeout: 300
@@ -149,7 +149,7 @@ functions:
     role: lambdaExecutionRole
   loadActionDiary:
     name: ${self:service}-${self:provider.stage}-action-diary
-    description: "The scheduler to refresh operating balance table. Run at 03:00 AM"
+    description: "The scheduler to load action diary spreadsheet. Run at 03:00 AM"
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadActionDiary
     role: lambdaExecutionRole
@@ -169,6 +169,8 @@ functions:
     timeout: 600
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadAdjustmentsTransactions
     role: lambdaExecutionRole
+    events:
+        - schedule: cron(30 1 * * ? *)
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:
