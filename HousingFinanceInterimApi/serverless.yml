@@ -1,4 +1,4 @@
- service: housing-finance-interim-api
+service: housing-finance-interim-api
 provider:
   name: aws
   timeout: 300
