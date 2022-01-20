@@ -26,16 +26,12 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             try
             {
-                var adjustmentAux = adjustmentDomain.Select(a => new Adjustment
+                var adjustmentAux = adjustmentDomain.Select(a => new AdjustmentAux
                 {
-                    TenancyAgreementRef = a.TenancyAgreementRef,
-                    Year = a.Year,
-                    Period = a.Period,
+                    PaymentRef = a.PaymentRef,
                     TransactionType = a.TransactionType,
-                    TransactionSource = a.TransactionSource,
                     Amount = a.Amount,
-                    TransactionDate = a.TransactionDate,
-                    IsRead = false
+                    TransactionDate = a.TransactionDate
                 }).ToList();
 
                 await _context.BulkInsertAsync(adjustmentAux, new BulkConfig { BatchSize = _batchSize }).ConfigureAwait(false);
@@ -53,6 +49,20 @@ namespace HousingFinanceInterimApi.V1.Gateways
             try
             {
                 await _context.LoadAdjustmentTransactions().ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
+        }
+
+        public async Task ClearAdjustmentAuxiliary()
+        {
+            try
+            {
+                await _context.TruncateAdjustmentsAuxiliary().ConfigureAwait(false);
             }
             catch (Exception e)
             {

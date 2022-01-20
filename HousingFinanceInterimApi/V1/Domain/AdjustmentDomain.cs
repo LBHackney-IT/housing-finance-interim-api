@@ -11,26 +11,17 @@ namespace HousingFinanceInterimApi.V1.Domain
     {
         public int Id { get; set; }
 
-        [JsonProperty("Tenancy Agreement Ref")]
-        public string TenancyAgreementRef { get; set; }
-
-        [JsonProperty("Year")]
-        public int Year { get; set; }
-
-        [JsonProperty("Period (Week/Month)")]
-        public int Period { get; set; }
+        [JsonProperty("Payment Ref")]
+        public string PaymentRef { get; set; }
 
         [JsonProperty("Transaction Type")]
         public string TransactionType { get; set; }
 
-        [JsonProperty("Transaction Source")]
-        public string TransactionSource { get; set; }
-
         [JsonProperty("Amount")]
         public decimal Amount { get; set; }
 
-        [JsonProperty("Transaction Date")]
-        [JsonConverter(typeof(DateFormatConverter), "dd/MM/yyyy")]
+        [JsonProperty("Adjustment Date")]
+        [JsonConverter(typeof(DateTimeFormat))]
         public DateTime TransactionDate { get; set; }
 
         public bool IsRead { get; set; }

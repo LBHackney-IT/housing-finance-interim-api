@@ -8,5 +8,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
     {
         public Task CreateBulkAsync(IList<AdjustmentDomain> adjustmentDomain);
         public Task LoadTransactions();
+        public Task ClearAdjustmentAuxiliary();
     }
 }

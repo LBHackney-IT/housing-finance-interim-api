@@ -45,7 +45,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             LoggingHandler.LogInfo($"Starting adjustment import");
 
             const string sheetName = "Active";
-            const string sheetRange = "A:G";
+            const string sheetRange = "A:D";
 
             var batch = await _batchLogGateway.CreateAsync(_adjustmentLabel).ConfigureAwait(false);
             var googleFileSettings = await GetGoogleFileSetting(_adjustmentLabel).ConfigureAwait(false);
@@ -83,6 +83,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             try
             {
+                LoggingHandler.LogInfo($"Clear aux table");
+                await _adjustmentGateway.ClearAdjustmentAuxiliary().ConfigureAwait(false);
+
                 LoggingHandler.LogInfo($"Starting bulk insert");
                 await _adjustmentGateway.CreateBulkAsync(adjustment).ConfigureAwait(false);
 
