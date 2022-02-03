@@ -43,7 +43,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             LoggingHandler.LogInfo($"Starting direct debit import");
 
-            const string sheetName = "Active";
+            const string sheetNames = "Rent;LH";
             const string sheetRange = "A:C";
 
             var batch = await _batchLogGateway.CreateAsync(DirectDebitLabel).ConfigureAwait(false);
@@ -52,17 +52,20 @@ namespace HousingFinanceInterimApi.V1.UseCase
             if (googleFileSettings == null)
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(0) };
 
-            var directDebits = await _googleClientService
-                .ReadSheetToEntitiesAsync<DirectDebitAuxDomain>(googleFileSettings.GoogleIdentifier, sheetName, sheetRange)
-                .ConfigureAwait(false);
-
-            if (!directDebits.Any())
+            foreach (var sheetName in sheetNames.Split(";"))
             {
-                LoggingHandler.LogInfo($"No direct debit data to import");
-                return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
-            }
+                var directDebits = await _googleClientService
+                    .ReadSheetToEntitiesAsync<DirectDebitAuxDomain>(googleFileSettings.GoogleIdentifier, sheetName, sheetRange)
+                    .ConfigureAwait(false);
 
-            await HandleSpreadSheet(batch.Id, directDebits).ConfigureAwait(false);
+                if (!directDebits.Any())
+                {
+                    LoggingHandler.LogInfo($"No direct debit data to import for {sheetName}");
+                    continue;
+                }
+
+                await HandleSpreadSheet(batch.Id, directDebits).ConfigureAwait(false);
+            }
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
             LoggingHandler.LogInfo($"End direct debit import");

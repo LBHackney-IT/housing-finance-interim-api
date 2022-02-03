@@ -54,12 +54,12 @@ functions:
             allowCredentials: false
   loadTenancyAgreement:
     name: ${self:service}-${self:provider.stage}-load-tenagree
-    description: "The scheduler to update and add new tenancy agreements. Run at 12:15 AM"
+    description: "The scheduler to update and add new tenancy agreements. Run at 12:45 AM"
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadTenancyAgreement
     role: lambdaExecutionRole
     events:
-        - schedule: cron(15 0 * * ? *)   
+        - schedule: cron(45 0 * * ? *)   
   checkCashFiles:
     name: ${self:service}-${self:provider.stage}-check-cash-files
     description: "The scheduler to check if exists cash files. "
@@ -170,7 +170,7 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadAdjustmentsTransactions
     role: lambdaExecutionRole
     events:
-        - schedule: cron(30 1 * * ? *)
+        - schedule: cron(45 1 * * ? *)
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:
@@ -239,9 +239,9 @@ stepFunctions:
     hfstepfunchousingfile:
       name: HFHousingFileStateMachine
       events:
-        - schedule: cron(5 1 * * ? *)
+        - schedule: cron(15 0 * * ? MON)
       definition:
-        Comment: "Housing files process step function deployed via serverless. Run at 01:05 AM"
+        Comment: "Housing files process step function deployed via serverless. Run at 12:15 AM only Monday"
         StartAt: CheckHousingFiles
         States:
           CheckHousingFiles:
@@ -302,9 +302,9 @@ stepFunctions:
     hfstepfuncdirectdebit:
       name: HFDirectDebitStateMachine
       events:
-        - schedule: cron(10 1 * * ? *)
+        - schedule: cron(30 1 * * ? *)
       definition:
-        Comment: "Direct debit process step function deployed via serverless. Run at 01:10 AM"
+        Comment: "Direct debit process step function deployed via serverless. Run at 01:30 AM"
         StartAt: ImportDirectDebit
         States:          
           ImportDirectDebit:
@@ -350,9 +350,9 @@ stepFunctions:
     hfstepfunccharges:
       name: HFChargesStateMachine
       events:
-        - schedule: cron(15 1 * * ? *)
+        - schedule: cron(30 0 * * ? *)
       definition:
-        Comment: "Charges process step function deployed via serverless. Run at 01:15 AM"
+        Comment: "Charges process step function deployed via serverless. Run at 12:30 AM"
         StartAt: ImportCharges
         States:          
           ImportCharges:
