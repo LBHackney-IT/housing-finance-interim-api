@@ -239,7 +239,7 @@ stepFunctions:
     hfstepfunchousingfile:
       name: HFHousingFileStateMachine
       events:
-        - schedule: cron(15 0 * * ? MON)
+        - schedule: cron(15 0 * * 1)
       definition:
         Comment: "Housing files process step function deployed via serverless. Run at 12:15 AM only Monday"
         StartAt: CheckHousingFiles
