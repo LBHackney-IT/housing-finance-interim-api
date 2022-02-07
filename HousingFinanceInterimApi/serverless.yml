@@ -27,7 +27,7 @@ package:
   artifact: ./bin/release/netcoreapp3.1/housing-finance-interim-api.zip
 
 functions:
-  interimFinanceSystem:
+  baseApi:
     name: ${self:service}-${self:provider.stage}
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.LambdaEntryPoint::FunctionHandlerAsync
     role: lambdaExecutionRole
