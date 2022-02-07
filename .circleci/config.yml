@@ -56,16 +56,18 @@ commands:
           name: Install serverless CLI
           command: npm i -g serverless
       - run:
+          name: Install step function plugin          
+          command: npm i serverless-step-functions
+      - run:
           name: Build lambda
           command: |
             cd ./HousingFinanceInterimApi/
             chmod +x ./build.sh
-            ./build.sh
+            ./build.sh      
       - run:
           name: Deploy lambda
           command: |
-            cd ./HousingFinanceInterimApi/           
-            sls plugin install --name serverless-step-functions
+            cd ./HousingFinanceInterimApi/
             sls deploy --stage <<parameters.stage>> --conceal
 
 jobs:
