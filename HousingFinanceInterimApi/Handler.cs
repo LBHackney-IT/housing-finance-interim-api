@@ -28,6 +28,7 @@ namespace HousingFinanceInterimApi
         private readonly ILoadActionDiaryUseCase _loadActionDiaryUseCase;
         private readonly ILoadAdjustmentUseCase _loadAdjustmentUseCase;
         private readonly ILoadCashFileTransactionsUseCase _loadCashFileTransactionsUseCase;
+        private readonly ILoadChargesHistoryUseCase _loadChargesHistoryUseCase;
         private readonly ILoadChargesTransactionsUseCase _loadChargesTransactionsUseCase;
         private readonly ILoadChargesUseCase _loadChargesUseCase;
         private readonly ILoadDirectDebitTransactionsUseCase _loadDirectDebitTransactionsUseCase;
@@ -91,6 +92,7 @@ namespace HousingFinanceInterimApi
                 googleFileSettingGateway, googleClientService);
             _loadCashFileTransactionsUseCase = new LoadCashFileTransactionsUseCase(batchLogGateway,
                 batchLogErrorGateway, upCashLoadGateway, transactionGateway);
+            _loadChargesHistoryUseCase = new LoadChargesHistoryUseCase(batchLogGateway, batchLogErrorGateway, chargesGateway);
             _loadChargesTransactionsUseCase = new LoadChargesTransactionsUseCase(batchLogGateway, batchLogErrorGateway,
                 chargesGateway, transactionGateway);
             _loadChargesUseCase = new LoadChargesUseCase(batchLogGateway, batchLogErrorGateway,
@@ -161,6 +163,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> LoadCharges()
         {
             return await _loadChargesUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadChargesHistory()
+        {
+            return await _loadChargesTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
         public async Task<StepResponse> LoadChargesTransactions()

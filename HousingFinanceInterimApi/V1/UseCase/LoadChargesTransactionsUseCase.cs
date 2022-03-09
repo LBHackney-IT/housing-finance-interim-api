@@ -41,14 +41,11 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var batch = await _batchLogGateway.CreateAsync(_label).ConfigureAwait(false);
             try
             {
-                LoggingHandler.LogInfo($"Load ChargesHistory table");
-
-                await _chargesGateway.LoadChargesHistory(null).ConfigureAwait(false);
                 LoggingHandler.LogInfo($"Convert ChargesHistory in Transactions");
                 await _transactionGateway.LoadChargesTransactions().ConfigureAwait(false);
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-                LoggingHandler.LogInfo($"End cash file transactions import");
+                LoggingHandler.LogInfo($"End charges transactions import");
                 return new StepResponse()
                 {
                     Continue = true,
