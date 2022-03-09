@@ -54,12 +54,12 @@ functions:
             allowCredentials: false
   loadTenancyAgreement:
     name: ${self:service}-${self:provider.stage}-load-tenagree
-    description: "The scheduler to update and add new tenancy agreements. Run at 12:45 AM"
+    description: "The scheduler to update and add new tenancy agreements. Run at 12:00 AM"
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadTenancyAgreement
     role: lambdaExecutionRole
     events:
-        - schedule: cron(45 0 * * ? *)   
+        - schedule: cron(0 0 * * ? *)   
   checkCashFiles:
     name: ${self:service}-${self:provider.stage}-check-cash-files
     description: "The scheduler to check if exists cash files. "
@@ -132,13 +132,19 @@ functions:
   importCharges:
     name: ${self:service}-${self:provider.stage}-charges
     description: "The scheduler to import charges from Google Spreadshet."
-    timeout: 600
+    timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadCharges
     role: lambdaExecutionRole  
+  importChargesHistory:
+    name: ${self:service}-${self:provider.stage}-charges-hist
+    description: "The scheduler to import charges history."
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadChargesHistory
+    role: lambdaExecutionRole
   importChargesTransactions:
     name: ${self:service}-${self:provider.stage}-charges-trans
     description: "The scheduler to import charges transactions from Charges table."
-    timeout: 600
+    timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadChargesTransactions
     role: lambdaExecutionRole
   importChargesTransactionsOnDemand:
@@ -371,6 +377,30 @@ stepFunctions:
               TimestampPath: $.NextStepTime
               Next: Choice_1
           Choice_1:
+            Type: Choice
+            Choices:
+              - Variable: $.Continue
+                BooleanEquals: true
+                Next: ImportChargesHistory
+              - Variable: $.Continue
+                BooleanEquals: false
+                Next: EndStep
+          ImportChargesHistory:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ importChargesHistory, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: Wait_2
+          Wait_2:
+              Type: Wait
+              TimestampPath: $.NextStepTime
+              Next: Choice_2
+          Choice_2:
             Type: Choice
             Choices:
               - Variable: $.Continue
