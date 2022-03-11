@@ -17,7 +17,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IBatchLogGateway _batchLogGateway;
         private readonly IBatchLogErrorGateway _batchLogErrorGateway;
         private readonly IChargesGateway _chargesGateway;
-        private readonly ITransactionGateway _transactionGateway;
 
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
 
