@@ -167,7 +167,7 @@ namespace HousingFinanceInterimApi
 
         public async Task<StepResponse> LoadChargesHistory()
         {
-            return await _loadChargesTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
+            return await _loadChargesHistoryUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
         public async Task<StepResponse> LoadChargesTransactions()
