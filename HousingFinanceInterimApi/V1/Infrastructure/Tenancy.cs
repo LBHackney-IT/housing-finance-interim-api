@@ -56,6 +56,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// </summary>
         public decimal CurrentBalance { get; set; }
 
+        public decimal Rent { get; set; }
+
+        public decimal Service { get; set; }
+
+        public decimal OtherCharge { get; set; }
+
         /// <summary>
         /// Gets or sets the tenure.
         /// </summary>

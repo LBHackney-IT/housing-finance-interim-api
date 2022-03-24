@@ -51,6 +51,9 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// </returns>
         public Task<IList<TenancyTransaction>> GetTransactionsByDateAsync(string tenancyAgreementRef,
             string rentAccount, string householdRef, DateTime startDate, DateTime endDate);
+
+        public Task<IList<DailyTransaction>> GetAllTransactionsAsync(string tenancyAgreementRef,
+            string rentAccount, string householdRef);
     }
 
 }

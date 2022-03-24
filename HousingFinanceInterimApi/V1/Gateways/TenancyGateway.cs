@@ -66,5 +66,11 @@ namespace HousingFinanceInterimApi.V1.Gateways
             var results = await _context.GetTenancyTransactionsByDateAsync(tenancyAgreementRef, rentAccount, householdRef, startDate, endDate).ConfigureAwait(false);
             return results;
         }
+
+        public async Task<IList<DailyTransaction>> GetAllTransactionsAsync(string tenancyAgreementRef, string rentAccount, string householdRef)
+        {
+            var results = await _context.GetAllTenancyTransactionsAsync(tenancyAgreementRef, rentAccount, householdRef).ConfigureAwait(false);
+            return results;
+        }
     }
 }

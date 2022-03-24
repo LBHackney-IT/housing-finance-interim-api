@@ -35,6 +35,14 @@ namespace HousingFinanceInterimApi.V1.Controllers
                 .ConfigureAwait(false));
         }
 
+        [HttpGet("transactions/all")]
+        public async Task<JsonResult> GetAllTransactions(string tenancyAgreementRef, string rentAccount, string householdRef)
+        {
+            return Json(await _gateway
+                .GetAllTransactionsAsync(tenancyAgreementRef, rentAccount, householdRef)
+                .ConfigureAwait(false));
+        }
+
     }
 
 }

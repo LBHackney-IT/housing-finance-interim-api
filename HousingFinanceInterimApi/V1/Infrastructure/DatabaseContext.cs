@@ -32,6 +32,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<Payment>().HasNoKey().ToView(null);
             modelBuilder.Entity<Tenancy>().HasNoKey().ToView(null);
             modelBuilder.Entity<TenancyTransaction>().HasNoKey().ToView(null);
+            modelBuilder.Entity<DailyTransaction>().HasNoKey().ToView(null);
             modelBuilder.Entity<Transaction>().HasNoKey().ToView(null);
             modelBuilder.Entity<ChargesAux>().Property(x => x.TimeStamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<DirectDebitAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
@@ -203,6 +204,14 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
                 .FromSqlInterpolated($"usp_GetTenancyTransactionsByDate {tenancyAgreementRef}, {rentAccount}, {householdRef}, {startDate}, {endDate}")
                 .ToListAsync()
                 .ConfigureAwait(false);
+
+        public async Task<IList<DailyTransaction>> GetAllTenancyTransactionsAsync(string tenancyAgreementRef, string rentAccount, string householdRef)
+            => await DailyTrasactionsValue
+                .FromSqlInterpolated($"usp_GetAllTenancyTransactions {tenancyAgreementRef}, {rentAccount}, {householdRef}")
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+        private DbSet<DailyTransaction> DailyTrasactionsValue { get; set; }
 
         /// <summary>
         /// Gets or sets the tenancies.
