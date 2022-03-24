@@ -130,10 +130,7 @@ workflows:
       - assume-role-development:
           context: api-assume-role-housing-development-context
           requires:
-            - build-and-test
-          filters:
-            branches:
-              only: development
+            - build-and-test          
       - deploy-to-development:
           requires:
             - assume-role-development         
