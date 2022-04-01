@@ -131,7 +131,7 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadDirectDebitTransactionsOnDemand
     role: lambdaExecutionRole
   checkChargesBatchYears:
-    name: ${self:service}-${self:provider.stage}-check-charges-batch-years
+    name: ${self:service}-${self:provider.stage}-check-years
     description: "The scheduler to check pending year to process charges. "
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckChargesBatchYears  
   importCharges:
