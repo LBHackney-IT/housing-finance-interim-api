@@ -16,6 +16,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
     {
         private readonly IBatchLogGateway _batchLogGateway;
         private readonly IBatchLogErrorGateway _batchLogErrorGateway;
+        private readonly IChargesBatchYearsGateway _chargesBatchYearsGateway;
         private readonly IChargesGateway _chargesGateway;
         private readonly ITransactionGateway _transactionGateway;
 
@@ -26,11 +27,13 @@ namespace HousingFinanceInterimApi.V1.UseCase
         public LoadChargesTransactionsUseCase(
             IBatchLogGateway batchLogGateway,
             IBatchLogErrorGateway batchLogErrorGateway,
+            IChargesBatchYearsGateway chargesBatchYearsGateway,
             IChargesGateway chargesGateway,
             ITransactionGateway transactionGateway)
         {
             _batchLogGateway = batchLogGateway;
             _batchLogErrorGateway = batchLogErrorGateway;
+            _chargesBatchYearsGateway = chargesBatchYearsGateway;
             _chargesGateway = chargesGateway;
             _transactionGateway = transactionGateway;
         }
@@ -41,9 +44,12 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var batch = await _batchLogGateway.CreateAsync(_label).ConfigureAwait(false);
             try
             {
+                var pendingYear = await _chargesBatchYearsGateway.GetPendingYear().ConfigureAwait(false);
+                
                 LoggingHandler.LogInfo($"Convert ChargesHistory in Transactions");
-                await _transactionGateway.LoadChargesTransactions().ConfigureAwait(false);
+                await _transactionGateway.LoadChargesTransactions(pendingYear.Year).ConfigureAwait(false);
 
+                await _chargesBatchYearsGateway.SetToSuccessAsync(pendingYear.Year).ConfigureAwait(false);
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
                 LoggingHandler.LogInfo($"End charges transactions import");
                 return new StepResponse()
@@ -79,7 +85,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     await _chargesGateway.LoadChargesHistory(startDate.Year).ConfigureAwait(false);
 
                     LoggingHandler.LogInfo($"Convert ChargesHistory in transactions");
-                    await _transactionGateway.LoadChargesTransactions().ConfigureAwait(false);
+                    await _transactionGateway.LoadChargesTransactions(startDate.Year).ConfigureAwait(false);
 
                     startDate = startDate.Date.AddDays(1);
                 }

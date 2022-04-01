@@ -295,8 +295,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task LoadCashFileTransactions()
             => await PerformTransaction("usp_LoadTransactionsCashFile", 600).ConfigureAwait(false);
 
-        public async Task LoadChargesTransactions()
-            => await PerformTransaction("usp_LoadTransactionsCharges", 600).ConfigureAwait(false);
+        public async Task LoadChargesTransactions(int @processingYear)
+            => await PerformInterpolatedTransaction($"usp_LoadTransactionsCharges {@processingYear}", 600).ConfigureAwait(false);
 
         public async Task LoadHousingFileTransactions()
             => await PerformTransaction("usp_LoadTransactionsHousingFile", 600).ConfigureAwait(false);

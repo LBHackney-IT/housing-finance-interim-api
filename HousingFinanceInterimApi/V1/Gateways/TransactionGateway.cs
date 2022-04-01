@@ -68,11 +68,11 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
         }
 
-        public async Task LoadChargesTransactions()
+        public async Task LoadChargesTransactions(int processingYear)
         {
             try
             {
-                await _context.LoadChargesTransactions().ConfigureAwait(false);
+                await _context.LoadChargesTransactions(processingYear).ConfigureAwait(false);
             }
             catch (Exception e)
             {
