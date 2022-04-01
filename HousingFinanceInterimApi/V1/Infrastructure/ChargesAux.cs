@@ -14,6 +14,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public string RentGroup { get; set; }
 
+        public int Year { get; set; }
+
         public decimal DAT { get; set; }
 
         public decimal DBR { get; set; }

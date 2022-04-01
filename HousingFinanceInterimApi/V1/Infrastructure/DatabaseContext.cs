@@ -310,8 +310,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task LoadDirectDebitHistory(DateTime? processingDate)
             => await PerformInterpolatedTransaction($"usp_LoadDirectDebitHistory {processingDate:yyyy-MM-dd}", 600).ConfigureAwait(false);
 
-        public async Task LoadChargesHistory(DateTime? processingDate)
-            => await PerformInterpolatedTransaction($"usp_LoadChargesHistory {processingDate:yyyy-MM-dd}", 600).ConfigureAwait(false);
+        public async Task LoadChargesHistory(int @processingYear)
+            => await PerformInterpolatedTransaction($"usp_LoadChargesHistory {@processingYear}", 600).ConfigureAwait(false);
 
         public async Task CreateCashFileSuspenseAccountTransaction(long id, string newRentAccount)
             => await PerformInterpolatedTransaction($"usp_UpdateCashFileSuspenseAccountResolved {id}, {newRentAccount}").ConfigureAwait(false);

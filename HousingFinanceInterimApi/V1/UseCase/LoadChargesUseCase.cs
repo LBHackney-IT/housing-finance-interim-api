@@ -17,6 +17,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
     {
         private readonly IBatchLogGateway _batchLogGateway;
         private readonly IBatchLogErrorGateway _batchLogErrorGateway;
+        private readonly IChargesBatchYearsGateway _chargesBatchYearsGateway;
         private readonly IChargesGateway _chargesGateway;
         private readonly IGoogleFileSettingGateway _googleFileSettingGateway;
         private readonly IGoogleClientService _googleClientService;
@@ -28,12 +29,14 @@ namespace HousingFinanceInterimApi.V1.UseCase
         public LoadChargesUseCase(
             IBatchLogGateway batchLogGateway,
             IBatchLogErrorGateway batchLogErrorGateway,
+            IChargesBatchYearsGateway chargesBatchYearsGateway,
             IChargesGateway chargesGateway,
             IGoogleFileSettingGateway googleFileSettingGateway,
             IGoogleClientService googleClientService)
         {
             _batchLogGateway = batchLogGateway;
             _batchLogErrorGateway = batchLogErrorGateway;
+            _chargesBatchYearsGateway = chargesBatchYearsGateway;
             _chargesGateway = chargesGateway;
             _googleFileSettingGateway = googleFileSettingGateway;
             _googleClientService = googleClientService;
@@ -43,34 +46,35 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             LoggingHandler.LogInfo($"Starting charges import");
 
-            var existBatchToday = await _batchLogGateway.GetAsync(ChargesLabel).ConfigureAwait(false);
-            if (existBatchToday != null)
-            {
-                LoggingHandler.LogInfo($"Exists a charges load process today");
-                return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(0) };
-            }
-
             const string sheetRange = "A:AX";
 
             var batch = await _batchLogGateway.CreateAsync(ChargesLabel).ConfigureAwait(false);
             var googleFileSettings = await GetGoogleFileSetting(ChargesLabel).ConfigureAwait(false);
 
-            if (googleFileSettings == null)
+            if (!googleFileSettings.Any())
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
 
-            foreach (var sheetName in Enum.GetValues(typeof(RentGroup)))
+            var pendingYear = await _chargesBatchYearsGateway.GetPendingYear().ConfigureAwait(false);
+
+            foreach (var googleFile in googleFileSettings)
             {
-                var chargesAux = await _googleClientService
-                    .ReadSheetToEntitiesAsync<ChargesAuxDomain>(googleFileSettings.GoogleIdentifier, sheetName.ToString(), sheetRange)
-                    .ConfigureAwait(false);
-
-                if (!chargesAux.Any())
+                if (googleFile.FileYear == pendingYear.Year)
                 {
-                    LoggingHandler.LogInfo($"No charges data to import. Sheet name: {sheetName}");
-                    continue;
-                }
+                    foreach (var sheetName in Enum.GetValues(typeof(RentGroup)))
+                    {
+                        var chargesAux = await _googleClientService
+                            .ReadSheetToEntitiesAsync<ChargesAuxDomain>(googleFile.GoogleIdentifier, sheetName.ToString(), sheetRange)
+                            .ConfigureAwait(false);
 
-                await HandleSpreadSheet(batch.Id, chargesAux, sheetName.ToString()).ConfigureAwait(false);
+                        if (!chargesAux.Any())
+                        {
+                            LoggingHandler.LogInfo($"No charges data to import. Sheet name: {sheetName}");
+                            continue;
+                        }
+
+                        await HandleSpreadSheet(batch.Id, chargesAux, sheetName.ToString(), (int) googleFile.FileYear).ConfigureAwait(false);
+                    }
+                }
             }
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
@@ -78,16 +82,16 @@ namespace HousingFinanceInterimApi.V1.UseCase
             return new StepResponse() { Continue = true, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
         }
 
-        private async Task<GoogleFileSettingDomain> GetGoogleFileSetting(string label)
+        private async Task<List<GoogleFileSettingDomain>> GetGoogleFileSetting(string label)
         {
             LoggingHandler.LogInfo($"Getting Google file setting for '{label}' label");
             var googleFileSettings = await _googleFileSettingGateway.GetSettingsByLabel(label).ConfigureAwait(false);
             LoggingHandler.LogInfo($"{googleFileSettings.Count} Google file settings found");
 
-            return googleFileSettings.FirstOrDefault();
+            return googleFileSettings;
         }
 
-        private async Task HandleSpreadSheet(long batchId, IList<ChargesAuxDomain> chargesAux, string rentGroup)
+        private async Task HandleSpreadSheet(long batchId, IList<ChargesAuxDomain> chargesAux, string rentGroup, int year)
         {
             try
             {
@@ -95,7 +99,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 await _chargesGateway.ClearChargesAuxiliary().ConfigureAwait(false);
 
                 LoggingHandler.LogInfo($"Starting bulk insert");
-                await _chargesGateway.CreateBulkAsync(chargesAux, rentGroup).ConfigureAwait(false);
+                await _chargesGateway.CreateBulkAsync(chargesAux, rentGroup, year).ConfigureAwait(false);
 
                 LoggingHandler.LogInfo($"Starting merge charges");
                 await _chargesGateway.LoadCharges().ConfigureAwait(false);

@@ -95,11 +95,11 @@ namespace HousingFinanceInterimApi
                 googleFileSettingGateway, googleClientService);
             _loadCashFileTransactionsUseCase = new LoadCashFileTransactionsUseCase(batchLogGateway,
                 batchLogErrorGateway, upCashLoadGateway, transactionGateway);
-            _loadChargesHistoryUseCase = new LoadChargesHistoryUseCase(batchLogGateway, batchLogErrorGateway, chargesGateway);
+            _loadChargesHistoryUseCase = new LoadChargesHistoryUseCase(batchLogGateway, batchLogErrorGateway, chargesBatchYearsGateway, chargesGateway);
             _loadChargesTransactionsUseCase = new LoadChargesTransactionsUseCase(batchLogGateway, batchLogErrorGateway,
                 chargesGateway, transactionGateway);
             _loadChargesUseCase = new LoadChargesUseCase(batchLogGateway, batchLogErrorGateway,
-                chargesGateway, googleFileSettingGateway, googleClientService);
+                chargesBatchYearsGateway, chargesGateway, googleFileSettingGateway, googleClientService);
             _loadDirectDebitTransactionsUseCase = new LoadDirectDebitTransactionsUseCase(batchLogGateway,
                 batchLogErrorGateway, directDebitGateway, transactionGateway);
             _loadDirectDebitUseCase = new LoadDirectDebitUseCase(batchLogGateway, batchLogErrorGateway,

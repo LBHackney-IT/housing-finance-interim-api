@@ -76,7 +76,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 while (startDate <= endDate)
                 {
                     LoggingHandler.LogInfo($"Load ChargesHistory table");
-                    await _chargesGateway.LoadChargesHistory(startDate).ConfigureAwait(false);
+                    await _chargesGateway.LoadChargesHistory(startDate.Year).ConfigureAwait(false);
 
                     LoggingHandler.LogInfo($"Convert ChargesHistory in transactions");
                     await _transactionGateway.LoadChargesTransactions().ConfigureAwait(false);
