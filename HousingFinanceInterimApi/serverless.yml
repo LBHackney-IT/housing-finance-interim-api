@@ -130,6 +130,10 @@ functions:
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadDirectDebitTransactionsOnDemand
     role: lambdaExecutionRole
+  checkChargesBatchYears:
+    name: ${self:service}-${self:provider.stage}-check-charges-batch-years
+    description: "The scheduler to check pending year to process charges. "
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckChargesBatchYears  
   importCharges:
     name: ${self:service}-${self:provider.stage}-charges
     description: "The scheduler to import charges from Google Spreadshet."
@@ -360,8 +364,32 @@ stepFunctions:
         - schedule: cron(30 0 * * ? *)
       definition:
         Comment: "Charges process step function deployed via serverless. Run at 12:30 AM"
-        StartAt: ImportCharges
-        States:          
+        StartAt: CheckChargesBatchYears
+        States:
+          CheckChargesBatchYears:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ checkChargesBatchYears, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: Choice_ExistPendingYear
+          Choice_ExistPendingYear:
+            Type: Choice
+            Choices:
+              - Variable: $.Continue
+                BooleanEquals: true
+                Next: Wait_0
+              - Variable: $.Continue
+                BooleanEquals: false
+                Next: EndStep
+          Wait_0:
+              Type: Wait
+              TimestampPath: $.NextStepTime
+              Next: ImportCharges
           ImportCharges:
             Type: Task
             Resource:
@@ -376,16 +404,7 @@ stepFunctions:
           Wait_1:
               Type: Wait
               TimestampPath: $.NextStepTime
-              Next: Choice_1
-          Choice_1:
-            Type: Choice
-            Choices:
-              - Variable: $.Continue
-                BooleanEquals: true
-                Next: ImportChargesHistory
-              - Variable: $.Continue
-                BooleanEquals: false
-                Next: EndStep
+              Next: ImportChargesHistory
           ImportChargesHistory:
             Type: Task
             Resource:
@@ -400,16 +419,7 @@ stepFunctions:
           Wait_2:
               Type: Wait
               TimestampPath: $.NextStepTime
-              Next: Choice_2
-          Choice_2:
-            Type: Choice
-            Choices:
-              - Variable: $.Continue
-                BooleanEquals: true
-                Next: ImportChargesTransactions
-              - Variable: $.Continue
-                BooleanEquals: false
-                Next: EndStep
+              Next: ImportChargesTransactions          
           ImportChargesTransactions:
             Type: Task
             Resource:
@@ -420,7 +430,7 @@ stepFunctions:
                 IntervalSeconds: 30
                 MaxAttempts: 3
                 BackoffRate: 2
-            Next: EndStep
+            Next: CheckChargesBatchYears
           EndStep:
             Type: Succeed
       dependsOn: lambdaExecutionRole
