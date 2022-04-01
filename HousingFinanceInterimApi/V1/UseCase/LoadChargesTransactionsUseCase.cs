@@ -45,7 +45,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             try
             {
                 var pendingYear = await _chargesBatchYearsGateway.GetPendingYear().ConfigureAwait(false);
-                
+
                 LoggingHandler.LogInfo($"Convert ChargesHistory in Transactions");
                 await _transactionGateway.LoadChargesTransactions(pendingYear.Year).ConfigureAwait(false);
 
