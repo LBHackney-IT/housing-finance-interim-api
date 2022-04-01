@@ -15,7 +15,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
 
         public Task LoadDirectDebitTransactions();
 
-        public Task LoadChargesTransactions();
+        public Task LoadChargesTransactions(int processingYear);
 
         public Task CreateCashFileSuspenseAccountTransaction(long id, string newRentAccount);
 

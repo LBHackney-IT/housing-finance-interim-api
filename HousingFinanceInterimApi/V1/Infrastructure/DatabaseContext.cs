@@ -54,6 +54,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<BatchLog> BatchLogs { get; set; }
         public DbSet<BatchLogError> BatchLogErrors { get; set; }
         private DbSet<Transaction> Transactions { get; set; }
+        public DbSet<ChargesBatchYear> ChargesBatchYears { get; set; }
 
         /// <summary>
         /// Gets or sets the google file settings.
@@ -294,8 +295,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task LoadCashFileTransactions()
             => await PerformTransaction("usp_LoadTransactionsCashFile", 600).ConfigureAwait(false);
 
-        public async Task LoadChargesTransactions()
-            => await PerformTransaction("usp_LoadTransactionsCharges", 600).ConfigureAwait(false);
+        public async Task LoadChargesTransactions(int @processingYear)
+            => await PerformInterpolatedTransaction($"usp_LoadTransactionsCharges {@processingYear}", 600).ConfigureAwait(false);
 
         public async Task LoadHousingFileTransactions()
             => await PerformTransaction("usp_LoadTransactionsHousingFile", 600).ConfigureAwait(false);
@@ -309,8 +310,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task LoadDirectDebitHistory(DateTime? processingDate)
             => await PerformInterpolatedTransaction($"usp_LoadDirectDebitHistory {processingDate:yyyy-MM-dd}", 600).ConfigureAwait(false);
 
-        public async Task LoadChargesHistory(DateTime? processingDate)
-            => await PerformInterpolatedTransaction($"usp_LoadChargesHistory {processingDate:yyyy-MM-dd}", 600).ConfigureAwait(false);
+        public async Task LoadChargesHistory(int @processingYear)
+            => await PerformInterpolatedTransaction($"usp_LoadChargesHistory {@processingYear}", 600).ConfigureAwait(false);
 
         public async Task CreateCashFileSuspenseAccountTransaction(long id, string newRentAccount)
             => await PerformInterpolatedTransaction($"usp_UpdateCashFileSuspenseAccountResolved {id}, {newRentAccount}").ConfigureAwait(false);

@@ -16,6 +16,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
     {
         private readonly IBatchLogGateway _batchLogGateway;
         private readonly IBatchLogErrorGateway _batchLogErrorGateway;
+        private readonly IChargesBatchYearsGateway _chargesBatchYearsGateway;
         private readonly IChargesGateway _chargesGateway;
 
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
@@ -25,23 +26,29 @@ namespace HousingFinanceInterimApi.V1.UseCase
         public LoadChargesHistoryUseCase(
             IBatchLogGateway batchLogGateway,
             IBatchLogErrorGateway batchLogErrorGateway,
+            IChargesBatchYearsGateway chargesBatchYearsGateway,
             IChargesGateway chargesGateway)
         {
             _batchLogGateway = batchLogGateway;
             _batchLogErrorGateway = batchLogErrorGateway;
+            _chargesBatchYearsGateway = chargesBatchYearsGateway;
             _chargesGateway = chargesGateway;
         }
 
         public async Task<StepResponse> ExecuteAsync()
         {
+
             LoggingHandler.LogInfo($"Starting load charges history");
             var batch = await _batchLogGateway.CreateAsync(_label).ConfigureAwait(false);
             try
             {
-                LoggingHandler.LogInfo($"Load ChargesHistory table");
-                await _chargesGateway.LoadChargesHistory(null).ConfigureAwait(false);
+                var pendingYear = await _chargesBatchYearsGateway.GetPendingYear().ConfigureAwait(false);
+
+                LoggingHandler.LogInfo($"Load ChargesHistory table (year: { pendingYear.Year })");
+                await _chargesGateway.LoadChargesHistory(pendingYear.Year).ConfigureAwait(false);
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
+
                 LoggingHandler.LogInfo($"End load charges history");
                 return new StepResponse()
                 {

@@ -22,6 +22,7 @@ namespace HousingFinanceInterimApi
     public class Handler
     {
         private readonly ICheckExistFileUseCase _checkExistFileUseCase;
+        private readonly ICheckChargesBatchYearsUseCase _checkChargesBatchYearsUseCase;
         private readonly IGenerateRentPositionUseCase _generateRentPositionUseCase;
         private readonly IImportCashFileUseCase _importCashFileUseCase;
         private readonly IImportHousingFileUseCase _importHousingFileUseCase;
@@ -63,6 +64,7 @@ namespace HousingFinanceInterimApi
             IAdjustmentGateway adjustmentGateway = new AdjustmentGateway(context);
             IBatchLogErrorGateway batchLogErrorGateway = new BatchLogErrorGateway(context);
             IBatchLogGateway batchLogGateway = new BatchLogGateway(context);
+            IChargesBatchYearsGateway chargesBatchYearsGateway = new ChargesBatchYearsGateway(context);
             IChargesGateway chargesGateway = new ChargesGateway(context);
             ICurrentBalanceGateway currentBalanceGateway = new CurrentBalanceGateway(context);
             IDirectDebitGateway directDebitGateway = new DirectDebitGateway(context);
@@ -80,6 +82,7 @@ namespace HousingFinanceInterimApi
             IUPHousingCashLoadGateway upHousingCashLoadGateway = new UPHousingCashLoadGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
+            _checkChargesBatchYearsUseCase = new CheckChargesBatchYearsUseCase(chargesBatchYearsGateway);
             _generateRentPositionUseCase = new GenerateRentPositionUseCase(rentPositionGateway, batchLogGateway,
                 batchLogErrorGateway, googleFileSettingGateway, googleClientService);
             _importCashFileUseCase = new ImportCashFileUseCase(batchLogGateway, batchLogErrorGateway,
@@ -92,11 +95,11 @@ namespace HousingFinanceInterimApi
                 googleFileSettingGateway, googleClientService);
             _loadCashFileTransactionsUseCase = new LoadCashFileTransactionsUseCase(batchLogGateway,
                 batchLogErrorGateway, upCashLoadGateway, transactionGateway);
-            _loadChargesHistoryUseCase = new LoadChargesHistoryUseCase(batchLogGateway, batchLogErrorGateway, chargesGateway);
-            _loadChargesTransactionsUseCase = new LoadChargesTransactionsUseCase(batchLogGateway, batchLogErrorGateway,
+            _loadChargesHistoryUseCase = new LoadChargesHistoryUseCase(batchLogGateway, batchLogErrorGateway, chargesBatchYearsGateway, chargesGateway);
+            _loadChargesTransactionsUseCase = new LoadChargesTransactionsUseCase(batchLogGateway, batchLogErrorGateway, chargesBatchYearsGateway,
                 chargesGateway, transactionGateway);
             _loadChargesUseCase = new LoadChargesUseCase(batchLogGateway, batchLogErrorGateway,
-                chargesGateway, googleFileSettingGateway, googleClientService);
+                chargesBatchYearsGateway, chargesGateway, googleFileSettingGateway, googleClientService);
             _loadDirectDebitTransactionsUseCase = new LoadDirectDebitTransactionsUseCase(batchLogGateway,
                 batchLogErrorGateway, directDebitGateway, transactionGateway);
             _loadDirectDebitUseCase = new LoadDirectDebitUseCase(batchLogGateway, batchLogErrorGateway,
@@ -155,9 +158,14 @@ namespace HousingFinanceInterimApi
             return await _loadDirectDebitTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
-        public async Task<StepResponse> LoadDirectDebitTransactionsOnDemand(OnDemandRequest input, ILambdaContext context)
+        public async Task<StepResponse> LoadDirectDebitTransactionsOnDemand(OnDemandRequest input)
         {
             return await _loadDirectDebitTransactionsUseCase.ExecuteOnDemandAsync(input.StartDate, input.EndDate).ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> CheckChargesBatchYears()
+        {
+            return await _checkChargesBatchYearsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
         public async Task<StepResponse> LoadCharges()
@@ -175,7 +183,7 @@ namespace HousingFinanceInterimApi
             return await _loadChargesTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
-        public async Task<StepResponse> LoadChargesTransactionsOnDemand(OnDemandRequest input, ILambdaContext context)
+        public async Task<StepResponse> LoadChargesTransactionsOnDemand(OnDemandRequest input)
         {
             return await _loadChargesTransactionsUseCase.ExecuteOnDemandAsync(input.StartDate, input.EndDate).ConfigureAwait(false);
         }

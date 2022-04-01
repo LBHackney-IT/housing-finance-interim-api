@@ -24,7 +24,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
             _context = context;
         }
 
-        public async Task CreateBulkAsync(IList<ChargesAuxDomain> chargesAuxDomain, string rentGroup)
+        public async Task CreateBulkAsync(IList<ChargesAuxDomain> chargesAuxDomain, string rentGroup, int year)
         {
             try
             {
@@ -32,6 +32,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 {
                     PropertyRef = c.PropertyRef,
                     RentGroup = rentGroup,
+                    Year = year,
                     DAT = c.DAT ?? 0,
                     DBR = c.DBR ?? 0,
                     DC4 = c.DC4 ?? 0,
@@ -121,11 +122,11 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
         }
 
-        public async Task LoadChargesHistory(DateTime? processingDate)
+        public async Task LoadChargesHistory(int processingYear)
         {
             try
             {
-                await _context.LoadChargesHistory(processingDate).ConfigureAwait(false);
+                await _context.LoadChargesHistory(processingYear).ConfigureAwait(false);
             }
             catch (Exception e)
             {

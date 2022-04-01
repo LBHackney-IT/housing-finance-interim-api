@@ -13,6 +13,7 @@ namespace HousingFinanceInterimApi.V1.Factories
             {
                 Id = googleFileSetting.Id,
                 Label = googleFileSetting.Label,
+                FileYear = googleFileSetting.FileYear,
                 FileType = googleFileSetting.FileType,
                 GoogleIdentifier = googleFileSetting.GoogleIdentifier,
                 StartDate = googleFileSetting.StartDate,

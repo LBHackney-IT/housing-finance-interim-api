@@ -20,6 +20,11 @@ namespace HousingFinanceInterimApi.V1.Domain
         public string Label { get; set; }
 
         /// <summary>
+        /// Gets or sets the file year.
+        /// </summary>
+        public int FileYear { get; set; }
+
+        /// <summary>
         /// Gets or sets the google folder/file identifier.
         /// </summary>
         public string GoogleIdentifier { get; set; }
