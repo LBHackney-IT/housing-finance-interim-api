@@ -34,6 +34,11 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public string Label { get; set; }
 
         /// <summary>
+        /// Gets or sets the file year.
+        /// </summary>
+        public int FileYear { get; set; }
+
+        /// <summary>
         /// Gets or sets the start date.
         /// </summary>
         public DateTimeOffset StartDate { get; set; }
