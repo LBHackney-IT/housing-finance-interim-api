@@ -51,7 +51,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             if (googleFileSettings == null)
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(0) };
-                        
+
             var allSuspenseTransactions = await _googleClientService
                 .ReadSheetToEntitiesAsync<CashSuspenseTransactionAuxDomain>(googleFileSettings.GoogleIdentifier, sheetName, sheetRange)
                 .ConfigureAwait(false);
@@ -61,7 +61,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 var filledNewAccounts = allSuspenseTransactions.Where(x => !string.IsNullOrEmpty(x.NewRentAccount)).ToList();
 
                 await HandleSpreadSheet(batch.Id, filledNewAccounts).ConfigureAwait(false);
-            }     
+            }
 
             var suspenseTransactions = await _upCashLoadSuspenseAccountsGateway.GetCashSuspenseTransactions().ConfigureAwait(false);
 
@@ -69,7 +69,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             //HEADER
             rows.Add(new List<object>() { "Id", "Original Payment Ref", "Payment Date", "Amount", "New Payment Ref" });
-                        
+
             //ROWS            
             foreach (var suspenseTransaction in suspenseTransactions)
             {
@@ -81,7 +81,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     "" });
             }
 
-            await _googleClientService.UpdateSheetAsync(rows, googleFileSettings.GoogleIdentifier, sheetName, sheetRange, true).ConfigureAwait(false);            
+            await _googleClientService.UpdateSheetAsync(rows, googleFileSettings.GoogleIdentifier, sheetName, sheetRange, true).ConfigureAwait(false);
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
             LoggingHandler.LogInfo($"End suspense cash import");
