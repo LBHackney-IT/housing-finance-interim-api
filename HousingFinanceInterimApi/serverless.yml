@@ -110,6 +110,7 @@ functions:
   refreshManageArrearsTables:
     name: ${self:service}-${self:provider.stage}-refresh-ma-cur-bal
     description: "The scheduler to refresh manager arrears balance based on current balance table."
+    timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshManageArrears
     role: lambdaExecutionRole
   importDirectDebit:
@@ -182,6 +183,14 @@ functions:
     role: lambdaExecutionRole
     events:
         - schedule: cron(45 1 * * ? *)
+  suspenseCash:
+    name: ${self:service}-${self:provider.stage}-susp-cash
+    description: "The scheduler to load and reverse suspense cash files. Run at 03:05 AM"
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadSuspenseCashTransactions
+    role: lambdaExecutionRole
+    events:
+        - schedule: cron(5 3 * * ? *)
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:

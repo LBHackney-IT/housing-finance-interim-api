@@ -175,7 +175,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
             return results;
         }
 
-        public async Task<bool> RenameFileInDrive(string fileId, string newName)
+        public Task<bool> RenameFileInDrive(string fileId, string newName)
         {
             File newFileName = new File();
             newFileName.Name = newName;
@@ -184,7 +184,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
             var updateRequest = _driveService.Files.Update(newFileName, fileId);
             var renamedFile = updateRequest.Execute();
 
-            return renamedFile.Name == newName;
+            return Task.FromResult(renamedFile.Name == newName);
         }
 
         public async Task DeleteFileInDrive(string fileId)
@@ -249,6 +249,39 @@ namespace HousingFinanceInterimApi.V1.Gateways
         #endregion
 
         #region Google Sheets
+        public async Task UpdateSheetAsync(List<IList<object>> data, string spreadSheetId, string sheetName, string sheetRange, bool clearSheet = false)
+        {
+            if (clearSheet)
+                await ClearSheetAsync(spreadSheetId, sheetName, sheetRange).ConfigureAwait(false);
+
+            string valueInputOption = "USER_ENTERED";
+
+            // The new values to apply to the spreadsheet.
+            List<ValueRange> updateData = new List<ValueRange>();
+            var dataValueRange = new ValueRange();
+            dataValueRange.Range = $"{sheetName}!{sheetRange}";
+            dataValueRange.Values = data;
+            updateData.Add(dataValueRange);
+
+            Data.BatchUpdateValuesRequest requestBody = new BatchUpdateValuesRequest();
+            requestBody.ValueInputOption = valueInputOption;
+            requestBody.Data = updateData;
+
+            var request = _sheetsService.Spreadsheets.Values.BatchUpdate(requestBody, spreadSheetId);
+
+            request.Execute();
+        }
+
+        public Task ClearSheetAsync(string spreadSheetId, string sheetName, string sheetRange)
+        {
+            var requestBody = new ClearValuesRequest();
+
+            var requestClear =
+                _sheetsService.Spreadsheets.Values.Clear(requestBody, spreadSheetId, $"{sheetName}!{sheetRange}");
+
+            requestClear.Execute();
+            return Task.CompletedTask;
+        }
 
         public async Task<IList<_TEntity>> ReadSheetToEntitiesAsync<_TEntity>(string spreadSheetId, string sheetName,
             string sheetRange) where _TEntity : class

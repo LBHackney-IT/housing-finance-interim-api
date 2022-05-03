@@ -43,6 +43,10 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
 
         public Task<bool> UploadCsvFile(List<string[]> table, string fileName, string folderId);
 
+        public Task ClearSheetAsync(string spreadSheetId, string sheetName, string sheetRange);
+
+        public Task UpdateSheetAsync(List<IList<object>> data, string spreadSheetId, string sheetName, string sheetRange, bool clearSheet = false);
+
         public Task DeleteFileInDrive(string fileId);
 
     }

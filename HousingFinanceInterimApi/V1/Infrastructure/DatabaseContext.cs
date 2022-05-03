@@ -116,6 +116,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// </summary>
         public DbSet<OtherHRA> OtherHRA { get; set; }
 
+        public DbSet<CashSuspenseTransaction> CashSuspenseTransactions { get; set; }
+        public DbSet<CashSuspenseTransactionAux> CashSuspenseTransactionsAux { get; set; }
+
         /// <summary>
         /// Gets the operating balances.
         /// </summary>
@@ -264,9 +267,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task RefreshManageArrearsProperty()
             => await PerformTransaction("usp_RefreshManageArrearsProperty").ConfigureAwait(false);
 
-
-
-
+        public async Task<List<CashSuspenseTransaction>> GetCashSuspenseTransactions()
+            => await CashSuspenseTransactions.FromSqlRaw($"usp_GetCashSuspenseTransactions", 600).ToListAsync().ConfigureAwait(false);
 
         public async Task<IList<Transaction>> GetTransactionsAsync(DateTime? startDate, DateTime? endDate)
             => await Transactions
@@ -310,6 +312,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task LoadDirectDebitHistory(DateTime? processingDate)
             => await PerformInterpolatedTransaction($"usp_LoadDirectDebitHistory {processingDate:yyyy-MM-dd}", 600).ConfigureAwait(false);
 
+        public async Task LoadcashSuspenseTransactions()
+            => await PerformInterpolatedTransaction($"usp_LoadcashSuspenseTransactions", 600).ConfigureAwait(false);
+
         public async Task LoadChargesHistory(int @processingYear)
             => await PerformInterpolatedTransaction($"usp_LoadChargesHistory {@processingYear}", 600).ConfigureAwait(false);
 
@@ -328,6 +333,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task TruncateDirectDebitAuxiliary()
         {
             var sql = "DELETE FROM DirectDebitAux";
+            await PerformTransaction(sql).ConfigureAwait(false);
+        }
+
+        public async Task TruncateCashSuspenseTransactionAuxiliary()
+        {
+            var sql = "DELETE FROM CashSuspenseTransactionAux";
             await PerformTransaction(sql).ConfigureAwait(false);
         }
 
@@ -356,7 +367,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             => await PerformTransaction("usp_GenerateOperatingBalance", 600).ConfigureAwait(false);
 
         public async Task RefreshManageArrearsTenancyAgreement()
-            => await PerformTransaction("usp_RefreshManageArrearsTenancyAgreement", 300).ConfigureAwait(false);
+            => await PerformTransaction("usp_RefreshManageArrearsTenancyAgreement", 900).ConfigureAwait(false);
 
         public async Task<List<string[]>> GetRentPosition()
         {
