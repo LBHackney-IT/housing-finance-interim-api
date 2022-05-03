@@ -16,11 +16,10 @@ namespace HousingFinanceInterimApi.V1.Controllers
             _createGoogleClientServiceUseCase = createGoogleClientServiceUseCase;
         }
 
-        public Task<IActionResult> AuthenticateGoogleAuthCode()
+        public async Task<IActionResult> AuthenticateGoogleAuthCode(string code)
         {
-            return Task.FromResult(null);
+            return null;
         }
-
     }
 
 }
