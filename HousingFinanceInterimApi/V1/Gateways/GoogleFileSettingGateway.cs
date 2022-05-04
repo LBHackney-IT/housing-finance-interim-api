@@ -24,13 +24,13 @@ namespace HousingFinanceInterimApi.V1.Gateways
         public async Task<IList<GoogleFileSetting>> ListAsync()
             => await _context.GoogleFileSettings.ToListAsync().ConfigureAwait(false);
 
-        public async Task<List<GoogleFileSettingDomain>> GetSettingsByLabel(string label)
+        public Task<List<GoogleFileSettingDomain>> GetSettingsByLabel(string label)
         {
             try
             {
                 var googleFileSettings = _context.GoogleFileSettings
                     .Where(item => item.Label.Equals(label)).ToList();
-                return googleFileSettings.ToDomain();
+                return Task.FromResult(googleFileSettings.ToDomain());
             }
             catch (Exception e)
             {

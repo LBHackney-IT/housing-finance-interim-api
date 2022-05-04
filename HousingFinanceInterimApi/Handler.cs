@@ -35,6 +35,7 @@ namespace HousingFinanceInterimApi
         private readonly ILoadDirectDebitTransactionsUseCase _loadDirectDebitTransactionsUseCase;
         private readonly ILoadDirectDebitUseCase _loadDirectDebitUseCase;
         private readonly ILoadHousingFileTransactionsUseCase _loadHousingFileTransactionsUseCase;
+        private readonly ILoadSuspenseCashTransactionsUseCase _loadSuspenseCashTransactionsUseCase;
         private readonly ILoadTenancyAgreementUseCase _loadTenancyAgreementUseCase;
         private readonly IRefreshCurrentBalanceUseCase _refreshCurrentBalanceUseCase;
         private readonly IRefreshManageArrearsUseCase _refreshManageArrearsUseCase;
@@ -57,8 +58,10 @@ namespace HousingFinanceInterimApi
                     DriveService.Scope.Drive, SheetsService.Scope.SpreadsheetsReadonly
                 }
             });
-            IGoogleClientService googleClientService = new GoogleClientServiceFactory(default, options, context)
-                .CreateGoogleClientServiceFromJson(Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
+
+            IGoogleClientService googleClientService =
+                new GoogleClientServiceFactory(default, options, context)
+                    .CreateGoogleClientServiceFromJson(Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
 
             IActionDiaryGateway actionDiaryGateway = new ActionDiaryGateway(context);
             IAdjustmentGateway adjustmentGateway = new AdjustmentGateway(context);
@@ -80,6 +83,7 @@ namespace HousingFinanceInterimApi
             IUPHousingCashDumpFileNameGateway upHousingCashDumpFileNameGateway = new UPHousingCashDumpFileNameGateway(context);
             IUPHousingCashDumpGateway upHousingCashDumpGateway = new UPHousingCashDumpGateway(context);
             IUPHousingCashLoadGateway upHousingCashLoadGateway = new UPHousingCashLoadGateway(context);
+            IUPCashLoadSuspenseAccountsGateway upCashLoadSuspenseAccountsGateway = new UPCashLoadSuspenseAccountsGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _checkChargesBatchYearsUseCase = new CheckChargesBatchYearsUseCase(chargesBatchYearsGateway);
@@ -106,6 +110,8 @@ namespace HousingFinanceInterimApi
                 directDebitGateway, googleFileSettingGateway, googleClientService);
             _loadHousingFileTransactionsUseCase = new LoadHousingFileTransactionsUseCase(batchLogGateway,
                 batchLogErrorGateway, upHousingCashLoadGateway, transactionGateway);
+            _loadSuspenseCashTransactionsUseCase = new LoadSuspenseCashTransactionsUseCase(batchLogGateway,
+                batchLogErrorGateway, upCashLoadSuspenseAccountsGateway, googleFileSettingGateway, googleClientService);
             _loadTenancyAgreementUseCase = new LoadTenancyAgreementUseCase(batchLogGateway, batchLogErrorGateway,
                 tenancyAgreementGateway, googleFileSettingGateway, googleClientService);
             _refreshCurrentBalanceUseCase = new RefreshCurrentBalanceUseCase(currentBalanceGateway);
@@ -216,6 +222,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> RefreshManageArrears()
         {
             return await _refreshManageArrearsUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> LoadSuspenseCashTransactions()
+        {
+            return await _loadSuspenseCashTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 

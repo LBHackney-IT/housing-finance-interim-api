@@ -101,7 +101,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
         }
 
-        public async Task<UPHousingCashDumpFileNameDomain> GetProcessedFileByName(string fileName)
+        public Task<UPHousingCashDumpFileNameDomain> GetProcessedFileByName(string fileName)
         {
             try
             {
@@ -109,7 +109,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     item.FileName.Equals(fileName) &&
                     item.IsSuccess.Equals(true));
 
-                return housingCashDumpFileName.ToDomain();
+                return Task.FromResult(housingCashDumpFileName.ToDomain());
             }
             catch (Exception e)
             {
