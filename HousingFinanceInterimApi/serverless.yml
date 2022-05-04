@@ -109,7 +109,7 @@ functions:
         - schedule: cron(0 4 * * ? *)    
   refreshManageArrearsTables:
     name: ${self:service}-${self:provider.stage}-refresh-ma-cur-bal
-    description: "The scheduler to refresh manager arrears balance based on current balance table."
+    description: "The scheduler to refresh manage arrears balance based on current balance table."
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshManageArrears
     role: lambdaExecutionRole
