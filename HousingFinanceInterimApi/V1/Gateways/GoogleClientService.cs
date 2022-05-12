@@ -135,7 +135,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// <returns>
         /// The list of files for the given drive.
         /// </returns>
-        public async Task<IList<File>> GetFilesInDriveAsync(string driveId)
+        public async Task<IList<Google.Apis.Drive.v3.Data.File>> GetFilesInDriveAsync(string driveId)
         {
             FilesResource.ListRequest listRequest = _driveService.Files.List();
             listRequest.Q = $"'{driveId}' in parents";
@@ -191,6 +191,50 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             var deleteRequest = _driveService.Files.Delete(fileId);
             var deletedFile = await deleteRequest.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<bool> UploadFileInDrive(MemoryStream memoryStream, string fileName, string folderId)
+        {
+            IUploadProgress createdFile = null;
+            try
+            {
+                LoggingHandler.LogInfo($"Uploading file");
+
+                var path = "tmp/tempfiles";
+                var outputPath = $"{path}/{fileName}";
+
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                if (System.IO.File.Exists(outputPath))
+                    System.IO.File.Delete(outputPath);
+
+                File newFile = new File()
+                {
+                    Name = fileName,
+                    MimeType = "text/plain",
+                    Parents = new List<string> { folderId }
+                };
+
+                using (var stream = new FileStream(outputPath, FileMode.Create))
+                {
+                    memoryStream.WriteTo(stream);
+                    var createRequest = _driveService.Files.Create(newFile, stream, "text/plain");
+                    createdFile = await createRequest.UploadAsync().ConfigureAwait(false);
+                }
+
+                LoggingHandler.LogInfo($"Upload progress: { JsonConvert.SerializeObject(createdFile) }");
+
+                return createdFile.Status == UploadStatus.Completed;
+            }
+            catch (Exception exc)
+            {
+                LoggingHandler.LogError($"Error uploading file");
+                LoggingHandler.LogError($"Upload progress: { JsonConvert.SerializeObject(createdFile) }");
+                LoggingHandler.LogError(exc.ToString());
+
+                throw;
+            }
         }
 
         public async Task<bool> UploadCsvFile(List<string[]> table, string fileName, string folderId)
