@@ -198,9 +198,10 @@ namespace HousingFinanceInterimApi.V1.Gateways
             IUploadProgress createdFile = null;
             try
             {
+
                 LoggingHandler.LogInfo($"Uploading file");
 
-                var path = "tmp/tempfiles";
+                var path = "/tmp/tempfiles";
                 var outputPath = $"{path}/{fileName}";
 
                 if (!Directory.Exists(path))
