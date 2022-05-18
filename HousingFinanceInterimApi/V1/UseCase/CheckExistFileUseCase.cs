@@ -74,7 +74,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         foreach (var googleFileSetting in googleFileSettings)
                         {
                             await _googleClientService
-                                .UploadFileInDrive(memoryStream, fileDate, googleFileSetting.GoogleIdentifier)
+                                .UploadFileInDrive(memoryStream, newFilename, googleFileSetting.GoogleIdentifier)
                                 .ConfigureAwait(false);
                         }
 
