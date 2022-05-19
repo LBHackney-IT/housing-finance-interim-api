@@ -404,6 +404,115 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             return results;
         }
 
+        //REPORTS
+        public async Task<List<dynamic>> GetChargesByYearAndRentGroupAsync(int year, string rentGroup)
+        {
+            var results = new List<dynamic>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetChargesByYearAndRentGroup {year}, {rentGroup}", dbConnection)
+            {
+                CommandTimeout = 900
+            };
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    dynamic result = new System.Dynamic.ExpandoObject();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        ((IDictionary<string, object>) result)[columnNames[i]] = reader[i] != DBNull.Value ? reader[i] : null;
+                    }
+
+                    results.Add(result);
+                }
+
+            }
+            dbConnection.Close();
+
+            return results;
+        }
+
+        public async Task<List<dynamic>> GetChargesByGroupType(int year, string type)
+        {
+            var results = new List<dynamic>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetChargesByGroupType {year}, {type}", dbConnection)
+            {
+                CommandTimeout = 900
+            };
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    dynamic result = new System.Dynamic.ExpandoObject();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        ((IDictionary<string, object>) result)[columnNames[i]] = reader[i] != DBNull.Value ? reader[i] : null;
+                    }
+
+                    results.Add(result);
+                }
+
+            }
+            dbConnection.Close();
+
+            return results;
+        }
+
+        public async Task<List<dynamic>> GetChargesByYear(int year)
+        {
+            var results = new List<dynamic>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetChargesByYear {year}", dbConnection)
+            {
+                CommandTimeout = 900
+            };
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    dynamic result = new System.Dynamic.ExpandoObject();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        ((IDictionary<string, object>) result)[columnNames[i]] = reader[i] != DBNull.Value ? reader[i] : null;
+                    }
+
+                    results.Add(result);
+                }
+
+            }
+            dbConnection.Close();
+
+            return results;
+        }
+
         private async Task PerformTransaction(string sql, int timeout = 0)
         {
             await using var transaction = await Database.BeginTransactionAsync().ConfigureAwait(false);

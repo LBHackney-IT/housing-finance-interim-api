@@ -151,6 +151,7 @@ namespace HousingFinanceInterimApi
             services.AddScoped<ITransactionGateway, TransactionGateway>();
             services.AddScoped<IBatchLogGateway, BatchLogGateway>();
             services.AddScoped<IBatchLogErrorGateway, BatchLogErrorGateway>();
+            services.AddScoped<IReportChargesGateway, ReportChargesGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
