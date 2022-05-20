@@ -137,6 +137,7 @@ namespace HousingFinanceInterimApi
         private static void ConfigureDbContext(IServiceCollection services)
         {
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+
             services.AddDbContext<DatabaseContext>(opt => opt.UseSqlServer(connectionString, sqlOptions =>
             {
                 sqlOptions.CommandTimeout(360);
@@ -152,6 +153,7 @@ namespace HousingFinanceInterimApi
             services.AddScoped<IBatchLogGateway, BatchLogGateway>();
             services.AddScoped<IBatchLogErrorGateway, BatchLogErrorGateway>();
             services.AddScoped<IReportChargesGateway, ReportChargesGateway>();
+            services.AddScoped<IReportSuspenseAccountGateway, ReportSuspenseAccountGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
