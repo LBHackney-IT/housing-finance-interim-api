@@ -5,7 +5,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
     public class ReportCashSuspenseAccount
     {
-        public string OriginalRentAccount { get; set; }
+        public string RentReference { get; set; }
 
         public DateTime TransactionDate { get; set; }
 
@@ -13,7 +13,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public string TransactionType { get; set; }
 
-        public string SuspenseAccountType { get; set; }
-    }
+        public string OriginalRentAccount { get; set; }
 
+        public string RentGroup { get; set; }
+        
+        public string OriginId { get; set; }
+        
+        public string Description { get; set; }
+    }
 }
