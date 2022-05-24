@@ -34,6 +34,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<TenancyTransaction>().HasNoKey().ToView(null);
             modelBuilder.Entity<Transaction>().HasNoKey().ToView(null);
             modelBuilder.Entity<ReportCashSuspenseAccount>().HasNoKey().ToView(null);
+            modelBuilder.Entity<ReportCashImport>().HasNoKey().ToView(null);
             modelBuilder.Entity<ChargesAux>().Property(x => x.TimeStamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<DirectDebitAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<ActionDiaryAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
@@ -120,6 +121,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<CashSuspenseTransaction> CashSuspenseTransactions { get; set; }
         public DbSet<CashSuspenseTransactionAux> CashSuspenseTransactionsAux { get; set; }
         public DbSet<ReportCashSuspenseAccount> ReportCashSuspenseAccounts { get; set; }
+        public DbSet<ReportCashImport> ReportCashImports { get; set; }
 
         /// <summary>
         /// Gets the operating balances.
@@ -410,6 +412,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task<IList<ReportCashSuspenseAccount>> GetCashSuspenseAccountByYearAsync(int year, string suspenseAccountType)
             => await ReportCashSuspenseAccounts
                 .FromSqlInterpolated($"usp_GetCashSuspenseAccountByYear {year}, {suspenseAccountType}")
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+        public async Task<IList<ReportCashImport>> GetCashImportByDateAsync(DateTime startDate, DateTime endDate)
+            => await ReportCashImports
+                .FromSqlInterpolated($"usp_GetCashImportByDate {startDate}, {endDate}")
                 .ToListAsync()
                 .ConfigureAwait(false);
 

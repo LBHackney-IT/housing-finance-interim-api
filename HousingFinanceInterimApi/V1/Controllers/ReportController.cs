@@ -11,12 +11,15 @@ namespace HousingFinanceInterimApi.V1.Controllers
 
         private readonly IReportChargesGateway _reportChargesGateway;
         private readonly IReportSuspenseAccountGateway _reportSuspenseAccountGateway;
+        private readonly IReportCashImportGateway _reportCashImportGateway;
 
         public ReportController(IReportChargesGateway reportChargesGateway,
-            IReportSuspenseAccountGateway reportSuspenseAccountGateway)
+            IReportSuspenseAccountGateway reportSuspenseAccountGateway,
+            IReportCashImportGateway reportCashImportGateway)
         {
             _reportChargesGateway = reportChargesGateway;
             _reportSuspenseAccountGateway = reportSuspenseAccountGateway;
+            _reportCashImportGateway = reportCashImportGateway;
         }
 
         [HttpGet("charges")]
@@ -41,6 +44,13 @@ namespace HousingFinanceInterimApi.V1.Controllers
         {
             return Json(await _reportSuspenseAccountGateway
                 .ListCashSuspenseByYearAndTypeAsync(year, suspenseAccountType).ConfigureAwait(false));
+        }
+
+        [HttpGet("cash/import")]
+        public async Task<JsonResult> ListCashImportByDate(DateTime startDate, DateTime endDate)
+        {
+            return Json(await _reportCashImportGateway
+                .ListCashImportByDateAsync(startDate, endDate).ConfigureAwait(false));
         }
     }
 }

@@ -16,9 +16,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public string OriginalRentAccount { get; set; }
 
         public string RentGroup { get; set; }
-        
+
         public string OriginId { get; set; }
-        
+
         public string Description { get; set; }
     }
 }
