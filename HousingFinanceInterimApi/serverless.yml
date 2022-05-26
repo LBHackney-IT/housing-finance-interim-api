@@ -23,6 +23,8 @@ provider:
     HOUSING_FILE_REGEX: ${ssm:/housing-finance/${self:provider.stage}/housing-benefit-file-regex}
     ACCEPTED_ORIGINS: ${ssm:/housing-finance/${self:provider.stage}/cors-accepted-origins}
     CHARGES_BATCH_YEARS: ${ssm:/housing-finance/${self:provider.stage}/charges-batch-years}
+    S3_BUCKET_NAME: ${ssm:/housing-finance/${self:provider.stage}/s3-bucket-name}
+    S3_OBJECT_PREFIX: ${ssm:/housing-finance/${self:provider.stage}/s3-object-prefix}
 
 package:
   artifact: ./bin/release/netcoreapp3.1/housing-finance-interim-api.zip
