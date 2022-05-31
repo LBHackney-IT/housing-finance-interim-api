@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cors;
+using HousingFinanceInterimApi.V1.Boundary.Request;
+using HousingFinanceInterimApi.V1.Factories;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
@@ -12,14 +14,17 @@ namespace HousingFinanceInterimApi.V1.Controllers
         private readonly IReportChargesGateway _reportChargesGateway;
         private readonly IReportSuspenseAccountGateway _reportSuspenseAccountGateway;
         private readonly IReportCashImportGateway _reportCashImportGateway;
+        private readonly IBatchReportAccountBalanceGateway _batchReportAccountBalanceGateway;
 
         public ReportController(IReportChargesGateway reportChargesGateway,
             IReportSuspenseAccountGateway reportSuspenseAccountGateway,
-            IReportCashImportGateway reportCashImportGateway)
+            IReportCashImportGateway reportCashImportGateway,
+            IBatchReportAccountBalanceGateway batchReportAccountBalanceGateway)
         {
             _reportChargesGateway = reportChargesGateway;
             _reportSuspenseAccountGateway = reportSuspenseAccountGateway;
             _reportCashImportGateway = reportCashImportGateway;
+            _batchReportAccountBalanceGateway = batchReportAccountBalanceGateway;
         }
 
         [HttpGet("charges")]
@@ -51,6 +56,20 @@ namespace HousingFinanceInterimApi.V1.Controllers
         {
             return Json(await _reportCashImportGateway
                 .ListCashImportByDateAsync(startDate, endDate).ConfigureAwait(false));
+        }
+
+        [HttpPost("balance")]
+        public async Task<JsonResult> CreateReportAccountBalance([FromBody] BatchReportAccountBalanceRequest request)
+        {
+            return Json(await _batchReportAccountBalanceGateway
+                .CreateAsync(request.ToDomain()).ConfigureAwait(false));
+        }
+
+        [HttpGet("balance")]
+        public async Task<JsonResult> ListReportAccountBalance()
+        {
+            return Json(await _batchReportAccountBalanceGateway
+                .ListAsync().ConfigureAwait(false));
         }
     }
 }
