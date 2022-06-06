@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
@@ -35,6 +36,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<Transaction>().HasNoKey().ToView(null);
             modelBuilder.Entity<ReportCashSuspenseAccount>().HasNoKey().ToView(null);
             modelBuilder.Entity<ReportCashImport>().HasNoKey().ToView(null);
+            modelBuilder.Entity<ReportAccountBalance>().HasNoKey().ToView(null);
             modelBuilder.Entity<ChargesAux>().Property(x => x.TimeStamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<DirectDebitAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<ActionDiaryAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
@@ -123,6 +125,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<ReportCashSuspenseAccount> ReportCashSuspenseAccounts { get; set; }
         public DbSet<ReportCashImport> ReportCashImports { get; set; }
         public DbSet<BatchReportAccountBalance> BatchReportAccountBalances { get; set; }
+        public DbSet<ReportAccountBalance> ReportAccountBalances { get; set; }
 
         /// <summary>
         /// Gets the operating balances.
@@ -366,7 +369,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         }
 
         public async Task UpdateCurrentBalance()
-            => await PerformTransaction("usp_UpdateCurrentBalance", 300).ConfigureAwait(false);
+            => await PerformTransaction("usp_UpdateCurrentBalance", 900).ConfigureAwait(false);
 
         public async Task GenerateOperatingBalance()
             => await PerformTransaction("usp_GenerateOperatingBalance", 600).ConfigureAwait(false);
@@ -530,6 +533,47 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             return results;
         }
 
+        public async Task<IList<ReportAccountBalance>> GetReportAccountBalance(DateTime reportDate, string rentGroup)
+        {
+            var results = new List<ReportAccountBalance>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetReportAccountBalance", dbConnection)
+            {
+                CommandTimeout = 900,
+                CommandType = CommandType.StoredProcedure
+            };
+
+            command.Parameters.AddWithValue("@reportDate", reportDate.ToString("yyyy-MM-dd"));
+
+            if (!string.IsNullOrEmpty(rentGroup))
+                command.Parameters.AddWithValue("@rentGroup", rentGroup);
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+
+                while (reader.Read())
+                {
+                    results.Add(new ReportAccountBalance()
+                    {
+                        TenancyAgreementRef = reader["TenancyAgreementRef"] != DBNull.Value ? reader["TenancyAgreementRef"].ToString() : null,
+                        RentAccount = reader["RentAccount"] != DBNull.Value ? reader["RentAccount"].ToString() : null,
+                        RentGroup = reader["RentGroup"] != DBNull.Value ? reader["RentGroup"].ToString() : null,
+                        TenancyEndDate = reader["TenancyEndDate"] != DBNull.Value ? Convert.ToDateTime(reader["TenancyEndDate"]) : (DateTime?) null,
+                        Balance = reader["Balance"] != DBNull.Value ? Convert.ToDecimal(reader["Balance"]) : 0m,
+                    });
+                }
+
+            }
+            dbConnection.Close();
+
+            return results;
+        }
+
+
+
+
         private async Task PerformTransaction(string sql, int timeout = 0)
         {
             await using var transaction = await Database.BeginTransactionAsync().ConfigureAwait(false);
@@ -565,7 +609,6 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
                 throw;
             }
         }
-
     }
 
 }

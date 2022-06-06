@@ -18,6 +18,8 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// <returns>The list of files for the given drive.</returns>
         public Task<IList<File>> GetFilesInDriveAsync(string driveId);
 
+        public Task<File> GetFilesInDriveAsync(string driveId, string fileName);
+
         /// <summary>
         /// Reads the file line data asynchronous.
         /// </summary>

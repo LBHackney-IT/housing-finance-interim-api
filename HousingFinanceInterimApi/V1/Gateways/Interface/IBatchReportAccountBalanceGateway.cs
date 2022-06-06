@@ -7,7 +7,8 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
     public interface IBatchReportAccountBalanceGateway
     {
         Task<BatchReportAccountBalanceDomain> CreateAsync(BatchReportAccountBalanceDomain batchReportAccountBalanceDomain);
-        Task<bool> SetToSuccessAsync(int id);
+        Task<bool> SetToSuccessAsync(int id, string link);
         Task<IList<BatchReportAccountBalanceDomain>> ListAsync();
+        Task<IList<BatchReportAccountBalanceDomain>> ListPendingAsync();
     }
 }

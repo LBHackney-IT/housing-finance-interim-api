@@ -191,6 +191,12 @@ functions:
     role: lambdaExecutionRole
     events:
         - schedule: cron(5 3 * * ? *)
+  generateReportAccountBalance:
+    name: ${self:service}-${self:provider.stage}-gen-rep-acc-bal
+    description: "The scheduler to generate the account balances report."
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::GenerateReportAccountBalance
+    role: lambdaExecutionRole 
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:
@@ -479,6 +485,43 @@ stepFunctions:
                 MaxAttempts: 3
                 BackoffRate: 2
             Next: EndStep
+          EndStep:
+            Type: Succeed
+      dependsOn: lambdaExecutionRole
+      tags:
+        Team: HousingFinance
+    hfstepfuncreport:
+      name: HFReportsStateMachine
+      events:
+        - schedule: cron(0/30 * * * ? *)
+      definition:
+        Comment: "Reports step function deployed via serverless. Run every 30 min"
+        StartAt: GenerateReportAccountBalance
+        States:
+          GenerateReportAccountBalance:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ generateReportAccountBalance, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: Choice_ExistPendingReport
+          Choice_ExistPendingReport:
+            Type: Choice
+            Choices:
+              - Variable: $.Continue
+                BooleanEquals: true
+                Next: Wait_0
+              - Variable: $.Continue
+                BooleanEquals: false
+                Next: EndStep
+          Wait_0:
+              Type: Wait
+              TimestampPath: $.NextStepTime
+              Next: GenerateReportAccountBalance          
           EndStep:
             Type: Succeed
       dependsOn: lambdaExecutionRole

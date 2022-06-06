@@ -39,7 +39,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
         }
 
-        public async Task<bool> SetToSuccessAsync(int id)
+        public async Task<bool> SetToSuccessAsync(int id, string link)
         {
             try
             {
@@ -49,6 +49,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 if (batch == null)
                     return false;
 
+                batch.Link = link;
                 batch.IsSuccess = true;
                 batch.EndTime = DateTimeOffset.Now;
                 return await _context.SaveChangesAsync().ConfigureAwait(false) == 1;
@@ -64,6 +65,16 @@ namespace HousingFinanceInterimApi.V1.Gateways
         public async Task<IList<BatchReportAccountBalanceDomain>> ListAsync()
         {
             var results = await _context.BatchReportAccountBalances.ToListAsync().ConfigureAwait(false);
+            return results.ToDomain();
+        }
+
+        public async Task<IList<BatchReportAccountBalanceDomain>> ListPendingAsync()
+        {
+            var results = await _context.BatchReportAccountBalances
+                .Where(x => !x.IsSuccess)
+                .ToListAsync()
+                .ConfigureAwait(false);
+
             return results.ToDomain();
         }
     }

@@ -40,6 +40,7 @@ namespace HousingFinanceInterimApi
         private readonly IRefreshCurrentBalanceUseCase _refreshCurrentBalanceUseCase;
         private readonly IRefreshManageArrearsUseCase _refreshManageArrearsUseCase;
         private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
+        private readonly IGenereteReportAccountBalanceUseCase _generateReportAccountBalanceUseCase;
 
         private const string CashFileLabel = "CashFile";
         private const string HousingBenefitFileLabel = "HousingBenefitFile";
@@ -84,6 +85,8 @@ namespace HousingFinanceInterimApi
             IUPHousingCashDumpGateway upHousingCashDumpGateway = new UPHousingCashDumpGateway(context);
             IUPHousingCashLoadGateway upHousingCashLoadGateway = new UPHousingCashLoadGateway(context);
             IUPCashLoadSuspenseAccountsGateway upCashLoadSuspenseAccountsGateway = new UPCashLoadSuspenseAccountsGateway(context);
+            IReportAccountBalanceGateway reportAccountBalanceGateway = new ReportAccountBalanceGateway(context);
+            IBatchReportAccountBalanceGateway batchReportAccountBalanceGateway = new BatchReportAccountBalanceGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _checkChargesBatchYearsUseCase = new CheckChargesBatchYearsUseCase(chargesBatchYearsGateway);
@@ -117,6 +120,8 @@ namespace HousingFinanceInterimApi
             _refreshCurrentBalanceUseCase = new RefreshCurrentBalanceUseCase(currentBalanceGateway);
             _refreshManageArrearsUseCase = new RefreshManageArrearsUseCase(manageArrearsGateway);
             _refreshOperatingBalanceUseCase = new RefreshOperatingBalanceUseCase(operatingBalanceGateway);
+            _generateReportAccountBalanceUseCase = new GenerateReportAccountBalanceUseCase(batchReportAccountBalanceGateway,
+                reportAccountBalanceGateway, googleFileSettingGateway, googleClientService);
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()
@@ -227,6 +232,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> LoadSuspenseCashTransactions()
         {
             return await _loadSuspenseCashTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> GenerateReportAccountBalance()
+        {
+            return await _generateReportAccountBalanceUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 
