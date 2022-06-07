@@ -91,6 +91,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var upload = await _googleClientService.UploadCsvFile(convertedReportAccountBalance, fileName, googleFileSetting.GoogleIdentifier)
                 .ConfigureAwait(false);
 
+            System.Threading.Thread.Sleep(int.Parse(_waitDuration));
+
             var file = await _googleClientService
                 .GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
                 .ConfigureAwait(false);
