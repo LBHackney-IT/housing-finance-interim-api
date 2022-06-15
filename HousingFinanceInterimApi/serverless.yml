@@ -55,6 +55,10 @@ functions:
               - X-Amz-Security-Token
               - X-Amz-User-Agent
             allowCredentials: false
+      - http:
+          path: /swagger/{proxy+}
+          method: GET
+          private: false
   loadTenancyAgreement:
     name: ${self:service}-${self:provider.stage}-load-tenagree
     description: "The scheduler to update and add new tenancy agreements. Run at 12:00 AM"
