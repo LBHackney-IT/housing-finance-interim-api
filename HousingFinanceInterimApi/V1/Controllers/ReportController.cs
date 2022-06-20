@@ -12,9 +12,15 @@ using System.Net.Http;
 using System.Collections.Generic;
 using System.Net;
 using Amazon.Lambda.Core;
+using Microsoft.AspNetCore.Http;
+using HousingFinanceInterimApi.V1.Infrastructure;
+using HousingFinanceInterimApi.V1.Domain;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
+    [ApiController]
+    [Route("api/v1/report")]
+    [ApiVersion("1.0")]
     public class ReportController : BaseController
     {
 
@@ -22,10 +28,6 @@ namespace HousingFinanceInterimApi.V1.Controllers
         private readonly IReportSuspenseAccountGateway _reportSuspenseAccountGateway;
         private readonly IReportCashImportGateway _reportCashImportGateway;
         private readonly IBatchReportAccountBalanceGateway _batchReportAccountBalanceGateway;
-
-        // Information to generate pre-signed object URL.
-        private readonly string _bucketName = "academy-cashfile-sync-dev";
-
 
         public ReportController(IReportChargesGateway reportChargesGateway,
             IReportSuspenseAccountGateway reportSuspenseAccountGateway,
@@ -38,50 +40,89 @@ namespace HousingFinanceInterimApi.V1.Controllers
             _batchReportAccountBalanceGateway = batchReportAccountBalanceGateway;
         }
 
-        [LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
-        [HttpGet("charges")]
-        public async Task<JsonResult> ListChargesByYearAndRentGroup(int year, string rentGroup, string group)
+        [ProducesResponseType(typeof(List<dynamic>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet]
+        [Route("charges")]
+        public async Task<IActionResult> ListChargesByYearAndRentGroup(int year, string rentGroup, string group)
         {
+            var data = new List<dynamic>();
+
             if (!string.IsNullOrEmpty(rentGroup))
             {
-                return Json(await _reportChargesGateway.ListByYearAndRentGroupAsync(year, rentGroup).ConfigureAwait(false));
+                data = (List<dynamic>) await _reportChargesGateway.ListByYearAndRentGroupAsync(year, rentGroup).ConfigureAwait(false);
             }
             else if (!string.IsNullOrEmpty(group))
             {
-                return Json(await _reportChargesGateway.ListByGroupTypeAsync(year, group).ConfigureAwait(false));
+                data = (List<dynamic>) await _reportChargesGateway.ListByGroupTypeAsync(year, group).ConfigureAwait(false);
             }
             else
             {
-                return Json(await _reportChargesGateway.ListByYearAsync(year).ConfigureAwait(false));
+                data = (List<dynamic>) await _reportChargesGateway.ListByYearAsync(year).ConfigureAwait(false);
             }
+
+            if (data.Count == 0)
+                return NotFound();
+            return Ok(data);
         }
 
-        [HttpGet("cash/suspense")]
-        public async Task<JsonResult> ListCashSuspenseByYearAndType(int year, string suspenseAccountType)
+        [ProducesResponseType(typeof(List<ReportCashSuspenseAccount>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet]
+        [Route("cash/suspense")]
+        public async Task<IActionResult> ListCashSuspenseByYearAndType(int year, string suspenseAccountType)
         {
-            return Json(await _reportSuspenseAccountGateway
-                .ListCashSuspenseByYearAndTypeAsync(year, suspenseAccountType).ConfigureAwait(false));
+            var data = await _reportSuspenseAccountGateway
+                .ListCashSuspenseByYearAndTypeAsync(year, suspenseAccountType).ConfigureAwait(false);
+
+            if (data == null)
+                return NotFound();
+            return Ok(data);
         }
 
-        [HttpGet("cash/import")]
-        public async Task<JsonResult> ListCashImportByDate(DateTime startDate, DateTime endDate)
+        [ProducesResponseType(typeof(List<ReportCashImport>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet]
+        [Route("cash/import")]
+        public async Task<IActionResult> ListCashImportByDate(DateTime startDate, DateTime endDate)
         {
-            return Json(await _reportCashImportGateway
-                .ListCashImportByDateAsync(startDate, endDate).ConfigureAwait(false));
+            var data = await _reportCashImportGateway
+                .ListCashImportByDateAsync(startDate, endDate).ConfigureAwait(false);
+
+            if (data == null)
+                return NotFound();
+            return Ok(data);
         }
 
-        [HttpPost("balance")]
-        public async Task<JsonResult> CreateReportAccountBalance([FromBody] BatchReportAccountBalanceRequest request)
+        [ProducesResponseType(typeof(List<BatchReportAccountBalanceDomain>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPost]
+        [Route("balance")]
+        public async Task<IActionResult> CreateReportAccountBalance([FromBody] BatchReportAccountBalanceRequest request)
         {
-            return Json(await _batchReportAccountBalanceGateway
-                .CreateAsync(request.ToDomain()).ConfigureAwait(false));
+            var data = await _batchReportAccountBalanceGateway
+                .CreateAsync(request.ToDomain()).ConfigureAwait(false);
+
+            return Created("Report request created",
+                           data);
         }
 
-        [HttpGet("balance")]
-        public async Task<JsonResult> ListReportAccountBalance()
+        [ProducesResponseType(typeof(List<BatchReportAccountBalanceDomain>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet]
+        [Route("balance")]
+        public async Task<IActionResult> ListReportAccountBalance()
         {
-            return Json(await _batchReportAccountBalanceGateway
-                .ListAsync().ConfigureAwait(false));
+            var data = await _batchReportAccountBalanceGateway
+                .ListAsync().ConfigureAwait(false);
+
+            if (data == null)
+                return NotFound();
+            return Ok(data);
         }
     }
 }
