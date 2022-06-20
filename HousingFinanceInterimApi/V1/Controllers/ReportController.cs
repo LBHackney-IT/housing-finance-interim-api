@@ -37,7 +37,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
             _reportCashImportGateway = reportCashImportGateway;
             _batchReportAccountBalanceGateway = batchReportAccountBalanceGateway;
         }
-        
+
         [LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
         [HttpGet("charges")]
         public async Task<JsonResult> ListChargesByYearAndRentGroup(int year, string rentGroup, string group)
@@ -45,7 +45,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
             if (!string.IsNullOrEmpty(rentGroup))
             {
                 return Json(await _reportChargesGateway.ListByYearAndRentGroupAsync(year, rentGroup).ConfigureAwait(false));
-            }           
+            }
             else if (!string.IsNullOrEmpty(group))
             {
                 return Json(await _reportChargesGateway.ListByGroupTypeAsync(year, group).ConfigureAwait(false));
