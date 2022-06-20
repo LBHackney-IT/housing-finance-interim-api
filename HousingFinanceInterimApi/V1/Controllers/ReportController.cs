@@ -5,6 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cors;
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Factories;
+using Amazon.S3;
+using Amazon.S3.Model;
+using System.IO;
+using System.Net.Http;
+using System.Collections.Generic;
+using System.Net;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
@@ -15,6 +21,10 @@ namespace HousingFinanceInterimApi.V1.Controllers
         private readonly IReportSuspenseAccountGateway _reportSuspenseAccountGateway;
         private readonly IReportCashImportGateway _reportCashImportGateway;
         private readonly IBatchReportAccountBalanceGateway _batchReportAccountBalanceGateway;
+
+        // Information to generate pre-signed object URL.
+        private readonly string _bucketName = "academy-cashfile-sync-dev";
+
 
         public ReportController(IReportChargesGateway reportChargesGateway,
             IReportSuspenseAccountGateway reportSuspenseAccountGateway,
@@ -27,12 +37,73 @@ namespace HousingFinanceInterimApi.V1.Controllers
             _batchReportAccountBalanceGateway = batchReportAccountBalanceGateway;
         }
 
+        private async Task UploadObject(string url, string objectKey)
+        {
+            var path = "/tmp/tempfiles";
+            var outputPath = $"{path}/{objectKey}";
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            if (System.IO.File.Exists(outputPath))
+                System.IO.File.Delete(outputPath);
+
+            var table = new List<string[]>()
+                {
+                    new string[] { "Year", "Rent Group", "Group", "Charge", "Amount" }
+                };
+
+            using (var w = new StreamWriter(outputPath))
+            {
+                foreach (var row in table)
+                {
+                    var newRow = string.Join(";", row);
+                    await w.WriteLineAsync(newRow).ConfigureAwait(false);
+                    await w.FlushAsync().ConfigureAwait(false);
+                }
+            }
+
+            await using var fileStream = System.IO.File.OpenRead(outputPath);
+            var fileStreamResponse = await new HttpClient().PutAsync(
+                new Uri(url),
+                new StreamContent(fileStream));
+            fileStreamResponse.EnsureSuccessStatusCode();
+        }
+
+        private string GeneratePreSignedURL(string objectKey)
+        {
+            string url = null;
+
+            using (IAmazonS3 client = new AmazonS3Client())
+            {
+                GetPreSignedUrlRequest request = new GetPreSignedUrlRequest
+                {
+                    BucketName = _bucketName,
+                    Key = "cashfile/" + objectKey,
+                    Verb = HttpVerb.PUT,
+                    Expires = DateTime.Now.AddMinutes(5)
+                };
+
+                url = client.GetPreSignedURL(request);
+            }
+
+            return url;
+        }
+
         [HttpGet("charges")]
         public async Task<JsonResult> ListChargesByYearAndRentGroup(int year, string rentGroup, string group)
         {
             if (!string.IsNullOrEmpty(rentGroup))
             {
                 return Json(await _reportChargesGateway.ListByYearAndRentGroupAsync(year, rentGroup).ConfigureAwait(false));
+            }
+            else if (group == "TEST")
+            {
+                var filekey = $"{year}{rentGroup}{group}_{DateTime.Now.ToString("yyyyMMddHHmmss")}";
+                var uri = GeneratePreSignedURL(filekey);
+                await UploadObject(uri, filekey).ConfigureAwait(false);
+
+                return Json(null);
             }
             else if (!string.IsNullOrEmpty(group))
             {
