@@ -27,6 +27,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
         private const string ReportChargesLabel = "ReportCharges";
         private const string ReportCashSuspenseLabel = "ReportCashSuspense";
+        private const string ReportCashImportLabel = "ReportCashImport";
 
         public ReportController(IReportChargesGateway reportChargesGateway,
             IReportSuspenseAccountGateway reportSuspenseAccountGateway,
@@ -145,20 +146,52 @@ namespace HousingFinanceInterimApi.V1.Controllers
         //    return Ok(data);
         //}
 
-        [ProducesResponseType(typeof(List<ReportCashImport>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<BatchReportCashImportResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPost]
+        [Route("cash/import")]
+        public async Task<IActionResult> CreateReportCashImport([FromBody] BatchReportCashImportRequest request)
+        {
+            var batchReport = request.ToDomain();
+            batchReport.ReportName = ReportCashImportLabel;
+
+            var batchReportCharges = await _batchReportGateway
+                .CreateAsync(batchReport)
+                .ConfigureAwait(false);
+
+            return Created("Report request created",
+                           batchReportCharges.ToReportCashImportResponse());
+        }
+
+        [ProducesResponseType(typeof(List<BatchReportCashImportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [Route("cash/import")]
-        public async Task<IActionResult> ListCashImportByDate(DateTime startDate, DateTime endDate)
+        public async Task<IActionResult> ListReportCashImport()
         {
-            var data = await _reportCashImportGateway
-                .ListCashImportByDateAsync(startDate, endDate).ConfigureAwait(false);
+            var batchReportCharges = await _batchReportGateway
+                .ListAsync(ReportCashImportLabel).ConfigureAwait(false);
 
-            if (data == null)
+            if (batchReportCharges == null)
                 return NotFound();
-            return Ok(data);
+            return Ok(batchReportCharges.ToReportCashImportResponse());
         }
+
+        //[ProducesResponseType(typeof(List<ReportCashImport>), StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        //[HttpGet]
+        //[Route("cash/import")]
+        //public async Task<IActionResult> ListCashImportByDate(DateTime startDate, DateTime endDate)
+        //{
+        //    var data = await _reportCashImportGateway
+        //        .ListCashImportByDateAsync(startDate, endDate).ConfigureAwait(false);
+
+        //    if (data == null)
+        //        return NotFound();
+        //    return Ok(data);
+        //}
 
         [ProducesResponseType(typeof(List<BatchReportAccountBalanceResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

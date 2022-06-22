@@ -92,6 +92,24 @@ namespace HousingFinanceInterimApi.V1.Factories
             return batchReportCashSuspenses?.Select(b => b.ToDomain()).ToList();
         }
 
+        public static BatchReportDomain ToDomain(this BatchReportCashImportRequest batchReportCashImport)
+        {
+            if (batchReportCashImport == null)
+                return null;
+
+            return new BatchReportDomain
+            {
+                ReportStartDate = batchReportCashImport.StartDate,
+                ReportEndDate = batchReportCashImport.EndDate
+            };
+        }
+
+        public static List<BatchReportDomain> ToDomain(
+            this ICollection<BatchReportCashImportRequest> batchReportCashImports)
+        {
+            return batchReportCashImports?.Select(b => b.ToDomain()).ToList();
+        }
+
         public static Infrastructure.BatchReport ToDatabase(this BatchReportDomain batchReport)
         {
             if (batchReport == null)
@@ -188,6 +206,29 @@ namespace HousingFinanceInterimApi.V1.Factories
             this ICollection<BatchReportDomain> batchReports)
         {
             return batchReports?.Select(b => b.ToReportCashSuspenseResponse()).ToList();
+        }
+
+        public static BatchReportCashImportResponse ToReportCashImportResponse(this BatchReportDomain batchReport)
+        {
+            if (batchReport == null)
+                return null;
+
+            return new BatchReportCashImportResponse
+            {
+                Id = batchReport.Id,
+                StartDate = batchReport.ReportStartDate.Value,
+                EndDate = batchReport.ReportEndDate.Value,
+                Link = batchReport.Link,
+                StartTime = batchReport.StartTime,
+                EndTime = batchReport.EndTime,
+                IsSuccess = batchReport.IsSuccess
+            };
+        }
+
+        public static List<BatchReportCashImportResponse> ToReportCashImportResponse(
+            this ICollection<BatchReportDomain> batchReports)
+        {
+            return batchReports?.Select(b => b.ToReportCashImportResponse()).ToList();
         }
     }
 }
