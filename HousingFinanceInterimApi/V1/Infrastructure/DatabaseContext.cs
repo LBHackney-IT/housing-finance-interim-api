@@ -124,7 +124,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<CashSuspenseTransactionAux> CashSuspenseTransactionsAux { get; set; }
         public DbSet<ReportCashSuspenseAccount> ReportCashSuspenseAccounts { get; set; }
         public DbSet<ReportCashImport> ReportCashImports { get; set; }
-        public DbSet<BatchReportAccountBalance> BatchReportAccountBalances { get; set; }
+        public DbSet<BatchReport> BatchReports { get; set; }
         public DbSet<ReportAccountBalance> ReportAccountBalances { get; set; }
 
         /// <summary>

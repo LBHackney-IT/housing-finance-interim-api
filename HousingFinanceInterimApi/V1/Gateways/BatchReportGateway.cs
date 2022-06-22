@@ -11,21 +11,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
-    public class BatchReportAccountBalanceGateway : IBatchReportAccountBalanceGateway
+    public class BatchReportGateway : IBatchReportGateway
     {
         private readonly DatabaseContext _context;
 
-        public BatchReportAccountBalanceGateway(DatabaseContext context)
+        public BatchReportGateway(DatabaseContext context)
         {
             _context = context;
         }
 
-        public async Task<BatchReportAccountBalanceDomain> CreateAsync(BatchReportAccountBalanceDomain batchReportAccountBalanceDomain)
+        public async Task<BatchReportDomain> CreateAsync(BatchReportDomain batchReportAccountBalanceDomain)
         {
             try
             {
                 var batchReportAccountBalance = batchReportAccountBalanceDomain.ToDatabase();
-                await _context.BatchReportAccountBalances.AddAsync(batchReportAccountBalance).ConfigureAwait(false);
+                await _context.BatchReports.AddAsync(batchReportAccountBalance).ConfigureAwait(false);
 
                 return await _context.SaveChangesAsync().ConfigureAwait(false) == 1
                     ? batchReportAccountBalance.ToDomain()
@@ -43,7 +43,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             try
             {
-                var batch = await _context.BatchReportAccountBalances.FirstOrDefaultAsync(item => item.Id == id)
+                var batch = await _context.BatchReports.FirstOrDefaultAsync(item => item.Id == id)
                     .ConfigureAwait(false);
 
                 if (batch == null)
@@ -62,16 +62,19 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
         }
 
-        public async Task<IList<BatchReportAccountBalanceDomain>> ListAsync()
+        public async Task<IList<BatchReportDomain>> ListAsync(string reportName)
         {
-            var results = await _context.BatchReportAccountBalances.ToListAsync().ConfigureAwait(false);
+            var results = await _context.BatchReports
+                .Where(r => r.ReportName == reportName)
+                .ToListAsync()
+                .ConfigureAwait(false);
             return results.ToDomain();
         }
 
-        public async Task<IList<BatchReportAccountBalanceDomain>> ListPendingAsync()
+        public async Task<IList<BatchReportDomain>> ListPendingAsync()
         {
-            var results = await _context.BatchReportAccountBalances
-                .Where(x => !x.IsSuccess)
+            var results = await _context.BatchReports
+                .Where(r => !r.IsSuccess)
                 .ToListAsync()
                 .ConfigureAwait(false);
 

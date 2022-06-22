@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
-using HousingFinanceInterimApi.V1.Infrastructure;
 
-namespace HousingFinanceInterimApi.V1.Domain
+namespace HousingFinanceInterimApi.V1.Boundary.Response
 {
-    public class BatchReportAccountBalanceDomain
+    public class BatchReportAccountBalanceResponse
     {
         public int Id { get; set; }
 

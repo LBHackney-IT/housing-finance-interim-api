@@ -86,7 +86,7 @@ namespace HousingFinanceInterimApi
             IUPHousingCashLoadGateway upHousingCashLoadGateway = new UPHousingCashLoadGateway(context);
             IUPCashLoadSuspenseAccountsGateway upCashLoadSuspenseAccountsGateway = new UPCashLoadSuspenseAccountsGateway(context);
             IReportAccountBalanceGateway reportAccountBalanceGateway = new ReportAccountBalanceGateway(context);
-            IBatchReportAccountBalanceGateway batchReportAccountBalanceGateway = new BatchReportAccountBalanceGateway(context);
+            IBatchReportGateway batchReportAccountBalanceGateway = new BatchReportGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _checkChargesBatchYearsUseCase = new CheckChargesBatchYearsUseCase(chargesBatchYearsGateway);
@@ -120,7 +120,7 @@ namespace HousingFinanceInterimApi
             _refreshCurrentBalanceUseCase = new RefreshCurrentBalanceUseCase(currentBalanceGateway);
             _refreshManageArrearsUseCase = new RefreshManageArrearsUseCase(manageArrearsGateway);
             _refreshOperatingBalanceUseCase = new RefreshOperatingBalanceUseCase(operatingBalanceGateway);
-            _generateReportAccountBalanceUseCase = new GenerateReportAccountBalanceUseCase(batchReportAccountBalanceGateway,
+            _generateReportAccountBalanceUseCase = new GenerateReportUseCase(batchReportAccountBalanceGateway,
                 reportAccountBalanceGateway, googleFileSettingGateway, googleClientService);
         }
 
@@ -239,5 +239,4 @@ namespace HousingFinanceInterimApi
             return await _generateReportAccountBalanceUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
-
 }

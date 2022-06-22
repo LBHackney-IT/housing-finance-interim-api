@@ -5,15 +5,25 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
-    [Table("BatchReportAccountBalance")]
-    public class BatchReportAccountBalance
+    [Table("BatchReport")]
+    public class BatchReport
     {
         [Key]
         public int Id { get; set; }
 
+        public string ReportName { get; set; }
+
         public string RentGroup { get; set; }
 
-        public DateTime ReportDate { get; set; }
+        public string Group { get; set; }
+
+        public DateTime? ReportStartDate { get; set; }
+
+        public DateTime? ReportEndDate { get; set; }
+
+        public DateTime? ReportDate { get; set; }
+
+        public int? ReportYear { get; set; }
 
         public string Link { get; set; }
 

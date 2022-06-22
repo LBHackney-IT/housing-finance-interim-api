@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using HousingFinanceInterimApi.V1.Domain;
+using HousingFinanceInterimApi.V1.Boundary.Response;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
@@ -21,12 +22,14 @@ namespace HousingFinanceInterimApi.V1.Controllers
         private readonly IReportChargesGateway _reportChargesGateway;
         private readonly IReportSuspenseAccountGateway _reportSuspenseAccountGateway;
         private readonly IReportCashImportGateway _reportCashImportGateway;
-        private readonly IBatchReportAccountBalanceGateway _batchReportAccountBalanceGateway;
+        private readonly IBatchReportGateway _batchReportAccountBalanceGateway;
+
+        private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
 
         public ReportController(IReportChargesGateway reportChargesGateway,
             IReportSuspenseAccountGateway reportSuspenseAccountGateway,
             IReportCashImportGateway reportCashImportGateway,
-            IBatchReportAccountBalanceGateway batchReportAccountBalanceGateway)
+            IBatchReportGateway batchReportAccountBalanceGateway)
         {
             _reportChargesGateway = reportChargesGateway;
             _reportSuspenseAccountGateway = reportSuspenseAccountGateway;
@@ -39,7 +42,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [Route("charges")]
-        public async Task<IActionResult> ListChargesByYearAndRentGroup(int year, string rentGroup, string group)
+        public async Task<IActionResult> ListChargesByYearAndRentGroup([FromQuery] int year, string rentGroup, string group)
         {
             var data = new List<dynamic>();
 
@@ -91,32 +94,36 @@ namespace HousingFinanceInterimApi.V1.Controllers
             return Ok(data);
         }
 
-        [ProducesResponseType(typeof(List<BatchReportAccountBalanceDomain>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(List<BatchReportAccountBalanceResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost]
         [Route("balance")]
         public async Task<IActionResult> CreateReportAccountBalance([FromBody] BatchReportAccountBalanceRequest request)
         {
-            var data = await _batchReportAccountBalanceGateway
-                .CreateAsync(request.ToDomain()).ConfigureAwait(false);
+            var batchReport = request.ToDomain();
+            batchReport.ReportName = ReportAccountBalanceByDateLabel;
+
+            var batchReportAccountBalance = await _batchReportAccountBalanceGateway
+                .CreateAsync(batchReport)
+                .ConfigureAwait(false);
 
             return Created("Report request created",
-                           data);
+                           batchReportAccountBalance);
         }
 
-        [ProducesResponseType(typeof(List<BatchReportAccountBalanceDomain>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<BatchReportDomain>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [Route("balance")]
         public async Task<IActionResult> ListReportAccountBalance()
         {
-            var data = await _batchReportAccountBalanceGateway
-                .ListAsync().ConfigureAwait(false);
+            var batchReportAccountBalance = await _batchReportAccountBalanceGateway
+                .ListAsync(ReportAccountBalanceByDateLabel).ConfigureAwait(false);
 
-            if (data == null)
+            if (batchReportAccountBalance == null)
                 return NotFound();
-            return Ok(data);
+            return Ok(batchReportAccountBalance.ToResponse());
         }
     }
 }
