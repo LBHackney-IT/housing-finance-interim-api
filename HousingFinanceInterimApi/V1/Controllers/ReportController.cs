@@ -26,6 +26,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
 
         private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
         private const string ReportChargesLabel = "ReportCharges";
+        private const string ReportCashSuspenseLabel = "ReportCashSuspense";
 
         public ReportController(IReportChargesGateway reportChargesGateway,
             IReportSuspenseAccountGateway reportSuspenseAccountGateway,
@@ -38,7 +39,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
             _batchReportGateway = batchReportGateway;
         }
 
-        [ProducesResponseType(typeof(List<BatchReportAccountBalanceResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(List<BatchReportChargesResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost]
         [Route("charges")]
@@ -55,7 +56,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
                            batchReportCharges.ToReportChargesResponse());
         }
 
-        [ProducesResponseType(typeof(List<BatchReportDomain>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<BatchReportChargesResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
@@ -97,20 +98,52 @@ namespace HousingFinanceInterimApi.V1.Controllers
         //    return Ok(data);
         //}
 
-        [ProducesResponseType(typeof(List<ReportCashSuspenseAccount>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<BatchReportCashSuspenseResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPost]
+        [Route("cash/suspense")]
+        public async Task<IActionResult> CreateReportCashSuspense([FromBody] BatchReportCashSuspenseRequest request)
+        {
+            var batchReport = request.ToDomain();
+            batchReport.ReportName = ReportCashSuspenseLabel;
+
+            var batchReportCharges = await _batchReportGateway
+                .CreateAsync(batchReport)
+                .ConfigureAwait(false);
+
+            return Created("Report request created",
+                           batchReportCharges.ToReportCashSuspenseResponse());
+        }
+
+        [ProducesResponseType(typeof(List<BatchReportCashSuspenseResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [Route("cash/suspense")]
-        public async Task<IActionResult> ListCashSuspenseByYearAndType(int year, string suspenseAccountType)
+        public async Task<IActionResult> ListReportCashSuspense()
         {
-            var data = await _reportSuspenseAccountGateway
-                .ListCashSuspenseByYearAndTypeAsync(year, suspenseAccountType).ConfigureAwait(false);
+            var batchReportCharges = await _batchReportGateway
+                .ListAsync(ReportCashSuspenseLabel).ConfigureAwait(false);
 
-            if (data == null)
+            if (batchReportCharges == null)
                 return NotFound();
-            return Ok(data);
+            return Ok(batchReportCharges.ToReportCashSuspenseResponse());
         }
+
+        //[ProducesResponseType(typeof(List<ReportCashSuspenseAccount>), StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        //[HttpGet]
+        //[Route("cash/suspense")]
+        //public async Task<IActionResult> ListCashSuspenseByYearAndType(int year, string suspenseAccountType)
+        //{
+        //    var data = await _reportSuspenseAccountGateway
+        //        .ListCashSuspenseByYearAndTypeAsync(year, suspenseAccountType).ConfigureAwait(false);
+
+        //    if (data == null)
+        //        return NotFound();
+        //    return Ok(data);
+        //}
 
         [ProducesResponseType(typeof(List<ReportCashImport>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -144,7 +177,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
                            batchReportAccountBalance.ToReportAccountBalanceResponse());
         }
 
-        [ProducesResponseType(typeof(List<BatchReportDomain>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<BatchReportAccountBalanceResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
