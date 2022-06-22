@@ -28,6 +28,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         private const string ReportChargesLabel = "ReportCharges";
         private const string ReportCashSuspenseLabel = "ReportCashSuspense";
         private const string ReportCashImportLabel = "ReportCashImport";
+        private const string ReportHousingBenefitAcademyLabel = "ReportHousingBenefitAcademy";
 
         public ReportController(IReportChargesGateway reportChargesGateway,
             IReportSuspenseAccountGateway reportSuspenseAccountGateway,
@@ -223,6 +224,38 @@ namespace HousingFinanceInterimApi.V1.Controllers
             if (batchReportAccountBalance == null)
                 return NotFound();
             return Ok(batchReportAccountBalance.ToReportAccountBalanceResponse());
+        }
+
+        [ProducesResponseType(typeof(List<BatchReportHousingBenefitAcademyResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPost]
+        [Route("housingbenefit/academy")]
+        public async Task<IActionResult> CreateReportHousingBenefitAcademy([FromBody] BatchReportHousingBenefitAcademyRequest request)
+        {
+            var batchReport = request.ToDomain();
+            batchReport.ReportName = ReportHousingBenefitAcademyLabel;
+
+            var batchReportHousingBenefitAcademy = await _batchReportGateway
+                .CreateAsync(batchReport)
+                .ConfigureAwait(false);
+
+            return Created("Report request created",
+                           batchReportHousingBenefitAcademy.ToReportHousingBenefitAcademyResponse());
+        }
+
+        [ProducesResponseType(typeof(List<BatchReportHousingBenefitAcademyResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet]
+        [Route("housingbenefit/academy")]
+        public async Task<IActionResult> ListReportHousingBenefitAcademy()
+        {
+            var batchReportHousingBenefitAcademy = await _batchReportGateway
+                .ListAsync(ReportHousingBenefitAcademyLabel).ConfigureAwait(false);
+
+            if (batchReportHousingBenefitAcademy == null)
+                return NotFound();
+            return Ok(batchReportHousingBenefitAcademy.ToReportHousingBenefitAcademyResponse());
         }
     }
 }

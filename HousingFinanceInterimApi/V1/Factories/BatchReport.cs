@@ -110,6 +110,23 @@ namespace HousingFinanceInterimApi.V1.Factories
             return batchReportCashImports?.Select(b => b.ToDomain()).ToList();
         }
 
+        public static BatchReportDomain ToDomain(this BatchReportHousingBenefitAcademyRequest batchReportHousingBenefitAcademy)
+        {
+            if (batchReportHousingBenefitAcademy == null)
+                return null;
+
+            return new BatchReportDomain
+            {
+                ReportYear = batchReportHousingBenefitAcademy.Year
+            };
+        }
+
+        public static List<BatchReportDomain> ToDomain(
+            this ICollection<BatchReportHousingBenefitAcademyRequest> batchReportHousingBenefitAcademy)
+        {
+            return batchReportHousingBenefitAcademy?.Select(b => b.ToDomain()).ToList();
+        }
+
         public static Infrastructure.BatchReport ToDatabase(this BatchReportDomain batchReport)
         {
             if (batchReport == null)
@@ -229,6 +246,28 @@ namespace HousingFinanceInterimApi.V1.Factories
             this ICollection<BatchReportDomain> batchReports)
         {
             return batchReports?.Select(b => b.ToReportCashImportResponse()).ToList();
+        }
+
+        public static BatchReportHousingBenefitAcademyResponse ToReportHousingBenefitAcademyResponse(this BatchReportDomain batchReport)
+        {
+            if (batchReport == null)
+                return null;
+
+            return new BatchReportHousingBenefitAcademyResponse
+            {
+                Id = batchReport.Id,
+                Year = batchReport.ReportYear.Value,
+                Link = batchReport.Link,
+                StartTime = batchReport.StartTime,
+                EndTime = batchReport.EndTime,
+                IsSuccess = batchReport.IsSuccess
+            };
+        }
+
+        public static List<BatchReportHousingBenefitAcademyResponse> ToReportHousingBenefitAcademyResponse(
+            this ICollection<BatchReportDomain> batchReports)
+        {
+            return batchReports?.Select(b => b.ToReportHousingBenefitAcademyResponse()).ToList();
         }
     }
 }
