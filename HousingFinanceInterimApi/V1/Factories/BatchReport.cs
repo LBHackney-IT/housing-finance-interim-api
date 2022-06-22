@@ -55,6 +55,25 @@ namespace HousingFinanceInterimApi.V1.Factories
             return batchReportAccountBalances?.Select(b => b.ToDomain()).ToList();
         }
 
+        public static BatchReportDomain ToDomain(this BatchReportChargesRequest batchReportCharge)
+        {
+            if (batchReportCharge == null)
+                return null;
+
+            return new BatchReportDomain
+            {
+                RentGroup = batchReportCharge.RentGroup,
+                Group = batchReportCharge.Group,
+                ReportYear = batchReportCharge.Year
+            };
+        }
+
+        public static List<BatchReportDomain> ToDomain(
+            this ICollection<BatchReportChargesRequest> batchReportCharges)
+        {
+            return batchReportCharges?.Select(b => b.ToDomain()).ToList();
+        }
+
         public static Infrastructure.BatchReport ToDatabase(this BatchReportDomain batchReport)
         {
             if (batchReport == null)
@@ -83,7 +102,7 @@ namespace HousingFinanceInterimApi.V1.Factories
             return batchReportAccountBalances?.Select(b => b.ToDatabase()).ToList();
         }
 
-        public static BatchReportAccountBalanceResponse ToResponse(this BatchReportDomain batchReport)
+        public static BatchReportAccountBalanceResponse ToReportAccountBalanceResponse(this BatchReportDomain batchReport)
         {
             if (batchReport == null)
                 return null;
@@ -100,10 +119,34 @@ namespace HousingFinanceInterimApi.V1.Factories
             };
         }
 
-        public static List<BatchReportAccountBalanceResponse> ToResponse(
+        public static List<BatchReportAccountBalanceResponse> ToReportAccountBalanceResponse(
             this ICollection<BatchReportDomain> batchReports)
         {
-            return batchReports?.Select(b => b.ToResponse()).ToList();
+            return batchReports?.Select(b => b.ToReportAccountBalanceResponse()).ToList();
+        }
+
+        public static BatchReportChargesResponse ToReportChargesResponse(this BatchReportDomain batchReport)
+        {
+            if (batchReport == null)
+                return null;
+
+            return new BatchReportChargesResponse
+            {
+                Id = batchReport.Id,
+                Year = batchReport.ReportYear.Value,
+                RentGroup = batchReport.RentGroup,
+                Group = batchReport.Group,
+                Link = batchReport.Link,
+                StartTime = batchReport.StartTime,
+                EndTime = batchReport.EndTime,
+                IsSuccess = batchReport.IsSuccess
+            };
+        }
+
+        public static List<BatchReportChargesResponse> ToReportChargesResponse(
+            this ICollection<BatchReportDomain> batchReports)
+        {
+            return batchReports?.Select(b => b.ToReportChargesResponse()).ToList();
         }
     }
 }

@@ -22,47 +22,80 @@ namespace HousingFinanceInterimApi.V1.Controllers
         private readonly IReportChargesGateway _reportChargesGateway;
         private readonly IReportSuspenseAccountGateway _reportSuspenseAccountGateway;
         private readonly IReportCashImportGateway _reportCashImportGateway;
-        private readonly IBatchReportGateway _batchReportAccountBalanceGateway;
+        private readonly IBatchReportGateway _batchReportGateway;
 
         private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
+        private const string ReportChargesLabel = "ReportCharges";
 
         public ReportController(IReportChargesGateway reportChargesGateway,
             IReportSuspenseAccountGateway reportSuspenseAccountGateway,
             IReportCashImportGateway reportCashImportGateway,
-            IBatchReportGateway batchReportAccountBalanceGateway)
+            IBatchReportGateway batchReportGateway)
         {
             _reportChargesGateway = reportChargesGateway;
             _reportSuspenseAccountGateway = reportSuspenseAccountGateway;
             _reportCashImportGateway = reportCashImportGateway;
-            _batchReportAccountBalanceGateway = batchReportAccountBalanceGateway;
+            _batchReportGateway = batchReportGateway;
         }
 
-        [ProducesResponseType(typeof(List<dynamic>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<BatchReportAccountBalanceResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPost]
+        [Route("charges")]
+        public async Task<IActionResult> CreateReportCharges([FromBody] BatchReportChargesRequest request)
+        {
+            var batchReport = request.ToDomain();
+            batchReport.ReportName = ReportChargesLabel;
+
+            var batchReportCharges = await _batchReportGateway
+                .CreateAsync(batchReport)
+                .ConfigureAwait(false);
+
+            return Created("Report request created",
+                           batchReportCharges.ToReportChargesResponse());
+        }
+
+        [ProducesResponseType(typeof(List<BatchReportDomain>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [Route("charges")]
-        public async Task<IActionResult> ListChargesByYearAndRentGroup([FromQuery] int year, string rentGroup, string group)
+        public async Task<IActionResult> ListReportCharges()
         {
-            var data = new List<dynamic>();
+            var batchReportCharges = await _batchReportGateway
+                .ListAsync(ReportChargesLabel).ConfigureAwait(false);
 
-            if (!string.IsNullOrEmpty(rentGroup))
-            {
-                data = (List<dynamic>) await _reportChargesGateway.ListByYearAndRentGroupAsync(year, rentGroup).ConfigureAwait(false);
-            }
-            else if (!string.IsNullOrEmpty(group))
-            {
-                data = (List<dynamic>) await _reportChargesGateway.ListByGroupTypeAsync(year, group).ConfigureAwait(false);
-            }
-            else
-            {
-                data = (List<dynamic>) await _reportChargesGateway.ListByYearAsync(year).ConfigureAwait(false);
-            }
-
-            if (data.Count == 0)
+            if (batchReportCharges == null)
                 return NotFound();
-            return Ok(data);
+            return Ok(batchReportCharges.ToReportChargesResponse());
         }
+
+        //[ProducesResponseType(typeof(List<dynamic>), StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        //[HttpGet]
+        //[Route("charges")]
+        //public async Task<IActionResult> ListChargesByYearAndRentGroup([FromQuery] int year, string rentGroup, string group)
+        //{
+        //    var data = new List<dynamic>();
+
+        //    if (!string.IsNullOrEmpty(rentGroup))
+        //    {
+        //        data = (List<dynamic>) await _reportChargesGateway.ListByYearAndRentGroupAsync(year, rentGroup).ConfigureAwait(false);
+        //    }
+        //    else if (!string.IsNullOrEmpty(group))
+        //    {
+        //        data = (List<dynamic>) await _reportChargesGateway.ListByGroupTypeAsync(year, group).ConfigureAwait(false);
+        //    }
+        //    else
+        //    {
+        //        data = (List<dynamic>) await _reportChargesGateway.ListByYearAsync(year).ConfigureAwait(false);
+        //    }
+
+        //    if (data.Count == 0)
+        //        return NotFound();
+        //    return Ok(data);
+        //}
 
         [ProducesResponseType(typeof(List<ReportCashSuspenseAccount>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -103,12 +136,12 @@ namespace HousingFinanceInterimApi.V1.Controllers
             var batchReport = request.ToDomain();
             batchReport.ReportName = ReportAccountBalanceByDateLabel;
 
-            var batchReportAccountBalance = await _batchReportAccountBalanceGateway
+            var batchReportAccountBalance = await _batchReportGateway
                 .CreateAsync(batchReport)
                 .ConfigureAwait(false);
 
             return Created("Report request created",
-                           batchReportAccountBalance);
+                           batchReportAccountBalance.ToReportAccountBalanceResponse());
         }
 
         [ProducesResponseType(typeof(List<BatchReportDomain>), StatusCodes.Status200OK)]
@@ -118,12 +151,12 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [Route("balance")]
         public async Task<IActionResult> ListReportAccountBalance()
         {
-            var batchReportAccountBalance = await _batchReportAccountBalanceGateway
+            var batchReportAccountBalance = await _batchReportGateway
                 .ListAsync(ReportAccountBalanceByDateLabel).ConfigureAwait(false);
 
             if (batchReportAccountBalance == null)
                 return NotFound();
-            return Ok(batchReportAccountBalance.ToResponse());
+            return Ok(batchReportAccountBalance.ToReportAccountBalanceResponse());
         }
     }
 }
