@@ -191,11 +191,11 @@ functions:
     role: lambdaExecutionRole
     events:
         - schedule: cron(5 3 * * ? *)
-  generateReportAccountBalance:
-    name: ${self:service}-${self:provider.stage}-gen-rep-acc-bal
-    description: "The scheduler to generate the account balances report."
+  generateReport:
+    name: ${self:service}-${self:provider.stage}-gen-report
+    description: "The scheduler to generate google drive reports."
     timeout: 900
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::GenerateReportAccountBalance
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::GenerateReport
     role: lambdaExecutionRole 
 stepFunctions:
   stateMachines:
@@ -496,12 +496,12 @@ stepFunctions:
         - schedule: cron(0/30 * * * ? *)
       definition:
         Comment: "Reports step function deployed via serverless. Run every 30 min"
-        StartAt: GenerateReportAccountBalance
+        StartAt: GenerateReport
         States:
-          GenerateReportAccountBalance:
+          GenerateReport:
             Type: Task
             Resource:
-              Fn::GetAtt: [ generateReportAccountBalance, Arn ]
+              Fn::GetAtt: [ generateReport, Arn ]
             Retry:
               - ErrorEquals:
                   - States.All
@@ -521,7 +521,7 @@ stepFunctions:
           Wait_0:
               Type: Wait
               TimestampPath: $.NextStepTime
-              Next: GenerateReportAccountBalance          
+              Next: GenerateReport          
           EndStep:
             Type: Succeed
       dependsOn: lambdaExecutionRole

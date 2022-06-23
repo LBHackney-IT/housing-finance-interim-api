@@ -40,7 +40,7 @@ namespace HousingFinanceInterimApi
         private readonly IRefreshCurrentBalanceUseCase _refreshCurrentBalanceUseCase;
         private readonly IRefreshManageArrearsUseCase _refreshManageArrearsUseCase;
         private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
-        private readonly IGenereteReportAccountBalanceUseCase _generateReportAccountBalanceUseCase;
+        private readonly IGenerateReportUseCase _generateReportUseCase;
 
         private const string CashFileLabel = "CashFile";
         private const string HousingBenefitFileLabel = "HousingBenefitFile";
@@ -85,8 +85,8 @@ namespace HousingFinanceInterimApi
             IUPHousingCashDumpGateway upHousingCashDumpGateway = new UPHousingCashDumpGateway(context);
             IUPHousingCashLoadGateway upHousingCashLoadGateway = new UPHousingCashLoadGateway(context);
             IUPCashLoadSuspenseAccountsGateway upCashLoadSuspenseAccountsGateway = new UPCashLoadSuspenseAccountsGateway(context);
-            IReportAccountBalanceGateway reportAccountBalanceGateway = new ReportAccountBalanceGateway(context);
-            IBatchReportGateway batchReportAccountBalanceGateway = new BatchReportGateway(context);
+            IReportGateway reportGateway = new ReportGateway(context);
+            IBatchReportGateway batchReportGateway = new BatchReportGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _checkChargesBatchYearsUseCase = new CheckChargesBatchYearsUseCase(chargesBatchYearsGateway);
@@ -120,8 +120,8 @@ namespace HousingFinanceInterimApi
             _refreshCurrentBalanceUseCase = new RefreshCurrentBalanceUseCase(currentBalanceGateway);
             _refreshManageArrearsUseCase = new RefreshManageArrearsUseCase(manageArrearsGateway);
             _refreshOperatingBalanceUseCase = new RefreshOperatingBalanceUseCase(operatingBalanceGateway);
-            _generateReportAccountBalanceUseCase = new GenerateReportUseCase(batchReportAccountBalanceGateway,
-                reportAccountBalanceGateway, googleFileSettingGateway, googleClientService);
+            _generateReportUseCase = new GenerateReportUseCase(batchReportGateway,
+                reportGateway, googleFileSettingGateway, googleClientService);
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()
@@ -234,9 +234,9 @@ namespace HousingFinanceInterimApi
             return await _loadSuspenseCashTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
-        public async Task<StepResponse> GenerateReportAccountBalance()
+        public async Task<StepResponse> GenerateReport()
         {
-            return await _generateReportAccountBalanceUseCase.ExecuteAsync().ConfigureAwait(false);
+            return await _generateReportUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 }

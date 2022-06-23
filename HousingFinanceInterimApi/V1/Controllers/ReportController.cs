@@ -18,10 +18,6 @@ namespace HousingFinanceInterimApi.V1.Controllers
     [ApiVersion("1.0")]
     public class ReportController : BaseController
     {
-
-        private readonly IReportChargesGateway _reportChargesGateway;
-        private readonly IReportSuspenseAccountGateway _reportSuspenseAccountGateway;
-        private readonly IReportCashImportGateway _reportCashImportGateway;
         private readonly IBatchReportGateway _batchReportGateway;
 
         private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
@@ -30,14 +26,9 @@ namespace HousingFinanceInterimApi.V1.Controllers
         private const string ReportCashImportLabel = "ReportCashImport";
         private const string ReportHousingBenefitAcademyLabel = "ReportHousingBenefitAcademy";
 
-        public ReportController(IReportChargesGateway reportChargesGateway,
-            IReportSuspenseAccountGateway reportSuspenseAccountGateway,
-            IReportCashImportGateway reportCashImportGateway,
+        public ReportController(
             IBatchReportGateway batchReportGateway)
         {
-            _reportChargesGateway = reportChargesGateway;
-            _reportSuspenseAccountGateway = reportSuspenseAccountGateway;
-            _reportCashImportGateway = reportCashImportGateway;
             _batchReportGateway = batchReportGateway;
         }
 
@@ -73,33 +64,6 @@ namespace HousingFinanceInterimApi.V1.Controllers
             return Ok(batchReportCharges.ToReportChargesResponse());
         }
 
-        //[ProducesResponseType(typeof(List<dynamic>), StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        //[HttpGet]
-        //[Route("charges")]
-        //public async Task<IActionResult> ListChargesByYearAndRentGroup([FromQuery] int year, string rentGroup, string group)
-        //{
-        //    var data = new List<dynamic>();
-
-        //    if (!string.IsNullOrEmpty(rentGroup))
-        //    {
-        //        data = (List<dynamic>) await _reportChargesGateway.ListByYearAndRentGroupAsync(year, rentGroup).ConfigureAwait(false);
-        //    }
-        //    else if (!string.IsNullOrEmpty(group))
-        //    {
-        //        data = (List<dynamic>) await _reportChargesGateway.ListByGroupTypeAsync(year, group).ConfigureAwait(false);
-        //    }
-        //    else
-        //    {
-        //        data = (List<dynamic>) await _reportChargesGateway.ListByYearAsync(year).ConfigureAwait(false);
-        //    }
-
-        //    if (data.Count == 0)
-        //        return NotFound();
-        //    return Ok(data);
-        //}
-
         [ProducesResponseType(typeof(List<BatchReportCashSuspenseResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost]
@@ -132,21 +96,6 @@ namespace HousingFinanceInterimApi.V1.Controllers
             return Ok(batchReportCharges.ToReportCashSuspenseResponse());
         }
 
-        //[ProducesResponseType(typeof(List<ReportCashSuspenseAccount>), StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        //[HttpGet]
-        //[Route("cash/suspense")]
-        //public async Task<IActionResult> ListCashSuspenseByYearAndType(int year, string suspenseAccountType)
-        //{
-        //    var data = await _reportSuspenseAccountGateway
-        //        .ListCashSuspenseByYearAndTypeAsync(year, suspenseAccountType).ConfigureAwait(false);
-
-        //    if (data == null)
-        //        return NotFound();
-        //    return Ok(data);
-        //}
-
         [ProducesResponseType(typeof(List<BatchReportCashImportResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost]
@@ -178,21 +127,6 @@ namespace HousingFinanceInterimApi.V1.Controllers
                 return NotFound();
             return Ok(batchReportCharges.ToReportCashImportResponse());
         }
-
-        //[ProducesResponseType(typeof(List<ReportCashImport>), StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        //[HttpGet]
-        //[Route("cash/import")]
-        //public async Task<IActionResult> ListCashImportByDate(DateTime startDate, DateTime endDate)
-        //{
-        //    var data = await _reportCashImportGateway
-        //        .ListCashImportByDateAsync(startDate, endDate).ConfigureAwait(false);
-
-        //    if (data == null)
-        //        return NotFound();
-        //    return Ok(data);
-        //}
 
         [ProducesResponseType(typeof(List<BatchReportAccountBalanceResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

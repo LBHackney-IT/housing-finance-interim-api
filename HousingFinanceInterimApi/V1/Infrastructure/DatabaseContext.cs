@@ -412,22 +412,88 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             return results;
         }
 
-        //REPORTS
-        public async Task<IList<ReportCashSuspenseAccount>> GetCashSuspenseAccountByYearAsync(int year, string suspenseAccountType)
-            => await ReportCashSuspenseAccounts
-                .FromSqlInterpolated($"usp_GetCashSuspenseAccountByYear {year}, {suspenseAccountType}")
-                .ToListAsync()
-                .ConfigureAwait(false);
-
-        public async Task<IList<ReportCashImport>> GetCashImportByDateAsync(DateTime startDate, DateTime endDate)
-            => await ReportCashImports
-                .FromSqlInterpolated($"usp_GetCashImportByDate {startDate}, {endDate}")
-                .ToListAsync()
-                .ConfigureAwait(false);
-
-        public async Task<List<dynamic>> GetChargesByYearAndRentGroupAsync(int year, string rentGroup)
+        //REPORTS    
+        public async Task<List<string[]>> GetCashSuspenseAccountByYearAsync(int year, string suspenseAccountType)
         {
-            var results = new List<dynamic>();
+            var results = new List<string[]>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"usp_GetCashSuspenseAccountByYear {year}, {suspenseAccountType}", dbConnection)
+            {
+                CommandTimeout = 900
+            };
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    var result = new string[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        result[i] = reader[i].ToString();
+                    }
+
+                    results.Add(result);
+                }
+
+                results.Insert(0, columnNames);
+            }
+            dbConnection.Close();
+
+            return results;
+        }
+
+        public async Task<List<string[]>> GetCashImportByDateAsync(DateTime startDate, DateTime endDate)
+        {
+            var results = new List<string[]>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"usp_GetCashImportByDate", dbConnection)
+            {
+                CommandTimeout = 900,
+                CommandType = CommandType.StoredProcedure
+            };
+
+            command.Parameters.AddWithValue("@startDate", startDate.ToString("yyyy-MM-dd"));
+            command.Parameters.AddWithValue("@endDate", endDate.ToString("yyyy-MM-dd"));
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    var result = new string[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        result[i] = reader[i].ToString();
+                    }
+
+                    results.Add(result);
+                }
+
+                results.Insert(0, columnNames);
+            }
+            dbConnection.Close();
+
+            return results;
+        }
+
+        public async Task<List<string[]>> GetChargesByYearAndRentGroupAsync(int year, string rentGroup)
+        {
+            var results = new List<string[]>();
 
             var dbConnection = Database.GetDbConnection() as SqlConnection;
             var command = new SqlCommand($"dbo.usp_GetChargesByYearAndRentGroup {year}, {rentGroup}", dbConnection)
@@ -446,24 +512,25 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
                 while (reader.Read())
                 {
-                    dynamic result = new System.Dynamic.ExpandoObject();
+                    var result = new string[reader.FieldCount];
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        ((IDictionary<string, object>) result)[columnNames[i]] = reader[i] != DBNull.Value ? reader[i] : null;
+                        result[i] = reader[i].ToString();
                     }
 
                     results.Add(result);
                 }
 
+                results.Insert(0, columnNames);
             }
             dbConnection.Close();
 
             return results;
         }
 
-        public async Task<List<dynamic>> GetChargesByGroupType(int year, string type)
+        public async Task<List<string[]>> GetChargesByGroupType(int year, string type)
         {
-            var results = new List<dynamic>();
+            var results = new List<string[]>();
 
             var dbConnection = Database.GetDbConnection() as SqlConnection;
             var command = new SqlCommand($"dbo.usp_GetChargesByGroupType {year}, {type}", dbConnection)
@@ -482,24 +549,25 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
                 while (reader.Read())
                 {
-                    dynamic result = new System.Dynamic.ExpandoObject();
+                    var result = new string[reader.FieldCount];
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        ((IDictionary<string, object>) result)[columnNames[i]] = reader[i] != DBNull.Value ? reader[i] : null;
+                        result[i] = reader[i].ToString();
                     }
 
                     results.Add(result);
                 }
 
+                results.Insert(0, columnNames);
             }
             dbConnection.Close();
 
             return results;
         }
 
-        public async Task<List<dynamic>> GetChargesByYear(int year)
+        public async Task<List<string[]>> GetChargesByYear(int year)
         {
-            var results = new List<dynamic>();
+            var results = new List<string[]>();
 
             var dbConnection = Database.GetDbConnection() as SqlConnection;
             var command = new SqlCommand($"dbo.usp_GetChargesByYear {year}", dbConnection)
@@ -518,15 +586,53 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
                 while (reader.Read())
                 {
-                    dynamic result = new System.Dynamic.ExpandoObject();
+                    var result = new string[reader.FieldCount];
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        ((IDictionary<string, object>) result)[columnNames[i]] = reader[i] != DBNull.Value ? reader[i] : null;
+                        result[i] = reader[i].ToString();
                     }
 
                     results.Add(result);
                 }
 
+                results.Insert(0, columnNames);
+            }
+            dbConnection.Close();
+
+            return results;
+        }
+
+        public async Task<List<string[]>> GetHousingBenefitAcademyByYear(int year)
+        {
+            var results = new List<string[]>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetHousingBenefitAcademyByYear {year}", dbConnection)
+            {
+                CommandTimeout = 900
+            };
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    var result = new string[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        result[i] = reader[i].ToString();
+                    }
+
+                    results.Add(result);
+                }
+
+                results.Insert(0, columnNames);
             }
             dbConnection.Close();
 
@@ -571,9 +677,6 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             return results;
         }
 
-
-
-
         private async Task PerformTransaction(string sql, int timeout = 0)
         {
             await using var transaction = await Database.BeginTransactionAsync().ConfigureAwait(false);
@@ -591,7 +694,6 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
                 throw;
             }
         }
-
         private async Task PerformInterpolatedTransaction(FormattableString sql, int timeout = 0)
         {
             await using var transaction = await Database.BeginTransactionAsync().ConfigureAwait(false);

@@ -12,10 +12,14 @@ using HousingFinanceInterimApi.V1.Handlers;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
-    public class GenerateReportUseCase : IGenereteReportAccountBalanceUseCase
+    public class GenerateReportUseCase : IGenerateReportUseCase
     {
         private readonly IBatchReportGateway _batchReportGateway;
-        private readonly IReportAccountBalanceGateway _reportAccountBalanceGateway;
+        private readonly IReportGateway _reportGateway;
+        //private readonly IReportAccountBalanceGateway _reportAccountBalanceGateway;
+        //private readonly IReportChargesGateway _reportChargesGateway;
+        //private readonly IReportCashImportGateway _reportCashImportGateway;
+        //private readonly IReportSuspenseAccountGateway _reportSuspenseAccountGateway;
         private readonly IGoogleFileSettingGateway _googleFileSettingGateway;
         private readonly IGoogleClientService _googleClientService;
 
@@ -23,14 +27,18 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly int _sleepDuration = 30000;
 
         private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
+        private const string ReportChargesLabel = "ReportCharges";
+        private const string ReportCashSuspenseLabel = "ReportCashSuspense";
+        private const string ReportCashImportLabel = "ReportCashImport";
+        private const string ReportHousingBenefitAcademyLabel = "ReportHousingBenefitAcademy";
 
         public GenerateReportUseCase(IBatchReportGateway batchReportGateway,
-            IReportAccountBalanceGateway reportAccountBalanceGateway,
+            IReportGateway reportGateway,
             IGoogleFileSettingGateway googleFileSettingGateway,
             IGoogleClientService googleClientService)
         {
             _batchReportGateway = batchReportGateway;
-            _reportAccountBalanceGateway = reportAccountBalanceGateway;
+            _reportGateway = reportGateway;
             _googleFileSettingGateway = googleFileSettingGateway;
             _googleClientService = googleClientService;
         }
@@ -50,8 +58,20 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 case ReportAccountBalanceByDateLabel:
                     await CreateBalanceReportByDate(batchReport).ConfigureAwait(false);
                     break;
+                case ReportChargesLabel:
+                    await CreateChargesReport(batchReport).ConfigureAwait(false);
+                    break;
+                case ReportCashSuspenseLabel:
+                    await CreateCashSuspenseReport(batchReport).ConfigureAwait(false);
+                    break;
+                case ReportCashImportLabel:
+                    await CreateCashImportReport(batchReport).ConfigureAwait(false);
+                    break;
+                case ReportHousingBenefitAcademyLabel:
+                    await CreateHousingBenefitAcademyReport(batchReport).ConfigureAwait(false);
+                    break;
                 default:
-                    LoggingHandler.LogInfo($"Output folder not found");
+                    LoggingHandler.LogInfo($"Report label not found");
                     break;
             }
 
@@ -67,7 +87,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             return googleFileSettings.FirstOrDefault();
         }
 
-        private async Task<bool> CreateBalanceReportByDate(BatchReportDomain batchReport)
+        private async Task CreateBalanceReportByDate(BatchReportDomain batchReport)
         {
             var rentgroup = string.IsNullOrEmpty(batchReport.RentGroup) ? "ALL" : batchReport.RentGroup.Trim();
             var reportDate = batchReport.ReportDate.Value.ToString("yyyyMMdd");
@@ -76,7 +96,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
             if (googleFileSetting == null)
             {
                 LoggingHandler.LogInfo($"Output folder not found");
-                return false;
+                await _batchReportGateway.SetStatusAsync(batchReport.Id, "Output folder not found", false).ConfigureAwait(false);
+                return;
             }
 
             var folder = await _googleClientService
@@ -85,7 +106,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             var fileName = $"Account_Balance_{rentgroup}_{reportDate}_{batchReport.Id}.csv";
 
-            var reportAccountBalances = await _reportAccountBalanceGateway.ListAsync(batchReport.ReportDate.Value, batchReport.RentGroup).ConfigureAwait(false);
+            var reportAccountBalances = await _reportGateway.GetReportAccountBalanceAsync(batchReport.ReportDate.Value, batchReport.RentGroup).ConfigureAwait(false);
             List<string[]> convertedReportAccountBalance = reportAccountBalances
                 .Select(x => new string[]
                 {
@@ -116,9 +137,153 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 .ConfigureAwait(false);
 
             var fileLink = $"https://drive.google.com/file/d/{file.Id}";
-            await _batchReportGateway.SetToSuccessAsync(batchReport.Id, fileLink).ConfigureAwait(false);
+            await _batchReportGateway.SetStatusAsync(batchReport.Id, fileLink, true).ConfigureAwait(false);
+        }
 
-            return true;
+        private async Task CreateChargesReport(BatchReportDomain batchReport)
+        {
+            var googleFileSetting = await GetGoogleFileSetting(ReportChargesLabel).ConfigureAwait(false);
+            if (googleFileSetting == null)
+            {
+                LoggingHandler.LogInfo($"Output folder not found");
+                await _batchReportGateway.SetStatusAsync(batchReport.Id, "Output folder not found", false).ConfigureAwait(false);
+                return;
+            }
+
+            var folder = await _googleClientService
+                .GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier)
+                .ConfigureAwait(false);
+
+            var fileName = "";
+            var reportCharges = new List<string[]>();
+
+            if (!string.IsNullOrEmpty(batchReport.RentGroup))
+            {
+                fileName = $"Charges_{batchReport.RentGroup}_{batchReport.ReportYear}_{batchReport.Id}.csv";
+                reportCharges = (List<string[]>) await _reportGateway.GetChargesByYearAndRentGroupAsync(batchReport.ReportYear.Value, batchReport.RentGroup).ConfigureAwait(false);
+            }
+            else if (!string.IsNullOrEmpty(batchReport.Group))
+            {
+                fileName = $"Charges_{batchReport.Group}_{batchReport.ReportYear}_{batchReport.Id}.csv";
+                reportCharges = (List<string[]>) await _reportGateway.GetChargesByGroupTypeAsync(batchReport.ReportYear.Value, batchReport.Group).ConfigureAwait(false);
+            }
+            else
+            {
+                fileName = $"Charges_{batchReport.ReportYear}_{batchReport.Id}.csv";
+                reportCharges = (List<string[]>) await _reportGateway.GetChargesByYearAsync(batchReport.ReportYear.Value).ConfigureAwait(false);
+            }
+
+            await _googleClientService
+                .UploadCsvFile(reportCharges, fileName, googleFileSetting.GoogleIdentifier)
+                .ConfigureAwait(false);
+
+            System.Threading.Thread.Sleep(_sleepDuration);
+
+            var file = await _googleClientService
+                .GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
+                .ConfigureAwait(false);
+
+            var fileLink = $"https://drive.google.com/file/d/{file.Id}";
+            await _batchReportGateway.SetStatusAsync(batchReport.Id, fileLink, true).ConfigureAwait(false);
+        }
+
+        private async Task CreateCashSuspenseReport(BatchReportDomain batchReport)
+        {
+            var googleFileSetting = await GetGoogleFileSetting(ReportCashSuspenseLabel).ConfigureAwait(false);
+            if (googleFileSetting == null)
+            {
+                LoggingHandler.LogInfo($"Output folder not found");
+                await _batchReportGateway.SetStatusAsync(batchReport.Id, "Output folder not found", false).ConfigureAwait(false);
+                return;
+            }
+
+            var folder = await _googleClientService
+                .GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier)
+                .ConfigureAwait(false);
+
+            var reportSuspenseAccount = (List<string[]>) await _reportGateway
+               .GetCashSuspenseAccountByYearAsync(batchReport.ReportYear.Value, batchReport.Group).ConfigureAwait(false);
+
+            var fileName = $"Cash_Suspense_{batchReport.Group}_{batchReport.ReportYear.Value}_{batchReport.Id}.csv";
+
+            await _googleClientService
+                .UploadCsvFile(reportSuspenseAccount, fileName, googleFileSetting.GoogleIdentifier)
+                .ConfigureAwait(false);
+
+            System.Threading.Thread.Sleep(_sleepDuration);
+
+            var file = await _googleClientService
+                .GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
+                .ConfigureAwait(false);
+
+            var fileLink = $"https://drive.google.com/file/d/{file.Id}";
+            await _batchReportGateway.SetStatusAsync(batchReport.Id, fileLink, true).ConfigureAwait(false);
+        }
+
+        private async Task CreateCashImportReport(BatchReportDomain batchReport)
+        {
+            var googleFileSetting = await GetGoogleFileSetting(ReportCashImportLabel).ConfigureAwait(false);
+            if (googleFileSetting == null)
+            {
+                LoggingHandler.LogInfo($"Output folder not found");
+                await _batchReportGateway.SetStatusAsync(batchReport.Id, "Output folder not found", false).ConfigureAwait(false);
+                return;
+            }
+
+            var folder = await _googleClientService
+                .GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier)
+                .ConfigureAwait(false);
+
+            var reportCashImport = (List<string[]>) await _reportGateway
+                .GetCashImportByDateAsync(batchReport.ReportStartDate.Value, batchReport.ReportEndDate.Value).ConfigureAwait(false);
+
+            var fileName = $"Cash_Import_{batchReport.ReportStartDate.Value.ToString("ddMMyyyy")}_{batchReport.ReportEndDate.Value.ToString("ddMMyyyy")}_{batchReport.Id}.csv";
+
+            await _googleClientService
+                .UploadCsvFile(reportCashImport, fileName, googleFileSetting.GoogleIdentifier)
+                .ConfigureAwait(false);
+
+            System.Threading.Thread.Sleep(_sleepDuration);
+
+            var file = await _googleClientService
+                .GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
+                .ConfigureAwait(false);
+
+            var fileLink = $"https://drive.google.com/file/d/{file.Id}";
+            await _batchReportGateway.SetStatusAsync(batchReport.Id, fileLink, true).ConfigureAwait(false);
+        }
+
+        private async Task CreateHousingBenefitAcademyReport(BatchReportDomain batchReport)
+        {
+            var googleFileSetting = await GetGoogleFileSetting(ReportHousingBenefitAcademyLabel).ConfigureAwait(false);
+            if (googleFileSetting == null)
+            {
+                LoggingHandler.LogInfo($"Output folder not found");
+                await _batchReportGateway.SetStatusAsync(batchReport.Id, "Output folder not found", false).ConfigureAwait(false);
+                return;
+            }
+
+            var folder = await _googleClientService
+                .GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier)
+                .ConfigureAwait(false);
+
+            var reportCashImport = (List<string[]>) await _reportGateway
+                .GetHousingBenefitAcademyByYearAsync(batchReport.ReportYear.Value).ConfigureAwait(false);
+
+            var fileName = $"HB_Academy_{batchReport.ReportYear.Value}_{batchReport.Id}.csv";
+
+            await _googleClientService
+                .UploadCsvFile(reportCashImport, fileName, googleFileSetting.GoogleIdentifier)
+                .ConfigureAwait(false);
+
+            System.Threading.Thread.Sleep(_sleepDuration);
+
+            var file = await _googleClientService
+                .GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
+                .ConfigureAwait(false);
+
+            var fileLink = $"https://drive.google.com/file/d/{file.Id}";
+            await _batchReportGateway.SetStatusAsync(batchReport.Id, fileLink, true).ConfigureAwait(false);
         }
     }
 }
