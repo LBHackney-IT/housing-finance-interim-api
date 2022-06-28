@@ -361,10 +361,10 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         }
 
         public async Task UpdateCurrentBalance()
-            => await PerformTransaction("usp_UpdateCurrentBalance", 300).ConfigureAwait(false);
+            => await PerformTransaction("usp_UpdateCurrentBalance", 900).ConfigureAwait(false);
 
         public async Task GenerateOperatingBalance()
-            => await PerformTransaction("usp_GenerateOperatingBalance", 600).ConfigureAwait(false);
+            => await PerformTransaction("usp_GenerateOperatingBalance", 900).ConfigureAwait(false);
 
         public async Task RefreshManageArrearsTenancyAgreement()
             => await PerformTransaction("usp_RefreshManageArrearsTenancyAgreement", 900).ConfigureAwait(false);
