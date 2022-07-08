@@ -13,7 +13,7 @@ using HousingFinanceInterimApi.V1.Infrastructure;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
-    public class LoadSuspenseCashTransactionsUseCase : ILoadSuspenseCashTransactionsUseCase
+    public class LoadSuspenseHousingBenefitTransactionsUseCase : ILoadSuspenseHousingBenefitTransactionsUseCase
     {
         private readonly IBatchLogGateway _batchLogGateway;
         private readonly IBatchLogErrorGateway _batchLogErrorGateway;
@@ -23,10 +23,10 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
 
-        private const string CashSuspenseLabel = "Cash Suspense Transactions";
-        private const string Type = "Cash File";
+        private const string HousingSuspenseLabel = "Housing Suspense Transactions";
+        private const string Type = "Housing Benefit";
 
-        public LoadSuspenseCashTransactionsUseCase(
+        public LoadSuspenseHousingBenefitTransactionsUseCase(
             IBatchLogGateway batchLogGateway,
             IBatchLogErrorGateway batchLogErrorGateway,
             ISuspenseAccountsGateway upCashLoadSuspenseAccountsGateway,
@@ -42,13 +42,13 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"Starting suspense cash import");
+            LoggingHandler.LogInfo($"Starting suspense housing benefit import");
 
-            const string sheetName = "Cash";
+            const string sheetName = "Housing Benefit";
             const string sheetRange = "A:E";
 
-            var batch = await _batchLogGateway.CreateAsync(CashSuspenseLabel).ConfigureAwait(false);
-            var googleFileSettings = await GetGoogleFileSetting(CashSuspenseLabel).ConfigureAwait(false);
+            var batch = await _batchLogGateway.CreateAsync(HousingSuspenseLabel).ConfigureAwait(false);
+            var googleFileSettings = await GetGoogleFileSetting(HousingSuspenseLabel).ConfigureAwait(false);
 
             if (googleFileSettings == null)
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(0) };
@@ -65,7 +65,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     await HandleSpreadSheet(batch.Id, filledNewAccounts).ConfigureAwait(false);
             }
 
-            var suspenseTransactions = await _upCashLoadSuspenseAccountsGateway.GetCashSuspenseTransactions().ConfigureAwait(false);
+            var suspenseTransactions = await _upCashLoadSuspenseAccountsGateway.GetHousingBenefitSuspenseTransactions().ConfigureAwait(false);
 
             List<IList<object>> rows = new List<IList<object>>();
 
@@ -86,7 +86,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             await _googleClientService.UpdateSheetAsync(rows, googleFileSettings.GoogleIdentifier, sheetName, sheetRange, true).ConfigureAwait(false);
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"End suspense cash import");
+            LoggingHandler.LogInfo($"End suspense housing benefit import");
             return new StepResponse() { Continue = true, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
         }
 
@@ -110,7 +110,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 await _upCashLoadSuspenseAccountsGateway.CreateBulkAsync(cashSuspenseTransactions, Type).ConfigureAwait(false);
 
                 LoggingHandler.LogInfo($"Starting merge");
-                await _upCashLoadSuspenseAccountsGateway.LoadCashSuspenseTransactions().ConfigureAwait(false);
+                await _upCashLoadSuspenseAccountsGateway.LoadHousingBenefitSuspenseTransactions().ConfigureAwait(false);
 
                 LoggingHandler.LogInfo("File success");
             }
@@ -118,7 +118,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(HandleSpreadSheet)}";
 
-                await _batchLogErrorGateway.CreateAsync(batchId, "ERROR", $"Application error. Not possible to load suspense cash").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batchId, "ERROR", $"Application error. Not possible to load suspense housing benefit").ConfigureAwait(false);
 
                 LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());

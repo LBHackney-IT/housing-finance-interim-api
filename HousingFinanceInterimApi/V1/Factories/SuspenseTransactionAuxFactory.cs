@@ -5,14 +5,14 @@ using System.Linq;
 
 namespace HousingFinanceInterimApi.V1.Factories
 {
-    public static class CashSuspenseTransactionAuxFactory
+    public static class SuspenseTransactionAuxFactory
     {
-        public static CashSuspenseTransactionAuxDomain ToDomain(this CashSuspenseTransactionAux cashSuspenseTransactionAux)
+        public static SuspenseTransactionAuxDomain ToDomain(this SuspenseTransactionAux cashSuspenseTransactionAux)
         {
             if (cashSuspenseTransactionAux == null)
                 return null;
 
-            return new CashSuspenseTransactionAuxDomain
+            return new SuspenseTransactionAuxDomain
             {
                 Id = cashSuspenseTransactionAux.Id,
                 RentAccount = cashSuspenseTransactionAux.RentAccount,
@@ -22,8 +22,8 @@ namespace HousingFinanceInterimApi.V1.Factories
             };
         }
 
-        public static List<CashSuspenseTransactionAuxDomain> ToDomain(
-            this ICollection<CashSuspenseTransactionAux> cashSuspenseTransactionAux)
+        public static List<SuspenseTransactionAuxDomain> ToDomain(
+            this ICollection<SuspenseTransactionAux> cashSuspenseTransactionAux)
         {
             return cashSuspenseTransactionAux?.Select(d => d.ToDomain()).ToList();
         }
