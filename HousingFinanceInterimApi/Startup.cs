@@ -124,69 +124,6 @@ namespace HousingFinanceInterimApi
                     c.IncludeXmlComments(xmlPath);
             });
 
-            //services.AddSwaggerGen(swaggerSetup =>
-            //{
-            //    swaggerSetup.AddSecurityDefinition("Token", new OpenApiSecurityScheme
-            //    {
-            //        In = ParameterLocation.Header,
-            //        // TODO ensure populated
-            //        Description = apiOptions.HackneyApiKey,
-            //        Name = "X-Api-Key",
-            //        Type = SecuritySchemeType.ApiKey
-            //    });
-
-            //    swaggerSetup.AddSecurityRequirement(new OpenApiSecurityRequirement
-            //    {
-            //        {
-            //            new OpenApiSecurityScheme
-            //            {
-            //                Reference = new OpenApiReference
-            //                {
-            //                    Type = ReferenceType.SecurityScheme, Id = "Token"
-            //                }
-            //            },
-            //            new List<string>()
-            //        }
-            //    });
-
-            //    // Looks at the APIVersionAttribute [ApiVersion("x")] on controllers and decides whether or not
-            //    // to include it in that version of the swagger document
-            //    // Controllers must have this [ApiVersion("x")] to be included in swagger documentation!!
-            //    swaggerSetup.DocInclusionPredicate((docName, apiDesc) =>
-            //    {
-            //        apiDesc.TryGetMethodInfo(out MethodInfo methodInfo);
-
-            //        IList<ApiVersion> versions = methodInfo?.DeclaringType?.GetCustomAttributes()
-            //            .OfType<ApiVersionAttribute>()
-            //            .SelectMany(attr => attr.Versions)
-            //            .ToList();
-
-            //        return versions?.Any(v => $"{v.GetFormattedApiVersion()}" == docName) ?? false;
-            //    });
-
-            //    // Get every ApiVersion attribute specified and create swagger docs for them
-            //    foreach (string version in _apiVersions.Select(apiVersion => $"v{apiVersion.ApiVersion}"))
-            //    {
-            //        swaggerSetup.SwaggerDoc(version, new OpenApiInfo
-            //        {
-            //            Title = $"{apiOptions.ApiName}-api {version}",
-            //            Version = version,
-            //            Description =
-            //                $"{apiOptions.ApiName} version {version}. Please check older versions for depreciated endpoints."
-            //        });
-            //    }
-
-            //    swaggerSetup.CustomSchemaIds(x => x.FullName);
-
-            //    // Set the comments path for the Swagger JSON and UI.
-            //    string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            //    string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-
-            //    if (File.Exists(xmlPath))
-            //    {
-            //        swaggerSetup.IncludeXmlComments(xmlPath);
-            //    }
-            //});
             ConfigureDbContext(services);
             RegisterGateways(services);
             RegisterUseCases(services);
