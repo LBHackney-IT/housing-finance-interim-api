@@ -205,32 +205,8 @@ stepFunctions:
         - schedule: cron(0 1 * * ? *)
       definition:
         Comment: "Cash files process step function deployed via serverless. Run at 01:00 AM"
-        StartAt: CheckCashFiles
-        States:
-          CheckCashFiles:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [ checkCashFiles, Arn ]
-            Retry:
-              - ErrorEquals:
-                  - States.All
-                IntervalSeconds: 30
-                MaxAttempts: 3
-                BackoffRate: 2
-            Next: Wait_1
-          Wait_1:
-              Type: Wait
-              TimestampPath: $.NextStepTime
-              Next: Choice_1
-          Choice_1:
-            Type: Choice
-            Choices:
-              - Variable: $.Continue
-                BooleanEquals: true
-                Next: ImportCashFile
-              - Variable: $.Continue
-                BooleanEquals: false
-                Next: ImportCashFileTransactions
+        StartAt: ImportCashFile
+        States:          
           ImportCashFile:
             Type: Task
             Resource:
@@ -454,9 +430,9 @@ stepFunctions:
     hfstepfunccurentbalance:
       name: HFCurrentBalanceStateMachine
       events:
-        - schedule: cron(0 2 * * ? *)
+        - schedule: cron(0 4 * * ? *)
       definition:
-        Comment: "Current balance process step function deployed via serverless. Run at 02:00 AM"
+        Comment: "Current balance process step function deployed via serverless. Run at 04:00 AM"
         StartAt: RefreshCurrentBalance
         States:          
           RefreshCurrentBalance:

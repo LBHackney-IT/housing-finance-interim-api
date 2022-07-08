@@ -61,7 +61,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 LoggingHandler.LogInfo($"Folder Id: {googleFileSetting.GoogleIdentifier}");
                 LoggingHandler.LogInfo($"File count: {folderFiles.Count}");
 
-                await HandleCashFile(batch.Id, folderFiles).ConfigureAwait(false);
+                if (folderFiles.Any())
+                    await HandleCashFile(batch.Id, folderFiles).ConfigureAwait(false);
             }
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
