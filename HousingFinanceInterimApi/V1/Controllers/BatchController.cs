@@ -6,9 +6,15 @@ using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using HousingFinanceInterimApi.V1.Boundary.Response;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
+    [ApiController]
+    [Route("api/v1/batch")]
+    [ApiVersion("1.0")]
     public class BatchController : BaseController
     {
         private readonly IGetBatchLogErrorUseCase _getBatchLogErrorUseCase;
@@ -18,10 +24,18 @@ namespace HousingFinanceInterimApi.V1.Controllers
             _getBatchLogErrorUseCase = getBatchLogErrorUseCase;
         }
 
-        [HttpGet("errors")]
-        public async Task<JsonResult> GetErrors()
+        [ProducesResponseType(typeof(List<BatchLogResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet]
+        [Route("errors")]
+        public async Task<IActionResult> GetErrors()
         {
-            return Json(await _getBatchLogErrorUseCase.ExecuteAsync().ConfigureAwait(false));
+            var data = await _getBatchLogErrorUseCase.ExecuteAsync().ConfigureAwait(false);
+            if (data == null)
+                return NotFound();
+            return Ok(data);
+
         }
     }
 }

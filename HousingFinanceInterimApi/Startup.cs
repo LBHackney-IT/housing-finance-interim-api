@@ -38,6 +38,8 @@ namespace HousingFinanceInterimApi
 
         private static List<ApiVersionDescription> _apiVersions { get; set; }
 
+        private const string ApiName = "housing-finance-interim";
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -64,69 +66,64 @@ namespace HousingFinanceInterimApi
 
             services.AddSingleton<IApiVersionDescriptionProvider, DefaultApiVersionDescriptionProvider>();
 
-            services.AddSwaggerGen(swaggerSetup =>
+            services.AddSwaggerGen(c =>
             {
-                //swaggerSetup.AddSecurityDefinition("Token", new OpenApiSecurityScheme
-                //{
-                //    In = ParameterLocation.Header,
-                //    // TODO ensure populated
-                //    Description = apiOptions.HackneyApiKey,
-                //    Name = "X-Api-Key",
-                //    Type = SecuritySchemeType.ApiKey
-                //});
+                c.AddSecurityDefinition("Bearer",
+                    new OpenApiSecurityScheme
+                    {
+                        In = ParameterLocation.Header,
+                        Description = "Your Hackney Token. Example: \"Authorization: Bearer {token}\"",
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer"
+                    });
 
-                swaggerSetup.AddSecurityRequirement(new OpenApiSecurityRequirement
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
                         new OpenApiSecurityScheme
                         {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme, Id = "Token"
-                            }
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
                         },
                         new List<string>()
                     }
                 });
 
-                // Looks at the APIVersionAttribute [ApiVersion("x")] on controllers and decides whether or not
-                // to include it in that version of the swagger document
-                // Controllers must have this [ApiVersion("x")] to be included in swagger documentation!!
-                swaggerSetup.DocInclusionPredicate((docName, apiDesc) =>
+                //Looks at the APIVersionAttribute [ApiVersion("x")] on controllers and decides whether or not
+                //to include it in that version of the swagger document
+                //Controllers must have this [ApiVersion("x")] to be included in swagger documentation!!
+                c.DocInclusionPredicate((docName, apiDesc) =>
                 {
-                    apiDesc.TryGetMethodInfo(out MethodInfo methodInfo);
+                    apiDesc.TryGetMethodInfo(out var methodInfo);
 
-                    IList<ApiVersion> versions = methodInfo?.DeclaringType?.GetCustomAttributes()
+                    var versions = methodInfo?
+                        .DeclaringType?.GetCustomAttributes()
                         .OfType<ApiVersionAttribute>()
-                        .SelectMany(attr => attr.Versions)
-                        .ToList();
+                        .SelectMany(attr => attr.Versions).ToList();
 
                     return versions?.Any(v => $"{v.GetFormattedApiVersion()}" == docName) ?? false;
                 });
 
-                // Get every ApiVersion attribute specified and create swagger docs for them
-                foreach (string version in _apiVersions.Select(apiVersion => $"v{apiVersion.ApiVersion}"))
+                //Get every ApiVersion attribute specified and create swagger docs for them
+                foreach (var apiVersion in _apiVersions)
                 {
-                    swaggerSetup.SwaggerDoc(version, new OpenApiInfo
+                    var version = $"v{apiVersion.ApiVersion}";
+                    c.SwaggerDoc(version, new OpenApiInfo
                     {
-                        Title = $"{apiOptions.ApiName}-api {version}",
+                        Title = $"{ApiName}-api {version}",
                         Version = version,
-                        Description =
-                            $"{apiOptions.ApiName} version {version}. Please check older versions for depreciated endpoints."
+                        Description = $"{ApiName} version {version}. Please check older versions for depreciated endpoints."
                     });
                 }
 
-                swaggerSetup.CustomSchemaIds(x => x.FullName);
-
+                c.CustomSchemaIds(x => x.FullName);
                 // Set the comments path for the Swagger JSON and UI.
-                string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 if (File.Exists(xmlPath))
-                {
-                    swaggerSetup.IncludeXmlComments(xmlPath);
-                }
+                    c.IncludeXmlComments(xmlPath);
             });
+
             ConfigureDbContext(services);
             RegisterGateways(services);
             RegisterUseCases(services);
@@ -159,7 +156,7 @@ namespace HousingFinanceInterimApi
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env, IOptions<ApiOptions> apiOptions)
+        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -179,14 +176,14 @@ namespace HousingFinanceInterimApi
             IApiVersionDescriptionProvider api = app.ApplicationServices.GetService<IApiVersionDescriptionProvider>();
             _apiVersions = api.ApiVersionDescriptions.ToList();
 
-            // Swagger ui to view the swagger.json file
+            //Swagger ui to view the swagger.json file
             app.UseSwaggerUI(c =>
             {
-                foreach (ApiVersionDescription apiVersionDescription in _apiVersions)
+                foreach (var apiVersionDescription in _apiVersions)
                 {
                     //Create a swagger endpoint for each swagger version
                     c.SwaggerEndpoint($"{apiVersionDescription.GetFormattedApiVersion()}/swagger.json",
-                        $"{apiOptions.Value.ApiName}-api {apiVersionDescription.GetFormattedApiVersion()}");
+                        $"{ApiName}-api {apiVersionDescription.GetFormattedApiVersion()}");
                 }
             });
             app.UseSwagger();

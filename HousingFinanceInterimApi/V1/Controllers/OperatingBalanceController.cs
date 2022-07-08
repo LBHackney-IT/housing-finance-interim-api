@@ -3,9 +3,15 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cors;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
+using HousingFinanceInterimApi.V1.Infrastructure;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
+    [ApiController]
+    [Route("api/v1/operatingbalance")]
+    [ApiVersion("1.0")]
     public class OperatingBalanceController : BaseController
     {
 
@@ -16,9 +22,17 @@ namespace HousingFinanceInterimApi.V1.Controllers
             _gateway = gateway;
         }
 
+        [ProducesResponseType(typeof(List<OperatingBalance>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
-        public async Task<JsonResult> Get(DateTime? startDate, DateTime? endDate, int startWeek, int startYear, int endWeek, int endYear)
-            =>
-                Json(await _gateway.ListAsync(startDate, endDate, startWeek, startYear, endWeek, endYear).ConfigureAwait(false));
+        [Route("")]
+        public async Task<IActionResult> Get(DateTime? startDate, DateTime? endDate, int startWeek, int startYear, int endWeek, int endYear)
+        {
+            var data = await _gateway.ListAsync(startDate, endDate, startWeek, startYear, endWeek, endYear).ConfigureAwait(false);
+            if (data == null)
+                return NotFound();
+            return Ok(data);
+        }
     }
 }
