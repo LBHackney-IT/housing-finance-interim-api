@@ -144,6 +144,13 @@ namespace HousingFinanceInterimApi.V1.Gateways
             return await GetFilesInDrive(listRequest, null).ConfigureAwait(false);
         }
 
+        public async Task<File> GetFilesInDriveAsync(string driveId, string fileName)
+        {
+            var files = await GetFilesInDriveAsync(driveId).ConfigureAwait(false);
+
+            return files.Where(f => f.Name == fileName).FirstOrDefault();
+        }
+
         /// <summary>
         /// Recursively gets the files in the given drive for the given request.
         /// </summary>

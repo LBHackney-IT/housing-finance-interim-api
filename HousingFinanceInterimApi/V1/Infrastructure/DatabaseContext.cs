@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
@@ -33,6 +34,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<Tenancy>().HasNoKey().ToView(null);
             modelBuilder.Entity<TenancyTransaction>().HasNoKey().ToView(null);
             modelBuilder.Entity<Transaction>().HasNoKey().ToView(null);
+            modelBuilder.Entity<ReportCashSuspenseAccount>().HasNoKey().ToView(null);
+            modelBuilder.Entity<ReportCashImport>().HasNoKey().ToView(null);
+            modelBuilder.Entity<ReportAccountBalance>().HasNoKey().ToView(null);
             modelBuilder.Entity<ChargesAux>().Property(x => x.TimeStamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<DirectDebitAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<ActionDiaryAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
@@ -117,7 +121,11 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<OtherHRA> OtherHRA { get; set; }
 
         public DbSet<SuspenseTransaction> SuspenseTransactions { get; set; }
-        public DbSet<SuspenseTransactionAux> CashSuspenseTransactionsAux { get; set; }
+        public DbSet<SuspenseTransactionAux> SuspenseTransactionsAux { get; set; }
+        public DbSet<ReportCashSuspenseAccount> ReportCashSuspenseAccounts { get; set; }
+        public DbSet<ReportCashImport> ReportCashImports { get; set; }
+        public DbSet<BatchReport> BatchReports { get; set; }
+        public DbSet<ReportAccountBalance> ReportAccountBalances { get; set; }
 
         /// <summary>
         /// Gets the operating balances.
@@ -410,6 +418,271 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             return results;
         }
 
+        //REPORTS    
+        public async Task<List<string[]>> GetCashSuspenseAccountByYearAsync(int year, string suspenseAccountType)
+        {
+            var results = new List<string[]>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"usp_GetCashSuspenseAccountByYear {year}, {suspenseAccountType}", dbConnection)
+            {
+                CommandTimeout = 900
+            };
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    var result = new string[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        result[i] = reader[i].ToString();
+                    }
+
+                    results.Add(result);
+                }
+
+                results.Insert(0, columnNames);
+            }
+            dbConnection.Close();
+
+            return results;
+        }
+
+        public async Task<List<string[]>> GetCashImportByDateAsync(DateTime startDate, DateTime endDate)
+        {
+            var results = new List<string[]>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"usp_GetCashImportByDate", dbConnection)
+            {
+                CommandTimeout = 900,
+                CommandType = CommandType.StoredProcedure
+            };
+
+            command.Parameters.AddWithValue("@startDate", startDate.ToString("yyyy-MM-dd"));
+            command.Parameters.AddWithValue("@endDate", endDate.ToString("yyyy-MM-dd"));
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    var result = new string[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        result[i] = reader[i].ToString();
+                    }
+
+                    results.Add(result);
+                }
+
+                results.Insert(0, columnNames);
+            }
+            dbConnection.Close();
+
+            return results;
+        }
+
+        public async Task<List<string[]>> GetChargesByYearAndRentGroupAsync(int year, string rentGroup)
+        {
+            var results = new List<string[]>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetChargesByYearAndRentGroup {year}, {rentGroup}", dbConnection)
+            {
+                CommandTimeout = 900
+            };
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    var result = new string[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        result[i] = reader[i].ToString();
+                    }
+
+                    results.Add(result);
+                }
+
+                results.Insert(0, columnNames);
+            }
+            dbConnection.Close();
+
+            return results;
+        }
+
+        public async Task<List<string[]>> GetChargesByGroupType(int year, string type)
+        {
+            var results = new List<string[]>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetChargesByGroupType {year}, {type}", dbConnection)
+            {
+                CommandTimeout = 900
+            };
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    var result = new string[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        result[i] = reader[i].ToString();
+                    }
+
+                    results.Add(result);
+                }
+
+                results.Insert(0, columnNames);
+            }
+            dbConnection.Close();
+
+            return results;
+        }
+
+        public async Task<List<string[]>> GetChargesByYear(int year)
+        {
+            var results = new List<string[]>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetChargesByYear {year}", dbConnection)
+            {
+                CommandTimeout = 900
+            };
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    var result = new string[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        result[i] = reader[i].ToString();
+                    }
+
+                    results.Add(result);
+                }
+
+                results.Insert(0, columnNames);
+            }
+            dbConnection.Close();
+
+            return results;
+        }
+
+        public async Task<List<string[]>> GetHousingBenefitAcademyByYear(int year)
+        {
+            var results = new List<string[]>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetHousingBenefitAcademyByYear {year}", dbConnection)
+            {
+                CommandTimeout = 900
+            };
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    var result = new string[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        result[i] = reader[i].ToString();
+                    }
+
+                    results.Add(result);
+                }
+
+                results.Insert(0, columnNames);
+            }
+            dbConnection.Close();
+
+            return results;
+        }
+
+        public async Task<IList<ReportAccountBalance>> GetReportAccountBalance(DateTime reportDate, string rentGroup)
+        {
+            var results = new List<ReportAccountBalance>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetReportAccountBalance", dbConnection)
+            {
+                CommandTimeout = 900,
+                CommandType = CommandType.StoredProcedure
+            };
+
+            command.Parameters.AddWithValue("@reportDate", reportDate.ToString("yyyy-MM-dd"));
+
+            if (!string.IsNullOrEmpty(rentGroup))
+                command.Parameters.AddWithValue("@rentGroup", rentGroup);
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+
+                while (reader.Read())
+                {
+                    results.Add(new ReportAccountBalance()
+                    {
+                        TenancyAgreementRef = reader["TenancyAgreementRef"] != DBNull.Value ? reader["TenancyAgreementRef"].ToString() : null,
+                        RentAccount = reader["RentAccount"] != DBNull.Value ? reader["RentAccount"].ToString() : null,
+                        RentGroup = reader["RentGroup"] != DBNull.Value ? reader["RentGroup"].ToString() : null,
+                        TenancyEndDate = reader["TenancyEndDate"] != DBNull.Value ? Convert.ToDateTime(reader["TenancyEndDate"]) : (DateTime?) null,
+                        Balance = reader["Balance"] != DBNull.Value ? Convert.ToDecimal(reader["Balance"]) : 0m,
+                    });
+                }
+
+            }
+            dbConnection.Close();
+
+            return results;
+        }
+
         private async Task PerformTransaction(string sql, int timeout = 0)
         {
             await using var transaction = await Database.BeginTransactionAsync().ConfigureAwait(false);
@@ -427,7 +700,6 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
                 throw;
             }
         }
-
         private async Task PerformInterpolatedTransaction(FormattableString sql, int timeout = 0)
         {
             await using var transaction = await Database.BeginTransactionAsync().ConfigureAwait(false);
@@ -445,7 +717,6 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
                 throw;
             }
         }
-
     }
 
 }

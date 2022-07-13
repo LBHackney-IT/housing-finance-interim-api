@@ -205,6 +205,12 @@ functions:
     role: lambdaExecutionRole
     events:
         - schedule: cron(10 3 * * ? *)
+  generateReport:
+    name: ${self:service}-${self:provider.stage}-gen-report
+    description: "The scheduler to generate google drive reports."
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::GenerateReport
+    role: lambdaExecutionRole 
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:
@@ -445,6 +451,43 @@ stepFunctions:
                 MaxAttempts: 3
                 BackoffRate: 2
             Next: EndStep
+          EndStep:
+            Type: Succeed
+      dependsOn: lambdaExecutionRole
+      tags:
+        Team: HousingFinance
+    hfstepfuncreport:
+      name: HFReportsStateMachine
+      events:
+        - schedule: cron(0/30 * * * ? *)
+      definition:
+        Comment: "Reports step function deployed via serverless. Run every 30 min"
+        StartAt: GenerateReport
+        States:
+          GenerateReport:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ generateReport, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: Choice_ExistPendingReport
+          Choice_ExistPendingReport:
+            Type: Choice
+            Choices:
+              - Variable: $.Continue
+                BooleanEquals: true
+                Next: Wait_0
+              - Variable: $.Continue
+                BooleanEquals: false
+                Next: EndStep
+          Wait_0:
+              Type: Wait
+              TimestampPath: $.NextStepTime
+              Next: GenerateReport          
           EndStep:
             Type: Succeed
       dependsOn: lambdaExecutionRole

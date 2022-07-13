@@ -130,7 +130,7 @@ workflows:
       - assume-role-development:
           context: api-assume-role-housing-development-context
           requires:
-            - build-and-test          
+            - build-and-test
       - deploy-to-development:
           requires:
             - assume-role-development       

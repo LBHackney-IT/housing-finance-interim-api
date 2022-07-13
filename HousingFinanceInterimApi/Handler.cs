@@ -41,6 +41,7 @@ namespace HousingFinanceInterimApi
         private readonly IRefreshCurrentBalanceUseCase _refreshCurrentBalanceUseCase;
         private readonly IRefreshManageArrearsUseCase _refreshManageArrearsUseCase;
         private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
+        private readonly IGenerateReportUseCase _generateReportUseCase;
 
         private const string CashFileLabel = "CashFile";
         private const string HousingBenefitFileLabel = "HousingBenefitFile";
@@ -84,6 +85,8 @@ namespace HousingFinanceInterimApi
             IUPHousingCashDumpFileNameGateway upHousingCashDumpFileNameGateway = new UPHousingCashDumpFileNameGateway(context);
             IUPHousingCashDumpGateway upHousingCashDumpGateway = new UPHousingCashDumpGateway(context);
             IUPHousingCashLoadGateway upHousingCashLoadGateway = new UPHousingCashLoadGateway(context);
+            IReportGateway reportGateway = new ReportGateway(context);
+            IBatchReportGateway batchReportGateway = new BatchReportGateway(context);
             ISuspenseAccountsGateway suspenseAccountsGateway = new SuspenseAccountsGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
@@ -120,6 +123,8 @@ namespace HousingFinanceInterimApi
             _refreshCurrentBalanceUseCase = new RefreshCurrentBalanceUseCase(currentBalanceGateway);
             _refreshManageArrearsUseCase = new RefreshManageArrearsUseCase(manageArrearsGateway);
             _refreshOperatingBalanceUseCase = new RefreshOperatingBalanceUseCase(operatingBalanceGateway);
+            _generateReportUseCase = new GenerateReportUseCase(batchReportGateway,
+                reportGateway, googleFileSettingGateway, googleClientService);
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()
@@ -236,6 +241,10 @@ namespace HousingFinanceInterimApi
         {
             return await _loadSuspenseHousingBenefitTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
         }
-    }
 
+        public async Task<StepResponse> GenerateReport()
+        {
+            return await _generateReportUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+    }
 }
