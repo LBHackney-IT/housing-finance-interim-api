@@ -197,6 +197,14 @@ functions:
     role: lambdaExecutionRole
     events:
         - schedule: cron(5 3 * * ? *)
+  suspenseHousingBenefit:
+    name: ${self:service}-${self:provider.stage}-susp-hb
+    description: "The scheduler to load and reverse suspense hb files. Run at 03:10 AM"
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadSuspenseHousingBenefitTransactions
+    role: lambdaExecutionRole
+    events:
+        - schedule: cron(10 3 * * ? *)
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:
@@ -244,32 +252,8 @@ stepFunctions:
         - schedule: cron(15 0 ? * MON *)
       definition:
         Comment: "Housing files process step function deployed via serverless. Run at 12:15 AM only Monday"
-        StartAt: CheckHousingFiles
-        States:
-          CheckHousingFiles:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [ checkHousingFiles, Arn ]
-            Retry:
-              - ErrorEquals:
-                  - States.All
-                IntervalSeconds: 30
-                MaxAttempts: 3
-                BackoffRate: 2
-            Next: Wait_1
-          Wait_1:
-              Type: Wait
-              TimestampPath: $.NextStepTime
-              Next: Choice_1
-          Choice_1:
-            Type: Choice
-            Choices:
-              - Variable: $.Continue
-                BooleanEquals: true
-                Next: ImportHousingFile
-              - Variable: $.Continue
-                BooleanEquals: false
-                Next: ImportHousingFileTransactions
+        StartAt: ImportHousingFile
+        States:          
           ImportHousingFile:
             Type: Task
             Resource:

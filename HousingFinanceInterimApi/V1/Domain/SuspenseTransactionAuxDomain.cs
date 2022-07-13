@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.Domain
 {
-    public class CashSuspenseTransactionAuxDomain
+    public class SuspenseTransactionAuxDomain
     {
         public long Id { get; set; }
 
