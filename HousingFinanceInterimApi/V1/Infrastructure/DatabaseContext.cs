@@ -120,8 +120,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// </summary>
         public DbSet<OtherHRA> OtherHRA { get; set; }
 
-        public DbSet<CashSuspenseTransaction> CashSuspenseTransactions { get; set; }
-        public DbSet<CashSuspenseTransactionAux> CashSuspenseTransactionsAux { get; set; }
+        public DbSet<SuspenseTransaction> SuspenseTransactions { get; set; }
+        public DbSet<SuspenseTransactionAux> SuspenseTransactionsAux { get; set; }
         public DbSet<ReportCashSuspenseAccount> ReportCashSuspenseAccounts { get; set; }
         public DbSet<ReportCashImport> ReportCashImports { get; set; }
         public DbSet<BatchReport> BatchReports { get; set; }
@@ -275,8 +275,11 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task RefreshManageArrearsProperty()
             => await PerformTransaction("usp_RefreshManageArrearsProperty").ConfigureAwait(false);
 
-        public async Task<List<CashSuspenseTransaction>> GetCashSuspenseTransactions()
-            => await CashSuspenseTransactions.FromSqlRaw($"usp_GetCashSuspenseTransactions", 600).ToListAsync().ConfigureAwait(false);
+        public async Task<List<SuspenseTransaction>> GetCashSuspenseTransactions()
+            => await SuspenseTransactions.FromSqlRaw($"usp_GetCashSuspenseTransactions", 600).ToListAsync().ConfigureAwait(false);
+
+        public async Task<List<SuspenseTransaction>> GetHousingBenefitSuspenseTransactions()
+            => await SuspenseTransactions.FromSqlRaw($"usp_GetHousingBenefitSuspenseTransactions", 600).ToListAsync().ConfigureAwait(false);
 
         public async Task<IList<Transaction>> GetTransactionsAsync(DateTime? startDate, DateTime? endDate)
             => await Transactions
@@ -320,8 +323,11 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task LoadDirectDebitHistory(DateTime? processingDate)
             => await PerformInterpolatedTransaction($"usp_LoadDirectDebitHistory {processingDate:yyyy-MM-dd}", 600).ConfigureAwait(false);
 
-        public async Task LoadcashSuspenseTransactions()
-            => await PerformInterpolatedTransaction($"usp_LoadcashSuspenseTransactions", 600).ConfigureAwait(false);
+        public async Task LoadCashSuspenseTransactions()
+            => await PerformInterpolatedTransaction($"usp_LoadCashSuspenseTransactions", 600).ConfigureAwait(false);
+
+        public async Task LoadHousingBenefitSuspenseTransactions()
+            => await PerformInterpolatedTransaction($"usp_LoadHousingBenefitSuspenseTransactions", 600).ConfigureAwait(false);
 
         public async Task LoadChargesHistory(int @processingYear)
             => await PerformInterpolatedTransaction($"usp_LoadChargesHistory {@processingYear}", 600).ConfigureAwait(false);
@@ -344,9 +350,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             await PerformTransaction(sql).ConfigureAwait(false);
         }
 
-        public async Task TruncateCashSuspenseTransactionAuxiliary()
+        public async Task TruncateSuspenseTransactionAuxiliary()
         {
-            var sql = "DELETE FROM CashSuspenseTransactionAux";
+            var sql = "DELETE FROM SuspenseTransactionAux";
             await PerformTransaction(sql).ConfigureAwait(false);
         }
 
@@ -372,7 +378,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             => await PerformTransaction("usp_UpdateCurrentBalance", 900).ConfigureAwait(false);
 
         public async Task GenerateOperatingBalance()
-            => await PerformTransaction("usp_GenerateOperatingBalance", 600).ConfigureAwait(false);
+            => await PerformTransaction("usp_GenerateOperatingBalance", 900).ConfigureAwait(false);
 
         public async Task RefreshManageArrearsTenancyAgreement()
             => await PerformTransaction("usp_RefreshManageArrearsTenancyAgreement", 900).ConfigureAwait(false);

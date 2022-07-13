@@ -23,6 +23,8 @@ provider:
     HOUSING_FILE_REGEX: ${ssm:/housing-finance/${self:provider.stage}/housing-benefit-file-regex}
     ACCEPTED_ORIGINS: ${ssm:/housing-finance/${self:provider.stage}/cors-accepted-origins}
     CHARGES_BATCH_YEARS: ${ssm:/housing-finance/${self:provider.stage}/charges-batch-years}
+    S3_BUCKET_NAME: ${ssm:/housing-finance/${self:provider.stage}/s3-bucket-name}
+    S3_OBJECT_PREFIX: ${ssm:/housing-finance/${self:provider.stage}/s3-object-prefix}
 
 package:
   artifact: ./bin/release/netcoreapp3.1/housing-finance-interim-api.zip
@@ -53,6 +55,10 @@ functions:
               - X-Amz-Security-Token
               - X-Amz-User-Agent
             allowCredentials: false
+      - http:
+          path: /swagger/{proxy+}
+          method: GET
+          private: false
   loadTenancyAgreement:
     name: ${self:service}-${self:provider.stage}-load-tenagree
     description: "The scheduler to update and add new tenancy agreements. Run at 12:00 AM"
@@ -191,6 +197,14 @@ functions:
     role: lambdaExecutionRole
     events:
         - schedule: cron(5 3 * * ? *)
+  suspenseHousingBenefit:
+    name: ${self:service}-${self:provider.stage}-susp-hb
+    description: "The scheduler to load and reverse suspense hb files. Run at 03:10 AM"
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadSuspenseHousingBenefitTransactions
+    role: lambdaExecutionRole
+    events:
+        - schedule: cron(10 3 * * ? *)
   generateReport:
     name: ${self:service}-${self:provider.stage}-gen-report
     description: "The scheduler to generate google drive reports."
@@ -205,32 +219,8 @@ stepFunctions:
         - schedule: cron(0 1 * * ? *)
       definition:
         Comment: "Cash files process step function deployed via serverless. Run at 01:00 AM"
-        StartAt: CheckCashFiles
-        States:
-          CheckCashFiles:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [ checkCashFiles, Arn ]
-            Retry:
-              - ErrorEquals:
-                  - States.All
-                IntervalSeconds: 30
-                MaxAttempts: 3
-                BackoffRate: 2
-            Next: Wait_1
-          Wait_1:
-              Type: Wait
-              TimestampPath: $.NextStepTime
-              Next: Choice_1
-          Choice_1:
-            Type: Choice
-            Choices:
-              - Variable: $.Continue
-                BooleanEquals: true
-                Next: ImportCashFile
-              - Variable: $.Continue
-                BooleanEquals: false
-                Next: ImportCashFileTransactions
+        StartAt: ImportCashFile
+        States:          
           ImportCashFile:
             Type: Task
             Resource:
@@ -268,32 +258,8 @@ stepFunctions:
         - schedule: cron(15 0 ? * MON *)
       definition:
         Comment: "Housing files process step function deployed via serverless. Run at 12:15 AM only Monday"
-        StartAt: CheckHousingFiles
-        States:
-          CheckHousingFiles:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [ checkHousingFiles, Arn ]
-            Retry:
-              - ErrorEquals:
-                  - States.All
-                IntervalSeconds: 30
-                MaxAttempts: 3
-                BackoffRate: 2
-            Next: Wait_1
-          Wait_1:
-              Type: Wait
-              TimestampPath: $.NextStepTime
-              Next: Choice_1
-          Choice_1:
-            Type: Choice
-            Choices:
-              - Variable: $.Continue
-                BooleanEquals: true
-                Next: ImportHousingFile
-              - Variable: $.Continue
-                BooleanEquals: false
-                Next: ImportHousingFileTransactions
+        StartAt: ImportHousingFile
+        States:          
           ImportHousingFile:
             Type: Task
             Resource:
@@ -454,9 +420,9 @@ stepFunctions:
     hfstepfunccurentbalance:
       name: HFCurrentBalanceStateMachine
       events:
-        - schedule: cron(0 2 * * ? *)
+        - schedule: cron(0 4 * * ? *)
       definition:
-        Comment: "Current balance process step function deployed via serverless. Run at 02:00 AM"
+        Comment: "Current balance process step function deployed via serverless. Run at 04:00 AM"
         StartAt: RefreshCurrentBalance
         States:          
           RefreshCurrentBalance:

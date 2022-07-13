@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Google.Apis.Drive.v3.Data;
 
@@ -16,9 +17,9 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// </summary>
         /// <param name="driveId">The drive identifier.</param>
         /// <returns>The list of files for the given drive.</returns>
-        public Task<IList<File>> GetFilesInDriveAsync(string driveId);
+        public Task<IList<Google.Apis.Drive.v3.Data.File>> GetFilesInDriveAsync(string driveId);
 
-        public Task<File> GetFilesInDriveAsync(string driveId, string fileName);
+        public Task<Google.Apis.Drive.v3.Data.File> GetFilesInDriveAsync(string driveId, string fileName);
 
         /// <summary>
         /// Reads the file line data asynchronous.
@@ -42,6 +43,8 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
             string sheetRange) where _TEntity : class;
 
         public Task<bool> RenameFileInDrive(string fileId, string newName);
+
+        public Task<bool> UploadFileInDrive(MemoryStream memoryStream, string fileName, string folderId);
 
         public Task<bool> UploadCsvFile(List<string[]> table, string fileName, string folderId);
 

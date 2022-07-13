@@ -11,31 +11,32 @@ using EFCore.BulkExtensions;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
-    public class UPCashLoadSuspenseAccountsGateway : IUPCashLoadSuspenseAccountsGateway
+    public class SuspenseAccountsGateway : ISuspenseAccountsGateway
     {
         private readonly DatabaseContext _context;
 
         private readonly int _batchSize = Convert.ToInt32(Environment.GetEnvironmentVariable("BATCH_SIZE"));
 
-        public UPCashLoadSuspenseAccountsGateway(DatabaseContext context)
+        public SuspenseAccountsGateway(DatabaseContext context)
         {
             _context = context;
         }
 
-        public async Task CreateBulkAsync(IList<CashSuspenseTransactionAuxDomain> cashSuspenseDomain)
+        public async Task CreateBulkAsync(IList<SuspenseTransactionAuxDomain> suspenseTransactionsAuxDomain, string type)
         {
             try
             {
-                var cashSuspenseTransactionAux = cashSuspenseDomain.Select(c => new CashSuspenseTransactionAux
+                var suspenseTransactionsAux = suspenseTransactionsAuxDomain.Select(c => new SuspenseTransactionAux
                 {
                     IdSuspenseTransaction = c.Id,
                     RentAccount = c.RentAccount,
+                    Type = type,
                     Date = c.Date,
                     Amount = c.Amount,
                     NewRentAccount = c.NewRentAccount
                 }).ToList();
 
-                await _context.BulkInsertAsync(cashSuspenseTransactionAux, new BulkConfig { BatchSize = _batchSize }).ConfigureAwait(false);
+                await _context.BulkInsertAsync(suspenseTransactionsAux, new BulkConfig { BatchSize = _batchSize }).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -45,11 +46,11 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
         }
 
-        public async Task ClearCashSuspenseTransactionsAuxAuxiliary()
+        public async Task ClearSuspenseTransactionsAuxAuxiliary()
         {
             try
             {
-                await _context.TruncateCashSuspenseTransactionAuxiliary().ConfigureAwait(false);
+                await _context.TruncateSuspenseTransactionAuxiliary().ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -59,13 +60,13 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
         }
 
-        public async Task<IList<CashSuspenseTransactionAuxDomain>> GetCashSuspenseTransactions()
+        public async Task<IList<SuspenseTransactionAuxDomain>> GetCashSuspenseTransactions()
         {
             try
             {
                 var suspense = await _context.GetCashSuspenseTransactions().ConfigureAwait(false);
 
-                return suspense?.Select(d => new CashSuspenseTransactionAuxDomain()
+                return suspense?.Select(d => new SuspenseTransactionAuxDomain()
                 {
                     Id = d.Id,
                     RentAccount = d.RentAccount,
@@ -86,7 +87,44 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             try
             {
-                await _context.LoadcashSuspenseTransactions().ConfigureAwait(false);
+                await _context.LoadCashSuspenseTransactions().ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
+        }
+
+        public async Task<IList<SuspenseTransactionAuxDomain>> GetHousingBenefitSuspenseTransactions()
+        {
+            try
+            {
+                var suspense = await _context.GetHousingBenefitSuspenseTransactions().ConfigureAwait(false);
+
+                return suspense?.Select(d => new SuspenseTransactionAuxDomain()
+                {
+                    Id = d.Id,
+                    RentAccount = d.RentAccount,
+                    Date = d.PaymentDate,
+                    Amount = d.Amount,
+                    NewRentAccount = d.NewRentAccount
+                }).ToList();
+            }
+            catch (Exception e)
+            {
+                LoggingHandler.LogError(e.Message);
+                LoggingHandler.LogError(e.StackTrace);
+                throw;
+            }
+        }
+
+        public async Task LoadHousingBenefitSuspenseTransactions()
+        {
+            try
+            {
+                await _context.LoadHousingBenefitSuspenseTransactions().ConfigureAwait(false);
             }
             catch (Exception e)
             {

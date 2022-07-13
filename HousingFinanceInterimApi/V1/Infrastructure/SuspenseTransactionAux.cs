@@ -8,14 +8,16 @@ using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
-    [Table("CashSuspenseTransactionAux")]
-    public class CashSuspenseTransactionAux
+    [Table("SuspenseTransactionAux")]
+    public class SuspenseTransactionAux
     {
         public long Id { get; set; }
 
         public long IdSuspenseTransaction { get; set; }
 
         public string RentAccount { get; set; }
+
+        public string Type { get; set; }
 
         public DateTime Date { get; set; }
 

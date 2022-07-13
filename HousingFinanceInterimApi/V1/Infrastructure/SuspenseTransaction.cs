@@ -2,7 +2,7 @@ using System;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
-    public class CashSuspenseTransaction
+    public class SuspenseTransaction
     {
         public long Id { get; set; }
         public string RentAccount { get; set; }
