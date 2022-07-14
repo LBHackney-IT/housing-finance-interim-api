@@ -424,10 +424,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             var results = new List<string[]>();
 
             var dbConnection = Database.GetDbConnection() as SqlConnection;
-            var command = new SqlCommand($"usp_GetCashSuspenseAccountByYear {year}, {suspenseAccountType}", dbConnection)
-            {
-                CommandTimeout = 900
-            };
+            var command = new SqlCommand($"usp_GetCashSuspenseAccountByYear", dbConnection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add(new SqlParameter("@year", year));
+            if (!string.IsNullOrEmpty(suspenseAccountType))
+                command.Parameters.Add(new SqlParameter("@suspenseAccountType", suspenseAccountType));
+            command.CommandTimeout = 900;
 
             dbConnection.Open();
             await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
@@ -461,14 +463,11 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             var results = new List<string[]>();
 
             var dbConnection = Database.GetDbConnection() as SqlConnection;
-            var command = new SqlCommand($"usp_GetCashImportByDate", dbConnection)
-            {
-                CommandTimeout = 900,
-                CommandType = CommandType.StoredProcedure
-            };
-
-            command.Parameters.AddWithValue("@startDate", startDate.ToString("yyyy-MM-dd"));
-            command.Parameters.AddWithValue("@endDate", endDate.ToString("yyyy-MM-dd"));
+            var command = new SqlCommand($"usp_GetCashImportByDate", dbConnection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add(new SqlParameter("@startDate", startDate.ToString("yyyy-MM-dd")));
+            command.Parameters.Add(new SqlParameter("@endDate", endDate.ToString("yyyy-MM-dd")));
+            command.CommandTimeout = 900;
 
             dbConnection.Open();
             await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
@@ -502,10 +501,11 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             var results = new List<string[]>();
 
             var dbConnection = Database.GetDbConnection() as SqlConnection;
-            var command = new SqlCommand($"dbo.usp_GetChargesByYearAndRentGroup {year}, {rentGroup}", dbConnection)
-            {
-                CommandTimeout = 900
-            };
+            var command = new SqlCommand($"usp_GetChargesByYearAndRentGroup", dbConnection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add(new SqlParameter("@year", year));
+            command.Parameters.Add(new SqlParameter("@rentGroup", rentGroup));
+            command.CommandTimeout = 900;
 
             dbConnection.Open();
             await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
@@ -539,10 +539,11 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             var results = new List<string[]>();
 
             var dbConnection = Database.GetDbConnection() as SqlConnection;
-            var command = new SqlCommand($"dbo.usp_GetChargesByGroupType {year}, {type}", dbConnection)
-            {
-                CommandTimeout = 900
-            };
+            var command = new SqlCommand($"usp_GetChargesByGroupType", dbConnection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add(new SqlParameter("@year", year));
+            command.Parameters.Add(new SqlParameter("@type", type));
+            command.CommandTimeout = 900;
 
             dbConnection.Open();
             await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
@@ -576,10 +577,10 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             var results = new List<string[]>();
 
             var dbConnection = Database.GetDbConnection() as SqlConnection;
-            var command = new SqlCommand($"dbo.usp_GetChargesByYear {year}", dbConnection)
-            {
-                CommandTimeout = 900
-            };
+            var command = new SqlCommand($"usp_GetChargesByYear", dbConnection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add(new SqlParameter("@year", year));
+            command.CommandTimeout = 900;
 
             dbConnection.Open();
             await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
@@ -613,10 +614,10 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             var results = new List<string[]>();
 
             var dbConnection = Database.GetDbConnection() as SqlConnection;
-            var command = new SqlCommand($"dbo.usp_GetHousingBenefitAcademyByYear {year}", dbConnection)
-            {
-                CommandTimeout = 900
-            };
+            var command = new SqlCommand($"usp_GetHousingBenefitAcademyByYear", dbConnection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add(new SqlParameter("@year", year));
+            command.CommandTimeout = 900;
 
             dbConnection.Open();
             await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
@@ -650,16 +651,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             var results = new List<ReportAccountBalance>();
 
             var dbConnection = Database.GetDbConnection() as SqlConnection;
-            var command = new SqlCommand($"dbo.usp_GetReportAccountBalance", dbConnection)
-            {
-                CommandTimeout = 900,
-                CommandType = CommandType.StoredProcedure
-            };
-
-            command.Parameters.AddWithValue("@reportDate", reportDate.ToString("yyyy-MM-dd"));
-
+            var command = new SqlCommand($"dbo.usp_GetReportAccountBalance", dbConnection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add(new SqlParameter("@reportDate", reportDate.ToString("yyyy-MM-dd")));
             if (!string.IsNullOrEmpty(rentGroup))
-                command.Parameters.AddWithValue("@rentGroup", rentGroup);
+                command.Parameters.Add(new SqlParameter("@rentGroup", rentGroup));
+            command.CommandTimeout = 900;
 
             dbConnection.Open();
             await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
