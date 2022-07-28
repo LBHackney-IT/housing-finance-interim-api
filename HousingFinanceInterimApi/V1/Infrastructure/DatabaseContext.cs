@@ -276,10 +276,66 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             => await PerformTransaction("usp_RefreshManageArrearsProperty").ConfigureAwait(false);
 
         public async Task<List<SuspenseTransaction>> GetCashSuspenseTransactions()
-            => await SuspenseTransactions.FromSqlRaw($"usp_GetCashSuspenseTransactions", 600).ToListAsync().ConfigureAwait(false);
+        {
+            var results = new List<SuspenseTransaction>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetCashSuspenseTransactions", dbConnection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandTimeout = 900;
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+
+                while (reader.Read())
+                {
+                    results.Add(new SuspenseTransaction()
+                    {
+                        Id = Convert.ToInt64(reader["Id"]),
+                        RentAccount = reader["RentAccount"].ToString(),
+                        PaymentDate = Convert.ToDateTime(reader["PaymentDate"]),
+                        Amount = Convert.ToDecimal(reader["Amount"]),
+                        NewRentAccount = reader["NewRentAccount"].ToString()
+                    });
+                }
+
+            }
+            dbConnection.Close();
+
+            return results;
+        }
 
         public async Task<List<SuspenseTransaction>> GetHousingBenefitSuspenseTransactions()
-            => await SuspenseTransactions.FromSqlRaw($"usp_GetHousingBenefitSuspenseTransactions", 600).ToListAsync().ConfigureAwait(false);
+        {
+            var results = new List<SuspenseTransaction>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetHousingBenefitSuspenseTransactions", dbConnection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandTimeout = 900;
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+
+                while (reader.Read())
+                {
+                    results.Add(new SuspenseTransaction()
+                    {
+                        Id = Convert.ToInt64(reader["Id"]),
+                        RentAccount = reader["RentAccount"].ToString(),
+                        PaymentDate = Convert.ToDateTime(reader["PaymentDate"]),
+                        Amount = Convert.ToDecimal(reader["Amount"]),
+                        NewRentAccount = reader["NewRentAccount"].ToString()
+                    });
+                }
+
+            }
+            dbConnection.Close();
+
+            return results;
+        }
 
         public async Task<IList<Transaction>> GetTransactionsAsync(DateTime? startDate, DateTime? endDate)
             => await Transactions
