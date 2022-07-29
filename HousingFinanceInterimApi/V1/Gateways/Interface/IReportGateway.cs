@@ -7,7 +7,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
 {
     public interface IReportGateway
     {
-        Task<IList<ReportAccountBalance>> GetReportAccountBalanceAsync(DateTime reportDate, string rentGroup);
+        Task<IList<string[]>> GetReportAccountBalanceAsync(DateTime reportDate, string rentGroup);
         Task<IList<string[]>> GetCashImportByDateAsync(DateTime startDate, DateTime endDate);
         Task<IList<string[]>> GetChargesByYearAndRentGroupAsync(int year, string rentGroup);
         Task<IList<string[]>> GetChargesByGroupTypeAsync(int year, string type);

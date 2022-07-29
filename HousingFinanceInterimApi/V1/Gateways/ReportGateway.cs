@@ -19,7 +19,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
             _context = context;
         }
 
-        public async Task<IList<ReportAccountBalance>> GetReportAccountBalanceAsync(DateTime reportDate, string rentGroup)
+        public async Task<IList<string[]>> GetReportAccountBalanceAsync(DateTime reportDate, string rentGroup)
         {
             var results = await _context.GetReportAccountBalance(reportDate, rentGroup).ConfigureAwait(false);
 

@@ -702,9 +702,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             return results;
         }
 
-        public async Task<IList<ReportAccountBalance>> GetReportAccountBalance(DateTime reportDate, string rentGroup)
+        public async Task<IList<string[]>> GetReportAccountBalance(DateTime reportDate, string rentGroup)
         {
-            var results = new List<ReportAccountBalance>();
+            var results = new List<string[]>();
 
             var dbConnection = Database.GetDbConnection() as SqlConnection;
             var command = new SqlCommand($"dbo.usp_GetReportAccountBalance", dbConnection);
@@ -717,19 +717,24 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             dbConnection.Open();
             await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
             {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
 
                 while (reader.Read())
                 {
-                    results.Add(new ReportAccountBalance()
+                    var result = new string[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        TenancyAgreementRef = reader["TenancyAgreementRef"] != DBNull.Value ? reader["TenancyAgreementRef"].ToString() : null,
-                        RentAccount = reader["RentAccount"] != DBNull.Value ? reader["RentAccount"].ToString() : null,
-                        RentGroup = reader["RentGroup"] != DBNull.Value ? reader["RentGroup"].ToString() : null,
-                        TenancyEndDate = reader["TenancyEndDate"] != DBNull.Value ? Convert.ToDateTime(reader["TenancyEndDate"]) : (DateTime?) null,
-                        Balance = reader["Balance"] != DBNull.Value ? Convert.ToDecimal(reader["Balance"]) : 0m,
-                    });
+                        result[i] = reader[i].ToString();
+                    }
+
+                    results.Add(result);
                 }
 
+                results.Insert(0, columnNames);
             }
             dbConnection.Close();
 
