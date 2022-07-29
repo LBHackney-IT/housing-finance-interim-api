@@ -61,8 +61,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 var filledNewAccounts = allSuspenseTransactions.Where(x => !string.IsNullOrEmpty(x.NewRentAccount)).ToList();
 
-                if (filledNewAccounts.Any())
-                    await HandleSpreadSheet(batch.Id, filledNewAccounts).ConfigureAwait(false);
+                await HandleSpreadSheet(batch.Id, filledNewAccounts).ConfigureAwait(false);
             }
 
             var suspenseTransactions = await _upCashLoadSuspenseAccountsGateway.GetCashSuspenseTransactions().ConfigureAwait(false);
@@ -106,8 +105,11 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 LoggingHandler.LogInfo($"Clear aux table");
                 await _upCashLoadSuspenseAccountsGateway.ClearSuspenseTransactionsAuxAuxiliary().ConfigureAwait(false);
 
-                LoggingHandler.LogInfo($"Starting bulk insert");
-                await _upCashLoadSuspenseAccountsGateway.CreateBulkAsync(cashSuspenseTransactions, Type).ConfigureAwait(false);
+                if (cashSuspenseTransactions.Any())
+                {
+                    LoggingHandler.LogInfo($"Starting bulk insert");
+                    await _upCashLoadSuspenseAccountsGateway.CreateBulkAsync(cashSuspenseTransactions, Type).ConfigureAwait(false);
+                }
 
                 LoggingHandler.LogInfo($"Starting merge");
                 await _upCashLoadSuspenseAccountsGateway.LoadCashSuspenseTransactions().ConfigureAwait(false);
