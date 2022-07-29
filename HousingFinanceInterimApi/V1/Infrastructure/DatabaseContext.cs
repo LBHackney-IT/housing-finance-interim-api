@@ -276,10 +276,66 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             => await PerformTransaction("usp_RefreshManageArrearsProperty").ConfigureAwait(false);
 
         public async Task<List<SuspenseTransaction>> GetCashSuspenseTransactions()
-            => await SuspenseTransactions.FromSqlRaw($"usp_GetCashSuspenseTransactions", 600).ToListAsync().ConfigureAwait(false);
+        {
+            var results = new List<SuspenseTransaction>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetCashSuspenseTransactions", dbConnection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandTimeout = 900;
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+
+                while (reader.Read())
+                {
+                    results.Add(new SuspenseTransaction()
+                    {
+                        Id = Convert.ToInt64(reader["Id"]),
+                        RentAccount = reader["RentAccount"].ToString(),
+                        PaymentDate = Convert.ToDateTime(reader["PaymentDate"]),
+                        Amount = Convert.ToDecimal(reader["Amount"]),
+                        NewRentAccount = reader["NewRentAccount"].ToString()
+                    });
+                }
+
+            }
+            dbConnection.Close();
+
+            return results;
+        }
 
         public async Task<List<SuspenseTransaction>> GetHousingBenefitSuspenseTransactions()
-            => await SuspenseTransactions.FromSqlRaw($"usp_GetHousingBenefitSuspenseTransactions", 600).ToListAsync().ConfigureAwait(false);
+        {
+            var results = new List<SuspenseTransaction>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"dbo.usp_GetHousingBenefitSuspenseTransactions", dbConnection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandTimeout = 900;
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+
+                while (reader.Read())
+                {
+                    results.Add(new SuspenseTransaction()
+                    {
+                        Id = Convert.ToInt64(reader["Id"]),
+                        RentAccount = reader["RentAccount"].ToString(),
+                        PaymentDate = Convert.ToDateTime(reader["PaymentDate"]),
+                        Amount = Convert.ToDecimal(reader["Amount"]),
+                        NewRentAccount = reader["NewRentAccount"].ToString()
+                    });
+                }
+
+            }
+            dbConnection.Close();
+
+            return results;
+        }
 
         public async Task<IList<Transaction>> GetTransactionsAsync(DateTime? startDate, DateTime? endDate)
             => await Transactions
@@ -646,9 +702,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             return results;
         }
 
-        public async Task<IList<ReportAccountBalance>> GetReportAccountBalance(DateTime reportDate, string rentGroup)
+        public async Task<IList<string[]>> GetReportAccountBalance(DateTime reportDate, string rentGroup)
         {
-            var results = new List<ReportAccountBalance>();
+            var results = new List<string[]>();
 
             var dbConnection = Database.GetDbConnection() as SqlConnection;
             var command = new SqlCommand($"dbo.usp_GetReportAccountBalance", dbConnection);
@@ -661,19 +717,24 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             dbConnection.Open();
             await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
             {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
 
                 while (reader.Read())
                 {
-                    results.Add(new ReportAccountBalance()
+                    var result = new string[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        TenancyAgreementRef = reader["TenancyAgreementRef"] != DBNull.Value ? reader["TenancyAgreementRef"].ToString() : null,
-                        RentAccount = reader["RentAccount"] != DBNull.Value ? reader["RentAccount"].ToString() : null,
-                        RentGroup = reader["RentGroup"] != DBNull.Value ? reader["RentGroup"].ToString() : null,
-                        TenancyEndDate = reader["TenancyEndDate"] != DBNull.Value ? Convert.ToDateTime(reader["TenancyEndDate"]) : (DateTime?) null,
-                        Balance = reader["Balance"] != DBNull.Value ? Convert.ToDecimal(reader["Balance"]) : 0m,
-                    });
+                        result[i] = reader[i].ToString();
+                    }
+
+                    results.Add(result);
                 }
 
+                results.Insert(0, columnNames);
             }
             dbConnection.Close();
 

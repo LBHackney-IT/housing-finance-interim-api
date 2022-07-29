@@ -105,29 +105,10 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 .ConfigureAwait(false);
 
             var fileName = $"Account_Balance_{rentgroup}_{reportDate}_{batchReport.Id}.csv";
-
-            var reportAccountBalances = await _reportGateway.GetReportAccountBalanceAsync(batchReport.ReportDate.Value, batchReport.RentGroup).ConfigureAwait(false);
-            List<string[]> convertedReportAccountBalance = reportAccountBalances
-                .Select(x => new string[]
-                {
-                    x.TenancyAgreementRef,
-                    x.RentAccount,
-                    x.RentGroup,
-                    x.TenancyEndDate?.ToString("dd/MM/yyyy"),
-                    x.Balance.ToString()
-                })
-                .ToList();
-
-            convertedReportAccountBalance.Insert(0, new string[]{
-                "TenancyAgreementRef",
-                "RentAccount",
-                "RentGroup",
-                "TenancyEndDate",
-                "Balance"
-            });
+            var reportAccountBalances = (List<string[]>) await _reportGateway.GetReportAccountBalanceAsync(batchReport.ReportDate.Value, batchReport.RentGroup).ConfigureAwait(false);
 
             await _googleClientService
-                .UploadCsvFile(convertedReportAccountBalance, fileName, googleFileSetting.GoogleIdentifier)
+                .UploadCsvFile(reportAccountBalances, fileName, googleFileSetting.GoogleIdentifier)
                 .ConfigureAwait(false);
 
             System.Threading.Thread.Sleep(_sleepDuration);
