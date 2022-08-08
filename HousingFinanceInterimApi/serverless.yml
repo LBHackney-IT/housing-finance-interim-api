@@ -257,9 +257,24 @@ stepFunctions:
       events:        
         - schedule: cron(0 6 ? * MON *)
       definition:
-        Comment: "Housing files process step function deployed via serverless. Run at 06:00 AM only Monday"
-        StartAt: ImportHousingFile
-        States:          
+        Comment: "Housing files process step function deployed via serverless. Run at 06:00 AM only Monday"        
+        StartAt: CheckHousingFiles
+        States:
+          CheckHousingFiles:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ checkHousingFiles, Arn ]
+            Retry:
+              - ErrorEquals:
+                  - States.All
+                IntervalSeconds: 30
+                MaxAttempts: 3
+                BackoffRate: 2
+            Next: Wait_1
+          Wait_1:
+              Type: Wait
+              TimestampPath: $.NextStepTime
+              Next: ImportHousingFile  
           ImportHousingFile:
             Type: Task
             Resource:

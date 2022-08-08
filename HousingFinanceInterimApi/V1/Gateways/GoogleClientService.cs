@@ -182,6 +182,19 @@ namespace HousingFinanceInterimApi.V1.Gateways
             return results;
         }
 
+        public Task CopyFileInDrive(string fileId, string destinationFolderId, string fileName)
+        {
+            var newFile = new File()
+            {
+                Name = fileName,
+                Parents = new List<string> { destinationFolderId }
+            };
+
+            var updateRequest = _driveService.Files.Copy(newFile, fileId);
+            var renamedFile = updateRequest.Execute();
+            return Task.CompletedTask;
+        }
+
         public Task<bool> RenameFileInDrive(string fileId, string newName)
         {
             File newFileName = new File();

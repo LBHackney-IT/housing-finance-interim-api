@@ -42,6 +42,7 @@ namespace HousingFinanceInterimApi
         private readonly IRefreshManageArrearsUseCase _refreshManageArrearsUseCase;
         private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
         private readonly IGenerateReportUseCase _generateReportUseCase;
+        private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
 
         private const string CashFileLabel = "CashFile";
         private const string HousingBenefitFileLabel = "HousingBenefitFile";
@@ -125,6 +126,8 @@ namespace HousingFinanceInterimApi
             _refreshOperatingBalanceUseCase = new RefreshOperatingBalanceUseCase(operatingBalanceGateway);
             _generateReportUseCase = new GenerateReportUseCase(batchReportGateway,
                 reportGateway, googleFileSettingGateway, googleClientService);
+            _moveHousingBenefitFileUseCase = new MoveHousingBenefitFileUseCase(batchLogGateway, batchLogErrorGateway,
+                googleFileSettingGateway, googleClientService);
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()
@@ -149,7 +152,7 @@ namespace HousingFinanceInterimApi
 
         public async Task<StepResponse> CheckHousingBenefitFiles()
         {
-            return await _checkExistFileUseCase.ExecuteAsync(HousingBenefitFileLabel).ConfigureAwait(false);
+            return await _moveHousingBenefitFileUseCase.ExecuteAsync(HousingBenefitFileLabel).ConfigureAwait(false);
         }
 
         public async Task<StepResponse> ImportHousingBenefitFile()
