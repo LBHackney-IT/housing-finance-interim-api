@@ -20,6 +20,6 @@ RUN dotnet restore ./HousingFinanceInterimApi.Tests/HousingFinanceInterimApi.Tes
 # Copy everything else and build
 COPY . .
 
-RUN dotnet build -c debug -o out FinanceDataMigrationApi.Tests/FinanceDataMigrationApi.Tests.csproj
+RUN dotnet build -c debug -o out HousingFinanceInterimApi.Tests/HousingFinanceInterimApi.Tests.csproj
 
 CMD dotnet test
