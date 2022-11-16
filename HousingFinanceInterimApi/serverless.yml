@@ -16,6 +16,7 @@ provider:
           rateLimit: 100
   environment:
     CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
+    CONNECTION_STRING_POSTGRES: User ID =${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-username};Password=${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-password};Server=${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-hostname};Port=${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-port};Database=${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-database};Integrated Security=true;Pooling=true;
     GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
     WAIT_DURATION: ${ssm:/housing-finance/${self:provider.stage}/step-function-wait-duration}
     BATCH_SIZE: ${ssm:/housing-finance/${self:provider.stage}/bulk-insert-batch-size}
@@ -559,6 +560,66 @@ resources:
                   Action:
                     - "lambda:InvokeFunction"
                   Resource: "*"
+          - PolicyName: tenureInformationDBAccess
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - "dynamodb:BatchGet*"
+                    - "dynamodb:DescribeStream"
+                    - "dynamodb:DescribeTable"
+                    - "dynamodb:Get*"
+                    - "dynamodb:Query"
+                    - "dynamodb:Scan"
+                  Resource:
+                    - 'Fn::Join':
+                        - ':'
+                        - - 'arn:aws:dynamodb'
+                          - Ref: 'AWS::Region'
+                          - Ref: 'AWS::AccountId'
+                          - 'table/TenureInformation'
+                - Effect: Allow
+                  Action:
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                  Resource:
+                    - 'Fn::Join':
+                        - ':'
+                        - - 'arn:aws:dynamodb'
+                          - Ref: 'AWS::Region'
+                          - Ref: 'AWS::AccountId'
+                          - 'table/TenureInformation/index/*'
+          - PolicyName: assetInformationDBAccess
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - "dynamodb:BatchGet*"
+                    - "dynamodb:DescribeStream"
+                    - "dynamodb:DescribeTable"
+                    - "dynamodb:Get*"
+                    - "dynamodb:Query"
+                    - "dynamodb:Scan"
+                  Resource:
+                    - 'Fn::Join':
+                        - ':'
+                        - - 'arn:aws:dynamodb'
+                          - Ref: 'AWS::Region'
+                          - Ref: 'AWS::AccountId'
+                          - 'table/Assets'
+                - Effect: Allow
+                  Action:
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                  Resource:
+                    - 'Fn::Join':
+                        - ':'
+                        - - 'arn:aws:dynamodb'
+                          - Ref: 'AWS::Region'
+                          - Ref: 'AWS::AccountId'
+                          - 'table/Assets/index/*'
 custom:
   vpc:
     development:

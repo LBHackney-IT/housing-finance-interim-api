@@ -2,6 +2,7 @@ using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using HousingFinanceInterimApi.Versioning;
+using Hackney.Core.DynamoDb;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -16,10 +17,10 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using AutoMapper;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 
@@ -125,6 +126,8 @@ namespace HousingFinanceInterimApi
             });
 
             ConfigureDbContext(services);
+            //services.ConfigureDynamoDB();
+
             RegisterGateways(services);
             RegisterUseCases(services);
 
