@@ -211,7 +211,23 @@ functions:
     description: "The scheduler to generate google drive reports."
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::GenerateReport
-    role: lambdaExecutionRole 
+    role: lambdaExecutionRole
+  loadAssets:
+    name: ${self:service}-${self:provider.stage}-load-assets
+    description: "The scheduler to import assets from dynamodb."
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadAssets
+    role: lambdaExecutionRole
+    events:
+        - schedule: cron(5 0 * * ? *)
+  loadTenuresInformation:
+    name: ${self:service}-${self:provider.stage}-load-tenure-info
+    description: "The scheduler to import tenure information from dynamodb."
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadTenuresInformation
+    role: lambdaExecutionRole
+    events:
+        - schedule: cron(10 0 * * ? *)
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:
