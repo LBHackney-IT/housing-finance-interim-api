@@ -60,7 +60,7 @@ namespace HousingFinanceInterimApi
             DatabaseContext context = new DatabaseContext(optionsBuilder.Options);
 
             DbContextOptionsBuilder postgresOptionsBuilder = new DbContextOptionsBuilder();
-            postgresOptionsBuilder.UseNpgsql("CONNECTION_STRING_POSTGRES");
+            postgresOptionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("CONNECTION_STRING_POSTGRES"));
             HousingFinanceContext housingFinanceContext = new HousingFinanceContext(postgresOptionsBuilder.Options);
 
             var options = Options.Create(new GoogleClientServiceOptions

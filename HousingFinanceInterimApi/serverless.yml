@@ -16,7 +16,7 @@ provider:
           rateLimit: 100
   environment:
     CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
-    CONNECTION_STRING_POSTGRES: User ID =${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-username};Password=${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-password};Server=${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-hostname};Port=${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-port};Database=${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-database};Integrated Security=true;Pooling=true;
+    CONNECTION_STRING_POSTGRES: Host=${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-hostname};Port=${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-port};Database=${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-database};Username=${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-username};Password=${ssm:/housing-finance/${self:provider.stage}/hfs-postgres-password}
     GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
     WAIT_DURATION: ${ssm:/housing-finance/${self:provider.stage}/step-function-wait-duration}
     BATCH_SIZE: ${ssm:/housing-finance/${self:provider.stage}/bulk-insert-batch-size}
