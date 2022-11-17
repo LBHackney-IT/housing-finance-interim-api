@@ -43,12 +43,12 @@ namespace HousingFinanceInterimApi.V1.Infrastructure.Postgres
             => await PerformTransaction("DELETE FROM housingfinance_dbo.assets_aux;").ConfigureAwait(false);
 
         public async Task MergeAssetsAuxiliary()
-            => await PerformTransaction($"CALL housingfinance_dbo.usp_load_chargesid();", 300).ConfigureAwait(false);
+            => await PerformTransaction($"CALL housingfinance_dbo.usp_load_chargesid();", 900).ConfigureAwait(false);
 
         public async Task TruncateTenuresInformationAuxiliary()
             => await PerformTransaction("DELETE FROM housingfinance_dbo.tenures_information_aux;").ConfigureAwait(false);
 
         public async Task MergeTenuresInformationAuxiliary()
-            => await PerformTransaction($"CALL housingfinance_dbo.usp_load_transactionsid();", 300).ConfigureAwait(false);
+            => await PerformTransaction($"CALL housingfinance_dbo.usp_load_transactionsid();", 900).ConfigureAwait(false);
     }
 }
