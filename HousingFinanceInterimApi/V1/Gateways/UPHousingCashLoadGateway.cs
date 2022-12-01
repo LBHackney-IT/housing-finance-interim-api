@@ -1,6 +1,8 @@
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.Gateways
@@ -31,6 +33,18 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             await _context.LoadHousingFiles().ConfigureAwait(false);
             return true;
+        }
+
+        public async Task<List<string>> GetAcademyRefByRentAccount(string rentAccount)
+        {
+            var housingCashLoads = await _context.UPHousingCashLoads
+                .Where(x => x.RentAccount == rentAccount)
+                .Select(x => x.AcademyClaimRef)
+                .Distinct()
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            return housingCashLoads;
         }
 
     }

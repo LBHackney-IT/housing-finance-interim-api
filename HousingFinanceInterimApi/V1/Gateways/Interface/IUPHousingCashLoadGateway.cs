@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.Gateways.Interface
@@ -9,6 +10,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
     public interface IUPHousingCashLoadGateway
     {
         public Task<bool> LoadHousingFiles();
+        public Task<List<string>> GetAcademyRefByRentAccount(string rentAccount);
     }
 
 }

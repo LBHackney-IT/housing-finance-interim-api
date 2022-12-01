@@ -18,10 +18,12 @@ namespace HousingFinanceInterimApi.V1.Controllers
     {
 
         private readonly ITenancyGateway _gateway;
+        private readonly IUPHousingCashLoadGateway _uPHousingCashLoadGateway;
 
-        public TenancyController(ITenancyGateway gateway)
+        public TenancyController(ITenancyGateway gateway, IUPHousingCashLoadGateway uPHousingCashLoadGateway)
         {
             _gateway = gateway;
+            _uPHousingCashLoadGateway = uPHousingCashLoadGateway;
         }
 
         [ProducesResponseType(typeof(List<TenancyTransaction>), StatusCodes.Status200OK)]
@@ -34,6 +36,10 @@ namespace HousingFinanceInterimApi.V1.Controllers
             var data = await _gateway.GetAsync(tenancyAgreementRef, rentAccount, householdRef).ConfigureAwait(false);
             if (data == null)
                 return NotFound();
+
+            var academyClaimRefs = await _uPHousingCashLoadGateway.GetAcademyRefByRentAccount(data.RentAccount).ConfigureAwait(false);
+            data.AcademyClaimRefs = academyClaimRefs;
+
             return Ok(data);
         }
 
