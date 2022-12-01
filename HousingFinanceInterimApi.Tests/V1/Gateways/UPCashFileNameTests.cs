@@ -47,11 +47,10 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             Assert.Equal(fileName, getResult.FileName);
         }
 
-        public async Task GetNotExists()
+        public Task GetNotExists()
         {
-
+            return Task.CompletedTask;
         }
-
     }
 
 }

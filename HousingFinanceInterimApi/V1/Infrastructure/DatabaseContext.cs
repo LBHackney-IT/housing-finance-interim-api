@@ -44,6 +44,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<UPCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<UPHousingCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<AdjustmentAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
+
         }
 
         /// <summary>
@@ -84,6 +85,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the up cash dumps.
         /// </summary>
         public DbSet<UPHousingCashDump> UpHousingCashDumps { get; set; }
+
+        public DbSet<UPHousingCashLoad> UPHousingCashLoads { get; set; }
 
         /// <summary>
         /// Gets or sets the error logs.
