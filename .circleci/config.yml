@@ -123,20 +123,49 @@ jobs:
       - deploy-lambda:
           stage: "production"
 workflows:
+  check-and-build:
+   jobs:
+      - check-code-formatting:
+          context: api-nuget-token-context
+          filters:
+            branches:
+              ignore:
+                - development
+                - master
+      - build-and-test:
+          context: 
+            - api-nuget-token-context                     
+          filters:
+            branches:
+              ignore:
+                - development
+                - master
   check-and-deploy-development:
     jobs:
       - check-code-formatting:
           context: api-nuget-token-context
+          filters:
+            branches:
+              only: development
       - build-and-test:
           context: api-nuget-token-context
+          filters:
+            branches:
+              only: development
       - assume-role-development:
           context: api-assume-role-housing-development-context
           requires:
             - build-and-test
+          filters:
+            branches:
+              only: development
       - deploy-to-development:
           context: api-nuget-token-context
           requires:
-            - assume-role-development       
+            - assume-role-development
+          filters:
+            branches:
+              only: development
   check-and-deploy-staging-and-production:
     jobs:
       - check-code-formatting:
