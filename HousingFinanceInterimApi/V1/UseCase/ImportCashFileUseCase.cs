@@ -47,7 +47,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             LoggingHandler.LogInfo($"Starting cash file import");
 
-            throw new InvalidOperationException("Hello world");
+            throw new Exception("Hello world");
 
             var batch = await _batchLogGateway.CreateAsync(_cashFileLabel).ConfigureAwait(false);
             var googleFileSettings = await GetGoogleFileSetting(_cashFileLabel).ConfigureAwait(false);
