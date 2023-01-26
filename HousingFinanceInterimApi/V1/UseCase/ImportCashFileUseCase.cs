@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using HousingFinanceInterimApi.V1.Domain;
-using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;
@@ -45,33 +44,46 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"Starting cash file import");
+            var errorMessage = "An error occurred processing the cash file";
+            try {
+                LoggingHandler.LogInfo($"Starting cash file import");
 
-            var batch = await _batchLogGateway.CreateAsync(_cashFileLabel).ConfigureAwait(false);
-            var googleFileSettings = await GetGoogleFileSetting(_cashFileLabel).ConfigureAwait(false);
+                var batch = await _batchLogGateway.CreateAsync(_cashFileLabel).ConfigureAwait(false);
+                var googleFileSettings = await GetGoogleFileSetting(_cashFileLabel).ConfigureAwait(false);
 
-            foreach (var googleFileSetting in googleFileSettings)
-            {
-                var folderFiles = await _googleClientService.GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier).ConfigureAwait(false);
+                foreach (var googleFileSetting in googleFileSettings)
+                {
+                    var folderFiles = await _googleClientService.GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier).ConfigureAwait(false);
 
-                folderFiles = folderFiles.Where(item =>
-                    item.Name.EndsWith(googleFileSetting.FileType) &&
-                    !_listExcludedFileStartWith.Any(y => item.Name.StartsWith(y))).ToList();
+                    folderFiles = folderFiles.Where(item =>
+                        item.Name.EndsWith(googleFileSetting.FileType) &&
+                        !_listExcludedFileStartWith.Any(y => item.Name.StartsWith(y))).ToList();
 
-                LoggingHandler.LogInfo($"Folder Id: {googleFileSetting.GoogleIdentifier}");
-                LoggingHandler.LogInfo($"File count: {folderFiles.Count}");
+                    LoggingHandler.LogInfo($"Folder Id: {googleFileSetting.GoogleIdentifier}");
+                    LoggingHandler.LogInfo($"File count: {folderFiles.Count}");
 
-                if (folderFiles.Any())
-                    await HandleCashFile(batch.Id, folderFiles).ConfigureAwait(false);
+                    if (folderFiles.Any())
+                        await HandleCashFile(batch.Id, folderFiles).ConfigureAwait(false);
+                    else
+                    {
+                        errorMessage += $": No files found in {googleFileSetting.GoogleIdentifier}";
+                        throw new Exception(errorMessage);
+                    }
+                }
+
+                await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
+                LoggingHandler.LogInfo($"End cash file import");
+                return new StepResponse()
+                {
+                    Continue = true,
+                    NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration))
+                };
             }
-
-            await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"End cash file import");
-            return new StepResponse()
+            catch (Exception e)
             {
-                Continue = true,
-                NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration))
-            };
+                LoggingHandler.LogError(errorMessage);
+                throw e;
+            }
         }
 
         private async Task<List<GoogleFileSettingDomain>> GetGoogleFileSetting(string label)
@@ -108,7 +120,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     {
                         await LogAndRenameFileError(batchId,
                             $"Non-standard cash filename (CashFileYYYYMMDD). Check file name: {fileItem.Name}",
-                            "WARNING",
+                            "ERROR",
                             fileItem)
                             .ConfigureAwait(false);
 
@@ -121,7 +133,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     {
                         await LogAndRenameFileError(batchId,
                                 $"File {fileItem.Name} already exist",
-                                "WARNING",
+                                "ERROR",
                                 fileItem)
                             .ConfigureAwait(false);
 
@@ -134,7 +146,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     {
                         await LogAndRenameFileError(batchId,
                                 $"File entry {fileItem.Name} not created",
-                                "WARNING",
+                                "ERROR",
                                 fileItem)
                             .ConfigureAwait(false);
 
@@ -145,6 +157,10 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     fileLines = fileLines.Where(item => !string.IsNullOrWhiteSpace(item)).ToList();
 
                     LoggingHandler.LogInfo($"Row count: {fileLines.Count}");
+                    if (fileLines.Count == 0)
+                    {
+                        throw new Exception($"No lines found in source spreadsheet {fileItem.Name} {fileItem.Id}");
+                    }
 
                     LoggingHandler.LogInfo($"Starting bulk insert");
                     await _upCashDumpGateway.CreateBulkAsync(upCashDumpFileName.Id, fileLines).ConfigureAwait(false);
