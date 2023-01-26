@@ -45,7 +45,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
         public async Task<StepResponse> ExecuteAsync()
         {
             var errorMessage = "An error occurred processing the cash file";
-            try {
+            try
+            {
                 LoggingHandler.LogInfo($"Starting cash file import");
 
                 var batch = await _batchLogGateway.CreateAsync(_cashFileLabel).ConfigureAwait(false);
