@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
 using HousingFinanceInterimApi.V1.Gateways;
 using FluentAssertions;
 using Google.Apis.Services;
@@ -19,13 +18,11 @@ using Microsoft.Extensions.Options;
 
 namespace CautionaryAlertsApi.Tests.V1.Gateways
 {
-    [TestFixture]
     public class GoogleSheetGatewayTests
     {
         private SheetsService _sheetsService;
         private GoogleClientService _classUnderTest;
-
-        [SetUp]
+        
         public void SetUp()
         {
             var clientFactory = new FakeHttpClientFactory(new TestSpreadsheetHandler("test_cash_file.csv").RequestHandler);
