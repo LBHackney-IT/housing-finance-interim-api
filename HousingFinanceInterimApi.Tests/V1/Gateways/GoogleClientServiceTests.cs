@@ -18,7 +18,7 @@ using Xunit;
 
 [assembly: NeutralResourcesLanguage("en")]
 
-namespace CautionaryAlertsApi.Tests.V1.Gateways
+namespace HousingFinanceInterimApi.Tests.V1.Gateways
 {
     public class GoogleSheetGatewayTests
     {
