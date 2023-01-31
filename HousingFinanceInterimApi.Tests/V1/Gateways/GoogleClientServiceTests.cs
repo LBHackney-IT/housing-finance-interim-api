@@ -22,7 +22,7 @@ namespace CautionaryAlertsApi.Tests.V1.Gateways
     {
         private SheetsService _sheetsService;
         private GoogleClientService _classUnderTest;
-        
+
         public void SetUp()
         {
             var clientFactory = new FakeHttpClientFactory(new TestSpreadsheetHandler("test_cash_file.csv").RequestHandler);
