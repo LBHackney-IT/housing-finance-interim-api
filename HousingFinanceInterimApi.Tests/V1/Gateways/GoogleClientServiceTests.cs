@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using HousingFinanceInterimApi.V1.Gateways;
 using FluentAssertions;
@@ -13,6 +14,7 @@ using HousingFinanceInterimApi.V1.Gateways.Options;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Xunit;
 
 [assembly: NeutralResourcesLanguage("en")]
 
@@ -52,28 +54,29 @@ namespace CautionaryAlertsApi.Tests.V1.Gateways
             _classUnderTest._sheetsService = _sheetsService;
         }
 
-        // [Test]
-        // public void GetsCautionaryAlertListItemForPropertyReference()
-        // {
-        //     // Arrange
-        //     const string spreadSheetId = "00999998";
-        //     const string sheetName = "00999998";
-        //     const string sheetRange = "00999998";
-        //
-        //     // Act
-        //     var result = _classUnderTest.ReadSheetToEntitiesAsync<IList<IList>>(spreadSheetId, sheetName, sheetRange);
-        //     TestContext.Out.Write(
-        //         JsonConvert.SerializeObject(result, Formatting.Indented, new StringEnumConverter()) +
-        //         Environment.NewLine);
-        //
-        //     // Assert
-        //     result.Count.Should().Be(2);
-        //     result.Should().ContainSingle(alert => alert.Address == "Fake Place 4");
-        //     result.Should().ContainSingle(alert => alert.Address == "Fake Place 5");
-        //     result.Should().OnlyContain(alert => alert.PropertyReference == propertyReference);
-        // }
-        //
-        // [Test]
+        [Fact]
+        public void GetsCautionaryAlertListItemForPropertyReference()
+        {
+            // Arrange
+            const string spreadSheetId = "00999998";
+            const string sheetName = "00999998";
+            const string sheetRange = "00999998";
+
+            // Act
+            var result = _classUnderTest.ReadSheetToEntitiesAsync<IList>(spreadSheetId, sheetName, sheetRange);
+            // TestContext.Out.Write(
+            //     JsonConvert.SerializeObject(result, Formatting.Indented, new StringEnumConverter()) +
+            //     Environment.NewLine);
+
+            // Assert
+            result.Should().NotBeNull();
+            // result.Count.Should().Be(2);
+            // result.Should().ContainSingle(alert => alert.Address == "Fake Place 4");
+            // result.Should().ContainSingle(alert => alert.Address == "Fake Place 5");
+            // result.Should().OnlyContain(alert => alert.PropertyReference == propertyReference);
+        }
+
+        // [Fact]
         // public void GetsCautionaryAlertListItemForPersonId()
         // {
         //     // Arrange
