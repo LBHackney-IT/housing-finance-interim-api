@@ -64,7 +64,11 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// <summary>
         /// Gets the sheets service.
         /// </summary>
-        private SheetsService _sheetsService => _sheetsServiceBacking ??= new SheetsService(_initializer);
+        public SheetsService _sheetsService
+        {
+            get { return _sheetsServiceBacking ??= new SheetsService(_initializer); }
+            set { _sheetsService = value; }
+        }
 
         #endregion
 
