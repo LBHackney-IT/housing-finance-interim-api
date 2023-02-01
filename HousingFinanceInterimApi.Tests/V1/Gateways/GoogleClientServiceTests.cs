@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using HousingFinanceInterimApi.V1.Gateways;
 using FluentAssertions;
 using Google.Apis.Services;
@@ -20,12 +21,12 @@ using Xunit;
 
 namespace HousingFinanceInterimApi.Tests.V1.Gateways
 {
-    public class GoogleSheetGatewayTests
+    public class GoogleSheetGatewayTests : IDisposable
     {
         private SheetsService _sheetsService;
         private GoogleClientService _classUnderTest;
 
-        public void SetUp()
+        public GoogleSheetGatewayTests()
         {
             var clientFactory = new FakeHttpClientFactory(new TestSpreadsheetHandler("test_cash_file.csv").RequestHandler);
             var baseClientService = new BaseClientService.Initializer { HttpClientFactory = clientFactory };
@@ -34,10 +35,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             var options = Options.Create(new GoogleClientServiceOptions
             {
                 ApplicationName = "Hackney Finance Interim Solution",
-                Scopes = new List<string>
-                {
-                    DriveService.Scope.Drive, SheetsService.Scope.SpreadsheetsReadonly
-                }
+                Scopes = new List<string> { DriveService.Scope.Drive, SheetsService.Scope.SpreadsheetsReadonly }
             });
 
             DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
@@ -75,23 +73,6 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             // result.Should().ContainSingle(alert => alert.Address == "Fake Place 5");
             // result.Should().OnlyContain(alert => alert.PropertyReference == propertyReference);
         }
-
-        // [Fact]
-        // public void GetsCautionaryAlertListItemForPersonId()
-        // {
-        //     // Arrange
-        //     const string personId = "566c45c2-1f0c-4ecf-8fbf-afe62d51c8ba";
-        //
-        //     // Act
-        //     var result = _classUnderTest.GetPersonAlerts(personId).ToList();
-        //
-        //     TestContext.Out.Write(
-        //         JsonConvert.SerializeObject(result, Formatting.Indented, new StringEnumConverter()) +
-        //         Environment.NewLine);
-        //
-        //     // Assert
-        //     result.Should().ContainSingle(alert => alert.CautionOnSystem == "Caution Type 2" && alert.Outcome == "Caution Description 2");
-        //     result.Should().ContainSingle(alert => alert.CautionOnSystem == "Caution Type 5" && alert.Outcome == "Caution Description 5");
-        // }
+        public void Dispose() { }
     }
 }
