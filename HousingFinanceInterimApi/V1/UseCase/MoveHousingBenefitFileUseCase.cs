@@ -35,9 +35,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
             _googleClientService = googleClientService;
         }
 
-        public async Task<StepResponse> ExecuteAsync(string label)
+        public async Task<StepResponse> ExecuteAsync()
         {
-            LoggingHandler.LogInfo($"Checking if exist pending for {label} label");
+            LoggingHandler.LogInfo($"Checking if exist pending for {_housingBenefitFileLabel} label");
 
             var batch = await _batchLogGateway.CreateAsync(_academyFileFolderLabel).ConfigureAwait(false);
             var googleFileSettings = await GetGoogleFileSetting(_academyFileFolderLabel).ConfigureAwait(false);
