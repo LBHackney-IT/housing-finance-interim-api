@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Google.Apis.Http;
 using IHttpClientFactory = Google.Apis.Http.IHttpClientFactory;
 
-namespace CautionaryAlertsApi.Tests.V1.Factories
+namespace HousingFinanceInterimApi.Tests.V1.Factories
 {
     public class FakeHttpClientFactory : IHttpClientFactory
     {

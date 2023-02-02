@@ -139,7 +139,9 @@ namespace CautionaryAlertsApi.Tests.V1.Helper
         private void Initialize(string fileName)
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = assembly.GetManifestResourceNames().Single(str => str.EndsWith(fileName, StringComparison.OrdinalIgnoreCase));
+
+            var resourceNames = assembly.GetManifestResourceNames();
+            var resourceName = resourceNames.Single(str => str.EndsWith(fileName, StringComparison.OrdinalIgnoreCase));
 
             using var stream = assembly.GetManifestResourceStream(resourceName) ?? throw new ArgumentException(fileName);
             using var reader = new StreamReader(stream);

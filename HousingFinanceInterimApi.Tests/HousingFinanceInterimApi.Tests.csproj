@@ -30,4 +30,9 @@
     <ProjectReference Include="..\HousingFinanceInterimApi\HousingFinanceInterimApi.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="V1\Gateways\test_cash_file.csv" />
+    <EmbeddedResource Include="V1\Gateways\test_cash_file.csv" />
+  </ItemGroup>
+
 </Project>

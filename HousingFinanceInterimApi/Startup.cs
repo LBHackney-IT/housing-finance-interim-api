@@ -20,6 +20,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using AutoMapper;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Services;
+using Google.Apis.Sheets.v4;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 
@@ -127,6 +130,7 @@ namespace HousingFinanceInterimApi
             ConfigureDbContext(services);
             RegisterGateways(services);
             RegisterUseCases(services);
+            ConfigureGoogleSheetsService(services);
 
             services.AddScoped<IGoogleClientServiceFactory, GoogleClientServiceFactory>();
         }
@@ -155,6 +159,17 @@ namespace HousingFinanceInterimApi
         private static void RegisterUseCases(IServiceCollection services)
         {
             services.AddScoped<IGetBatchLogErrorUseCase, GetBatchLogErrorUseCase>();
+        }
+
+        private static void ConfigureGoogleSheetsService(IServiceCollection services)
+        {
+            var credentialJson = Environment.GetEnvironmentVariable("CREDENTIAL_JSON");
+
+            services.AddSingleton(s => new SheetsService(new BaseClientService.Initializer
+            {
+                ApplicationName = ApiName,
+                HttpClientInitializer = GoogleCredential.FromJson(credentialJson)
+            }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
