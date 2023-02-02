@@ -15,9 +15,11 @@ services:
   dev-database:
     env_file:
       - database.env
-    image: microsoft/mssql-server-windows-express
+    image: mcr.microsoft.com/mssql/server:2022-latest
     volumes:
       - ./database:/docker-entrypoint-initdb.d
+    ports:
+      - 1433:1433
 
   housing-finance-interim-api-test:
     image: housing-finance-interim-api-test
@@ -25,12 +27,18 @@ services:
       context: .
       dockerfile: HousingFinanceInterimApi.Tests/Dockerfile
     environment:
-      - DB_SERVER=test-database
-      - DB_USERNAME=myuser
-      - DB_PASSWORD=mypassword
-      - DB_DATABASE=testdb
+      # - DB_SERVER=dev-database
+      # - DB_USERNAME=myuser
+      # - DB_PASSWORD=mypassword
+      # - DB_DATABASE=testdb
+      # - DB_HOST=test-database
+      # - DB_PORT=1433
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=mypassword
+      - MSSQL_PID=Enterprise
     links:
-      - test-database
+      - dev-database
+
   test-database:
     image: test-database
     build:

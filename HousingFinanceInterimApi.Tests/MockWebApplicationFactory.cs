@@ -11,9 +11,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Xunit;
 
 namespace HousingFinanceInterimApi.Tests
 {
+    //[Collection("AppTest collection")]
     public class MockWebApplicationFactory<_TStartup>
         : WebApplicationFactory<_TStartup> where _TStartup : class
     {
@@ -41,8 +43,7 @@ namespace HousingFinanceInterimApi.Tests
 
                 dbContext.Database.EnsureCreated();
             });
-            builder.ConfigureAppConfiguration(b => b.AddEnvironmentVariables())
-                .UseStartup<Startup>();
+            
             builder.ConfigureTestServices(services =>
             {
                 var clientFactory = new FakeHttpClientFactory(new TestSpreadsheetHandler("test_cash_file.csv").RequestHandler);

@@ -8,10 +8,8 @@ namespace HousingFinanceInterimApi.Tests
 
         public static string TestDatabase()
         {
-            return $"Server={Environment.GetEnvironmentVariable("DB_HOST") ?? "127.0.0.1"};" +
-                   $"User Id={Environment.GetEnvironmentVariable("DB_USERNAME") ?? "myuser"};" +
-                   $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "mypassword"};" +
-                   $"Database={Environment.GetEnvironmentVariable("DB_DATABASE") ?? "testdb"};" +
+            return $"User Id={Environment.GetEnvironmentVariable("MSSQL_PID") ?? "Enterprise"};" +
+                   $"Password={Environment.GetEnvironmentVariable("SA_PASSWORD") ?? "mypassword"};" +
                    "Trusted_Connection=True;MultipleActiveResultSets=true";
         }
 

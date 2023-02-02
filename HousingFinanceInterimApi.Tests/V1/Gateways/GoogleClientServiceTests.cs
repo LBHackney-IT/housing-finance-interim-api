@@ -23,14 +23,14 @@ using Xunit;
 
 namespace HousingFinanceInterimApi.Tests.V1.Gateways
 {
-    public class GoogleSheetGatewayTests : MockWebApplicationFactory<Startup>
+    //[Collection("AppTest collection")]
+    public class GoogleSheetGatewayTests : IClassFixture<IntegrationTests<Startup>>
     {
         private GoogleClientService _classUnderTest;
 
         private readonly Mock<ILogger<GoogleClientService>> _logger;
         private readonly Mock<BaseClientService.Initializer> _initializer;
 
-        public GoogleSheetGatewayTests(DbConnection dbConnection) {}
         public GoogleSheetGatewayTests()
         {
             _logger = new Mock<ILogger<GoogleClientService>>();
@@ -60,6 +60,5 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             // result.Should().ContainSingle(alert => alert.Address == "Fake Place 5");
             // result.Should().OnlyContain(alert => alert.PropertyReference == propertyReference);
         }
-        public void Dispose() { }
     }
 }
