@@ -116,7 +116,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     {
                         await LogAndRenameFileError(batchId,
                             $"Non-standard cash filename (CashFileYYYYMMDD). Check file name: {fileItem.Name}",
-                            "WARNING",
+                            "ERROR",
                             fileItem)
                             .ConfigureAwait(false);
 

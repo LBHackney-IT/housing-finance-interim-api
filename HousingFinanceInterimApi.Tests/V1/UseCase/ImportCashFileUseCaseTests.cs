@@ -153,6 +153,33 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         //Add a tests for non-match file name regex
+        [Fact]
+        public void InvalidFileNameThrowsException()
+        {
+            // Arrange
+            CreateGoogleFileSettingDomains();
+
+            var invalidFileName = "MyInvalidFileName12345.invalid";
+
+            var fileList = CreateFile();
+
+            fileList.First().Name = invalidFileName;
+
+            var batchLog = _fixture.Create<BatchLogDomain>();
+
+            SetUpGoogleClientService();
+            SetupGateways();
+
+            _batchLogGateway.Setup(gateway => gateway.CreateAsync(_batchId, false)).ReturnsAsync(batchLog);
+
+            // Act + Assert
+            _classUnderTest.Invoking(async cls => await cls.ExecuteAsync().ConfigureAwait(false))
+                .Should().Throw<Exception>()
+                .WithMessage($"Error message goes here {_googleIdentifier}");
+            // Not working because the files aren't getting through the file filter in the usecase!
+        }
+
+
         //Add tests for loaded files
         [Fact]
         public async Task RenamesIfFileNameExists()
