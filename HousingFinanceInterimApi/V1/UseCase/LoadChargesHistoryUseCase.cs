@@ -44,7 +44,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 var pendingYear = await _chargesBatchYearsGateway.GetPendingYear().ConfigureAwait(false);
 
-                LoggingHandler.LogInfo($"Load ChargesHistory table (year: { pendingYear.Year })");
+                LoggingHandler.LogInfo($"Load ChargesHistory table (year: {pendingYear.Year})");
                 await _chargesGateway.LoadChargesHistory(pendingYear.Year).ConfigureAwait(false);
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);

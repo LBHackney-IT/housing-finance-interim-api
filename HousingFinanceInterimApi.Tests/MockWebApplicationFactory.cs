@@ -43,7 +43,7 @@ namespace HousingFinanceInterimApi.Tests
 
                 dbContext.Database.EnsureCreated();
             });
-            
+
             builder.ConfigureTestServices(services =>
             {
                 var clientFactory = new FakeHttpClientFactory(new TestSpreadsheetHandler("test_cash_file.csv").RequestHandler);

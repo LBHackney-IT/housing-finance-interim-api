@@ -41,7 +41,7 @@ namespace HousingFinanceInterimApi.Tests
             }
         }
 
-        
+
         public IntegrationTests()
         {
             var connectionString = ConnectionString.TestDatabase();
@@ -60,7 +60,7 @@ namespace HousingFinanceInterimApi.Tests
             DatabaseContext.Database.EnsureCreated();
             _transaction = DatabaseContext.Database.BeginTransaction();
 
-            
+
         }
     }
 
