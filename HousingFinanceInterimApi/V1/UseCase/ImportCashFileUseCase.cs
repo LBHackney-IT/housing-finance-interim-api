@@ -45,9 +45,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
-            throw new Exception("Hello, can you hear me?");
             LoggingHandler.LogInfo($"Starting cash file import");
-
 
             var batch = await _batchLogGateway.CreateAsync(_cashFileLabel).ConfigureAwait(false);
             var googleFileSettings = await GetGoogleFileSetting(_cashFileLabel).ConfigureAwait(false);
@@ -64,10 +62,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 LoggingHandler.LogInfo($"Folder Id: {googleFileSetting.GoogleIdentifier}");
                 LoggingHandler.LogInfo($"File count: {folderFiles.Count}");
 
-                if (folderFiles.Count() == 0)
+                if (folderFiles.Count == 0)
                 {
                     LoggingHandler.LogError($"No files found in folder {googleFileSetting.GoogleIdentifier}");
-                    throw new Exception($"No files found in folder {googleFileSetting.GoogleIdentifier}");
                 }
 
 
@@ -77,6 +74,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
             LoggingHandler.LogInfo($"End cash file import");
+
             return new StepResponse()
             {
                 Continue = true,

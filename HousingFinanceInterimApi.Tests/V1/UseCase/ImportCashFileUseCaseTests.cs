@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoFixture;
+using Bogus;
 using FluentAssertions;
 using Google.Apis.Drive.v3.Data;
 using HousingFinanceInterimApi.V1.Domain;
@@ -17,7 +18,6 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
     public class ImportCashFileUseCaseTests
     {
         private ImportCashFileUseCase _classUnderTest;
-        //TODO: Make sure this works else put instantiation in setup
         private readonly Mock<IBatchLogGateway> _batchLogGateway = new Mock<IBatchLogGateway>();
         private readonly Mock<IBatchLogErrorGateway> _batchLogErrorGateway = new Mock<IBatchLogErrorGateway>();
         private readonly Mock<IGoogleFileSettingGateway> _googleFileSettingGateway = new Mock<IGoogleFileSettingGateway>();
@@ -27,13 +27,23 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
         private static Fixture _fixture = new Fixture();
 
-        private readonly string googleIdentifier = "abc123";
-        private readonly string batchId = "12345";
-        private readonly long batchIdLong = 12345;
-        private readonly string cashFileLabel = "CashFile";
+        private readonly string _googleIdentifier = "abc123";
+        private readonly string _batchId = "12345";
+        private readonly long _batchIdLong = 12345;
+        private readonly string _cashFileLabel = "CashFile";
+        private readonly List<string> _listExcludedFileStartWith = new List<string>(new string[] { "OK_", "NOK_" });
+        private List<GoogleFileSettingDomain> _googleFileSettingDomains;
+        private UPCashDumpFileNameDomain _uPCashDumpFileNameDomain;
+
+        private string _cashFileRegex = "^CashFile\\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01]).dat$";
+        private string _waitDuration = "1234567";
+
+
 
         public ImportCashFileUseCaseTests()
         {
+            Environment.SetEnvironmentVariable("CASH_FILE_REGEX", _cashFileRegex);
+            Environment.SetEnvironmentVariable("WAIT_DURATION", _waitDuration);
 
             _classUnderTest = new ImportCashFileUseCase(
                 _batchLogGateway.Object,
@@ -49,52 +59,96 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         {
             var _googleFileSettingFeature =
                 _fixture.Build<GoogleFileSettingDomain>()
-                    .With(domain => domain.Label, cashFileLabel)
-                    .With(domain => domain.GoogleIdentifier, googleIdentifier)
-                    .CreateMany().ToList();
+                        .With(domain => domain.Label, _cashFileLabel)
+                        .With(domain => domain.GoogleIdentifier, _googleIdentifier)
+                        .With(x => x.FileType, ".dat")
+                        .CreateMany()
+                        .ToList();
+            _googleFileSettingDomains = _googleFileSettingFeature;
             return _googleFileSettingFeature;
         }
 
-        private async Task SetupGateways()
+        private  UPCashDumpFileNameDomain CreateCashDumpFileDomain()
         {
-            // Let googleClientService return an empty file list (no files found)
-            _googleClientService.Setup(
-                service => service.GetFilesInDriveAsync(googleIdentifier)
-            ).ReturnsAsync(new List<File>());
+            _uPCashDumpFileNameDomain =  _fixture.Create<UPCashDumpFileNameDomain>();
+            return _uPCashDumpFileNameDomain;
+        }
 
-            _googleFileSettingGateway.Setup(
-                gateway => gateway.GetSettingsByLabel(cashFileLabel)
-            ).ReturnsAsync( CreateGoogleFileSettingDomains() );
+        private  void SetupGateways()
+        {
+            _googleFileSettingGateway.Setup(gateway => gateway.GetSettingsByLabel(_cashFileLabel)).ReturnsAsync( CreateGoogleFileSettingDomains() );
 
-            _googleFileSettingGateway.Setup(
-                gateway => gateway.GetSettingsByLabel(cashFileLabel)
-            ).ReturnsAsync( CreateGoogleFileSettingDomains() );
+            _googleFileSettingGateway.Setup(gateway => gateway.GetSettingsByLabel(_cashFileLabel)).ReturnsAsync( CreateGoogleFileSettingDomains() );
 
-            _batchLogGateway.Setup(
-                gateway => gateway.CreateAsync(batchId, false)
-            ).ReturnsAsync(new BatchLogDomain());
+            _batchLogGateway.Setup(gateway => gateway.CreateAsync(_cashFileLabel, false)).ReturnsAsync(_fixture.Create<BatchLogDomain>());
 
-            _batchLogGateway.Setup(
-                gateway => gateway.SetToSuccessAsync(123)
-            ).ReturnsAsync(true);
+            _batchLogGateway.Setup(gateway => gateway.SetToSuccessAsync(123)).ReturnsAsync(true);
 
-            _batchLogErrorGateway.Setup(
-                gateway => gateway.CreateAsync(batchIdLong, "ERROR", "message")
-            ).ReturnsAsync(new BatchLogErrorDomain());
+            _batchLogErrorGateway.Setup(gateway => gateway.CreateAsync(_batchIdLong, "ERROR", "message")).ReturnsAsync(new BatchLogErrorDomain());
+
+            _upCashDumpFileNameGateway.Setup(gateway => gateway.CreateAsync($"CashFile20230206{_googleFileSettingDomains.First().FileType}", false)).ReturnsAsync(CreateCashDumpFileDomain());
+
+            _upCashDumpFileNameGateway.Setup(gateway => gateway.SetToSuccessAsync(_uPCashDumpFileNameDomain.Id)).ReturnsAsync(true);
+
+            _upCashDumpGateway.Setup(gateway => gateway.CreateBulkAsync(_uPCashDumpFileNameDomain.Id, _fixture.CreateMany<string>().ToList()));
         }
 
         [Fact]
-        public async Task ImportCashFileThrowsExceptionWhenNoFileFoundInFolder()
+        public void ImportCashFileThrowsExceptionWhenNoFileFoundInFolder()
         {
             // Arrange
+
+            // Let googleClientService return an empty file list (no files found)
+            _googleClientService.Setup(service => service.GetFilesInDriveAsync(_googleIdentifier)).ReturnsAsync(new List<File>());
+
             SetupGateways();
 
-            // _classUnderTest.ExecuteAsync();
-
-            // Act + Assert
-            _classUnderTest.Invoking(cls => cls.ExecuteAsync().ConfigureAwait(false))
-                .Should().Throw<Exception>()
-                .WithMessage($"No files found in folder {googleIdentifier}");
+            //Act + Assert
+            _classUnderTest.Invoking(async cls => await cls.ExecuteAsync().ConfigureAwait(false))
+               .Should().Throw<Exception>()
+               .WithMessage($"[ERROR]: No files found in folder {_googleIdentifier}");
         }
+
+        [Fact]
+        public async Task ImportCashFileSuceeds()
+        {
+            // Arrange
+            CreateGoogleFileSettingDomains();
+
+            var fileList = _fixture.Build<File>()
+                                   .With(file => file.Name, $"CashFile20230206{_googleFileSettingDomains.First().FileType}")
+                                   .CreateMany(2).ToList();
+
+            fileList.First().Name = _listExcludedFileStartWith.First();
+
+            var batchLog = _fixture.Create<BatchLogDomain>();
+
+            // googleClientService return file list
+            _googleClientService.Setup(service => service.GetFilesInDriveAsync(_googleIdentifier)).ReturnsAsync(fileList);
+            _googleClientService.Setup(service => service.ReadFileLineDataAsync(fileList[1].Name,
+                                                                                fileList[1].Id,
+                                                                                fileList[1].MimeType))
+                                .Returns(_fixture.Create<Task<IList<string>>>());
+
+            _googleClientService.Setup(service => service.RenameFileInDrive(fileList[1].Id, $"OK_{fileList[1].Name}")).ReturnsAsync(true);
+            SetupGateways();
+
+            _batchLogGateway.Setup(gateway => gateway.CreateAsync(_batchId, false)).ReturnsAsync(batchLog);
+
+
+            // Act
+            var response = await _classUnderTest.ExecuteAsync().ConfigureAwait(false );
+
+            //Assert
+            response.Should().NotBeNull();
+        }
+
+        //Add a tests for non-match file name regex
+        //Add tests for loaded files
+        //Add tests for files that already exists
+        //Add tests for CashDumpFile == null
+
+
+
     }
 }
