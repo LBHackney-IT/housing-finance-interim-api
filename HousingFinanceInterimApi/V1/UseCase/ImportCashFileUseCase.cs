@@ -45,13 +45,16 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
+            throw new Exception("Hello, can you hear me?");
             LoggingHandler.LogInfo($"Starting cash file import");
+
 
             var batch = await _batchLogGateway.CreateAsync(_cashFileLabel).ConfigureAwait(false);
             var googleFileSettings = await GetGoogleFileSetting(_cashFileLabel).ConfigureAwait(false);
 
             foreach (var googleFileSetting in googleFileSettings)
             {
+
                 var folderFiles = await _googleClientService.GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier).ConfigureAwait(false);
 
                 folderFiles = folderFiles.Where(item =>
@@ -60,6 +63,13 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
                 LoggingHandler.LogInfo($"Folder Id: {googleFileSetting.GoogleIdentifier}");
                 LoggingHandler.LogInfo($"File count: {folderFiles.Count}");
+
+                if (folderFiles.Count() == 0)
+                {
+                    LoggingHandler.LogError($"No files found in folder {googleFileSetting.GoogleIdentifier}");
+                    throw new Exception($"No files found in folder {googleFileSetting.GoogleIdentifier}");
+                }
+
 
                 if (folderFiles.Any())
                     await HandleCashFile(batch.Id, folderFiles).ConfigureAwait(false);
