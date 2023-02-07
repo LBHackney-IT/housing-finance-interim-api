@@ -154,7 +154,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var fileList = CreateFile();
             SetUpGoogleClientService(fileList);
             var iList = _fixture.Create<Task<IList<string>>>();
-            iList = null;
+            iList.Result.Clear();
             _googleClientService.Setup(service => service.ReadFileLineDataAsync(fileList[1].Name,
                                                                                 fileList[1].Id,
                                                                                 fileList[1].MimeType))
@@ -164,7 +164,10 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             //Act + Assert
             _classUnderTest.Invoking(async cls => await cls.ExecuteAsync().ConfigureAwait(false))
                .Should().Throw<Exception>()
-               .WithMessage($"No rows found in file { fileList.Last().Name}");
+               .WithMessage(
+$"* Not possible to load cash files for (CashFile20230206.dat)\n"
+                    + "Reason: [ERROR]: No rows found in file CashFile20230206.dat"
+                );
         }
 
         [Fact]
@@ -194,11 +197,12 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // Arrange
             CreateGoogleFileSettingDomains();
 
-            bool isFileNameInvalid = true;
-
             var batchLog = _fixture.Create<BatchLogDomain>();
 
+            // First file in fileList will have an invalid name
+            bool isFileNameInvalid = true;
             var fileList = CreateFile(isFileNameInvalid);
+
             SetUpGoogleClientService(fileList);
             SetupGateways();
 
@@ -207,7 +211,10 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // Act + Assert
             _classUnderTest.Invoking(async cls => await cls.ExecuteAsync().ConfigureAwait(false))
                 .Should().Throw<Exception>()
-                .WithMessage($"[ERROR]: HousingFinanceInterimApi.Handler.HandleCashFile Application error. Not possible to load cash files ({fileList[0].Name})");
+                .WithMessage(
+                    $"* Not possible to load cash files for ({fileList[0].Name})\n"
+                    + $"Reason: [ERROR]: Non-standard cash filename (CashFileYYYYMMDD). Check file id: {fileList[0].Id} in folder(s) {fileList[0].Parents}"
+                    );
         }
 
         [Fact]

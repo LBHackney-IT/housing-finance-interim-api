@@ -122,7 +122,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     if (!checkFileName)
                     {
                         await LogAndRenameFileError(batchId,
-                            $"Non-standard cash filename (CashFileYYYYMMDD). Check file name: {fileItem.Name}",
+                            $"Non-standard cash filename (CashFileYYYYMMDD). Check file id: {fileItem.Id} in folder(s) {fileItem.Parents}",
                             "ERROR",
                             fileItem)
                             .ConfigureAwait(false);
@@ -177,7 +177,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 {
                     var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(HandleCashFile)}";
 
-                    var errorMessage = $"Application error. Not possible to load cash files ({fileItem.Name})";
+                    var errorMessage = $"Application error. Not possible to load cash files for ({fileItem.Name})\nReason: {exc.Message.ToString()}";
 
                     await _batchLogErrorGateway.CreateAsync(batchId, "ERROR", errorMessage).ConfigureAwait(false);
                     await _googleClientService.RenameFileInDrive(fileItem.Id, $"NOK_{fileItem.Name}").ConfigureAwait(false);
