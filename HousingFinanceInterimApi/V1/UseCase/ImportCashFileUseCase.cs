@@ -160,7 +160,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     if (fileLines.Count == 0)
                     {
                         //LoggingHandler.LogError($"No rows found in file {fileItem.Name}");
-                        throw new EmptyFileException(fileItem.Name); 
+                        throw new EmptyFileException(fileItem.Name);
                     }
 
                     _logger.LogInformation($"Starting bulk insert");
