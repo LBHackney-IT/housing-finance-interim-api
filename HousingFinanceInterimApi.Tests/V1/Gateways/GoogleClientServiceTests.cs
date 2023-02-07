@@ -23,7 +23,6 @@ using Xunit;
 
 namespace HousingFinanceInterimApi.Tests.V1.Gateways
 {
-    //[Collection("AppTest collection")]
     public class GoogleSheetGatewayTests : IClassFixture<IntegrationTests<Startup>>
     {
         private GoogleClientService _classUnderTest;
@@ -38,24 +37,23 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
 
             _classUnderTest = new GoogleClientService(_logger.Object, _initializer.Object);
         }
-        //TODO: Fix test
-        // [Fact]
-        // public void ReadSheetToEntitiesAsyncProcessesValidCsvDataCorrectly()
-        // {
-        //     // Arrange
-        //     const string spreadSheetId = "00999998";
-        //     const string sheetName = "00999998";
-        //     const string sheetRange = "00999998";
-        //
-        //     // Act
-        //     var result = _classUnderTest.ReadSheetToEntitiesAsync<IList>(spreadSheetId, sheetName, sheetRange);
-        //     // TestContext.Out.Write(
-        //     //     JsonConvert.SerializeObject(result, Formatting.Indented, new StringEnumConverter()) +
-        //     //     Environment.NewLine);
-        //
-        //     // Assert
-        //     result.Should().NotBeNull();
-        //     result.Result.Should().NotBeNull();
-        // }
+        [Fact(Skip = "TODO: Fix test")]
+        public void ReadSheetToEntitiesAsyncProcessesValidCsvDataCorrectly()
+        {
+            // Arrange
+            const string spreadSheetId = "00999998";
+            const string sheetName = "00999998";
+            const string sheetRange = "00999998";
+
+            // Act
+            var result = _classUnderTest.ReadSheetToEntitiesAsync<IList>(spreadSheetId, sheetName, sheetRange);
+            // TestContext.Out.Write(
+            //     JsonConvert.SerializeObject(result, Formatting.Indented, new StringEnumConverter()) +
+            //     Environment.NewLine);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Result.Should().NotBeNull();
+        }
     }
 }

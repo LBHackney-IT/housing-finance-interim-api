@@ -7,7 +7,6 @@ namespace HousingFinanceInterimApi.V1.Handlers
     {
         public static void LogError(string message)
         {
-            // LambdaLogger.Log($"[ERROR]: {message}");
             throw new Exception($"[ERROR]: {message}");
         }
 
