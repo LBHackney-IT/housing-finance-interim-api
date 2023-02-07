@@ -195,7 +195,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
             if (messageType == "WARNING")
             {
                 _logger.LogWarning(message);
-                //LoggingHandler.LogWarning(message);
             }
             else
             {
