@@ -16,6 +16,10 @@ using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Boundary.Response;
 using Amazon.Runtime.Internal.Util;
 using Microsoft.Extensions.Logging;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
+using HousingFinanceInterimApi.V1.Domain;
+using HousingFinanceInterimApi.V1.Infrastructure.Postgres;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -46,6 +50,8 @@ namespace HousingFinanceInterimApi
         private readonly IGenerateReportUseCase _generateReportUseCase;
         private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
         private readonly ILogger<ImportCashFileUseCase> _logger;
+        private readonly ILoadAssetFromDynamoDbUseCase _loadAssetFromDynamoDbUseCase;
+        private readonly ILoadTenureInformationFromDynamoDbUseCase _loadTenureInformationFromDynamoDbUseCase;
 
         private const string CashFileLabel = "CashFile";
         private const string HousingBenefitFileLabel = "HousingBenefitFile";
@@ -55,6 +61,10 @@ namespace HousingFinanceInterimApi
             DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
             optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
             DatabaseContext context = new DatabaseContext(optionsBuilder.Options);
+
+            DbContextOptionsBuilder postgresOptionsBuilder = new DbContextOptionsBuilder();
+            postgresOptionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("CONNECTION_STRING_POSTGRES"));
+            HousingFinanceContext housingFinanceContext = new HousingFinanceContext(postgresOptionsBuilder.Options);
 
             var options = Options.Create(new GoogleClientServiceOptions
             {
@@ -68,6 +78,9 @@ namespace HousingFinanceInterimApi
             IGoogleClientService googleClientService =
                 new GoogleClientServiceFactory(default, options, context)
                     .CreateGoogleClientServiceFromJson(Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
+
+            IAmazonDynamoDB amazonDynamoDb = CreateAmazonDynamoDbClient();
+            IDynamoDBContext dynamoDbContext = new DynamoDBContext(amazonDynamoDb);
 
             IActionDiaryGateway actionDiaryGateway = new ActionDiaryGateway(context);
             IAdjustmentGateway adjustmentGateway = new AdjustmentGateway(context);
@@ -92,6 +105,8 @@ namespace HousingFinanceInterimApi
             IReportGateway reportGateway = new ReportGateway(context);
             IBatchReportGateway batchReportGateway = new BatchReportGateway(context);
             ISuspenseAccountsGateway suspenseAccountsGateway = new SuspenseAccountsGateway(context);
+            IAssetGateway assetGateway = new AssetGateway(amazonDynamoDb, housingFinanceContext);
+            ITenureInformationGateway tenureInformationGateway = new TenureInformationGateway(amazonDynamoDb, housingFinanceContext);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _checkChargesBatchYearsUseCase = new CheckChargesBatchYearsUseCase(chargesBatchYearsGateway);
@@ -131,6 +146,32 @@ namespace HousingFinanceInterimApi
                 reportGateway, googleFileSettingGateway, googleClientService);
             _moveHousingBenefitFileUseCase = new MoveHousingBenefitFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService);
+            _loadAssetFromDynamoDbUseCase = new LoadAssetFromDynamoDbUseCase(assetGateway);
+            _loadTenureInformationFromDynamoDbUseCase = new LoadTenureInformationFromDynamoDbUseCase(tenureInformationGateway);
+        }
+
+        public static AmazonDynamoDBClient CreateAmazonDynamoDbClient()
+        {
+            bool result = bool.Parse(value: Environment.GetEnvironmentVariable("DynamoDb_LocalMode") ?? "false");
+            if (result)
+            {
+                string url = Environment.GetEnvironmentVariable("DynamoDb_LocalServiceUrl");
+                return new AmazonDynamoDBClient(new AmazonDynamoDBConfig
+                {
+                    ServiceURL = url
+                });
+            }
+            return new AmazonDynamoDBClient();
+        }
+
+        public async Task<AssetPagination> LoadAssets()
+        {
+            return await _loadAssetFromDynamoDbUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<TenureInformationPagination> LoadTenuresInformation()
+        {
+            return await _loadTenureInformationFromDynamoDbUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()

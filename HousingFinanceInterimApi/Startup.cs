@@ -2,6 +2,7 @@ using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using HousingFinanceInterimApi.Versioning;
+using Hackney.Core.DynamoDb;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -128,6 +130,8 @@ namespace HousingFinanceInterimApi
             });
 
             ConfigureDbContext(services);
+            //services.ConfigureDynamoDB();
+
             RegisterGateways(services);
             RegisterUseCases(services);
             ConfigureGoogleSheetsService(services);
@@ -155,6 +159,7 @@ namespace HousingFinanceInterimApi
             services.AddScoped<IBatchLogErrorGateway, BatchLogErrorGateway>();
             services.AddScoped<IReportGateway, ReportGateway>();
             services.AddScoped<IBatchReportGateway, BatchReportGateway>();
+            services.AddScoped<IUPHousingCashLoadGateway, UPHousingCashLoadGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)

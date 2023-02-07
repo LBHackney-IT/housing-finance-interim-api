@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
 
@@ -90,6 +93,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the postcode.
         /// </summary>
         public string PostCode { get; set; }
+
+        [NotMapped]
+        public List<string> AcademyClaimRefs { get; set; }
     }
 
 }

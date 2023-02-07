@@ -12,6 +12,11 @@ services:
       - 3000:3000
     environment:
       - CONNECTION_STRING=Server=dev-database;Database=testdb;User Id=myuser;Password=mypassword
+      - DynamoDb_LocalMode=true
+      - DynamoDb_LocalServiceUrl=http://dynamodb-database:8000
+      - AWS_REGION=eu-west-2
+      - AWS_ACCESS_KEY_ID=local
+      - AWS_SECRET_ACCESS_KEY=local
     links:
       - dev-database
     
@@ -43,7 +48,6 @@ services:
       - MSSQL_PID=Enterprise
     links:
       - dev-database
-    
 
   test-database:
     image: test-database
