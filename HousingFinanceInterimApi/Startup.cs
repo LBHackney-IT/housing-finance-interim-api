@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -21,15 +20,20 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using AutoMapper;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Services;
+using Google.Apis.Sheets.v4;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
+using Hackney.Core.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace HousingFinanceInterimApi
 {
 
     public class Startup
     {
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -130,6 +134,8 @@ namespace HousingFinanceInterimApi
 
             RegisterGateways(services);
             RegisterUseCases(services);
+            ConfigureGoogleSheetsService(services);
+            //services.ConfigureLambdaLogging(Configuration);
 
             services.AddScoped<IGoogleClientServiceFactory, GoogleClientServiceFactory>();
         }
@@ -159,6 +165,17 @@ namespace HousingFinanceInterimApi
         private static void RegisterUseCases(IServiceCollection services)
         {
             services.AddScoped<IGetBatchLogErrorUseCase, GetBatchLogErrorUseCase>();
+        }
+
+        private static void ConfigureGoogleSheetsService(IServiceCollection services)
+        {
+            var credentialJson = Environment.GetEnvironmentVariable("CREDENTIAL_JSON");
+
+            services.AddSingleton(s => new SheetsService(new BaseClientService.Initializer
+            {
+                ApplicationName = ApiName,
+                HttpClientInitializer = GoogleCredential.FromJson(credentialJson)
+            }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

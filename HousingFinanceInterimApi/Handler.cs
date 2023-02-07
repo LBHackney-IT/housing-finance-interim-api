@@ -14,6 +14,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Boundary.Response;
+using Amazon.Runtime.Internal.Util;
+using Microsoft.Extensions.Logging;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using HousingFinanceInterimApi.V1.Domain;
@@ -47,6 +49,7 @@ namespace HousingFinanceInterimApi
         private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
         private readonly IGenerateReportUseCase _generateReportUseCase;
         private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
+        private readonly ILogger<ImportCashFileUseCase> _logger;
         private readonly ILoadAssetFromDynamoDbUseCase _loadAssetFromDynamoDbUseCase;
         private readonly ILoadTenureInformationFromDynamoDbUseCase _loadTenureInformationFromDynamoDbUseCase;
 
@@ -110,7 +113,7 @@ namespace HousingFinanceInterimApi
             _generateRentPositionUseCase = new GenerateRentPositionUseCase(rentPositionGateway, batchLogGateway,
                 batchLogErrorGateway, googleFileSettingGateway, googleClientService);
             _importCashFileUseCase = new ImportCashFileUseCase(batchLogGateway, batchLogErrorGateway,
-                googleFileSettingGateway, googleClientService, upCashDumpFileNameGateway, upCashDumpGateway);
+                googleFileSettingGateway, googleClientService, upCashDumpFileNameGateway, upCashDumpGateway, _logger);
             _importHousingFileUseCase = new ImportHousingFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService, upHousingCashDumpFileNameGateway, upHousingCashDumpGateway);
             _loadActionDiaryUseCase = new LoadActionDiaryUseCase(batchLogGateway, batchLogErrorGateway,

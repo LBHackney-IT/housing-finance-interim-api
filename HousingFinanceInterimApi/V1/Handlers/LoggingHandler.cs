@@ -1,3 +1,4 @@
+using System;
 using Amazon.Lambda.Core;
 
 namespace HousingFinanceInterimApi.V1.Handlers
@@ -6,6 +7,7 @@ namespace HousingFinanceInterimApi.V1.Handlers
     {
         public static void LogError(string message)
         {
+            //throw new Exception($"[ERROR]: {message}");
             LambdaLogger.Log($"[ERROR]: {message}");
         }
 
