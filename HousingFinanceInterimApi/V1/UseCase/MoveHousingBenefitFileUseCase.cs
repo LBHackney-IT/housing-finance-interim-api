@@ -10,7 +10,7 @@ using HousingFinanceInterimApi.V1.Handlers;
 using System.Text.RegularExpressions;
 using Google.Apis.Drive.v3.Data;
 using SIO = System.IO;
-using HousingFinanceInterimApi.V1.Exceptions;
+using Google;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
@@ -54,10 +54,10 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 var destinationGoogleFileSettings = await GetGoogleFileSetting(_housingBenefitFileLabel).ConfigureAwait(false);
 
                 if (!academyFoldersSettings.Any())
-                    throw new NoFileSettingsFoundException(label: _academyFileFolderLabel);
+                    throw new Exception($"No file settings with label: '{_academyFileFolderLabel}' were found.");
 
                 if (!destinationGoogleFileSettings.Any())
-                    throw new NoFileSettingsFoundException(label: _housingBenefitFileLabel);
+                    throw new Exception($"No file settings with label: '{_housingBenefitFileLabel}' were found.");
 
                 // Retrieve all Academy files that potentially need to be copied.
                 var academyFiles = new List<File>();
@@ -141,11 +141,23 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration))
                 };
             }
+            catch (GoogleApiException ex)
+            {
+                LoggingHandler.LogError(ex.Message);
+                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message);
+                throw;
+            }
+            catch (SIO.FileNotFoundException ex)
+            {
+                LoggingHandler.LogError(ex.Message);
+                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message);
+                throw;
+            }
             catch (Exception ex)
             {
                 LoggingHandler.LogError(ex.Message);
                 await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message);
-                throw ex;
+                throw;
             }
         }
 

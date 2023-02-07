@@ -12,7 +12,6 @@ using HousingFinanceInterimApi.V1.Domain;
 using System.Linq;
 using Google.Apis.Drive.v3.Data;
 using FluentAssertions;
-using HousingFinanceInterimApi.V1.Exceptions;
 using SIO = System.IO;
 using Google;
 
@@ -293,7 +292,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            await useCaseCall.Should().ThrowAsync<NoFileSettingsFoundException>().WithMessage(expectedErrorMessage);
+            await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(expectedErrorMessage);
 
             _mockBatchLogGateway.Verify(g => g.SetToSuccessAsync(It.IsAny<long>()), Times.Never);
         }
@@ -315,7 +314,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            await useCaseCall.Should().ThrowAsync<NoFileSettingsFoundException>().WithMessage(expectedErrorMessage);
+            await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(expectedErrorMessage);
 
             _mockBatchLogGateway.Verify(g => g.SetToSuccessAsync(It.IsAny<long>()), Times.Never);
         }
