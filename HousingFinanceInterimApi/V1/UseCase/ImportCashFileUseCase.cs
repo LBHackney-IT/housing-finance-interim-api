@@ -12,6 +12,7 @@ using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Handlers;
 using Amazon.Runtime.Internal.Util;
 using Microsoft.Extensions.Logging;
+using HousingFinanceInterimApi.V1.Infrastructure;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
@@ -159,6 +160,11 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     fileLines = fileLines.Where(item => !string.IsNullOrWhiteSpace(item)).ToList();
 
                     _logger.LogInformation($"Row count: {fileLines.Count}");
+
+                    if (fileLines.Count == 0)
+                    {
+                        LoggingHandler.LogError($"No rows found in file {fileItem.Name}");
+                    }
 
                     _logger.LogInformation($"Starting bulk insert");
                     await _upCashDumpGateway.CreateBulkAsync(upCashDumpFileName.Id, fileLines).ConfigureAwait(false);

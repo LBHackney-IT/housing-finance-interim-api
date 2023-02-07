@@ -146,6 +146,28 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
+        public void ThrowsExceptionWhenNoRowsFoundInFile()
+        {
+            // Arrange
+            CreateGoogleFileSettingDomains();
+
+            var fileList = CreateFile();
+            SetUpGoogleClientService(fileList);
+            var iList = _fixture.Create<Task<IList<string>>>();
+            iList = null;
+            _googleClientService.Setup(service => service.ReadFileLineDataAsync(fileList[1].Name,
+                                                                                fileList[1].Id,
+                                                                                fileList[1].MimeType))
+                                .Returns(iList);
+            SetupGateways();
+
+            //Act + Assert
+            _classUnderTest.Invoking(async cls => await cls.ExecuteAsync().ConfigureAwait(false))
+               .Should().Throw<Exception>()
+               .WithMessage($"No rows found in file { fileList.Last().Name}");
+        }
+
+        [Fact]
         public async Task Suceeds()
         {
             // Arrange
