@@ -2,9 +2,14 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1
 
 WORKDIR /app
 
-# Copy csproj and restore as distinct layers
-COPY *.csproj ./
-RUN dotnet restore
+ARG LBHPACKAGESTOKEN
+ENV LBHPACKAGESTOKEN=$LBHPACKAGESTOKEN
+
+# Copy csproj and nuget config and restore as distinct layers
+COPY ./HousingFinanceInterimApi/HousingFinanceInterimApi.csproj ./
+COPY /NuGet.Config /root/.nuget/NuGet/NuGet.Config
+
+RUN dotnet restore ./HousingFinanceInterimApi.csproj
 
 # Copy everything else and build
 COPY . ./

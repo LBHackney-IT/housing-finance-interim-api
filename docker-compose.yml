@@ -6,12 +6,15 @@ services:
     build:
       context: HousingFinanceInterimApi/
       dockerfile: ./Dockerfile
+      args:
+      - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
     ports:
       - 3000:3000
     environment:
       - CONNECTION_STRING=Server=dev-database;Database=testdb;User Id=myuser;Password=mypassword
     links:
       - dev-database
+    
   dev-database:
     env_file:
       - database.env
@@ -26,6 +29,8 @@ services:
     build:
       context: .
       dockerfile: HousingFinanceInterimApi.Tests/Dockerfile
+      args:
+      - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
     environment:
       # - DB_SERVER=dev-database
       # - DB_USERNAME=myuser
@@ -38,6 +43,7 @@ services:
       - MSSQL_PID=Enterprise
     links:
       - dev-database
+    
 
   test-database:
     image: test-database
