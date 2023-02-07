@@ -82,19 +82,27 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             return _uPCashDumpFileNameDomain;
         }
 
-        private List<File> CreateFile()
+        private List<File> CreateFile(bool invalid = false)
         {
             var fileList = _fixture.Build<File>()
                                    .With(file => file.Name, $"CashFile20230206{_googleFileSettingDomains.First().FileType}")
                                    .CreateMany(2).ToList();
 
-            fileList.First().Name = _listExcludedFileStartWith.First();
+            if (invalid)
+            {
+                var invalidFileName = "CashFile12345.dat";
+                fileList.First().Name = invalidFileName;
+            }
+            else
+            {
+                fileList.First().Name = _listExcludedFileStartWith.First();
+            }
+
             return fileList;
         }
 
-        private void SetUpGoogleClientService()
+        private void SetUpGoogleClientService(List<File> fileList)
         {
-            var fileList = CreateFile();
             _googleClientService.Setup(service => service.GetFilesInDriveAsync(_googleIdentifier)).ReturnsAsync(fileList);
             _googleClientService.Setup(service => service.ReadFileLineDataAsync(fileList[1].Name,
                                                                                 fileList[1].Id,
@@ -145,8 +153,8 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // Arrange
             CreateGoogleFileSettingDomains();
 
-
-            SetUpGoogleClientService();
+            var fileList = CreateFile();
+            SetUpGoogleClientService(fileList);
             SetupGateways();
 
             var batchLog = _fixture.Create<BatchLogDomain>();
@@ -166,24 +174,20 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // Arrange
             CreateGoogleFileSettingDomains();
 
-            var invalidFileName = "MyInvalidFileName12345.invalid";
-
-            var fileList = CreateFile();
-
-            fileList.First().Name = invalidFileName;
+            bool isFileNameInvalid = true;
 
             var batchLog = _fixture.Create<BatchLogDomain>();
 
-            SetUpGoogleClientService();
+            var fileList = CreateFile(isFileNameInvalid);
+            SetUpGoogleClientService(fileList);
             SetupGateways();
 
             _batchLogGateway.Setup(gateway => gateway.CreateAsync(_batchId, false)).ReturnsAsync(batchLog);
-
+            
             // Act + Assert
             _classUnderTest.Invoking(async cls => await cls.ExecuteAsync().ConfigureAwait(false))
                 .Should().Throw<Exception>()
-                .WithMessage($"Error message goes here {_googleIdentifier}");
-            // Not working because the files aren't getting through the file filter in the usecase!
+                .WithMessage($"[ERROR]: HousingFinanceInterimApi.Handler.HandleCashFile Application error. Not possible to load cash files ({fileList[0].Name})");
         }
 
         [Fact]
@@ -193,7 +197,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             CreateGoogleFileSettingDomains();
             var fileList = CreateFile();
 
-            SetUpGoogleClientService();
+            SetUpGoogleClientService(fileList);
             SetupGateways();
             _upCashDumpFileNameGateway.Setup(gateway => gateway.GetProcessedFileByName(fileList.Last().Name)).Returns(_fixture.Create<Task<UPCashDumpFileNameDomain>>());
 
@@ -214,7 +218,8 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             CreateGoogleFileSettingDomains();
             var fileList = CreateFile();
 
-            SetUpGoogleClientService();
+
+            SetUpGoogleClientService(fileList);
             SetupGateways();
             _upCashDumpFileNameGateway.Setup(gateway => gateway.CreateAsync($"CashFile20230206{_googleFileSettingDomains.First().FileType}", false))
                                       .ReturnsAsync((UPCashDumpFileNameDomain) null);
