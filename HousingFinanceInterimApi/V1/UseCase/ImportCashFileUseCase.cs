@@ -192,7 +192,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 _logger.LogWarning(message);
             }
-            else
+            if(messageType == "ERROR")
             {
                 LoggingHandler.LogError(message);
                 throw new IncorrectFileNameException(file.Id, file.Parents);
