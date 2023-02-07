@@ -1,15 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Threading.Tasks;
+using Amazon.Lambda.Core;
+using Amazon.Runtime.Internal.Util;
 using AutoFixture;
 using Bogus;
 using FluentAssertions;
 using Google.Apis.Drive.v3.Data;
+using Hackney.Core.Testing.Shared;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -24,6 +30,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         private readonly Mock<IGoogleClientService> _googleClientService = new Mock<IGoogleClientService>();
         private readonly Mock<IUPCashDumpFileNameGateway> _upCashDumpFileNameGateway = new Mock<IUPCashDumpFileNameGateway>();
         private readonly Mock<IUPCashDumpGateway> _upCashDumpGateway = new Mock<IUPCashDumpGateway>();
+        private readonly Mock<ILogger<ImportCashFileUseCase>> _logger = new Mock<ILogger<ImportCashFileUseCase>>();
 
         private static Fixture _fixture = new Fixture();
 
@@ -51,7 +58,8 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 _googleFileSettingGateway.Object,
                 _googleClientService.Object,
                 _upCashDumpFileNameGateway.Object,
-                _upCashDumpGateway.Object
+                _upCashDumpGateway.Object,
+                _logger.Object
             );
         }
 
@@ -116,7 +124,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public void ImportCashFileThrowsExceptionWhenNoFileFoundInFolder()
+        public void ThrowsExceptionWhenNoFilesFoundInFolder()
         {
             // Arrange
 
@@ -132,7 +140,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public async Task ImportCashFileSuceeds()
+        public async Task Suceeds()
         {
             // Arrange
             CreateGoogleFileSettingDomains();
@@ -152,7 +160,6 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             response.Should().NotBeNull();
         }
 
-        //Add a tests for non-match file name regex
         [Fact]
         public void InvalidFileNameThrowsException()
         {
@@ -179,8 +186,6 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // Not working because the files aren't getting through the file filter in the usecase!
         }
 
-
-        //Add tests for loaded files
         [Fact]
         public async Task RenamesIfFileNameExists()
         {
@@ -198,17 +203,16 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             //Assert
             response.Should().NotBeNull();
-            //TODO: Check if it does a lambda log warning with message "File {fileItem.Name} already exist"
+            _logger.VerifyExact(LogLevel.Warning, $"File {fileList.Last().Name} already exist", Times.Exactly(3));
 
         }
 
-        //Add tests for CashDumpFile == null
         [Fact]
         public async Task RenamesIfCashDumpFileIsNull()
         {
             //Arrange
             CreateGoogleFileSettingDomains();
-            CreateFile();
+            var fileList = CreateFile();
 
             SetUpGoogleClientService();
             SetupGateways();
@@ -221,7 +225,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             //Assert
             response.Should().NotBeNull();
-            //TODO: Check if it does a lambda log warning with message "File entry {fileItem.Name} not created"
+            _logger.VerifyExact(LogLevel.Warning, $"File entry {fileList.Last().Name} not created", Times.Exactly(3));
         }
 
 

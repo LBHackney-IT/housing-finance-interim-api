@@ -14,6 +14,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Boundary.Response;
+using Amazon.Runtime.Internal.Util;
+using Microsoft.Extensions.Logging;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -43,6 +45,7 @@ namespace HousingFinanceInterimApi
         private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
         private readonly IGenerateReportUseCase _generateReportUseCase;
         private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
+        private readonly ILogger<ImportCashFileUseCase> _logger;
 
         private const string CashFileLabel = "CashFile";
         private const string HousingBenefitFileLabel = "HousingBenefitFile";
@@ -95,7 +98,7 @@ namespace HousingFinanceInterimApi
             _generateRentPositionUseCase = new GenerateRentPositionUseCase(rentPositionGateway, batchLogGateway,
                 batchLogErrorGateway, googleFileSettingGateway, googleClientService);
             _importCashFileUseCase = new ImportCashFileUseCase(batchLogGateway, batchLogErrorGateway,
-                googleFileSettingGateway, googleClientService, upCashDumpFileNameGateway, upCashDumpGateway);
+                googleFileSettingGateway, googleClientService, upCashDumpFileNameGateway, upCashDumpGateway, _logger);
             _importHousingFileUseCase = new ImportHousingFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService, upHousingCashDumpFileNameGateway, upHousingCashDumpGateway);
             _loadActionDiaryUseCase = new LoadActionDiaryUseCase(batchLogGateway, batchLogErrorGateway,

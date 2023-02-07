@@ -25,6 +25,7 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
+using Hackney.Core.Logging;
 
 namespace HousingFinanceInterimApi
 {
@@ -130,6 +131,7 @@ namespace HousingFinanceInterimApi
             RegisterGateways(services);
             RegisterUseCases(services);
             ConfigureGoogleSheetsService(services);
+            services.ConfigureLambdaLogging(Configuration);
 
             services.AddScoped<IGoogleClientServiceFactory, GoogleClientServiceFactory>();
         }
