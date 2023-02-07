@@ -130,22 +130,6 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public void ThrowsExceptionWhenNoFilesFoundInFolder()
-        {
-            // Arrange
-
-            // Let googleClientService return an empty file list (no files found)
-            _googleClientService.Setup(service => service.GetFilesInDriveAsync(_googleIdentifier)).ReturnsAsync(new List<File>());
-
-            SetupGateways();
-
-            //Act + Assert
-            _classUnderTest.Invoking(async cls => await cls.ExecuteAsync().ConfigureAwait(false))
-               .Should().Throw<Exception>()
-               .WithMessage($"[ERROR]: No files found in folder {_googleIdentifier}");
-        }
-
-        [Fact]
         public void ThrowsExceptionWhenNoRowsFoundInFile()
         {
             // Arrange
@@ -164,9 +148,8 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             //Act + Assert
             _classUnderTest.Invoking(async cls => await cls.ExecuteAsync().ConfigureAwait(false))
                .Should().Throw<Exception>()
-               .WithMessage(
-$"* Not possible to load cash files for (CashFile20230206.dat)\n"
-                    + "Reason: [ERROR]: No rows found in file CashFile20230206.dat"
+               .WithMessage($"Application error. Not possible to load cash files for ({fileList.Last().Name})\n"
+                    + $"Reason: No rows found in file {fileList.Last().Name}"
                 );
         }
 
@@ -213,7 +196,7 @@ $"* Not possible to load cash files for (CashFile20230206.dat)\n"
                 .Should().Throw<Exception>()
                 .WithMessage(
                     $"* Not possible to load cash files for ({fileList[0].Name})\n"
-                    + $"Reason: [ERROR]: Non-standard cash filename (CashFileYYYYMMDD). Check file id: {fileList[0].Id} in folder(s) {fileList[0].Parents}"
+                    + $"Reason: Non-standard cash filename (CashFileYYYYMMDD). Check file id: {fileList[0].Id} in folder(s) {fileList[0].Parents}"
                     );
         }
 

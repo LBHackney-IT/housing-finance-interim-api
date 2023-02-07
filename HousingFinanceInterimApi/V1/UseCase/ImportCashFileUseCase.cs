@@ -13,6 +13,7 @@ using HousingFinanceInterimApi.V1.Handlers;
 using Amazon.Runtime.Internal.Util;
 using Microsoft.Extensions.Logging;
 using HousingFinanceInterimApi.V1.Infrastructure;
+using HousingFinanceInterimApi.V1.Exceptions;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
@@ -68,11 +69,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
                 _logger.LogInformation($"Folder Id: {googleFileSetting.GoogleIdentifier}");
                 _logger.LogInformation($"File count: {folderFiles.Count}");
-
-                if (folderFiles.Count == 0)
-                {
-                    LoggingHandler.LogError($"No files found in folder {googleFileSetting.GoogleIdentifier}");
-                }
 
 
                 if (folderFiles.Any())
@@ -163,7 +159,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
                     if (fileLines.Count == 0)
                     {
-                        LoggingHandler.LogError($"No rows found in file {fileItem.Name}");
+                        //LoggingHandler.LogError($"No rows found in file {fileItem.Name}");
+                        throw new EmptyFileException(fileItem.Name); 
                     }
 
                     _logger.LogInformation($"Starting bulk insert");
@@ -184,8 +181,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
                     LoggingHandler.LogError($"{namespaceLabel} {errorMessage}");
                     LoggingHandler.LogError(exc.ToString());
-
-                    throw;
+                    throw new Exception(errorMessage);
                 }
             }
         }
@@ -199,6 +195,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             else
             {
                 LoggingHandler.LogError(message);
+                throw new IncorrectFileNameException(file.Id, file.Parents);
             }
 
             await _batchLogErrorGateway.CreateAsync(batchId, messageType, message).ConfigureAwait(false);

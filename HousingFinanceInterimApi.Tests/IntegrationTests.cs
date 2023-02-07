@@ -9,7 +9,6 @@ using Xunit;
 
 namespace HousingFinanceInterimApi.Tests
 {
-    //[Collection("AppTest collection")]
     public class IntegrationTests<_TStartup> where _TStartup : class
     {
 

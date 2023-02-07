@@ -15,7 +15,6 @@ using Xunit;
 
 namespace HousingFinanceInterimApi.Tests
 {
-    //[Collection("AppTest collection")]
     public class MockWebApplicationFactory<_TStartup>
         : WebApplicationFactory<_TStartup> where _TStartup : class
     {
