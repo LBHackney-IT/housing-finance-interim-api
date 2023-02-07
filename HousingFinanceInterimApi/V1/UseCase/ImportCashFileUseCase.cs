@@ -165,10 +165,12 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 {
                     var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(HandleCashFile)}";
 
-                    await _batchLogErrorGateway.CreateAsync(batchId, "ERROR", $"Application error. Not possible to load cash files ({fileItem.Name})").ConfigureAwait(false);
+                    var errorMessage = $"Application error. Not possible to load cash files ({fileItem.Name})";
+
+                    await _batchLogErrorGateway.CreateAsync(batchId, "ERROR", errorMessage).ConfigureAwait(false);
                     await _googleClientService.RenameFileInDrive(fileItem.Id, $"NOK_{fileItem.Name}").ConfigureAwait(false);
 
-                    LoggingHandler.LogError($"{namespaceLabel} Application error");
+                    LoggingHandler.LogError($"{namespaceLabel} {errorMessage}");
                     LoggingHandler.LogError(exc.ToString());
 
                     throw;
