@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -28,6 +27,7 @@ using Google.Apis.Sheets.v4;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using Hackney.Core.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace HousingFinanceInterimApi
 {
@@ -135,7 +135,7 @@ namespace HousingFinanceInterimApi
             RegisterGateways(services);
             RegisterUseCases(services);
             ConfigureGoogleSheetsService(services);
-            services.ConfigureLambdaLogging(Configuration);
+            //services.ConfigureLambdaLogging(Configuration);
 
             services.AddScoped<IGoogleClientServiceFactory, GoogleClientServiceFactory>();
         }

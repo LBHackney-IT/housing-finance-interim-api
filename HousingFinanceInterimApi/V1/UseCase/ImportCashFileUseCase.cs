@@ -7,13 +7,12 @@ using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;
-using Google.Apis.Drive.v3.Data;
 using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Handlers;
-using Amazon.Runtime.Internal.Util;
 using Microsoft.Extensions.Logging;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using HousingFinanceInterimApi.V1.Exceptions;
+using Google.Apis.Drive.v3.Data;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
