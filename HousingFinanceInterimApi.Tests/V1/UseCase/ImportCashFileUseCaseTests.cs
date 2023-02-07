@@ -45,8 +45,6 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         private string _cashFileRegex = "^CashFile\\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01]).dat$";
         private string _waitDuration = "1234567";
 
-
-
         public ImportCashFileUseCaseTests()
         {
             Environment.SetEnvironmentVariable("CASH_FILE_REGEX", _cashFileRegex);
@@ -183,7 +181,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             SetupGateways();
 
             _batchLogGateway.Setup(gateway => gateway.CreateAsync(_batchId, false)).ReturnsAsync(batchLog);
-            
+
             // Act + Assert
             _classUnderTest.Invoking(async cls => await cls.ExecuteAsync().ConfigureAwait(false))
                 .Should().Throw<Exception>()
