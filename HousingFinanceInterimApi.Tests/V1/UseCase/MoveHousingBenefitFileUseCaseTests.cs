@@ -183,7 +183,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // arrange
             var academyNewFilesCount = 2;
             var academyAlreadyCopiedFilesCount = 3;
- 
+
             var academyFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
             var academyNewFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: academyNewFilesCount);
 
@@ -208,7 +208,8 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 { oldNameFile3, newNameFile3 }
             };
 
-            var destinationFolderFiles = academyAlreadyCopiedFiles.Select(fileAtSource => {
+            var destinationFolderFiles = academyAlreadyCopiedFiles.Select(fileAtSource =>
+            {
                 var copiedFileAtDest = RandomGen
                     .Build<File>()
                     .With(copiedFile => copiedFile.Name, nameChangeRegister[fileAtSource.Name])
@@ -252,7 +253,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             academyNewFiles
                 .ToList()
-                .ForEach(academyFile => 
+                .ForEach(academyFile =>
                     _mockGoogleClientService.Verify(
                         g => g.CopyFileInDrive(
                             It.Is<string>(s => s == academyFile.Id),
@@ -264,7 +265,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             academyAlreadyCopiedFiles
                 .ToList()
-                .ForEach(existingAcademyFile => 
+                .ForEach(existingAcademyFile =>
                     _mockGoogleClientService.Verify(
                         g => g.CopyFileInDrive(
                             It.Is<string>(s => s == existingAcademyFile.Id),
@@ -334,7 +335,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             // act
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
-            
+
             // assert
             await useCaseCall.Should().ThrowAsync<SIO.FileNotFoundException>().WithMessage(expectedErrorMessage);
 
@@ -366,7 +367,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             // act
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
-            
+
             // assert
             await useCaseCall.Should().ThrowAsync<SIO.FileNotFoundException>().WithMessage(expectedErrorMessage);
 
@@ -382,7 +383,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 Here we're assuming that neither target directory already contains the files. The functionality
                 for excluding the files that already exist is tested by a dedicated test above.
             */
- 
+
             // arrange
             var academyFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 2);
             var academyFilesFolder1 = RandomGen.GoogleDriveFiles(filesValidity: true);
@@ -423,8 +424,8 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                     )
                 )
             );
-        } 
-        
+        }
+
         // UC copies all valid files with the correct new file names
         [Fact]
         public async Task UCCopiesValidAcademyFilesWithTheCorrectNewCalculatedName()
@@ -485,7 +486,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            _mockBatchLogGateway.Verify(g => 
+            _mockBatchLogGateway.Verify(g =>
                 g.SetToSuccessAsync(It.Is<long>(l => l == batchLog.Id)),
                 Times.Once
             );
@@ -515,7 +516,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             This is because this method is not able to distinguish between seeing no files and not having access to see
             files within the folder. In both such cases, it returns an empty list, hence, no error thrown by the gateway.
-        */ 
+        */
         [Fact]
         public async Task WhenGoogleClientServiceGetFilesInDriveMethodThrowsAFileNotFoundExceptionThenUCLogsItViaBatchLogErrorGWAndRethrowsThatSameException()
         {
@@ -538,7 +539,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // assert
             await useCaseCall.Should().ThrowAsync<GoogleApiException>().WithMessage(folderNotFoundException.Message);
 
-            _mockBatchLogErrorGateway.Verify(g => 
+            _mockBatchLogErrorGateway.Verify(g =>
                 g.CreateAsync(
                     It.Is<long>(l => l == batchLog.Id),
                     It.Is<string>(s => s == "ERROR"),
@@ -577,7 +578,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // assert
             await useCaseCall.Should().ThrowAsync<GoogleApiException>().WithMessage(fileNotFoundException.Message);
 
-            _mockBatchLogErrorGateway.Verify(g => 
+            _mockBatchLogErrorGateway.Verify(g =>
                 g.CreateAsync(
                     It.Is<long>(l => l == batchLog.Id),
                     It.Is<string>(s => s == "ERROR"),
@@ -609,7 +610,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // assert
             await useCaseCall.Should().ThrowAsync<GoogleApiException>().WithMessage(copyingIsForbiddenException.Message);
 
-            _mockBatchLogErrorGateway.Verify(g => 
+            _mockBatchLogErrorGateway.Verify(g =>
                 g.CreateAsync(
                     It.Is<long>(l => l == batchLog.Id),
                     It.Is<string>(s => s == "ERROR"),
@@ -652,7 +653,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 _mockBatchLogErrorGateway.Verify(g =>
                     g.CreateAsync(
                         It.Is<long>(l => l == batchLog.Id),
-                        It.Is<string>(s => s== "ERROR"),
+                        It.Is<string>(s => s == "ERROR"),
                         It.Is<string>(s => s == expectedErrorMessage(notValidFile.Name))
                     ),
                     Times.Once
@@ -681,7 +682,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ThrowsAsync(expectedException);
 
             // act
-            Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false); 
+            Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
             await useCaseCall.Should().ThrowAsync<TimeoutException>().WithMessage(expectedMessage);
