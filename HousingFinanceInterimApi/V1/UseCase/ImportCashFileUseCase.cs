@@ -51,7 +51,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         public async Task<StepResponse> ExecuteAsync()
         {
 
-            _logger.LogInformation("Starting cash file import");
+            //_logger.LogInformation("Starting cash file import");
 
             var batch = await _batchLogGateway.CreateAsync(_cashFileLabel).ConfigureAwait(false);
             var googleFileSettings = await GetGoogleFileSetting(_cashFileLabel).ConfigureAwait(false);
