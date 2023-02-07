@@ -54,7 +54,7 @@ namespace HousingFinanceInterimApi.Tests.V1.TestHelpers
                 var academyFileName = AcademyFileName(dateDiffBetweenDates1And2);
                 gDriveFileBuilder = gDriveFileBuilder.With(f => f.Name, academyFileName);
             }
-            
+
             return gDriveFileBuilder.Create();
         }
 

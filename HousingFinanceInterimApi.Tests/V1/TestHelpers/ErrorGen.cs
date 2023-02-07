@@ -14,16 +14,16 @@ namespace HousingFinanceInterimApi.Tests.V1.TestHelpers
             => GoogleApiException("drive", 403, "The user's Drive storage quota has been exceeded.", "storageQuotaExceeded");
 
         private static string ExceptionErrorMessage(string serviceName, int httpStatusCode, string errorMessage)
-            => $"The service {serviceName} has thrown an exception. HttpStatusCode is {(HttpStatusCode)httpStatusCode}. {errorMessage}";
+            => $"The service {serviceName} has thrown an exception. HttpStatusCode is {(HttpStatusCode) httpStatusCode}. {errorMessage}";
 
         private static GoogleApiException GoogleApiException(string serviceName, int httpStatusCode, string errorMessage, string failureReason)
         {
             var exceptionMessage = ExceptionErrorMessage(serviceName, httpStatusCode, errorMessage);
             var googleApiException = new GoogleApiException(serviceName, exceptionMessage);
-            
+
             var singleError = SingleError(errorMessage, failureReason);
             var requestError = RequestError(httpStatusCode, errorMessage, singleError);
-            
+
             googleApiException.Error = requestError;
             googleApiException.HttpStatusCode = HttpStatusCode.NotFound;
 
@@ -43,7 +43,7 @@ namespace HousingFinanceInterimApi.Tests.V1.TestHelpers
                 Location = isFileNotFound ? "fileId" : ""
             };
         }
-        
+
         private static RequestError RequestError(int httpStatusCode, string errorMessage, SingleError singleError)
         {
             return new RequestError()

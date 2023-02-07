@@ -91,13 +91,14 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     throw new SIO.FileNotFoundException($"No files with valid name were found within the '{_academyFileFolderLabel}' label directories.");
 
                 var validRenamedAcademyFiles = validAcademyFiles
-                    .Select(file =>  new { Id = file.Id, NewName = CalculateNewFileName(file) })
+                    .Select(file => new { Id = file.Id, NewName = CalculateNewFileName(file) })
                     .ToList();
 
                 // Create a folder with files object - makes further validation easier.
                 var destinationFolderWithFiles = await Task.WhenAll(
-                    destinationGoogleFileSettings.Select(async setting => 
-                        new {
+                    destinationGoogleFileSettings.Select(async setting =>
+                        new
+                        {
                             Id = setting.GoogleIdentifier,
                             Files = await _googleClientService.GetFilesInDriveAsync(setting.GoogleIdentifier).ConfigureAwait(false)
                         })
@@ -107,14 +108,16 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 var copyFileInstructions = destinationFolderWithFiles
                     .SelectMany(destinationFolder => validRenamedAcademyFiles
                         // Avoid duplicating existing files at destination folder
-                        .Where(academyFile => {
+                        .Where(academyFile =>
+                        {
                             var academyNewNamePattern = new Regex($"(?>N?OK_)?(?>{academyFile.NewName})"); // test in dotnet fiddle?
-                            var doesAcademyFileExistAmongDestinationFiles = 
+                            var doesAcademyFileExistAmongDestinationFiles =
                                 destinationFolder.Files.Any(destFile => academyNewNamePattern.IsMatch(destFile.Name));
                             return !doesAcademyFileExistAmongDestinationFiles;
                         })
                         // Create object with information needed for 'copy' action
-                        .Select(academyFile => new {
+                        .Select(academyFile => new
+                        {
                             FileGId = academyFile.Id,
                             FileName = academyFile.NewName,
                             DestinationFolderGId = destinationFolder.Id
