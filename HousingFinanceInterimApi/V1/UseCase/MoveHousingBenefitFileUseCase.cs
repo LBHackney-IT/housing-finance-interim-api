@@ -110,7 +110,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         // Avoid duplicating existing files at destination folder
                         .Where(academyFile =>
                         {
-                            var academyNewNamePattern = new Regex($"(?>N?OK_)?(?>{academyFile.NewName})"); // test in dotnet fiddle?
+                            var academyNewNamePattern = new Regex($"(?>N?OK_)?(?>{academyFile.NewName})");
                             var doesAcademyFileExistAmongDestinationFiles =
                                 destinationFolder.Files.Any(destFile => academyNewNamePattern.IsMatch(destFile.Name));
                             return !doesAcademyFileExistAmongDestinationFiles;
