@@ -6,7 +6,7 @@ namespace HousingFinanceInterimApi.V1.UseCase.Interfaces
 {
     public interface IMoveHousingBenefitFileUseCase
     {
-        public Task<StepResponse> ExecuteAsync(string label);
+        public Task<StepResponse> ExecuteAsync();
     }
 
 }

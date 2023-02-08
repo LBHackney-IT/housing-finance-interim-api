@@ -54,7 +54,6 @@ namespace HousingFinanceInterimApi
         private readonly ILoadTenureInformationFromDynamoDbUseCase _loadTenureInformationFromDynamoDbUseCase;
 
         private const string CashFileLabel = "CashFile";
-        private const string HousingBenefitFileLabel = "HousingBenefitFile";
 
         public Handler()
         {
@@ -196,7 +195,7 @@ namespace HousingFinanceInterimApi
 
         public async Task<StepResponse> CheckHousingBenefitFiles()
         {
-            return await _moveHousingBenefitFileUseCase.ExecuteAsync(HousingBenefitFileLabel).ConfigureAwait(false);
+            return await _moveHousingBenefitFileUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
         public async Task<StepResponse> ImportHousingBenefitFile()
