@@ -32,7 +32,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.3.1" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.50.0.2229" />
     <PackageReference Include="Google.Apis.Sheets.v4" Version="1.50.0.2175" />
-    <PackageReference Include="Hackney.Core.Logging" Version="1.49.0" />
 
   </ItemGroup>
 
