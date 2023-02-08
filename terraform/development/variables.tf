@@ -1,4 +1,4 @@
 variable "environment_name" {
-    type        = string
-    description = "development"
+  type    = string
+  default = "development"
 }
