@@ -2,32 +2,28 @@ using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using HousingFinanceInterimApi.Versioning;
-using Hackney.Core.DynamoDb;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using AutoMapper;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
-using Hackney.Core.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Hackney.Core.Logging;
 
 namespace HousingFinanceInterimApi
 {
@@ -69,7 +65,6 @@ namespace HousingFinanceInterimApi
                 o.ApiVersionReader = new UrlSegmentApiVersionReader();
             });
 
-            services.AddSingleton<IApiVersionDescriptionProvider, DefaultApiVersionDescriptionProvider>();
 
             services.AddSwaggerGen(c =>
             {
@@ -128,15 +123,15 @@ namespace HousingFinanceInterimApi
                 if (File.Exists(xmlPath))
                     c.IncludeXmlComments(xmlPath);
             });
+            services.ConfigureLambdaLogging(Configuration);
 
             ConfigureDbContext(services);
-            //services.ConfigureDynamoDB();
-
             RegisterGateways(services);
             RegisterUseCases(services);
             ConfigureGoogleSheetsService(services);
-            //services.ConfigureLambdaLogging(Configuration);
 
+            // services.AddSingleton<IApiVersionDescriptionProvider, DefaultApiVersionDescriptionProvider>();
+            services.AddSingleton<IConfiguration>(Configuration);
             services.AddScoped<IGoogleClientServiceFactory, GoogleClientServiceFactory>();
         }
 
@@ -211,6 +206,8 @@ namespace HousingFinanceInterimApi
             });
             app.UseSwagger();
             app.UseRouting();
+
+            app.UseLogCall();
 
             app.UseEndpoints(endpoints =>
             {
