@@ -200,7 +200,7 @@ workflows:
       - deploy-to-development:
           context: api-nuget-token-context
           requires:
-            - assume-role-development
+            - terraform-init-and-apply-to-development
           # filters:
           #   branches:
           #     only: development
