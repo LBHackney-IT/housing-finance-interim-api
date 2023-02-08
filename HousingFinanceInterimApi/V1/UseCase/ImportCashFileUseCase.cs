@@ -49,9 +49,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
             _upCashDumpGateway = upCashDumpGateway;
         }
 
-        public async Task<StepResponse> ExecuteAsync()
+        public async virtual Task<StepResponse> ExecuteAsync()
         {
-
             LoggingHandler.LogInfo("Starting cash file import");
 
             var batch = await _batchLogGateway.CreateAsync(_cashFileLabel).ConfigureAwait(false);
