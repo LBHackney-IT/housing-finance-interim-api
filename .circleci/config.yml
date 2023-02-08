@@ -131,16 +131,16 @@ jobs:
     steps:
       - terraform-init-then-apply:
           environment: "development"
-    terraform-init-and-apply-to-staging:
-      executor: docker-terraform
-      steps:
-        - terraform-init-then-apply:
-            environment: "staging"
-    terraform-init-and-apply-to-production:
-      executor: docker-terraform
-      steps:
-        - terraform-init-then-apply:
-            environment: "production"
+  terraform-init-and-apply-to-staging:
+    executor: docker-terraform
+    steps:
+      - terraform-init-then-apply:
+          environment: "staging"
+  terraform-init-and-apply-to-production:
+    executor: docker-terraform
+    steps:
+      - terraform-init-then-apply:
+          environment: "production"
   deploy-to-development:
     executor: docker-dotnet
     steps:
