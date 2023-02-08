@@ -34,8 +34,8 @@ data "aws_ssm_parameter" "sns_topic_arn" {
 module "api-alarm" {
     source           = "github.com/LBHackney-IT/aws-hackney-common-terraform.git//modules/cloudwatch/api-alarm"
     environment_name = var.environment_name
-    api_name         = housing-finance-interim-api
-    alarm_period     = 300
-    error_threshold  = 1
+    api_name         = "housing-finance-interim-api"
+    alarm_period     = "300"
+    error_threshold  = "1"
     sns_topic_arn    = data.aws_ssm_parameter.sns_topic_arn.value
 }
