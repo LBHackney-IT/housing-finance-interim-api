@@ -39,7 +39,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             IGoogleClientService googleClientService,
             IUPCashDumpFileNameGateway upCashDumpFileNameGateway,
             IUPCashDumpGateway upCashDumpGateway)
-            
+
         {
             _batchLogGateway = batchLogGateway;
             _batchLogErrorGateway = batchLogErrorGateway;
