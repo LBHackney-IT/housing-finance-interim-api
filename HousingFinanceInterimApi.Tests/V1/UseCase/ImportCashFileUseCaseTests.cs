@@ -13,6 +13,7 @@ using Hackney.Core.Testing.Shared;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
+using HousingFinanceInterimApi.V1.Handlers;
 using HousingFinanceInterimApi.V1.UseCase;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
@@ -23,6 +24,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 {
     public class ImportCashFileUseCaseTests
     {
+
         private ImportCashFileUseCase _classUnderTest;
         private readonly Mock<IBatchLogGateway> _batchLogGateway = new Mock<IBatchLogGateway>();
         private readonly Mock<IBatchLogErrorGateway> _batchLogErrorGateway = new Mock<IBatchLogErrorGateway>();
@@ -56,8 +58,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 _googleFileSettingGateway.Object,
                 _googleClientService.Object,
                 _upCashDumpFileNameGateway.Object,
-                _upCashDumpGateway.Object,
-                _logger.Object
+                _upCashDumpGateway.Object
             );
         }
 
@@ -217,7 +218,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             //Assert
             response.Should().NotBeNull();
-            _logger.VerifyExact(LogLevel.Warning, $"File {fileList.Last().Name} already exist", Times.Exactly(3));
+            //_logger.VerifyExact(LogLevel.Warning, $"File {fileList.Last().Name} already exist", Times.Exactly(3));
 
         }
 
@@ -240,7 +241,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             //Assert
             response.Should().NotBeNull();
-            _logger.VerifyExact(LogLevel.Warning, $"File entry {fileList.Last().Name} not created", Times.Exactly(3));
+            //_logger.VerifyExact(LogLevel.Warning, $"File entry {fileList.Last().Name} not created", Times.Exactly(3));
         }
 
 

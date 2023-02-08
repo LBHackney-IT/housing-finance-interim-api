@@ -23,7 +23,6 @@ using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Hackney.Core.Logging;
 
 namespace HousingFinanceInterimApi
 {
@@ -123,7 +122,7 @@ namespace HousingFinanceInterimApi
                 if (File.Exists(xmlPath))
                     c.IncludeXmlComments(xmlPath);
             });
-            services.ConfigureLambdaLogging(Configuration);
+
 
             ConfigureDbContext(services);
             RegisterGateways(services);
@@ -207,7 +206,6 @@ namespace HousingFinanceInterimApi
             app.UseSwagger();
             app.UseRouting();
 
-            app.UseLogCall();
 
             app.UseEndpoints(endpoints =>
             {

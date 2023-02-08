@@ -49,7 +49,6 @@ namespace HousingFinanceInterimApi
         private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
         private readonly IGenerateReportUseCase _generateReportUseCase;
         private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
-        private readonly ILogger<ImportCashFileUseCase> _logger;
         private readonly ILoadAssetFromDynamoDbUseCase _loadAssetFromDynamoDbUseCase;
         private readonly ILoadTenureInformationFromDynamoDbUseCase _loadTenureInformationFromDynamoDbUseCase;
 
@@ -112,7 +111,7 @@ namespace HousingFinanceInterimApi
             _generateRentPositionUseCase = new GenerateRentPositionUseCase(rentPositionGateway, batchLogGateway,
                 batchLogErrorGateway, googleFileSettingGateway, googleClientService);
             _importCashFileUseCase = new ImportCashFileUseCase(batchLogGateway, batchLogErrorGateway,
-                googleFileSettingGateway, googleClientService, upCashDumpFileNameGateway, upCashDumpGateway, _logger);
+                googleFileSettingGateway, googleClientService, upCashDumpFileNameGateway, upCashDumpGateway);
             _importHousingFileUseCase = new ImportHousingFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService, upHousingCashDumpFileNameGateway, upHousingCashDumpGateway);
             _loadActionDiaryUseCase = new LoadActionDiaryUseCase(batchLogGateway, batchLogErrorGateway,
