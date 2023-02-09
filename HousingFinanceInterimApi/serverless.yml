@@ -641,7 +641,7 @@ custom:
   alerts:
     topics:
       alarm:
-        topic: arn:aws:sns:${self:region}:${self:accountId}:Housing_Finance_Alarms_Development_topic
+        topic: arn:aws:sns:${self:provider:region}:${AWS::AccountId}:Housing_Finance_Alarms_Development_topic
   vpc:
     development:
       securityGroupIds:
