@@ -639,7 +639,7 @@ resources:
     TopicCloudwatchAlarm:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: Housing_Finance_Alarms_Development_topic_new
+        TopicName: Housing_Finance_Alarms_Development_topic
     ApiGatewayAlarm5xx:
       Type: AWS::CloudWatch::Alarm
       Properties:
