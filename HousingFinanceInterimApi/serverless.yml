@@ -656,7 +656,7 @@ resources:
           # arn:aws:sns:${AWS::Region}:{AWS::AccountId}:Housing_Finance_Alarms_Development_topic
         Dimensions:
           - Name: ApiName
-            Value: development-housing-finance-interim
+            Value: ${self:service}
             
 custom:
   vpc:
