@@ -660,9 +660,9 @@ resources:
             Value:
             Fn::Join:
               - "-"
+              -
                 - Ref: ApiGatewayStage
                 - ${self:service}
-            
 custom:
   vpc:
     development:
