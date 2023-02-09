@@ -13,6 +13,7 @@ provider "aws" {
 }
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
+
 locals {
   application_name = "housing-finance-interim-api" # The name to use for your application
    parameter_store = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter"
@@ -55,10 +56,10 @@ module "development" {
   task_definition_environment_variables = {
     ASPNETCORE_ENVIRONMENT = "development"
   }
-  task_definition_environment_variable_count = number # This number needs to reflect the number of environment variables provided
+  task_definition_environment_variable_count = "" # This number needs to reflect the number of environment variables provided
   cost_code = your project's cost code
   task_definition_secrets      = {}
-  task_definition_secret_count = number # This number needs to reflect the number of environment variables provided
+  task_definition_secret_count = "" # This number needs to reflect the number of environment variables provided
 }
 
 data "aws_ssm_parameter" "sns_topic_arn" {
