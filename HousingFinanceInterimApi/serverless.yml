@@ -637,11 +637,9 @@ resources:
                           - Ref: 'AWS::Region'
                           - Ref: 'AWS::AccountId'
                           - 'table/Assets/index/*'
-
-	
 custom:
   serverlessSsmFetch:
-    SNS_TOPIC_ARN: ${ssm:/housing-finance/${self:provider.stage}/cloudwatch-alarms-topic-arn}
+    SNS_TOPIC_ARN: /aws/ssm/parameter/housing-finance/${self:provider.stage}/cloudwatch-alarms-topic-arn
   alerts:
     topics:
       alarm:
