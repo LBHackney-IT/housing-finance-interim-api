@@ -28,17 +28,6 @@ terraform {
   }
 }
 
-resource "aws_db_subnet_group" "db_subnets" {
-  name        = "housing_finance_development-db-subnet-development"
-  description = "Managed by Terraform"
-  subnet_ids = [
-    "subnet-0140d06fb84fdb547",
-    "subnet-029aded4e4b739233",
-    "subnet-05ce390ba88c42bfd",
-    "subnet-0c522aafcb373a205",
-  ]
-}
-
 data "aws_ssm_parameter" "sns_topic_arn" {
     name = "/housing-finance/${var.environment_name}/cloudwatch-alarms-topic-arn"
 }

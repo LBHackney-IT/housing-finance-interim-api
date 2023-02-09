@@ -26,7 +26,6 @@ provider:
     CHARGES_BATCH_YEARS: ${ssm:/housing-finance/${self:provider.stage}/charges-batch-years}
     S3_BUCKET_NAME: ${ssm:/housing-finance/${self:provider.stage}/s3-bucket-name}
     S3_OBJECT_PREFIX: ${ssm:/housing-finance/${self:provider.stage}/s3-object-prefix}
-    # SNS_TOPIC_NAME: ${ssm:/housing-finance/${self:provider.stage}/cloudwatch-alarms-topic-arn}
 
 package:
   artifact: ./bin/release/netcoreapp3.1/housing-finance-interim-api.zip
