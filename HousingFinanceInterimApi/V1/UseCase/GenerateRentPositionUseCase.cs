@@ -77,15 +77,22 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         await _googleClientService.DeleteFileInDrive(file.Id).ConfigureAwait(false);
                     }
 
-                    await _googleClientService.UploadCsvFile(rentPosition, fileName, googleFileSetting.GoogleIdentifier)
+                    var isSuccess = await _googleClientService.UploadCsvFile(rentPosition, fileName, googleFileSetting.GoogleIdentifier)
                         .ConfigureAwait(false);
+
+                    if (!isSuccess)
+                        throw new Exception("Failed to upload to Rent Position folder (Qlik)");
+
                 }
 
                 googleFileSettings = await GetGoogleFileSetting(_rentPositionBkpLabel).ConfigureAwait(false);
                 foreach (var googleFileSetting in googleFileSettings)
                 {
-                    await _googleClientService.UploadCsvFile(rentPosition, $"{DateTime.Now:yyyyMMdd_HHmmss}.csv",
+                    var isSuccess = await _googleClientService.UploadCsvFile(rentPosition, $"{DateTime.Now:yyyyMMdd_HHmmss}.csv",
                         googleFileSetting.GoogleIdentifier).ConfigureAwait(false);
+
+                    if (!isSuccess)
+                        throw new Exception("Failed to upload to Rent Position folder (Backup)");
                 }
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
