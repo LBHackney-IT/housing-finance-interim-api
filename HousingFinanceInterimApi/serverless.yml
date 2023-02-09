@@ -652,7 +652,7 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         AlarmActions: 
-          - Ref: TopicCloudwatchAlarm
+          - arn:aws:sns:${AWS::Region}:{AWS::AccountId}:Housing_Finance_Alarms_Development_topic
         Dimensions:
           - Name: FunctionName
             Value: housing-finance-interim-api-development-cash-file
