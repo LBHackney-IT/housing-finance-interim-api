@@ -29,10 +29,8 @@ terraform {
 }
 
 resource "aws_db_subnet_group" "db_subnets" {
-  arn         = "arn:aws:rds:eu-west-2:364864573329:subgrp:housing_finance_development-db-subnet-development"
-  description = "Managed by Terraform"
-  id          = "housing_finance_development-db-subnet-development"
   name        = "housing_finance_development-db-subnet-development"
+  description = "Managed by Terraform"
   subnet_ids = [
     "subnet-0140d06fb84fdb547",
     "subnet-029aded4e4b739233",
