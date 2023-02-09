@@ -89,7 +89,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             if (invalid)
             {
-                 // File name doesn't start with CashFile, OK_, or NOK_ but still ends in .dat (valid end)
+                // File name doesn't start with CashFile, OK_, or NOK_ but still ends in .dat (valid end)
                 // If file name doesn't end with .dat it will be ignored!
                 var invalidFileName = "invalid_file_name.dat";
                 fileList.First().Name = invalidFileName;
