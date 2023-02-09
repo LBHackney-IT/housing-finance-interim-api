@@ -76,5 +76,10 @@ namespace HousingFinanceInterimApi.Tests.V1.TestHelpers
             var date2 = DateTime.UtcNow.AddDays(dayRange).ToString("ddMMyyyy");
             return $"{date1}_Something_Academy_{date2}"; // TODO: change to realistic format
         }
+
+        public static List<string[]> RentPositionCsvRepresentation()
+        {
+            return CreateMany(() => _faker.Random.WordsArray(7,7), 5).ToList();
+        }
     }
 }
