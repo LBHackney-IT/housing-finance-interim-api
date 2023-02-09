@@ -643,8 +643,8 @@ resources:
     ApiGatewayAlarm5xx:
       Type: AWS::CloudWatch::Alarm
       Properties:
-        AlarmDescription: Errors detected in lambda
-        Namespace: AWS/Lambda
+        AlarmDescription: Errors detected in API/Gateway
+        Namespace: AWS/Gateway
         MetricName: "Errors"
         Statistic: Sum
         Threshold: 0
@@ -652,10 +652,10 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         AlarmActions: 
-          - arn:aws:sns:${AWS::Region}:{AWS::AccountId}:Housing_Finance_Alarms_Development_topic
+          - arn:aws:sns:${AWS::Region}:${AWS::AccountId}:Housing_Finance_Alarms_Development_topic
         Dimensions:
-          - Name: FunctionName
-            Value: housing-finance-interim-api-development-cash-file
+          - Name: APIName
+            Value: development-housing-finance-interim-api	
 custom:
   vpc:
     development:
