@@ -638,12 +638,10 @@ resources:
                           - Ref: 'AWS::AccountId'
                           - 'table/Assets/index/*'
 custom:
-  serverlessSsmFetch:
-    SNS_TOPIC_ARN: /aws/ssm/parameter/housing-finance/${self:provider.stage}/cloudwatch-alarms-topic-arn
   alerts:
     topics:
       alarm:
-        topic: SNS_TOPIC_ARN
+        topic: arn:aws:sns:${self:region}:${self::accountId}:Housing_Finance_Alarms_Development_topic
   vpc:
     development:
       securityGroupIds:
@@ -667,6 +665,4 @@ custom:
 plugins:
   - serverless-step-functions
   - serverless-plugin-aws-alerts
-  - serverless-ssm-fetch
-
 

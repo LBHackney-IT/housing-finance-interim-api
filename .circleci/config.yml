@@ -76,7 +76,7 @@ commands:
           command: npm i -g serverless
       - run:
           name: Install servreless plugins
-          command: npm i serverless-step-functions serverless-plugin-aws-alerts serverless-ssm-fetch
+          command: npm i serverless-step-functions serverless-plugin-aws-alerts
       - run:
           name: Build lambda
           command: |
