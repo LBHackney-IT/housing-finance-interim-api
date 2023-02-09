@@ -650,7 +650,7 @@ resources:
       Period: 60
       Dimensions:
         - Name: ApiName
-          Value: ${self:provider.region}-ApiName
+          Value: ${self:provider.stage}-ApiName
       
 custom:
   vpc:
