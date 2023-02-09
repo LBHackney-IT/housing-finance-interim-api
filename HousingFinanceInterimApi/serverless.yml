@@ -639,23 +639,24 @@ resources:
     TopicCloudwatchAlarm:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: Housing_Finance_Alarms_Development_topic
-    ApiGatewayAlarm5xx:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmDescription: 5xx errors detected at API Gateway
-      Namespace: AWS/ApiGateway
-      MetricName: 5XXError
-      Statistic: Sum
-      Threshold: 0
-      ComparisonOperator: GreaterThanThreshold
-      EvaluationPeriods: 1
-      Period: 60
-      AlarmActions: 
-        - arn:aws:sns:${AWS::Region}:{AWS::AccountId}:Housing_Finance_Alarms_Development_topic
-      Dimensions:
-        - Name: ApiName
-          Value: development-housing-finance-interim
+        TopicName: Housing_Finance_Alarms_Development_topic_new
+    # ApiGatewayAlarm5xx:
+    #   Type: AWS::CloudWatch::Alarm
+    #   Properties:
+    #     AlarmDescription: 5xx errors detected at API Gateway
+    #     Namespace: AWS/ApiGateway
+    #     MetricName: 5XXError
+    #     Statistic: Sum
+    #     Threshold: 0
+    #     ComparisonOperator: GreaterThanThreshold
+    #     EvaluationPeriods: 1
+    #     Period: 60
+    #     AlarmActions: 
+    #       - Ref: TopicCloudwatchAlarm
+    #       # arn:aws:sns:${AWS::Region}:{AWS::AccountId}:Housing_Finance_Alarms_Development_topic
+    #     Dimensions:
+    #       - Name: ApiName
+    #         Value: development-housing-finance-interim
             
 custom:
   vpc:
