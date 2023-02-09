@@ -43,6 +43,7 @@ module "development" {
   # source = "github.com/LBHackney-IT/aws-hackney-components-per-service-terraform.git//modules/environment/backend/ec2"
   cluster_name                = "development-apis"
   ecr_name                    = ecr repository name # Replace with your repository name - pattern: "hackney/YOUR APP NAME"
+  
   environment_name            = "development"
   application_name            = local.application_name 
   security_group_name         = back end security group name # Replace with your security group name, WITHOUT SPECIFYING environment. Usually the SG has the name of your API
