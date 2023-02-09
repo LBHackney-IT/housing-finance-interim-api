@@ -87,7 +87,6 @@ commands:
           name: Deploy lambda
           command: |
             cd ./HousingFinanceInterimApi/
-            sls print
             sls deploy --stage <<parameters.stage>> --conceal
 
 jobs:
