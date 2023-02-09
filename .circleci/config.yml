@@ -178,8 +178,8 @@ workflows:
     jobs:
       - check-code-formatting:
           context: api-nuget-token-context
-      - build-and-test:
-          context: api-nuget-token-context
+      # - build-and-test:
+      #     context: api-nuget-token-context
           #TODO: Revert
           # filters:
           #   branches:
@@ -191,16 +191,16 @@ workflows:
           # filters:
           #   branches:
           #     only: development
-      - terraform-init-and-apply-to-development:
-          requires:
-            - assume-role-development
+      # - terraform-init-and-apply-to-development:
+      #     requires:
+      #       - assume-role-development
           # filters:
           #   branches:
           #     only: development
       - deploy-to-development:
           context: api-nuget-token-context
           requires:
-            - terraform-init-and-apply-to-development
+            - assume-role-development
           # filters:
           #   branches:
           #     only: development
