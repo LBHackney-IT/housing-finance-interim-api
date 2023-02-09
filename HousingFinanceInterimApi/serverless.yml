@@ -648,9 +648,11 @@ resources:
       ComparisonOperator: GreaterThanThreshold
       EvaluationPeriods: 1
       Period: 60
+      AlarmActions: arn:aws:sns:${AWS::Region}:{AWS::AccountId}:Housing_Finance_Alarms_${self:provider.stage}_topic
       Dimensions:
         - Name: ApiName
           Value: ${self:provider.stage}-ApiName
+
       
 custom:
   vpc:
