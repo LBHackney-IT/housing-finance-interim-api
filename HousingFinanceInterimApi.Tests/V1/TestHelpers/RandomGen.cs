@@ -79,7 +79,7 @@ namespace HousingFinanceInterimApi.Tests.V1.TestHelpers
 
         public static List<string[]> RentPositionCsvRepresentation()
         {
-            return CreateMany(() => _faker.Random.WordsArray(7,7), 5).ToList();
+            return CreateMany(() => _faker.Random.WordsArray(7, 7), 5).ToList();
         }
     }
 }
