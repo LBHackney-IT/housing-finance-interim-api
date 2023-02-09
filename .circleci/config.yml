@@ -75,8 +75,8 @@ commands:
           name: Install serverless CLI
           command: npm i -g serverless
       - run:
-          name: Install step function plugin
-          command: npm i serverless-step-functions
+          name: Install servreless plugins
+          command: npm i serverless-step-functions serverless-plugin-aws-alerts serverless-ssm-fetch
       - run:
           name: Build lambda
           command: |
