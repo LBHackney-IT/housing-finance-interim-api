@@ -34,10 +34,10 @@ resource "aws_db_subnet_group" "db_subnets" {
   id          = "housing_finance_development-db-subnet-development"
   name        = "housing_finance_development-db-subnet-development"
   subnet_ids = [
-    -"subnet-0140d06fb84fdb547",
-    -"subnet-029aded4e4b739233",
-    -"subnet-05ce390ba88c42bfd",
-    -"subnet-0c522aafcb373a205",
+    "subnet-0140d06fb84fdb547",
+    "subnet-029aded4e4b739233",
+    "subnet-05ce390ba88c42bfd",
+    "subnet-0c522aafcb373a205",
   ]
 }
 
