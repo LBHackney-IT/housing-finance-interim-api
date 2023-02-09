@@ -642,12 +642,10 @@ resources:
 custom:
   serverlessSsmFetch:
     SNS_TOPIC_ARN: ${ssm:/housing-finance/${self:provider.stage}/cloudwatch-alarms-topic-arn}
-custom:
   alerts:
     topics:
       alarm:
         topic: SNS_TOPIC_ARN
-custom:
   vpc:
     development:
       securityGroupIds:
