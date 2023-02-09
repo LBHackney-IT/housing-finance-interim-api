@@ -637,11 +637,21 @@ resources:
                           - Ref: 'AWS::Region'
                           - Ref: 'AWS::AccountId'
                           - 'table/Assets/index/*'
+    ApiGatewayAlarm5xx:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: 5xx errors detected at API Gateway
+      Namespace: AWS/ApiGateway
+      MetricName: 5XXError
+      Statistic: Sum
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      EvaluationPeriods: 1
+      Period: 60
+      Dimensions:
+        - Name: ${self:provider.region}-ApiName
+      
 custom:
-  alerts:
-    topics:
-      alarm:
-        topic: arn:aws:sns:${AWS::region}:${AWS::AccountId}:Housing_Finance_Alarms_Development_topic
   vpc:
     development:
       securityGroupIds:
@@ -664,5 +674,3 @@ custom:
 
 plugins:
   - serverless-step-functions
-  - serverless-plugin-aws-alerts
-
