@@ -649,7 +649,8 @@ resources:
       EvaluationPeriods: 1
       Period: 60
       Dimensions:
-        - Name: ${self:provider.region}-ApiName
+        - Name: ApiName
+          Value: ${self:provider.region}-ApiName
       
 custom:
   vpc:
