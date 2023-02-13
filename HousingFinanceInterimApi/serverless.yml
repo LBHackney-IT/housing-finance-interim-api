@@ -649,10 +649,14 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         AlarmActions: 
-          - arn:aws:sns:eu-west-2:${AWS::AccountId}:Housing_Finance_Alarms_Development_topic
+          - 'Fn::Join'
+            - ' arn:aws:sns:eu-west-2:'
+            - Ref: 'AWS::AccountId'
+            - ':Housing_Finance_Alarms_Development_topic'
+          # - arn:aws:sns:eu-west-2:${AWS::AccountId}:Housing_Finance_Alarms_Development_topic
         Dimensions:
           - Name: FunctionName
-            Value: housing-finance-interim-api-development-cash-file	
+            Value: ${self:service}-${self:provider.stage}-cash-file
 custom:
   vpc:
     development:
