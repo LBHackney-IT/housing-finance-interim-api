@@ -640,11 +640,6 @@ resources:
       Type: AWS::SNS::Topic
       Properties:
         TopicName: Housing_Finance_Alarms_Development_topic_new
-
-    TopicCloudwatchAlarm:
-      Type: AWS::SNS::Topic
-      Properties:
-        TopicName: Housing_Finance_Alarms_Development_topic_new
     ApiGatewayAlarm5xx:
       Type: AWS::CloudWatch::Alarm
       Properties:
