@@ -684,8 +684,8 @@ resources:
     HousingFileLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
-        AlarmName: "${self:provider.stage}-housing-finance-housing-file-lambda-alarm"
-        AlarmDescription: Errors detected in AWS Lambda for Housing File function
+        AlarmName: "${self:provider.stage}-housing-finance-check-housing-file-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Check Housing File function
         Namespace: AWS/Lambda
         MetricName: "Errors"
         Statistic: Sum
@@ -702,7 +702,7 @@ resources:
               - 'Housing_Finance_Alarms_Development_topic'
         Dimensions:
           - Name: FunctionName
-            Value: ${self:service}-${self:provider.stage}-housing-file
+            Value: ${self:service}-${self:provider.stage}-check-housing-file
 custom:
   vpc:
     development:
