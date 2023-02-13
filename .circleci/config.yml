@@ -185,8 +185,8 @@ workflows:
           #     only: development
       - assume-role-development:
           context: api-assume-role-housing-development-context
-          requires:
-            - build-and-test
+          # requires:
+          #   - build-and-test
           # filters:
           #   branches:
           #     only: development
