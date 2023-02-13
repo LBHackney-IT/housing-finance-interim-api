@@ -2,6 +2,8 @@
 
 Housing Finance API will be used to serve data for the interim housing finance solution
 
+# [Useful Diagram](https://whimsical.com/hfs-VDsMra1H9iWZLY2HBgFC3R)
+
 ## Stack
 
 - .NET Core as a web framework.

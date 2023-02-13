@@ -640,7 +640,8 @@ resources:
     CashFileLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
-        AlarmDescription: Errors detected in AWS Lambda
+        AlarmName: "${self:provider.stage}-housing-finance-cash-file-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for CashFile function
         Namespace: AWS/Lambda
         MetricName: "Errors"
         Statistic: Sum
@@ -661,7 +662,8 @@ resources:
     RentPositionLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
-        AlarmDescription: Errors detected in AWS Lambda
+        AlarmName: "${self:provider.stage}-housing-finance-rent-position-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Rent Position function
         Namespace: AWS/Lambda
         MetricName: "Errors"
         Statistic: Sum
@@ -682,7 +684,8 @@ resources:
     HousingFileLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
-        AlarmDescription: Errors detected in AWS Lambda
+        AlarmName: "${self:provider.stage}-housing-finance-housing-file-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Housing File function
         Namespace: AWS/Lambda
         MetricName: "Errors"
         Statistic: Sum
