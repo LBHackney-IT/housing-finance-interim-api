@@ -642,7 +642,7 @@ resources:
       Properties:
         AlarmDescription: Errors detected in AWS Lambda
         Namespace: AWS/Lambda
-        MetricName: "Error"
+        MetricName: "Errors"
         Statistic: Sum
         Threshold: 0
         ComparisonOperator: GreaterThanThreshold
