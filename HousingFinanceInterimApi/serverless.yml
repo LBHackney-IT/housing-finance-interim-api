@@ -636,14 +636,11 @@ resources:
                           - Ref: 'AWS::Region'
                           - Ref: 'AWS::AccountId'
                           - 'table/Assets/index/*'
-    TopicCloudwatchAlarm:
-      Type: AWS::SNS::Topic
-      Properties:
-        TopicName: Housing_Finance_Alarms_Development_topic_new
-    ApiGatewayAlarm5xx:
+   
+    CashFileLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
-        AlarmDescription: Errors detected in API/ApiGateway
+        AlarmDescription: Errors detected in AWS Lambda
         Namespace: AWS/Lambda
         MetricName: "Error"
         Statistic: Sum
@@ -652,8 +649,7 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         AlarmActions: 
-          # - arn:aws:sns:eu-west-2:${AWS::AccountId}:Housing_Finance_Alarms_Development_topic
-          - Ref: TopicCloudwatchAlarm
+          - arn:aws:sns:eu-west-2:${AWS::AccountId}:Housing_Finance_Alarms_Development_topic
         Dimensions:
           - Name: FunctionName
             Value: housing-finance-interim-api-development-cash-file	
