@@ -9,9 +9,6 @@ executors:
   docker-python:
     docker:
       - image: circleci/python:3.7
-  docker-terraform:
-    docker:
-      - image: "hashicorp/terraform:light"
   docker-dotnet:
     docker:
       - image: mcr.microsoft.com/dotnet/core/sdk:3.1
@@ -56,14 +53,14 @@ commands:
           name: Install serverless CLI
           command: npm i -g serverless
       - run:
-          name: Install step function plugin          
+          name: Install Step function plugin
           command: npm i serverless-step-functions
       - run:
           name: Build lambda
           command: |
             cd ./HousingFinanceInterimApi/
             chmod +x ./build.sh
-            ./build.sh      
+            ./build.sh
       - run:
           name: Deploy lambda
           command: |
@@ -133,8 +130,8 @@ workflows:
                 - development
                 - master
       - build-and-test:
-          context: 
-            - api-nuget-token-context                     
+          context:
+            - api-nuget-token-context
           filters:
             branches:
               ignore:
