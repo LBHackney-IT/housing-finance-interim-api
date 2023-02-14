@@ -76,7 +76,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         else
                         {
                             await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"Application error. Not possible to copy academy files({file.Name})").ConfigureAwait(false);
-                            LoggingHandler.LogError($"Not possible to copy academy files({ file.Name})");
+                            LoggingHandler.LogError($"Not possible to copy academy files({file.Name})");
                         }
                     }
                 }
