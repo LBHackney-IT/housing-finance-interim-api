@@ -125,15 +125,21 @@ jobs:
 workflows:
   check-and-deploy-development:
     jobs:
-      - check-code-formatting
+      - check-code-formatting        
       - build-and-test
       - assume-role-development:
           context: api-assume-role-housing-development-context
           requires:
             - build-and-test
+          filters:
+            branches:
+              only: development
       - deploy-to-development:
           requires:
-            - assume-role-development       
+            - assume-role-development  
+          filters:
+            branches:
+              only: development     
   check-and-deploy-staging-and-production:
     jobs:
       - build-and-test:
