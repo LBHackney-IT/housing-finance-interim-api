@@ -244,14 +244,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     createdFile = await createRequest.UploadAsync().ConfigureAwait(false);
                 }
 
-                LoggingHandler.LogInfo($"Upload progress: { JsonConvert.SerializeObject(createdFile) }");
+                LoggingHandler.LogInfo($"Upload progress: {JsonConvert.SerializeObject(createdFile)}");
 
                 return createdFile.Status == UploadStatus.Completed;
             }
             catch (Exception exc)
             {
                 LoggingHandler.LogError($"Error uploading file");
-                LoggingHandler.LogError($"Upload progress: { JsonConvert.SerializeObject(createdFile) }");
+                LoggingHandler.LogError($"Upload progress: {JsonConvert.SerializeObject(createdFile)}");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;
@@ -297,14 +297,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     createdFile = await createRequest.UploadAsync().ConfigureAwait(false);
                 }
 
-                LoggingHandler.LogInfo($"Upload progress: { JsonConvert.SerializeObject(createdFile) }");
+                LoggingHandler.LogInfo($"Upload progress: {JsonConvert.SerializeObject(createdFile)}");
 
                 return createdFile.Status == UploadStatus.Completed;
             }
             catch (Exception exc)
             {
                 LoggingHandler.LogError($"Error uploading csv file");
-                LoggingHandler.LogError($"Upload progress: { JsonConvert.SerializeObject(createdFile) }");
+                LoggingHandler.LogError($"Upload progress: {JsonConvert.SerializeObject(createdFile)}");
                 LoggingHandler.LogError(exc.ToString());
 
                 throw;
