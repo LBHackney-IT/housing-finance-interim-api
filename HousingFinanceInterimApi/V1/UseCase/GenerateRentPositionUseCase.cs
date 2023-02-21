@@ -65,10 +65,11 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
                 foreach (var googleFileSetting in googleFileSettings)
                 {
+                    LoggingHandler.LogInfo($"Folder ID: {googleFileSetting.GoogleIdentifier}");
+
                     var folderFiles = await _googleClientService.GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier)
                         .ConfigureAwait(false);
 
-                    LoggingHandler.LogInfo($"Folder ID: {googleFileSetting.GoogleIdentifier}");
                     LoggingHandler.LogInfo($"File count: {folderFiles.Count}");
 
                     LoggingHandler.LogInfo($"Deleting old files");
