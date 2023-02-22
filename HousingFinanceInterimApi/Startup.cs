@@ -51,7 +51,7 @@ namespace HousingFinanceInterimApi
 
 
             services.AddCors();
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddMvc();
 
             services.AddApiVersioning(o =>
             {

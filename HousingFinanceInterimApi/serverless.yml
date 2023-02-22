@@ -2,7 +2,7 @@ service: housing-finance-interim-api
 provider:
   name: aws
   timeout: 300
-  runtime: dotnetcore3.1
+  runtime: dotnet6
   vpc: ${self:custom.vpc.${opt:stage}}
   stage: ${opt:stage}
   region: eu-west-2
@@ -27,7 +27,7 @@ provider:
     S3_OBJECT_PREFIX: ${ssm:/housing-finance/${self:provider.stage}/s3-object-prefix}
 
 package:
-  artifact: ./bin/release/netcoreapp3.1/housing-finance-interim-api.zip
+  artifact: ./bin/release/net6.0/housing-finance-interim-api.zip
 
 functions:
   interimFinanceSystem:
