@@ -302,6 +302,40 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             _mockBatchLogGateway.Verify(g => g.SetToSuccessAsync(It.IsAny<long>()), Times.Never);
         }
 
+        [Fact]
+        public async Task UCThrowsExceptionWhenAcademyFileCreationTimeIsNull()
+        {
+            // arrange
+            const string FileName = "20042023_Something_Academy_04052023";
+            var Parents = new List<string>() { "1234567890", "3141592653" }.AsReadOnly();
+            var expectedErrorMessage = $"File {FileName} in folder(s) {String.Join(", ", Parents)} has no creation date";
+
+            var academyFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+            var validAcademyFolder = RandomGen.GoogleDriveFiles(filesValidity: true);
+            var validAcademyFolderArray = validAcademyFolder as File[] ?? validAcademyFolder.ToArray();
+
+            // Set file with null creation time and corresponding expected error message
+            validAcademyFolderArray.First().CreatedTime = null;
+            validAcademyFolderArray.First().Name = FileName;
+            validAcademyFolderArray.First().Parents = Parents;
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.AcademyFileFolderLabel)))
+                .ReturnsAsync(academyFolders.ToList());
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolders.First().GoogleIdentifier)))
+                .ReturnsAsync(validAcademyFolderArray.ToList());
+
+            // act
+            Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(expectedErrorMessage);
+
+            _mockBatchLogGateway.Verify(g => g.SetToSuccessAsync(It.IsAny<long>()), Times.Never);
+        }
+
         // If No destination folders are found...
         [Fact]
         public async Task UCThrowsNoFileSettingsFoundExceptionWhenNoHousingBenefitFileSettingsAreFound()
