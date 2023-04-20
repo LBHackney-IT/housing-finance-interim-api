@@ -175,6 +175,69 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             );
         }
 
+        // It calls the COPY method for each file in the folder and has the same name for each file
+        [Fact]
+        public async Task UCCallsCopyMethodForMultipleFilesInSameWeek() //TODO: Change Name
+        {
+            // arrange
+            var academyNewFilesCount = 2;
+
+            // Create 2 new files in the same week (same "next Monday" date)
+            var academyFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+            var academyNewFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: academyNewFilesCount);
+
+            var academyFolderFiles = academyNewFiles as File[] ?? academyNewFiles.ToArray();
+            academyFolderFiles[0].Name = "rentpost_10042023_to_23042023";
+            academyFolderFiles[1].Name = "rentpost_10042023_to_23042023";
+            academyFolderFiles[0].CreatedTime = new DateTime(2023, 4, 5); // Wednesday
+            academyFolderFiles[1].CreatedTime = new DateTime(2023, 4, 6); // Thursday
+
+            // Name that both files created by this UC are expected to have
+            var expectedNewFileName = "HousingBenefitFile20230410.dat";
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.AcademyFileFolderLabel)))
+                .ReturnsAsync(academyFolders.ToList());
+
+            var destinationFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.HousingBenefitFileLabel)))
+                .ReturnsAsync(destinationFolders.ToList());
+
+            var academyFolderGId = academyFolders.First().GoogleIdentifier;
+            var destinationFolderGId = destinationFolders.First().GoogleIdentifier;
+
+            _mockGoogleClientService
+                    .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolderGId)))
+                    .ReturnsAsync(academyFolderFiles.ToList());
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            // Runs method to generate new files in the destination folder for both files in the source folder
+            _mockGoogleClientService.Verify(
+                g => g.CopyFileInDrive(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()),
+                Times.Exactly(academyNewFilesCount)
+            );
+            // Both files in the same week have the same name
+            academyNewFiles
+                .ToList()
+                .ForEach(academyFile =>
+                    _mockGoogleClientService.Verify(
+                        g => g.CopyFileInDrive(
+                            It.Is<string>(s => s == academyFile.Id),
+                            It.Is<string>(s => s == destinationFolderGId),
+                            It.Is<string>(s => s == expectedNewFileName)),
+                        Times.Once
+                    )
+                );
+        }
+
         // It calls the COPY method only for files that don't already exist at destination:
         [Fact]
         public async Task UCCallsGoogleClientServiceCopyFileInDriveMethodForEachValidAcademyFileThatDoesntAlreadyExistAtDestination()
