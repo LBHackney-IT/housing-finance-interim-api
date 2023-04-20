@@ -174,13 +174,14 @@ namespace HousingFinanceInterimApi.V1.UseCase
             return googleFileSettings;
         }
 
-        private string CalculateNewFileName(File file)
+        private static string CalculateNewFileName(File file)
         {
-            // Handle null creation date
+            // Handle null creation date - this should never happen
             if (file.CreatedTime == null)
             {
-                Console.WriteLine($"File {file.Name} has no creation date");
-                return null;
+                var errorMsg = $"File {file.Name} in folder(s) {String.Join(", ", file.Parents)} has no creation date";
+                LoggingHandler.LogError(errorMsg);
+                throw new Exception(errorMsg);
             }
 
             // Get date of next Monday after file creation time
