@@ -251,17 +251,17 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var academyNewFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: academyNewFilesCount);
 
             var newFiles = academyNewFiles as File[] ?? academyNewFiles.ToArray();
-            newFiles[0].Name = "07042022_Something_Academy_21042025";
-            newFiles[1].Name = "07042022_Something_Academy_03022026";
+            newFiles[0].Name = "rentpost_07042022_to_21042025";
+            newFiles[1].Name = "rentpost_07042022_to_03022026";
             newFiles[0].CreatedTime = new DateTime(2023, 4, 1);
             newFiles[1].CreatedTime = new DateTime(2023, 4, 11);
 
 
             // Create 3 files that already exist at destination
             var academyAlreadyCopiedFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: academyAlreadyCopiedFilesCount).ToList();
-            academyAlreadyCopiedFiles[0].Name = "07042022_Something_Academy_21042022";
-            academyAlreadyCopiedFiles[1].Name = "20012023_Something_Academy_03042023";
-            academyAlreadyCopiedFiles[2].Name = "15082022_Something_Academy_29082022";
+            academyAlreadyCopiedFiles[0].Name = "rentpost_07042022_to_21042022";
+            academyAlreadyCopiedFiles[1].Name = "rentpost_20012023_to_03042023";
+            academyAlreadyCopiedFiles[2].Name = "rentpost_15082022_to_29082022";
             academyAlreadyCopiedFiles[0].CreatedTime = new DateTime(2022, 4, 21);
             academyAlreadyCopiedFiles[1].CreatedTime = new DateTime(2022, 2, 3);
             academyAlreadyCopiedFiles[2].CreatedTime = new DateTime(2022, 8, 29);
