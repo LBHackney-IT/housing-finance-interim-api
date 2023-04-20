@@ -184,15 +184,19 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 throw new Exception(errorMsg);
             }
 
-            // Get date of next Monday after file creation time
-            // file.CreatedTime.DayOfWeek ranges from 0 (Sunday) - 6 (Saturday)
             var createdTime = file.CreatedTime.Value;
-            var daysUntilNextMonday = ((int) DayOfWeek.Monday - (int) createdTime.DayOfWeek + 7) % 7;
-            var nextMonday = createdTime.AddDays(daysUntilNextMonday);
+            var nextMondayDate = GetFollowingMondayDate(createdTime);
 
-            var formattedNextDate = nextMonday.ToString("yyyyMMdd");
+            return $"HousingBenefitFile{nextMondayDate}.dat";
+        }
 
-            return $"HousingBenefitFile{formattedNextDate}.dat";
+        private static string GetFollowingMondayDate(DateTime fileCreatedDate)
+        {
+            // Get string with formatted date of next Monday after file creation time
+            // DayOfWeek ranges from 0 (Sunday) - 6 (Saturday)
+            var daysUntilNextMonday = ((int) DayOfWeek.Monday - (int) fileCreatedDate.DayOfWeek + 7) % 7;
+            var nextMonday = fileCreatedDate.AddDays(daysUntilNextMonday);
+            return nextMonday.ToString("yyyyMMdd");
         }
     }
 }
