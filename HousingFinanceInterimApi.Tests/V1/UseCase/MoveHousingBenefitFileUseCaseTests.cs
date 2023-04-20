@@ -177,7 +177,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
         // It calls the COPY method for each file in the folder and has the same name for each file
         [Fact]
-        public async Task UCCallsCopyMethodForMultipleFilesInSameWeek() //TODO: Change Name
+        public async Task UCCallsCopyMethodForMultipleFilesInSameWeek()
         {
             // arrange
             var academyNewFilesCount = 2;
