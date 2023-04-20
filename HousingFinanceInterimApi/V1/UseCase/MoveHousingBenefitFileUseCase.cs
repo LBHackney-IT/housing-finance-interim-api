@@ -91,7 +91,11 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     throw new SIO.FileNotFoundException($"No files with valid name were found within the '{_academyFileFolderLabel}' label directories.");
 
                 var validRenamedAcademyFiles = validAcademyFiles
-                    .Select(file => new { Id = file.Id, NewName = CalculateNewFileName(file) })
+                    .Select(file => new
+                    {
+                        Id = file.Id,
+                        NewName = CalculateNewFileName(file)
+                    })
                     .ToList();
 
                 // Create a folder with files object - makes further validation easier.
@@ -172,10 +176,22 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         private string CalculateNewFileName(File file)
         {
-            var fileNameDateMatches = _academyFilePattern.Matches(file.Name);
-            var fileNameDate = DateTime.ParseExact(fileNameDateMatches[1].Value, "ddMMyyyy", null);
+            // Handle null creation date
+            if (file.CreatedTime == null)
+            {
+                Console.WriteLine($"File {file.Name} has no creation date");
+                return null;
+            }
 
-            return $"HousingBenefitFile{fileNameDate.AddDays(-7).ToString("yyyyMMdd")}.dat";
+            // Get date of next Monday after file creation time
+            // file.CreatedTime.DayOfWeek ranges from 0 (Sunday) - 6 (Saturday)
+            var createdTime = file.CreatedTime.Value;
+            var daysUntilNextMonday = ((int) DayOfWeek.Monday - (int) createdTime.DayOfWeek + 7) % 7;
+            var nextMonday = createdTime.AddDays(daysUntilNextMonday);
+
+            var formattedNextDate = nextMonday.ToString("yyyyMMdd");
+
+            return $"HousingBenefitFile{formattedNextDate}.dat";
         }
     }
 }
