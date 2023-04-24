@@ -187,7 +187,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var createdTime = file.CreatedTime.Value;
             var nextMondayDate = GetFollowingMondayDate(createdTime);
 
-            return $"HousingBenefitFile{nextMondayDate}.dat";
+            var newFileName = $"HousingBenefitFile{nextMondayDate}.dat";
+            LoggingHandler.LogInfo($"File {file.Name} in folder(s) {String.Join(", ", file.Parents)} will be renamed to {newFileName}");
+            return newFileName;
         }
 
         private static string GetFollowingMondayDate(DateTime fileCreatedDate)
