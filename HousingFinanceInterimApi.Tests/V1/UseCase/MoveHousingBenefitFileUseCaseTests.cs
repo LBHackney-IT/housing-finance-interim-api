@@ -175,9 +175,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             );
         }
 
-        // It calls the COPY method for each file in the folder and has the same name for each file
+        // It throws an exception if multiple files are found in the same week
         [Fact]
-        public async Task UCCallsCopyMethodForMultipleFilesInSameWeek()
+        public async Task UCThrowsExceptionForMultipleFilesInSameWeek()
         {
             // arrange
             var academyNewFilesCount = 2;
@@ -191,6 +191,8 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             academyFolderFiles[1].Name = "rentpost_10042023_to_23042023";
             academyFolderFiles[0].CreatedTime = new DateTime(2023, 4, 5); // Wednesday
             academyFolderFiles[1].CreatedTime = new DateTime(2023, 4, 6); // Thursday
+            var expectedFileName = "HousingBenefitFile20230410.dat";
+            var expectedErrorMessage = $"Multiple files in week with name [{expectedFileName}] found";
 
             // Name that both files created by this UC are expected to have
             var expectedNewFileName = "HousingBenefitFile20230410.dat";
@@ -213,29 +215,19 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                     .ReturnsAsync(academyFolderFiles.ToList());
 
             // act
-            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+            Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            // Runs method to generate new files in the destination folder for both files in the source folder
+            // The method to generate the processed files in google drive is not run
             _mockGoogleClientService.Verify(
                 g => g.CopyFileInDrive(
                     It.IsAny<string>(),
                     It.IsAny<string>(),
                     It.IsAny<string>()),
-                Times.Exactly(academyNewFilesCount)
+                Times.Never
             );
-            // Both files in the same week have the same name
-            academyNewFiles
-                .ToList()
-                .ForEach(academyFile =>
-                    _mockGoogleClientService.Verify(
-                        g => g.CopyFileInDrive(
-                            It.Is<string>(s => s == academyFile.Id),
-                            It.Is<string>(s => s == destinationFolderGId),
-                            It.Is<string>(s => s == expectedNewFileName)),
-                        Times.Once
-                    )
-                );
+            // An exception is thrown
+            await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(expectedErrorMessage);
         }
 
         // It calls the COPY method only for files that don't already exist at destination:

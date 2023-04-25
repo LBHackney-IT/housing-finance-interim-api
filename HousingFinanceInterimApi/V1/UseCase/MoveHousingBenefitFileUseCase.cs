@@ -94,9 +94,31 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     .Select(file => new
                     {
                         Id = file.Id,
+                        OldName = file.Name,
                         NewName = CalculateNewFileName(file)
                     })
                     .ToList();
+
+                foreach (var file in validRenamedAcademyFiles)
+                {
+                    // Throw exception if there are multiple files in the same week
+                    var fileNames = validRenamedAcademyFiles.Select(f => f.NewName).ToList();
+                    var duplicateFileNames = fileNames.GroupBy(x => x)
+                        .Where(g => g.Count() > 1)
+                        .Select(y => y.Key)
+                        .ToList();
+                    var duplicateFiles = validRenamedAcademyFiles.Where(f => duplicateFileNames.Contains(f.NewName)).ToList();
+                    foreach (var duplicateFile in duplicateFiles)
+                    {
+                        var errorMessage = $"{duplicateFile.NewName} from {duplicateFile.OldName} is a duplicate file";
+                        LoggingHandler.LogError(errorMessage);
+                        await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"Application error. {errorMessage}").ConfigureAwait(false);
+                    }
+                    if (duplicateFileNames.Any())
+                    {
+                        throw new Exception($"Multiple files in week with name [{string.Join(", ", duplicateFileNames)}] found");
+                    }
+                }
 
                 // Create a folder with files object - makes further validation easier.
                 var destinationFolderWithFiles = await Task.WhenAll(
