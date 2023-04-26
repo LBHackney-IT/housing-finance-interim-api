@@ -175,6 +175,61 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             );
         }
 
+        // It throws an exception if multiple files are found in the same week
+        [Fact]
+        public async Task UCThrowsExceptionForMultipleFilesInSameWeek()
+        {
+            // arrange
+            var academyNewFilesCount = 2;
+
+            // Create 2 new files in the same week (same "next Monday" date)
+            var academyFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+            var academyNewFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: academyNewFilesCount);
+
+            var academyFolderFiles = academyNewFiles as File[] ?? academyNewFiles.ToArray();
+            academyFolderFiles[0].Name = "rentpost_10042023_to_23042023";
+            academyFolderFiles[1].Name = "rentpost_10042023_to_23042023";
+            academyFolderFiles[0].CreatedTime = new DateTime(2023, 4, 5); // Wednesday
+            academyFolderFiles[1].CreatedTime = new DateTime(2023, 4, 6); // Thursday
+            var expectedFileName = "HousingBenefitFile20230410.dat";
+            var expectedErrorMessage = $"Multiple files in week with name [{expectedFileName}] found";
+
+            // Name that both files created by this UC are expected to have
+            var expectedNewFileName = "HousingBenefitFile20230410.dat";
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.AcademyFileFolderLabel)))
+                .ReturnsAsync(academyFolders.ToList());
+
+            var destinationFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.HousingBenefitFileLabel)))
+                .ReturnsAsync(destinationFolders.ToList());
+
+            var academyFolderGId = academyFolders.First().GoogleIdentifier;
+            var destinationFolderGId = destinationFolders.First().GoogleIdentifier;
+
+            _mockGoogleClientService
+                    .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolderGId)))
+                    .ReturnsAsync(academyFolderFiles.ToList());
+
+            // act
+            Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            // The method to generate the processed files in google drive is not run
+            _mockGoogleClientService.Verify(
+                g => g.CopyFileInDrive(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()),
+                Times.Never
+            );
+            // An exception is thrown
+            await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(expectedErrorMessage);
+        }
+
         // It calls the COPY method only for files that don't already exist at destination:
         [Fact]
         public async Task UCCallsGoogleClientServiceCopyFileInDriveMethodForEachValidAcademyFileThatDoesntAlreadyExistAtDestination()
@@ -183,28 +238,33 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var academyNewFilesCount = 2;
             var academyAlreadyCopiedFilesCount = 3;
 
+            // Create 2 new files
             var academyFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
             var academyNewFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: academyNewFilesCount);
 
-            var oldNameFile1 = "07042022_Something_Academy_21042022";
-            var oldNameFile2 = "20012023_Something_Academy_03022023";
-            var oldNameFile3 = "15082022_Something_Academy_29082022";
+            var newFiles = academyNewFiles as File[] ?? academyNewFiles.ToArray();
+            newFiles[0].Name = "rentpost_07042022_to_21042025";
+            newFiles[1].Name = "rentpost_07042022_to_03022026";
+            newFiles[0].CreatedTime = new DateTime(2023, 4, 1);
+            newFiles[1].CreatedTime = new DateTime(2023, 4, 11);
 
+
+            // Create 3 files that already exist at destination
             var academyAlreadyCopiedFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: academyAlreadyCopiedFilesCount).ToList();
-            academyAlreadyCopiedFiles[0].Name = oldNameFile1;
-            academyAlreadyCopiedFiles[1].Name = oldNameFile2;
-            academyAlreadyCopiedFiles[2].Name = oldNameFile3;
+            academyAlreadyCopiedFiles[0].Name = "rentpost_07042022_to_21042022";
+            academyAlreadyCopiedFiles[1].Name = "rentpost_20012023_to_03042023";
+            academyAlreadyCopiedFiles[2].Name = "rentpost_15082022_to_29082022";
+            academyAlreadyCopiedFiles[0].CreatedTime = new DateTime(2022, 4, 21);
+            academyAlreadyCopiedFiles[1].CreatedTime = new DateTime(2022, 2, 3);
+            academyAlreadyCopiedFiles[2].CreatedTime = new DateTime(2022, 8, 29);
 
-            var academyFolderFiles = academyNewFiles.Concat(academyAlreadyCopiedFiles);
+            var academyFolderFiles = newFiles.Concat(academyAlreadyCopiedFiles);
 
-            var newNameFile1 = "HousingBenefitFile20220414.dat";
-            var newNameFile2 = "OK_HousingBenefitFile20230127.dat";
-            var newNameFile3 = "NOK_HousingBenefitFile20220822.dat";
-
+            // Mapping of file names in source folder to corresponding file names in destination folder
             var nameChangeRegister = new Dictionary<string, string>() {
-                { oldNameFile1, newNameFile1 },
-                { oldNameFile2, newNameFile2 },
-                { oldNameFile3, newNameFile3 }
+                { academyAlreadyCopiedFiles[0].Name, "HousingBenefitFile20220425.dat" },
+                { academyAlreadyCopiedFiles[1].Name, "OK_HousingBenefitFile20220207.dat" },
+                { academyAlreadyCopiedFiles[2].Name, "NOK_HousingBenefitFile20220829.dat" }
             };
 
             var destinationFolderFiles = academyAlreadyCopiedFiles.Select(fileAtSource =>
@@ -297,6 +357,40 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             _mockBatchLogGateway.Verify(g => g.SetToSuccessAsync(It.IsAny<long>()), Times.Never);
         }
 
+        [Fact]
+        public async Task UCThrowsExceptionWhenAcademyFileCreationTimeIsNull()
+        {
+            // arrange
+            const string FileName = "20042023_Something_Academy_04052023";
+            var Parents = new List<string>() { "1234567890", "3141592653" }.AsReadOnly();
+            var expectedErrorMessage = $"File {FileName} in folder(s) {String.Join(", ", Parents)} has no creation date";
+
+            var academyFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+            var validAcademyFolder = RandomGen.GoogleDriveFiles(filesValidity: true);
+            var validAcademyFolderArray = validAcademyFolder as File[] ?? validAcademyFolder.ToArray();
+
+            // Set file with null creation time and corresponding expected error message
+            validAcademyFolderArray.First().CreatedTime = null;
+            validAcademyFolderArray.First().Name = FileName;
+            validAcademyFolderArray.First().Parents = Parents;
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.AcademyFileFolderLabel)))
+                .ReturnsAsync(academyFolders.ToList());
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolders.First().GoogleIdentifier)))
+                .ReturnsAsync(validAcademyFolderArray.ToList());
+
+            // act
+            Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(expectedErrorMessage);
+
+            _mockBatchLogGateway.Verify(g => g.SetToSuccessAsync(It.IsAny<long>()), Times.Never);
+        }
+
         // If No destination folders are found...
         [Fact]
         public async Task UCThrowsNoFileSettingsFoundExceptionWhenNoHousingBenefitFileSettingsAreFound()
@@ -378,7 +472,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         [Fact]
         public async Task UCCallsCopiesAllValidAcademyFilesToEveryTargetHousingBenefitDirectory()
         {
-            /* 
+            /*
                 Here we're assuming that neither target directory already contains the files. The functionality
                 for excluding the files that already exist is tested by a dedicated test above.
             */
@@ -433,18 +527,18 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var academyFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
             var academyFolderFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: 2).ToList();
 
-            var oldNameFile1 = "06052022_Something_Academy_20052022";
-            var oldNameFile2 = "11022023_Something_Academy_25022023";
 
-            academyFolderFiles[0].Name = oldNameFile1;
-            academyFolderFiles[1].Name = oldNameFile2;
+            academyFolderFiles[0].Name = "06052022_Something_Academy_20052022";
+            academyFolderFiles[0].CreatedTime = new DateTime(2022, 2, 20);
+            academyFolderFiles[1].Name = "11022023_Something_Academy_25022023";
+            academyFolderFiles[1].CreatedTime = new DateTime(2023, 2, 25);
 
-            var newNameFile1 = "HousingBenefitFile20220513.dat";
-            var newNameFile2 = "HousingBenefitFile20230218.dat";
+            var newNameFile1 = "HousingBenefitFile20220221.dat";
+            var newNameFile2 = "HousingBenefitFile20230227.dat";
 
             var nameChangeRegister = new Dictionary<string, string>() {
-                { oldNameFile1, newNameFile1 },
-                { oldNameFile2, newNameFile2 }
+                { academyFolderFiles[0].Name, newNameFile1 },
+                { academyFolderFiles[1].Name, newNameFile2 }
             };
 
             _mockGoogleFileSettingGateway
@@ -549,10 +643,10 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
         // CopyFileInDrive file not found
         /*
-            The 'CopyFileInDrive' throws the same File Not Found error within these 4 scenarios: 
+            The 'CopyFileInDrive' throws the same File Not Found error within these 4 scenarios:
             1. Copied file doesn't exist, but destination folder does exist.
             2. Copied file does exist, but the destination folder doesn't exist.
-            3. Copied file does exist, but permissions don't allow target file access. 
+            3. Copied file does exist, but permissions don't allow target file access.
             4. Copied file does exist, but permissions don't allow destination folder access.
         */
         [Fact]

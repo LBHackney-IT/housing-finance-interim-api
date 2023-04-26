@@ -91,8 +91,34 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     throw new SIO.FileNotFoundException($"No files with valid name were found within the '{_academyFileFolderLabel}' label directories.");
 
                 var validRenamedAcademyFiles = validAcademyFiles
-                    .Select(file => new { Id = file.Id, NewName = CalculateNewFileName(file) })
+                    .Select(file => new
+                    {
+                        Id = file.Id,
+                        OldName = file.Name,
+                        NewName = CalculateNewFileName(file)
+                    })
                     .ToList();
+
+                foreach (var file in validRenamedAcademyFiles)
+                {
+                    // Throw exception if there are multiple files in the same week
+                    var fileNames = validRenamedAcademyFiles.Select(f => f.NewName).ToList();
+                    var duplicateFileNames = fileNames.GroupBy(x => x)
+                        .Where(g => g.Count() > 1)
+                        .Select(y => y.Key)
+                        .ToList();
+                    var duplicateFiles = validRenamedAcademyFiles.Where(f => duplicateFileNames.Contains(f.NewName)).ToList();
+                    foreach (var duplicateFile in duplicateFiles)
+                    {
+                        var errorMessage = $"{duplicateFile.NewName} from {duplicateFile.OldName} is a duplicate file";
+                        LoggingHandler.LogError(errorMessage);
+                        await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"Application error. {errorMessage}").ConfigureAwait(false);
+                    }
+                    if (duplicateFileNames.Any())
+                    {
+                        throw new Exception($"Multiple files in week with name [{string.Join(", ", duplicateFileNames)}] found");
+                    }
+                }
 
                 // Create a folder with files object - makes further validation easier.
                 var destinationFolderWithFiles = await Task.WhenAll(
@@ -170,12 +196,31 @@ namespace HousingFinanceInterimApi.V1.UseCase
             return googleFileSettings;
         }
 
-        private string CalculateNewFileName(File file)
+        private static string CalculateNewFileName(File file)
         {
-            var fileNameDateMatches = _academyFilePattern.Matches(file.Name);
-            var fileNameDate = DateTime.ParseExact(fileNameDateMatches[1].Value, "ddMMyyyy", null);
+            // Handle null creation date - this should never happen
+            if (file.CreatedTime == null)
+            {
+                var errorMsg = $"File {file.Name} in folder(s) {String.Join(", ", file.Parents)} has no creation date";
+                LoggingHandler.LogError(errorMsg);
+                throw new Exception(errorMsg);
+            }
 
-            return $"HousingBenefitFile{fileNameDate.AddDays(-7).ToString("yyyyMMdd")}.dat";
+            var createdTime = file.CreatedTime.Value;
+            var nextMondayDate = GetFollowingMondayDate(createdTime);
+
+            var newFileName = $"HousingBenefitFile{nextMondayDate}.dat";
+            LoggingHandler.LogInfo($"File {file.Name} in folder(s) {String.Join(", ", file.Parents)} will be renamed to {newFileName}");
+            return newFileName;
+        }
+
+        private static string GetFollowingMondayDate(DateTime fileCreatedDate)
+        {
+            // Get string with formatted date of next Monday after file creation time
+            // DayOfWeek ranges from 0 (Sunday) - 6 (Saturday)
+            var daysUntilNextMonday = ((int) DayOfWeek.Monday - (int) fileCreatedDate.DayOfWeek + 7) % 7;
+            var nextMonday = fileCreatedDate.AddDays(daysUntilNextMonday);
+            return nextMonday.ToString("yyyyMMdd");
         }
     }
 }
