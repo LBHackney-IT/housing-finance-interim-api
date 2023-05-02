@@ -10,12 +10,10 @@ using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.Tests.V1.TestHelpers;
 using HousingFinanceInterimApi.V1.Domain;
 using System.Linq;
-using Bogus.DataSets;
 using Google.Apis.Drive.v3.Data;
 using FluentAssertions;
 using SIO = System.IO;
 using Google;
-using HousingFinanceInterimApi.V1.Handlers;
 
 namespace HousingFinanceInterimApi.Tests.V1.UseCase
 {
@@ -159,7 +157,6 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         {
             // arrange
             var destinationFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(1).ToList();
-            var expectedGDriveDestIdentifiers = destinationFileSettings.Select(s => s.GoogleIdentifier).ToList();
 
             _mockGoogleFileSettingGateway
                 .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.HousingBenefitFileLabel)))
@@ -183,7 +180,6 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         {
             // arrange
             var academyNewFilesCount = 2;
-            var academyAlreadyCopiedFilesCount = 3;
 
             var referenceDate = new DateTime(2023, 04, 25);
 
@@ -673,7 +669,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            await useCaseCall.Should().ThrowAsync<TimeoutException>().WithMessage(expectedMessage);
+            await useCaseCall.Should().ThrowAsync<TimeoutException>().WithMessage(expectedMessage).ConfigureAwait(false);
 
             _mockBatchLogErrorGateway.Verify(g =>
                 g.CreateAsync(
