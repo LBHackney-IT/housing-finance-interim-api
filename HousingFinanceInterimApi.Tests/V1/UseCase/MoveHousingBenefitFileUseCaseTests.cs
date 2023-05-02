@@ -301,7 +301,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             var expectedErrorMsg =
                 "Expected 1 file to copy from the Academy Folder(s) " +
-                "* directories, but found 0. No valid files were found.";
+                "* directories, but found none.";
             await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(expectedErrorMsg);
         }
 
@@ -602,50 +602,6 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             );
         }
 
-        // No longer do this in this use case
-        // // UC calls batch log error for each invalid file name
-        // [Fact]
-        // public async Task UCCallsBatchLogErrorGWCreateMethodForEachFileWithInvalidName()
-        // {
-        //     // arrange
-        //     Func<string, string> expectedErrorMessage = fileName => $"Application error. Not possible to copy academy files({fileName})";
-        //
-        //     var academyFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
-        //     var academyFolderValidFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: 1);
-        //     var academyFolderNotValidFiles = RandomGen.GoogleDriveFiles(filesValidity: false).ToList();
-        //     var academyFolderFiles = academyFolderValidFiles.Concat(academyFolderNotValidFiles);
-        //
-        //     var batchLog = RandomGen.BatchLogDomain();
-        //
-        //     _mockGoogleFileSettingGateway
-        //         .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.AcademyFileFolderLabel)))
-        //         .ReturnsAsync(academyFolders.ToList());
-        //
-        //     _mockGoogleClientService
-        //         .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolders.First().GoogleIdentifier)))
-        //         .ReturnsAsync(academyFolderFiles.ToList());
-        //
-        //     _mockBatchLogGateway
-        //         .Setup(g => g.CreateAsync(It.IsAny<string>(), It.IsAny<bool>()))
-        //         .ReturnsAsync(batchLog);
-        //
-        //     // act
-        //     await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
-        //
-        //     // assert
-        //     academyFolderNotValidFiles.ForEach(notValidFile =>
-        //         _mockBatchLogErrorGateway.Verify(g =>
-        //             g.CreateAsync(
-        //                 It.Is<long>(l => l == batchLog.Id),
-        //                 It.Is<string>(s => s == "ERROR"),
-        //                 It.Is<string>(s => s == expectedErrorMessage(notValidFile.Name))
-        //             ),
-        //             Times.Once
-        //         )
-        //     );
-        //
-        //     _mockBatchLogErrorGateway.VerifyNoOtherCalls();
-        // }
 
         // If File Setting GW throws...
         [Fact]

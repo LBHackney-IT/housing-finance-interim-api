@@ -75,24 +75,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 if (!academyFiles.Any())
                     throw new SIO.FileNotFoundException($"No files were found within the '{_academyFileFolderLabel}' label directories.");
 
-                // From the files in the Academy folder, select ones created in last week and rename them.
-                var validRenamedAcademyFiles = academyFiles
-                    .Select(file => new
-                    {
-                        Id = file.Id,
-                        OldName = file.Name,
-                        NewName = CalculateNewFileName(file),
-                        CreatedTime = file.CreatedTime
-                    })
-                    .OrderBy(file => file.CreatedTime)
-                    .ToList();
-
-                var filesCreatedSinceLastWeek = validRenamedAcademyFiles.Where(file => file.CreatedTime > DateTime.Now.AddDays(-7)).ToList();
-                if (!filesCreatedSinceLastWeek.Any())
-                {
-                    LoggingHandler.LogWarning("No Academy files were created in the last week.");
-                }
-                validRenamedAcademyFiles = validRenamedAcademyFiles.TakeLast(1).ToList();
+                // Filters the list to only contain the most recent valid file to copy.
+                var validRenamedAcademyFiles = FilterAcademyFileToCopy(academyFiles, destinationGoogleFileSettings);
 
                 var destinationFolderWithFiles = await Task.WhenAll(
                     destinationGoogleFileSettings.Select(async setting =>
@@ -119,21 +103,17 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         {
                             FileGId = academyFile.Id,
                             FileName = academyFile.NewName,
+                            CreatedDate = academyFile.CreatedTime,
                             DestinationFolderGId = destinationFolder.Id
                         })
                     );
 
-                // Ensure that only one academy file is copied in this invocation
-                if (copyInstructions.Count() != 1)
+                // Ensure that an academy file is copied in this invocation
+                if (copyInstructions.Count() == 0)
                 {
                     var academyFolderIds = string.Join(", ", academyFoldersSettings.Select(setting => setting.GoogleIdentifier));
                     var errorMessage =
-                        $"Expected 1 file to copy from the Academy Folder(s) '{academyFolderIds}' directories, but found {copyInstructions.Count()}. ";
-                    if (copyInstructions.Any())
-                        errorMessage += $"Valid files found: {string.Join(", ", copyInstructions.Select(copyInstruction => copyInstruction.FileName))}";
-                    else
-                        errorMessage += "No valid files were found.";
-
+                        $"Expected 1 file to copy from the Academy Folder(s) '{academyFolderIds}' directories, but found none.";
                     throw new Exception(errorMessage);
                 }
 
@@ -172,6 +152,44 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message);
                 throw;
             }
+        }
+
+        private class FileCopyObject
+        {
+            public string Id;
+            public string OldName;
+            public string NewName;
+            public DateTime? CreatedTime;
+            public FileCopyObject(string id, string oldName, string newName, DateTime? createdTime)
+            {
+                Id = id;
+                OldName = oldName;
+                NewName = newName;
+                CreatedTime = createdTime;
+            }
+        }
+
+        private List<FileCopyObject> FilterAcademyFileToCopy(List<File> academyFiles, List<GoogleFileSettingDomain> destinationGoogleFileSettings)
+        {
+            // From the files in the Academy folder, select ones created in last week and rename them.
+            // If multiple files in valid week, select the first one only.
+            var validatedRenamedFiles = academyFiles
+                .Select(file => new FileCopyObject(
+                    file.Id,
+                    file.Name,
+                    CalculateNewFileName(file),
+                    file.CreatedTime)
+                        )
+                    .OrderBy(file => file.CreatedTime)
+                .ToList();
+
+            var filesCreatedSinceLastWeek = validatedRenamedFiles.Where(file => file.CreatedTime > DateTime.Now.AddDays(-7)).ToList();
+            if (!filesCreatedSinceLastWeek.Any())
+            {
+                LoggingHandler.LogWarning("No Academy files were created in the last week.");
+            }
+            validatedRenamedFiles = validatedRenamedFiles.TakeLast(1).ToList();
+            return validatedRenamedFiles;
         }
 
         private async Task<List<GoogleFileSettingDomain>> GetGoogleFileSetting(string label)
