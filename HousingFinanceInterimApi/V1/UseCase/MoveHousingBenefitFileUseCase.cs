@@ -75,52 +75,25 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 if (!academyFiles.Any())
                     throw new SIO.FileNotFoundException($"No files were found within the '{_academyFileFolderLabel}' label directories.");
 
-                Predicate<File> isValidFileName = (file) => _academyFilePattern.Matches(file.Name).Count == 2;
-
-                var validAcademyFiles = academyFiles.Where(f => isValidFileName(f)).ToList();
-                var notValidAcademyFiles = academyFiles.Where(f => !isValidFileName(f)).ToList();
-
-                foreach (var file in notValidAcademyFiles)
-                {
-                    var errorMessage = $"Not possible to copy academy files({file.Name})";
-                    LoggingHandler.LogError(errorMessage);
-                    await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"Application error. {errorMessage}").ConfigureAwait(false);
-                };
-
-                if (!validAcademyFiles.Any())
-                    throw new SIO.FileNotFoundException($"No files with valid name were found within the '{_academyFileFolderLabel}' label directories.");
-
-                var validRenamedAcademyFiles = validAcademyFiles
+                // From the files in the Academy folder, select ones created in last week and rename them.
+                var validRenamedAcademyFiles = academyFiles
                     .Select(file => new
                     {
                         Id = file.Id,
                         OldName = file.Name,
-                        NewName = CalculateNewFileName(file)
+                        NewName = CalculateNewFileName(file),
+                        CreatedTime = file.CreatedTime
                     })
+                    .OrderBy(file => file.CreatedTime)
                     .ToList();
 
-                foreach (var file in validRenamedAcademyFiles)
+                var filesCreatedSinceLastWeek = validRenamedAcademyFiles.Where(file => file.CreatedTime > DateTime.Now.AddDays(-7)).ToList();
+                if (!filesCreatedSinceLastWeek.Any())
                 {
-                    // Throw exception if there are multiple files in the same week
-                    var fileNames = validRenamedAcademyFiles.Select(f => f.NewName).ToList();
-                    var duplicateFileNames = fileNames.GroupBy(x => x)
-                        .Where(g => g.Count() > 1)
-                        .Select(y => y.Key)
-                        .ToList();
-                    var duplicateFiles = validRenamedAcademyFiles.Where(f => duplicateFileNames.Contains(f.NewName)).ToList();
-                    foreach (var duplicateFile in duplicateFiles)
-                    {
-                        var errorMessage = $"{duplicateFile.NewName} from {duplicateFile.OldName} is a duplicate file";
-                        LoggingHandler.LogError(errorMessage);
-                        await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"Application error. {errorMessage}").ConfigureAwait(false);
-                    }
-                    if (duplicateFileNames.Any())
-                    {
-                        throw new Exception($"Multiple files in week with name [{string.Join(", ", duplicateFileNames)}] found");
-                    }
+                    LoggingHandler.LogWarning("No Academy files were created in the last week.");
                 }
+                validRenamedAcademyFiles = validRenamedAcademyFiles.TakeLast(1).ToList();
 
-                // Create a folder with files object - makes further validation easier.
                 var destinationFolderWithFiles = await Task.WhenAll(
                     destinationGoogleFileSettings.Select(async setting =>
                         new
@@ -131,7 +104,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         .ToList()
                     );
 
-                var copyFileInstructions = destinationFolderWithFiles
+                var copyInstructions = destinationFolderWithFiles
                     .SelectMany(destinationFolder => validRenamedAcademyFiles
                         // Avoid duplicating existing files at destination folder
                         .Where(academyFile =>
@@ -150,12 +123,26 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         })
                     );
 
-                foreach (var copyInstruction in copyFileInstructions)
+                // Ensure that only one academy file is copied in this invocation
+                if (copyInstructions.Count() != 1)
                 {
-                    await _googleClientService
+                    var academyFolderIds = string.Join(", ", academyFoldersSettings.Select(setting => setting.GoogleIdentifier));
+                    var errorMessage =
+                        $"Expected 1 file to copy from the Academy Folder(s) '{academyFolderIds}' directories, but found {copyInstructions.Count()}. ";
+                    if (copyInstructions.Any())
+                        errorMessage += $"Valid files found: {string.Join(", ", copyInstructions.Select(copyInstruction => copyInstruction.FileName))}";
+                    else
+                        errorMessage += "No valid files were found.";
+
+                    throw new Exception(errorMessage);
+                }
+
+                var copyInstruction = copyInstructions.First();
+
+                await _googleClientService
                         .CopyFileInDrive(copyInstruction.FileGId, copyInstruction.DestinationFolderGId, copyInstruction.FileName)
                         .ConfigureAwait(false);
-                }
+
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
 
@@ -198,19 +185,16 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         private static string CalculateNewFileName(File file)
         {
-            // Handle null creation date - this should never happen
-            if (file.CreatedTime == null)
-            {
-                var errorMsg = $"File {file.Name} in folder(s) {String.Join(", ", file.Parents)} has no creation date";
-                LoggingHandler.LogError(errorMsg);
-                throw new Exception(errorMsg);
-            }
-
             var createdTime = file.CreatedTime.Value;
             var nextMondayDate = GetFollowingMondayDate(createdTime);
 
             var newFileName = $"HousingBenefitFile{nextMondayDate}.dat";
-            LoggingHandler.LogInfo($"File {file.Name} in folder(s) {String.Join(", ", file.Parents)} will be renamed to {newFileName}");
+
+            var parentFolders = "Unknown";
+            if (file.Parents != null)
+                parentFolders = String.Join(", ", file.Parents);
+
+            LoggingHandler.LogInfo($"File {file.Name} {file.Id} in folder(s) {parentFolders} will be renamed to {newFileName}");
             return newFileName;
         }
 
