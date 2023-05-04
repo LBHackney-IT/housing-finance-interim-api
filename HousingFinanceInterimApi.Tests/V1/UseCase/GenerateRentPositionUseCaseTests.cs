@@ -66,7 +66,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(RandomGen.RentPositionCsvRepresentation());
 
             _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>()))
+                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), null))
                 .ReturnsAsync(new List<File>());
 
             _mockGoogleClientService
@@ -109,7 +109,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(RandomGen.RentPositionCsvRepresentation());
 
             _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>()))
+                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), null))
                 .ReturnsAsync(new List<File>());
 
             _mockGoogleClientService
