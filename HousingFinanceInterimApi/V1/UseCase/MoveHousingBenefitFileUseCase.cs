@@ -75,9 +75,26 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 if (!academyFiles.Any())
                     throw new SIO.FileNotFoundException($"No files were found within the '{_academyFileFolderLabel}' label directories.");
 
-                // Filters the list to only contain the most recent valid file to copy.
-                var validRenamedAcademyFiles = FilterAcademyFileToCopy(academyFiles, destinationGoogleFileSettings);
+                Predicate<File> isValidFileName = (file) => _academyFilePattern.Matches(file.Name).Count == 2;
 
+                var validAcademyFiles = academyFiles.Where(f => isValidFileName(f)).ToList();
+                var notValidAcademyFiles = academyFiles.Where(f => !isValidFileName(f)).ToList();
+
+                foreach (var file in notValidAcademyFiles)
+                {
+                    var errorMessage = $"Not possible to copy academy files({file.Name})";
+                    LoggingHandler.LogError(errorMessage);
+                    await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"Application error. {errorMessage}").ConfigureAwait(false);
+                };
+
+                if (!validAcademyFiles.Any())
+                    throw new SIO.FileNotFoundException($"No files with valid name were found within the '{_academyFileFolderLabel}' label directories.");
+
+                var validRenamedAcademyFiles = validAcademyFiles
+                    .Select(file => new { Id = file.Id, NewName = CalculateNewFileName(file) })
+                    .ToList();
+
+                // Create a folder with files object - makes further validation easier.
                 var destinationFolderWithFiles = await Task.WhenAll(
                     destinationGoogleFileSettings.Select(async setting =>
                         new
@@ -88,7 +105,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         .ToList()
                     );
 
-                var copyInstructions = destinationFolderWithFiles
+                var copyFileInstructions = destinationFolderWithFiles
                     .SelectMany(destinationFolder => validRenamedAcademyFiles
                         // Avoid duplicating existing files at destination folder
                         .Where(academyFile =>
@@ -103,26 +120,16 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         {
                             FileGId = academyFile.Id,
                             FileName = academyFile.NewName,
-                            CreatedDate = academyFile.CreatedTime,
                             DestinationFolderGId = destinationFolder.Id
                         })
                     );
 
-                // Ensure that an academy file is copied in this invocation
-                if (copyInstructions.Count() == 0)
+                foreach (var copyInstruction in copyFileInstructions)
                 {
-                    var academyFolderIds = string.Join(", ", academyFoldersSettings.Select(setting => setting.GoogleIdentifier));
-                    var errorMessage =
-                        $"Expected 1 file to copy from the Academy Folder(s) '{academyFolderIds}' directories, but found none.";
-                    throw new Exception(errorMessage);
-                }
-
-                var copyInstruction = copyInstructions.First();
-
-                await _googleClientService
+                    await _googleClientService
                         .CopyFileInDrive(copyInstruction.FileGId, copyInstruction.DestinationFolderGId, copyInstruction.FileName)
                         .ConfigureAwait(false);
-
+                }
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
 
@@ -154,44 +161,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
             }
         }
 
-        private class FileCopyObject
-        {
-            public string Id;
-            public string OldName;
-            public string NewName;
-            public DateTime? CreatedTime;
-            public FileCopyObject(string id, string oldName, string newName, DateTime? createdTime)
-            {
-                Id = id;
-                OldName = oldName;
-                NewName = newName;
-                CreatedTime = createdTime;
-            }
-        }
-
-        private List<FileCopyObject> FilterAcademyFileToCopy(List<File> academyFiles, List<GoogleFileSettingDomain> destinationGoogleFileSettings)
-        {
-            // From the files in the Academy folder, select ones created in last week and rename them.
-            // If multiple files in valid week, select the first one only.
-            var validatedRenamedFiles = academyFiles
-                .Select(file => new FileCopyObject(
-                    file.Id,
-                    file.Name,
-                    CalculateNewFileName(file),
-                    file.CreatedTime)
-                        )
-                    .OrderBy(file => file.CreatedTime)
-                .ToList();
-
-            var filesCreatedSinceLastWeek = validatedRenamedFiles.Where(file => file.CreatedTime > DateTime.Now.AddDays(-7)).ToList();
-            if (!filesCreatedSinceLastWeek.Any())
-            {
-                LoggingHandler.LogWarning("No Academy files were created in the last week.");
-            }
-            validatedRenamedFiles = validatedRenamedFiles.TakeLast(1).ToList();
-            return validatedRenamedFiles;
-        }
-
         private async Task<List<GoogleFileSettingDomain>> GetGoogleFileSetting(string label)
         {
             LoggingHandler.LogInfo($"Getting google file settings for '{label}' label");
@@ -201,28 +170,12 @@ namespace HousingFinanceInterimApi.V1.UseCase
             return googleFileSettings;
         }
 
-        private static string CalculateNewFileName(File file)
+        private string CalculateNewFileName(File file)
         {
-            var createdTime = file.CreatedTime.Value;
-            var nextMondayDate = GetFollowingMondayDate(createdTime);
+            var fileNameDateMatches = _academyFilePattern.Matches(file.Name);
+            var fileNameDate = DateTime.ParseExact(fileNameDateMatches[1].Value, "ddMMyyyy", null);
 
-            var newFileName = $"HousingBenefitFile{nextMondayDate}.dat";
-
-            var parentFolders = "Unknown";
-            if (file.Parents != null)
-                parentFolders = String.Join(", ", file.Parents);
-
-            LoggingHandler.LogInfo($"File {file.Name} {file.Id} in folder(s) {parentFolders} will be renamed to {newFileName}");
-            return newFileName;
-        }
-
-        private static string GetFollowingMondayDate(DateTime fileCreatedDate)
-        {
-            // Get string with formatted date of next Monday after file creation time
-            // DayOfWeek ranges from 0 (Sunday) - 6 (Saturday)
-            var daysUntilNextMonday = ((int) DayOfWeek.Monday - (int) fileCreatedDate.DayOfWeek + 7) % 7;
-            var nextMonday = fileCreatedDate.AddDays(daysUntilNextMonday);
-            return nextMonday.ToString("yyyyMMdd");
+            return $"HousingBenefitFile{fileNameDate.AddDays(-7).ToString("yyyyMMdd")}.dat";
         }
     }
 }
