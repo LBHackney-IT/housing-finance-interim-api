@@ -419,12 +419,14 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public async Task UCCopiesValidAcademyFilesWithTheCorrectNewCalculatedName()
         {
             // arrange
+            var referenceDate = new DateTime(2023, 05, 01);
+
             var academyFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
             var academyFolderFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: 1).ToList();
 
             var academyFile = academyFolderFiles[0];
             academyFile.Name = "06052022_Something_Academy_20052022";
-            academyFile.CreatedTime = DateTime.Today - TimeSpan.FromDays(1);
+            academyFile.CreatedTime = referenceDate - TimeSpan.FromDays(2);
 
             // Expected new name for the academy file
             var renamedFileName = "HousingBenefitFile20230501.dat";
