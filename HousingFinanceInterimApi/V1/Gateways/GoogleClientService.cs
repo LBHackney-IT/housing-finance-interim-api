@@ -141,7 +141,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
             listRequest.Q = $"'{driveId}' in parents";
             if (!string.IsNullOrWhiteSpace(fieldsOverride))
             {
-                listRequest.Fields = fieldsOverride;
+                listRequest.Fields = fieldsOverride.Trim();
             }
 
             // Recursively get files from drive
