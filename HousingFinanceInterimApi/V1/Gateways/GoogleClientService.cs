@@ -135,16 +135,20 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// <returns>
         /// The list of files for the given drive.
         /// </returns>
-        public async Task<IList<Google.Apis.Drive.v3.Data.File>> GetFilesInDriveAsync(string driveId)
+        public async Task<IList<Google.Apis.Drive.v3.Data.File>> GetFilesInDriveAsync(string driveId, string fieldsOverride = null)
         {
             FilesResource.ListRequest listRequest = _driveService.Files.List();
             listRequest.Q = $"'{driveId}' in parents";
+            if (!string.IsNullOrWhiteSpace(fieldsOverride))
+            {
+                listRequest.Fields = fieldsOverride.Trim();
+            }
 
             // Recursively get files from drive
             return await GetFilesInDrive(listRequest, null).ConfigureAwait(false);
         }
 
-        public async Task<File> GetFilesInDriveAsync(string driveId, string fileName)
+        public async Task<File> GetFileByNameInDriveAsync(string driveId, string fileName)
         {
             var files = await GetFilesInDriveAsync(driveId).ConfigureAwait(false);
 

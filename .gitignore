@@ -64,3 +64,5 @@ tmp/
 .fake
 .ionide
 /HousingFinanceInterimApi/Properties/launchSettings.json
+
+*.env
