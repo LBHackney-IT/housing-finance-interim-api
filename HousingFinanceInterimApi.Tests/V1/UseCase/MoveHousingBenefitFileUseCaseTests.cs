@@ -60,11 +60,11 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(destinationFolders.ToList());
 
             // destination folder files
-            _mockGoogleClientService.Setup(g => g.GetFilesInDriveAsync(It.IsAny<string>(), null)).ReturnsAsync(new List<File>());
+            _mockGoogleClientService.Setup(g => g.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new List<File>());
 
             // source folder files
             _mockGoogleClientService
-                .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolders.First().GoogleIdentifier), null))
+                .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolders.First().GoogleIdentifier), It.IsAny<string>()))
                 .ReturnsAsync(academyFolderFiles.ToList());
         }
 
@@ -136,7 +136,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             // Return a couple files to avoid failure
             _mockGoogleClientService
-                .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFileSettings.First().GoogleIdentifier), null))
+                .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFileSettings.First().GoogleIdentifier), It.IsAny<string>()))
                 .ReturnsAsync(RandomGen.GoogleDriveFiles(true).ToList());
 
             // act
@@ -145,7 +145,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // assert
             academyFileSettings.ForEach((academyFileSetting) =>
                 _mockGoogleClientService.Verify(
-                    g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFileSetting.GoogleIdentifier), null),
+                    g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFileSetting.GoogleIdentifier), It.IsAny<string>()),
                     Times.Once
                 )
             );
@@ -168,7 +168,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // assert
             destinationFileSettings.ForEach(destinationFolder =>
                 _mockGoogleClientService.Verify(
-                    g => g.GetFilesInDriveAsync(It.Is<string>(s => s == destinationFolder.GoogleIdentifier), null),
+                    g => g.GetFilesInDriveAsync(It.Is<string>(s => s == destinationFolder.GoogleIdentifier), It.IsAny<string>()),
                     Times.Once
                 )
             );
@@ -212,11 +212,11 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var destinationFolderGId = destinationFolders.First().GoogleIdentifier;
 
             _mockGoogleClientService
-                    .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolderGId), null))
+                    .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolderGId), It.IsAny<string>()))
                     .ReturnsAsync(academyFolderFiles.ToList());
 
             _mockGoogleClientService
-                    .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == destinationFolderGId), null))
+                    .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == destinationFolderGId), It.IsAny<string>()))
                     .ReturnsAsync(destinationFolderFiles.ToList());
 
             // act
@@ -279,11 +279,11 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var destinationFolderGId = destinationFolders.First().GoogleIdentifier;
 
             _mockGoogleClientService
-                .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolderGId), null))
+                .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolderGId), It.IsAny<string>()))
                 .ReturnsAsync(academyFolderFiles.ToList());
 
             _mockGoogleClientService
-                .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == destinationFolderGId), null))
+                .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == destinationFolderGId), It.IsAny<string>()))
                 .ReturnsAsync(destinationFolderFiles.ToList());
 
             // act
@@ -391,7 +391,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(academyFolders.ToList());
 
             _mockGoogleClientService
-                    .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolders.First().GoogleIdentifier), null))
+                    .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolders.First().GoogleIdentifier), It.IsAny<string>()))
                     .ReturnsAsync(academyFiles.ToList());
 
             _mockGoogleFileSettingGateway
@@ -440,7 +440,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(academyFolders.ToList());
 
             _mockGoogleClientService
-                    .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolders.First().GoogleIdentifier), null))
+                    .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolders.First().GoogleIdentifier), It.IsAny<string>()))
                     .ReturnsAsync(academyFolderFiles);
 
             // act
@@ -511,7 +511,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var folderNotFoundException = ErrorGen.FileNotFoundException();
 
             _mockGoogleClientService
-                .Setup(g => g.GetFilesInDriveAsync(It.IsAny<string>(), null))
+                .Setup(g => g.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(folderNotFoundException);
 
             _mockBatchLogGateway

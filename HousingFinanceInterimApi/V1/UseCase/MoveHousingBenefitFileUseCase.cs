@@ -63,7 +63,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 var academyFiles = new List<File>();
                 foreach (var academyFolderSetting in academyFoldersSettings)
                 {
-                    var folderFiles = await _googleClientService.GetFilesInDriveAsync(academyFolderSetting.GoogleIdentifier).ConfigureAwait(false);
+                    var fileQueryFields = "nextPageToken, files(id, name, createdTime)";
+                    var folderFiles = await _googleClientService.GetFilesInDriveAsync(academyFolderSetting.GoogleIdentifier, fileQueryFields).ConfigureAwait(false);
 
                     // I believe, this should be logged within the Gateway method
                     LoggingHandler.LogInfo($"Folder Id: {academyFolderSetting.GoogleIdentifier}");
@@ -204,6 +205,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private static string CalculateNewFileName(File file)
         {
             var createdTime = file.CreatedTime.Value;
+            LoggingHandler.LogInfo("File created time: " + createdTime.ToString("yyyy-MM-dd HH:mm:ss"));
             var nextMondayDate = GetFollowingMondayDate(createdTime);
 
             var newFileName = $"HousingBenefitFile{nextMondayDate}.dat";
