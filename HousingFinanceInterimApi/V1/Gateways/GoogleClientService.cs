@@ -143,9 +143,18 @@ namespace HousingFinanceInterimApi.V1.Gateways
             {
                 listRequest.Fields = fieldsOverride.Trim();
             }
+            LoggingHandler.LogInfo($"GoogleClientService: GetFilesInDriveAsync: listRequest.Fields: {listRequest.Fields}");
 
             // Recursively get files from drive
-            return await GetFilesInDrive(listRequest, null).ConfigureAwait(false);
+            var files = await GetFilesInDrive(listRequest, null).ConfigureAwait(false);
+            LoggingHandler.LogInfo($"GoogleClientService: GetFilesInDriveAsync: files.Count: {files.Count}");
+            foreach (var file in files)
+            {
+                LoggingHandler.LogInfo($"GoogleClientService: GetFilesInDriveAsync: file.Name: {file.Name}");
+                LoggingHandler.LogInfo($"GoogleClientService: GetFilesInDriveAsync: file.Id: {file.Id}");
+                LoggingHandler.LogInfo($"GoogleClientService: GetFilesInDriveAsync: file.CreatedTime: {file.CreatedTime}");
+            }
+            return files;
         }
 
         public async Task<File> GetFileByNameInDriveAsync(string driveId, string fileName)

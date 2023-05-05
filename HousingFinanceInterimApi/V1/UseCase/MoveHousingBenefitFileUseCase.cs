@@ -205,6 +205,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private static string CalculateNewFileName(File file)
         {
             var createdTime = file.CreatedTime.Value;
+            LoggingHandler.LogInfo("File created time: " + createdTime.ToString("yyyy-MM-dd HH:mm:ss"));
             var nextMondayDate = GetFollowingMondayDate(createdTime);
 
             var newFileName = $"HousingBenefitFile{nextMondayDate}.dat";
