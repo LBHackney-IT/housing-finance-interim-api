@@ -16,10 +16,16 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// Gets the files in drive asynchronous.
         /// </summary>
         /// <param name="driveId">The drive identifier.</param>
+        /// <param name="fieldsOverride">A custom list of fields to fetch from the google drive api response.</param>
         /// <returns>The list of files for the given drive.</returns>
-        public Task<IList<Google.Apis.Drive.v3.Data.File>> GetFilesInDriveAsync(string driveId);
+        public Task<IList<Google.Apis.Drive.v3.Data.File>> GetFilesInDriveAsync(string driveId, string fieldsOverride = null);
 
-        public Task<Google.Apis.Drive.v3.Data.File> GetFilesInDriveAsync(string driveId, string fileName);
+        /// <summary>
+        /// Gets the files in a drive folder asynchronously by name.
+        /// </summary>
+        /// <param name="driveId">The drive identifier.</param>
+        /// <returns>The list of files for the given drive.</returns>
+        public Task<Google.Apis.Drive.v3.Data.File> GetFileByNameInDriveAsync(string driveId, string fileName);
 
         /// <summary>
         /// Reads the file line data asynchronous.

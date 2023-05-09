@@ -114,7 +114,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             System.Threading.Thread.Sleep(_sleepDuration);
 
             var file = await _googleClientService
-                .GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
+                .GetFileByNameInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
                 .ConfigureAwait(false);
 
             var fileLink = $"https://drive.google.com/file/d/{file.Id}";
@@ -161,7 +161,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             System.Threading.Thread.Sleep(_sleepDuration);
 
             var file = await _googleClientService
-                .GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
+                .GetFileByNameInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
                 .ConfigureAwait(false);
 
             var fileLink = $"https://drive.google.com/file/d/{file.Id}";
@@ -194,7 +194,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             System.Threading.Thread.Sleep(_sleepDuration);
 
             var file = await _googleClientService
-                .GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
+                .GetFileByNameInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
                 .ConfigureAwait(false);
 
             var fileLink = $"https://drive.google.com/file/d/{file.Id}";
@@ -227,7 +227,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             System.Threading.Thread.Sleep(_sleepDuration);
 
             var file = await _googleClientService
-                .GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
+                .GetFileByNameInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
                 .ConfigureAwait(false);
 
             var fileLink = $"https://drive.google.com/file/d/{file.Id}";
@@ -260,7 +260,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             System.Threading.Thread.Sleep(_sleepDuration);
 
             var file = await _googleClientService
-                .GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
+                .GetFileByNameInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
                 .ConfigureAwait(false);
 
             var fileLink = $"https://drive.google.com/file/d/{file.Id}";

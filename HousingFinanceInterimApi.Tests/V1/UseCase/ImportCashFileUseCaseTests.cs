@@ -104,7 +104,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
         private void SetUpGoogleClientService(List<File> fileList)
         {
-            _googleClientService.Setup(service => service.GetFilesInDriveAsync(_googleIdentifier)).ReturnsAsync(fileList);
+            _googleClientService.Setup(service => service.GetFilesInDriveAsync(_googleIdentifier, null)).ReturnsAsync(fileList);
             _googleClientService.Setup(service => service.ReadFileLineDataAsync(fileList[1].Name,
                                                                                 fileList[1].Id,
                                                                                 fileList[1].MimeType))

@@ -135,16 +135,23 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// <returns>
         /// The list of files for the given drive.
         /// </returns>
-        public async Task<IList<Google.Apis.Drive.v3.Data.File>> GetFilesInDriveAsync(string driveId)
+        public async Task<IList<Google.Apis.Drive.v3.Data.File>> GetFilesInDriveAsync(string driveId, string fieldsOverride = null)
         {
             FilesResource.ListRequest listRequest = _driveService.Files.List();
             listRequest.Q = $"'{driveId}' in parents";
+            if (!string.IsNullOrWhiteSpace(fieldsOverride))
+            {
+                listRequest.Fields = fieldsOverride.Trim();
+            }
 
             // Recursively get files from drive
-            return await GetFilesInDrive(listRequest, null).ConfigureAwait(false);
+            var files = await GetFilesInDrive(listRequest, null).ConfigureAwait(false);
+            LoggingHandler.LogInfo($"GoogleClientService: GetFilesInDriveAsync: folderId: {driveId}");
+            LoggingHandler.LogInfo($"GoogleClientService: GetFilesInDriveAsync: files.Count: {files.Count}");
+            return files;
         }
 
-        public async Task<File> GetFilesInDriveAsync(string driveId, string fileName)
+        public async Task<File> GetFileByNameInDriveAsync(string driveId, string fileName)
         {
             var files = await GetFilesInDriveAsync(driveId).ConfigureAwait(false);
 
@@ -192,6 +199,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
             var updateRequest = _driveService.Files.Copy(newFile, fileId);
             var renamedFile = updateRequest.Execute();
+            LoggingHandler.LogInfo($"File {fileName} copied to {destinationFolderId} - New ID: {renamedFile.Id}");
             return Task.CompletedTask;
         }
 
