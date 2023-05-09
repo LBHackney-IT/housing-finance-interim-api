@@ -143,17 +143,11 @@ namespace HousingFinanceInterimApi.V1.Gateways
             {
                 listRequest.Fields = fieldsOverride.Trim();
             }
-            LoggingHandler.LogInfo($"GoogleClientService: GetFilesInDriveAsync: listRequest.Fields: {listRequest.Fields}");
 
             // Recursively get files from drive
             var files = await GetFilesInDrive(listRequest, null).ConfigureAwait(false);
+            LoggingHandler.LogInfo($"GoogleClientService: GetFilesInDriveAsync: folderId: {driveId}");
             LoggingHandler.LogInfo($"GoogleClientService: GetFilesInDriveAsync: files.Count: {files.Count}");
-            foreach (var file in files)
-            {
-                LoggingHandler.LogInfo($"GoogleClientService: GetFilesInDriveAsync: file.Name: {file.Name}");
-                LoggingHandler.LogInfo($"GoogleClientService: GetFilesInDriveAsync: file.Id: {file.Id}");
-                LoggingHandler.LogInfo($"GoogleClientService: GetFilesInDriveAsync: file.CreatedTime: {file.CreatedTime}");
-            }
             return files;
         }
 
@@ -205,6 +199,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
             var updateRequest = _driveService.Files.Copy(newFile, fileId);
             var renamedFile = updateRequest.Execute();
+            LoggingHandler.LogInfo($"File {fileName} copied to {destinationFolderId} - New ID: {renamedFile.Id}");
             return Task.CompletedTask;
         }
 

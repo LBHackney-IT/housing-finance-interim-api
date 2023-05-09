@@ -67,8 +67,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     var folderFiles = await _googleClientService.GetFilesInDriveAsync(academyFolderSetting.GoogleIdentifier, fileQueryFields).ConfigureAwait(false);
 
                     // I believe, this should be logged within the Gateway method
-                    LoggingHandler.LogInfo($"Folder Id: {academyFolderSetting.GoogleIdentifier}");
+                    LoggingHandler.LogInfo($"Academy folder Id: {academyFolderSetting.GoogleIdentifier}");
                     LoggingHandler.LogInfo($"File count: {folderFiles.Count}");
+                    LoggingHandler.LogInfo("Destination Folder IDs: " + string.Join(", ", destinationGoogleFileSettings.Select(setting => setting.GoogleIdentifier)));
 
                     academyFiles.AddRange(folderFiles);
                 }
@@ -197,8 +198,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             LoggingHandler.LogInfo($"Getting google file settings for '{label}' label");
             var googleFileSettings = await _googleFileSettingGateway.GetSettingsByLabel(label).ConfigureAwait(false);
-            LoggingHandler.LogInfo($"{googleFileSettings.Count} Google file settings found");
-
+            LoggingHandler.LogInfo($"{googleFileSettings.Count} Google file settings found: {string.Join(", ", googleFileSettings.Select(setting => setting.GoogleIdentifier))}");
             return googleFileSettings;
         }
 
