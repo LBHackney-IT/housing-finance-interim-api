@@ -78,7 +78,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     throw new SIO.FileNotFoundException($"No files were found within the '{_academyFileFolderLabel}' label directories.");
 
                 // Filters the list to only contain the most recent valid file to copy.
-                var validRenamedAcademyFiles = FilterAcademyFileToCopy(academyFiles, destinationGoogleFileSettings);
+                var validRenamedAcademyFiles = FilterAcademyFileToCopy(academyFiles);
 
                 var destinationFolderWithFiles = await Task.WhenAll(
                     destinationGoogleFileSettings.Select(async setting =>
@@ -171,7 +171,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             }
         }
 
-        private List<FileCopyObject> FilterAcademyFileToCopy(List<File> academyFiles, List<GoogleFileSettingDomain> destinationGoogleFileSettings)
+        private List<FileCopyObject> FilterAcademyFileToCopy(List<File> academyFiles)
         {
             // From the files in the Academy folder, select ones created in last week and rename them.
             // If multiple files in valid week, select the first one only.
