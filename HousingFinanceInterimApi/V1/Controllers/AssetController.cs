@@ -27,6 +27,16 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [Route("{propertyReference}")]
         public async Task<IActionResult> UpdateAssetDetails([FromRoute] UpdateAssetDetailsQuery query, [FromBody] UpdateAssetDetailsRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.AddressLine1))
+            {
+                return BadRequest($"The value for {nameof(request.AddressLine1)} cannot be empty");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.PostCode))
+            {
+                return BadRequest($"The value for {nameof(request.PostCode)} cannot be empty");
+            }
+
             await _assetGateway.UpdateAssetDetails(query, request).ConfigureAwait(false);
 
             return NoContent();
