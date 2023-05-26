@@ -20,6 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using AutoMapper;
+using HousingFinanceInterimApi.V1.Handlers;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 
@@ -169,10 +170,19 @@ namespace HousingFinanceInterimApi
                 app.UseHsts();
             }
 
-            var origins = Environment.GetEnvironmentVariable("ACCEPTED_ORIGINS").Split(",");
-            app.UseCors(options => options.WithOrigins(origins)
+            LoggingHandler.LogInfo("Accepted Origins: " + Environment.GetEnvironmentVariable("ACCEPTED_ORIGINS"));
+            // var origins = Environment.GetEnvironmentVariable("ACCEPTED_ORIGINS").Split(",");
+            // app.UseCors(options => options.WithOrigins(origins)
+            //     .AllowAnyMethod()
+            //     .AllowAnyHeader());
+
+            // Temporarily allow all origins
+            app.UseCors(builder => builder
+                .AllowAnyOrigin()
                 .AllowAnyMethod()
-                .AllowAnyHeader());
+                .AllowAnyHeader()
+                .WithExposedHeaders("*")
+            );
 
             // Get All ApiVersions,
             IApiVersionDescriptionProvider api = app.ApplicationServices.GetService<IApiVersionDescriptionProvider>();
