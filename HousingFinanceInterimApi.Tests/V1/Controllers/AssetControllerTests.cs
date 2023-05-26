@@ -48,22 +48,6 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
         }
 
         [Fact]
-        public async Task UpdateAssetDetails_WhenPostCodeNullOrEmpty_ReturnsBadRequest()
-        {
-            // Arrange
-            var request = _fixture.Build<UpdateAssetDetailsRequest>()
-                .Without(x => x.PostCode)
-                .Create();
-
-            // Act
-            var response = await _classUnderTest.UpdateAssetDetails(_query, request)
-                .ConfigureAwait(false);
-
-            // Assert
-            response.Should().BeEquivalentTo(new BadRequestObjectResult($"The value for {nameof(request.PostCode)} cannot be empty"));
-        }
-
-        [Fact]
         public async Task UpdateAssetDetails_WhenValidRequest_ReturnsNoContent()
         {
             // Arrange

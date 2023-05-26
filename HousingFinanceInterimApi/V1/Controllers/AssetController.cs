@@ -32,11 +32,6 @@ namespace HousingFinanceInterimApi.V1.Controllers
                 return BadRequest($"The value for {nameof(request.AddressLine1)} cannot be empty");
             }
 
-            if (string.IsNullOrWhiteSpace(request.PostCode))
-            {
-                return BadRequest($"The value for {nameof(request.PostCode)} cannot be empty");
-            }
-
             await _assetGateway.UpdateAssetDetails(query, request).ConfigureAwait(false);
 
             return NoContent();
