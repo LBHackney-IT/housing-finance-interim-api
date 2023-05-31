@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Security.Principal;
+using HousingFinanceInterimApi.V1.Boundary.Request;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
@@ -167,6 +169,14 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the payments.
         /// </summary>
         private DbSet<Payment> PaymentsValue { get; set; }
+
+
+        public async Task UpdateAssetDetails(UpdateAssetDetailsQuery query, UpdateAssetDetailsRequest request)
+        {
+            await Database
+                .ExecuteSqlInterpolatedAsync($"usp_UpdateAssetDetails {query.PropertyReference}, {request.PostPreamble}, {request.AddressLine1}")
+                .ConfigureAwait(false);
+        }
 
         /// <summary>
         /// Gets the tenancy details.
