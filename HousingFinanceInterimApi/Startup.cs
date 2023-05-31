@@ -169,19 +169,10 @@ namespace HousingFinanceInterimApi
                 app.UseHsts();
             }
 
-            Console.WriteLine("Accepted Origins: " + Environment.GetEnvironmentVariable("ACCEPTED_ORIGINS"));
-            // var origins = Environment.GetEnvironmentVariable("ACCEPTED_ORIGINS").Split(",");
-            // app.UseCors(options => options.WithOrigins(origins)
-            //     .AllowAnyMethod()
-            //     .AllowAnyHeader());
-
-            // Temporarily allow all origins
-            app.UseCors(builder => builder
-                .AllowAnyOrigin()
+            var origins = Environment.GetEnvironmentVariable("ACCEPTED_ORIGINS").Split(",");
+            app.UseCors(options => options.WithOrigins(origins)
                 .AllowAnyMethod()
-                .AllowAnyHeader()
-                .WithExposedHeaders("*")
-            );
+                .AllowAnyHeader());
 
             // Get All ApiVersions,
             IApiVersionDescriptionProvider api = app.ApplicationServices.GetService<IApiVersionDescriptionProvider>();
