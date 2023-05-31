@@ -365,7 +365,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             => await PerformTransaction("usp_LoadTransactionsCashFile", 600).ConfigureAwait(false);
 
         public async Task LoadChargesTransactions(int @processingYear)
-            => await PerformInterpolatedTransaction($"usp_LoadTransactionsCharges {@processingYear}", 600).ConfigureAwait(false);
+            => await PerformInterpolatedTransaction($"usp_LoadTransactionsCharges {@processingYear}", 900).ConfigureAwait(false);
 
         public async Task LoadHousingFileTransactions()
             => await PerformTransaction("usp_LoadTransactionsHousingFile", 600).ConfigureAwait(false);
@@ -474,7 +474,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             return results;
         }
 
-        //REPORTS    
+        //REPORTS
         public async Task<List<string[]>> GetCashSuspenseAccountByYearAsync(int year, string suspenseAccountType)
         {
             var results = new List<string[]>();
