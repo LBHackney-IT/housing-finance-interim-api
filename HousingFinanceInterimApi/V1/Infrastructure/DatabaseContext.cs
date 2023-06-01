@@ -173,8 +173,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public async Task UpdateAssetDetails(UpdateAssetDetailsQuery query, UpdateAssetDetailsRequest request)
         {
-            await Database
-                .ExecuteSqlInterpolatedAsync($"usp_UpdateAssetDetails {query.PropertyReference}, {request.PostPreamble}, {request.AddressLine1}")
+            await PerformInterpolatedTransaction($"usp_UpdateAssetDetails {query.PropertyReference}, {request.PostPreamble}, {request.AddressLine1}")
                 .ConfigureAwait(false);
         }
 
