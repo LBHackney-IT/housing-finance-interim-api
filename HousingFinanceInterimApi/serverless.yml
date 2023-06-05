@@ -54,6 +54,7 @@ functions:
               - X-Api-Key
               - X-Amz-Security-Token
               - X-Amz-User-Agent
+              - x-correlation-id
             allowCredentials: false
       - http:
           path: /swagger/{proxy+}
