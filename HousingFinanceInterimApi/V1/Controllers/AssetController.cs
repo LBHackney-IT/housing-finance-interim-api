@@ -12,6 +12,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
 {
     [Route("api/v1/asset")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class AssetController : ControllerBase
     {
         private readonly IAssetGateway _assetGateway;
