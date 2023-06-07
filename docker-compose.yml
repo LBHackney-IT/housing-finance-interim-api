@@ -10,6 +10,7 @@ services:
       - 3000:3000
     environment:
       - CONNECTION_STRING=Server=dev-database;Database=testdb;User Id=myuser;Password=mypassword
+      - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
     links:
       - dev-database
   dev-database:
