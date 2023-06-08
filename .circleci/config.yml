@@ -83,6 +83,8 @@ jobs:
           command: ./dotnet-format-local/dotnet-format --check
   build-and-test:
     executor: docker-python
+    context:
+      - api-nuget-token-context
     steps:
       - checkout
       - setup_remote_docker
