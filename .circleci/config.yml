@@ -128,8 +128,8 @@ workflows:
     jobs:
       - check-code-formatting        
       - build-and-test:
-        context:
-          - api-nuget-token-context
+          context:
+            - api-nuget-token-context
       - assume-role-development:
           context: api-assume-role-housing-development-context
           requires:
