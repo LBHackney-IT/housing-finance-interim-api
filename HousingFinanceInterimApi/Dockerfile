@@ -6,12 +6,20 @@ ENV LBHPACKAGESTOKEN=$LBHPACKAGESTOKEN
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
-COPY *.csproj ./
+
+COPY ./HousingFinanceInterimApi.sln ./
+COPY ./HousingFinanceInterimApi/HousingFinanceInterimApi.csproj ./HousingFinanceInterimApi/
 COPY /NuGet.Config /root/.nuget/NuGet/NuGet.Config
-RUN dotnet restore
+
+RUN dotnet restore ./HousingFinanceInterimApi/HousingFinanceInterimApi.csproj  #--configfile /NuGet.Config
+
+# COPY *.csproj ./
+# COPY /NuGet.Config /root/.nuget/NuGet/NuGet.Config
+# RUN dotnet restore
 
 # Copy everything else and build
 COPY . ./
+
 RUN dotnet build -c Release -o out
 RUN dotnet publish -c Release -o out
 
