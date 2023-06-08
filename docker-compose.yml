@@ -35,6 +35,7 @@ services:
       - DB_DATABASE=testdb
     links:
       - test-database
+      
   test-database:
     image: test-database
     build:
