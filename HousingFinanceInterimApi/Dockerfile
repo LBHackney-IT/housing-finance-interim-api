@@ -1,13 +1,18 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0
 
+ARG LBHPACKAGESTOKEN
+ENV LBHPACKAGESTOKEN=$LBHPACKAGESTOKEN
+
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
 COPY *.csproj ./
+COPY /NuGet.Config /root/.nuget/NuGet/NuGet.Config
 RUN dotnet restore
 
 # Copy everything else and build
 COPY . ./
+
 RUN dotnet build -c Release -o out
 RUN dotnet publish -c Release -o out
 

@@ -1,17 +1,15 @@
+using Hackney.Core.Authorization;
 using HousingFinanceInterimApi.V1.Boundary.Request;
-using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
-using HousingFinanceInterimApi.V1.Infrastructure;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
     [Route("api/v1/asset")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class AssetController : ControllerBase
     {
         private readonly IAssetGateway _assetGateway;
@@ -25,6 +23,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPatch]
         [Route("{propertyReference}")]
+        [AuthorizeEndpointByGroups("ASSET_ADMIN_GROUPS")]
         public async Task<IActionResult> UpdateAssetDetails([FromRoute] UpdateAssetDetailsQuery query, [FromBody] UpdateAssetDetailsRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.AddressLine1))
