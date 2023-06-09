@@ -17,7 +17,10 @@
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.9.18" />
     <PackageReference Include="EFCore.BulkExtensions" Version="5.3.8" />
+    <PackageReference Include="Hackney.Core" Version="1.0.22" />
     <PackageReference Include="Hackney.Core.Authorization" Version="1.78.0" />
+    <PackageReference Include="Hackney.Core.Http" Version="1.70.0" />
+    <PackageReference Include="Hackney.Core.JWT" Version="1.72.0" />
     <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.HealthChecks" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="4.1.1" />
