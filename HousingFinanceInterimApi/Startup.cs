@@ -22,6 +22,7 @@ using System.Reflection;
 using AutoMapper;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
+using Hackney.Core.JWT;
 
 namespace HousingFinanceInterimApi
 {
@@ -127,6 +128,9 @@ namespace HousingFinanceInterimApi
             ConfigureDbContext(services);
             RegisterGateways(services);
             RegisterUseCases(services);
+
+            // Required for controller authorization
+            services.AddTokenFactory();
 
             services.AddScoped<IGoogleClientServiceFactory, GoogleClientServiceFactory>();
         }
