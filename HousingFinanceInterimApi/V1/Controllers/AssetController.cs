@@ -23,7 +23,6 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPatch]
         [Route("{propertyReference}")]
-        [AuthorizeEndpointByGroups("ASSET_ADMIN_GROUPS")]
         public async Task<IActionResult> UpdateAssetDetails([FromRoute] UpdateAssetDetailsQuery query, [FromBody] UpdateAssetDetailsRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.AddressLine1))
