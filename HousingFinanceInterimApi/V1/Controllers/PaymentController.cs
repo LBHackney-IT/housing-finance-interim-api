@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Cors;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using HousingFinanceInterimApi.V1.Infrastructure;
+using Hackney.Core.Authorization;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
@@ -28,6 +29,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [Route("")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
         public async Task<IActionResult> Get(string tenancyAgreementRef, string rentAccount, string householdRef, int count, string order)
         {
             var data = await _gateway.ListAsync(tenancyAgreementRef, rentAccount, householdRef, count, order).ConfigureAwait(false);

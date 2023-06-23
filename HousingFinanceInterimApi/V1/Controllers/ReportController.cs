@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Boundary.Response;
+using Hackney.Core.Authorization;
 
 namespace HousingFinanceInterimApi.V1.Controllers
 {
@@ -36,6 +37,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost]
         [Route("charges")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
         public async Task<IActionResult> CreateReportCharges([FromBody] BatchReportChargesRequest request)
         {
             var batchReport = request.ToDomain();
@@ -54,6 +56,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [Route("charges")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
         public async Task<IActionResult> ListReportCharges()
         {
             var batchReportCharges = await _batchReportGateway
@@ -68,6 +71,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost]
         [Route("cash/suspense")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
         public async Task<IActionResult> CreateReportCashSuspense([FromBody] BatchReportCashSuspenseRequest request)
         {
             var batchReport = request.ToDomain();
@@ -86,6 +90,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [Route("cash/suspense")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
         public async Task<IActionResult> ListReportCashSuspense()
         {
             var batchReportCharges = await _batchReportGateway
@@ -100,6 +105,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost]
         [Route("cash/import")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
         public async Task<IActionResult> CreateReportCashImport([FromBody] BatchReportCashImportRequest request)
         {
             var batchReport = request.ToDomain();
@@ -118,6 +124,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [Route("cash/import")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
         public async Task<IActionResult> ListReportCashImport()
         {
             var batchReportCharges = await _batchReportGateway
@@ -132,6 +139,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost]
         [Route("balance")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
         public async Task<IActionResult> CreateReportAccountBalance([FromBody] BatchReportAccountBalanceRequest request)
         {
             var batchReport = request.ToDomain();
@@ -150,6 +158,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [Route("balance")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
         public async Task<IActionResult> ListReportAccountBalance()
         {
             var batchReportAccountBalance = await _batchReportGateway
@@ -164,6 +173,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost]
         [Route("housingbenefit/academy")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
         public async Task<IActionResult> CreateReportHousingBenefitAcademy([FromBody] BatchReportHousingBenefitAcademyRequest request)
         {
             var batchReport = request.ToDomain();
@@ -182,6 +192,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet]
         [Route("housingbenefit/academy")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
         public async Task<IActionResult> ListReportHousingBenefitAcademy()
         {
             var batchReportHousingBenefitAcademy = await _batchReportGateway
