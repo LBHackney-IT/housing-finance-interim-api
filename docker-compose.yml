@@ -6,6 +6,8 @@ services:
     build:
       context: HousingFinanceInterimApi/
       dockerfile: ./Dockerfile
+      args:
+      - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
     ports:
       - 3000:3000
     environment:
@@ -24,6 +26,8 @@ services:
     build:
       context: .
       dockerfile: HousingFinanceInterimApi.Tests/Dockerfile
+      args:
+      - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
     environment:
       - DB_SERVER=test-database
       - DB_USERNAME=myuser
@@ -31,6 +35,7 @@ services:
       - DB_DATABASE=testdb
     links:
       - test-database
+      
   test-database:
     image: test-database
     build:
