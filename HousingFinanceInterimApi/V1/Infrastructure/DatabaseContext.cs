@@ -775,6 +775,10 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
                 throw;
             }
         }
+
+        public async Task CleanSSMiniTransactions()
+            => await PerformInterpolatedTransaction($"usp_CleanSSMiniTransactions", 900).ConfigureAwait(false);
+
     }
 
 }

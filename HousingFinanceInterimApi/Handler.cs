@@ -31,6 +31,7 @@ namespace HousingFinanceInterimApi
         private readonly ILoadCashFileTransactionsUseCase _loadCashFileTransactionsUseCase;
         private readonly ILoadChargesHistoryUseCase _loadChargesHistoryUseCase;
         private readonly ILoadChargesTransactionsUseCase _loadChargesTransactionsUseCase;
+        private readonly ICleanSSMiniTransactionUseCase _cleanSSMiniTransactionUseCase;
         private readonly ILoadChargesUseCase _loadChargesUseCase;
         private readonly ILoadDirectDebitTransactionsUseCase _loadDirectDebitTransactionsUseCase;
         private readonly ILoadDirectDebitUseCase _loadDirectDebitUseCase;
@@ -106,6 +107,7 @@ namespace HousingFinanceInterimApi
             _loadChargesHistoryUseCase = new LoadChargesHistoryUseCase(batchLogGateway, batchLogErrorGateway, chargesBatchYearsGateway, chargesGateway);
             _loadChargesTransactionsUseCase = new LoadChargesTransactionsUseCase(batchLogGateway, batchLogErrorGateway, chargesBatchYearsGateway,
                 chargesGateway, transactionGateway);
+            _cleanSSMiniTransactionUseCase = new CleanSSMiniTransactionUseCase(batchLogGateway, batchLogErrorGateway);
             _loadChargesUseCase = new LoadChargesUseCase(batchLogGateway, batchLogErrorGateway,
                 chargesBatchYearsGateway, chargesGateway, googleFileSettingGateway, googleClientService);
             _loadDirectDebitTransactionsUseCase = new LoadDirectDebitTransactionsUseCase(batchLogGateway,
@@ -197,6 +199,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> LoadChargesTransactions()
         {
             return await _loadChargesTransactionsUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> CleanSSMiniTransactions()
+        {
+            return await _cleanSSMiniTransactionUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
         public async Task<StepResponse> LoadChargesTransactionsOnDemand(OnDemandRequest input)

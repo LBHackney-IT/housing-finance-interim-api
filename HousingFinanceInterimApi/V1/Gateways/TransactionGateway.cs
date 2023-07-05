@@ -109,5 +109,18 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 throw;
             }
         }
+
+        public async Task CleanSSMiniTransactions()
+        {
+            try
+            {
+                await _context.CleanSSMiniTransactions();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
     }
 }
