@@ -373,7 +373,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 LoggingHandler.LogInfo($"No data found. Spreadsheet id: {spreadSheetId}, sheet name: {sheetName}, sheet range: {sheetRange}");
                 return null;
             }
-            LoggingHandler.LogInfo($"Rows {values.Count} found in sheet {sheetName}");
+            LoggingHandler.LogInfo($"Rows {values.Count} found in sheet {sheetName} - {spreadSheetId}");
 
             // Get the headers
             IList<string> headers = values.First().Select(cell => cell.ToString()).ToList();
