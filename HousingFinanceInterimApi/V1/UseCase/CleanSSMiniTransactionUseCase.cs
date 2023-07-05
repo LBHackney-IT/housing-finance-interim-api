@@ -7,7 +7,7 @@ using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 
 namespace HousingFinanceInterimApi.V1.UseCase;
 
-public class CleanSSMiniTransactionUseCase: ICleanSSMiniTransactionUseCase
+public class CleanSSMiniTransactionUseCase : ICleanSSMiniTransactionUseCase
 {
     private readonly IBatchLogGateway _batchLogGateway;
     private readonly IBatchLogErrorGateway _batchLogErrorGateway;
@@ -36,7 +36,8 @@ public class CleanSSMiniTransactionUseCase: ICleanSSMiniTransactionUseCase
             LoggingHandler.LogInfo("SSMiniTransactions Table Cleaned");
             return new StepResponse()
             {
-                Continue = true, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration))
+                Continue = true,
+                NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration))
             };
         }
         catch (Exception exc)
