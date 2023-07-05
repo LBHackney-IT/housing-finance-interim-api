@@ -22,6 +22,7 @@ using System.Reflection;
 using AutoMapper;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
+using Hackney.Core.JWT;
 
 namespace HousingFinanceInterimApi
 {
@@ -128,6 +129,9 @@ namespace HousingFinanceInterimApi
             RegisterGateways(services);
             RegisterUseCases(services);
 
+            // Required for controller authorization
+            services.AddTokenFactory();
+
             services.AddScoped<IGoogleClientServiceFactory, GoogleClientServiceFactory>();
         }
 
@@ -150,6 +154,7 @@ namespace HousingFinanceInterimApi
             services.AddScoped<IBatchLogErrorGateway, BatchLogErrorGateway>();
             services.AddScoped<IReportGateway, ReportGateway>();
             services.AddScoped<IBatchReportGateway, BatchReportGateway>();
+            services.AddScoped<IAssetGateway, AssetGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
