@@ -188,7 +188,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
 
             // Act
-           var usecaseCall = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // Assert
             _mockGoogleClientService.Verify(x => x.DeleteFileInDrive(fileToBeDeleted.Id), Times.Once);
