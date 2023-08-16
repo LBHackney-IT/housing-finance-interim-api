@@ -90,6 +90,25 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 {
                     var isSuccess = await _googleClientService.UploadCsvFile(rentPosition, $"{DateTime.Now:yyyyMMdd_HHmmss}.csv",
                         googleFileSetting.GoogleIdentifier).ConfigureAwait(false);
+                    var folderFiles = await _googleClientService.GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier)
+                        .ConfigureAwait(false);
+
+
+                    LoggingHandler.LogInfo("Deleting old files");
+                    foreach (var file in folderFiles.Where(f => f.CreatedTime <= DateTime.Today.AddDays(-7)).ToList())
+                    {
+                        try
+                        {
+
+                            LoggingHandler.LogInfo($"Deleting file {file.Name}, createdTime: {file.CreatedTime}");
+                            await _googleClientService.DeleteFileInDrive(file.Id).ConfigureAwait(false);
+                        }
+                        catch
+                        {
+                            LoggingHandler.LogInfo($"Could not delete file {file.Name}");
+                            throw;
+                        }
+                    }
 
                     if (!isSuccess)
                         throw new Exception("Failed to upload to Rent Position folder (Backup)");
