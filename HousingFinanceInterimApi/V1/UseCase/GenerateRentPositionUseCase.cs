@@ -106,7 +106,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         catch
                         {
                             LoggingHandler.LogInfo($"Could not delete file {file.Name}");
-                            throw;
                         }
                     }
 
