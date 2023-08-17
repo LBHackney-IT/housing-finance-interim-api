@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HousingFinanceInterimApi.V1.Domain;
-using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;
@@ -71,18 +70,17 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     LoggingHandler.LogInfo($"Folder ID: {googleFileSetting.GoogleIdentifier}");
                     LoggingHandler.LogInfo($"File count: {folderFiles.Count}");
 
-                    LoggingHandler.LogInfo($"Deleting old files");
-                    foreach (var file in folderFiles.Where(f => f.Name.Equals(fileName)).ToList())
-                    {
-                        await _googleClientService.DeleteFileInDrive(file.Id).ConfigureAwait(false);
-                    }
-
                     var isSuccess = await _googleClientService.UploadCsvFile(rentPosition, fileName, googleFileSetting.GoogleIdentifier)
                         .ConfigureAwait(false);
 
                     if (!isSuccess)
                         throw new Exception("Failed to upload to Rent Position folder (Qlik)");
 
+                    LoggingHandler.LogInfo($"Deleting old files");
+                    foreach (var file in folderFiles.Where(f => f.Name.Equals(fileName)).ToList())
+                    {
+                        await _googleClientService.DeleteFileInDrive(file.Id).ConfigureAwait(false);
+                    }
                 }
 
                 googleFileSettings = await GetGoogleFileSetting(_rentPositionBkpLabel).ConfigureAwait(false);
@@ -97,19 +95,32 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         throw new Exception("Failed to upload to Rent Position folder (Backup)");
 
                     LoggingHandler.LogInfo("Deleting old files");
-                    foreach (var file in folderFiles.Where(f => f.CreatedTime <= DateTime.Today.AddDays(-7)))
+
+                    // Keep a record of the last file for each financial year
+                    var lastFilesForFinancialYears = getLastFilesForFinancialYears(folderFiles);
+                    folderFiles = folderFiles.Where(f => !lastFilesForFinancialYears.Contains(f)).ToList();
+
+                    var deletionErrors = new List<Exception>();
+                    foreach (var file in folderFiles.Where(f =>
+                                 f.CreatedTime <= DateTime.Today.AddDays(-7)
+                                    && !lastFilesForFinancialYears.Contains(f)).ToList()
+                             )
                     {
                         try
                         {
                             LoggingHandler.LogInfo($"Deleting file {file.Name}, createdTime: {file.CreatedTime}");
                             await _googleClientService.DeleteFileInDrive(file.Id).ConfigureAwait(false);
                         }
-                        catch
+                        catch (Exception e)
                         {
                             LoggingHandler.LogInfo($"Could not delete file {file.Name}");
+                            deletionErrors.Add(e);
                         }
                     }
-
+                    if (deletionErrors.Any())
+                    {
+                        throw new AggregateException("Could not delete all files", deletionErrors);
+                    }
                 }
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
@@ -136,6 +147,20 @@ namespace HousingFinanceInterimApi.V1.UseCase
             LoggingHandler.LogInfo($"{googleFileSettings.Count} google file settings found");
 
             return googleFileSettings;
+        }
+
+        /// <summary>
+        /// Filters out each file that is the last file for a financial year (31st March)
+        /// </summary>
+        static IEnumerable<File> getLastFilesForFinancialYears(IEnumerable<File> fileList)
+        {
+            var filesOnLastDayOfFinancialYear = fileList.Where(
+                f => f.CreatedTime != null
+                     && f.CreatedTime.Value.Day == 31
+                     && f.CreatedTime.Value.Month == 3
+            );
+
+            return filesOnLastDayOfFinancialYear;
         }
     }
 }
