@@ -93,13 +93,14 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     var folderFiles = await _googleClientService.GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier)
                         .ConfigureAwait(false);
 
+                    if (!isSuccess)
+                        throw new Exception("Failed to upload to Rent Position folder (Backup)");
 
                     LoggingHandler.LogInfo("Deleting old files");
-                    foreach (var file in folderFiles.Where(f => f.CreatedTime <= DateTime.Today.AddDays(-7)).ToList())
+                    foreach (var file in folderFiles.Where(f => f.CreatedTime <= DateTime.Today.AddDays(-7)))
                     {
                         try
                         {
-
                             LoggingHandler.LogInfo($"Deleting file {file.Name}, createdTime: {file.CreatedTime}");
                             await _googleClientService.DeleteFileInDrive(file.Id).ConfigureAwait(false);
                         }
@@ -109,8 +110,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         }
                     }
 
-                    if (!isSuccess)
-                        throw new Exception("Failed to upload to Rent Position folder (Backup)");
                 }
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
