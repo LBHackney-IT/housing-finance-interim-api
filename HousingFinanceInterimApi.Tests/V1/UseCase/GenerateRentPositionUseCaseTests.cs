@@ -208,7 +208,6 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             fileToBeDeleted.CreatedTime = DateTime.Today.AddDays(-10);
             fileToNotBeDeleted.CreatedTime = DateTime.Today.AddDays(-2);
 
-            //TODO: A way to not copy paste these mocks?
             _mockBatchLogGateway
                 .Setup(g => g.CreateAsync(It.Is<string>(s => s == rentPosition), It.IsAny<bool>()))
                 .ReturnsAsync(RandomGen.BatchLogDomain());
@@ -342,6 +341,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .Setup(g => g.GetRentPosition())
                 .ReturnsAsync(RandomGen.RentPositionCsvRepresentation());
 
+            // Returns the test files
             _mockGoogleClientService
                 .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), null))
                 .ReturnsAsync(fileList);
@@ -372,7 +372,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         [Fact]
         public async Task ThrowsExceptionIfAnyFilesFailToDelete()
         {
-             // Arrange
+            // Arrange
             var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
             var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
             var rentPosition = ConstantsGen.RentPositionLabel;
