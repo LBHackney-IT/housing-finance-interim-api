@@ -151,16 +151,25 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         /// <summary>
         /// Filters out each file that is the last file for a financial year (31st March)
-        /// </summary>
+        /// </summary
         static IEnumerable<File> getLastFilesForFinancialYears(IEnumerable<File> fileList)
         {
-            var filesOnLastDayOfFinancialYear = fileList.Where(
-                f => f.CreatedTime != null
-                     && f.CreatedTime.Value.Day == 31
-                     && f.CreatedTime.Value.Month == 3
-            );
+            // Get list of file groups on the last working in March for each year
+            var marchFileGroupsNotOnWeekend = fileList
+                .Where(f => f.CreatedTime.HasValue)
+                .OrderBy(f => f.CreatedTime)
+                .Where(f => !new[] { DayOfWeek.Saturday, DayOfWeek.Sunday }.Contains(f.CreatedTime.Value.DayOfWeek))
+                .Where(f => f.CreatedTime.Value.Month == 3)
+                .GroupBy(f => f.CreatedTime.Value.Year)
+                .ToList();
 
-            return filesOnLastDayOfFinancialYear;
+            var filesOnLastDayOfFinanacialYear = new List<File>();
+            foreach (var marchList in marchFileGroupsNotOnWeekend)
+            {
+                filesOnLastDayOfFinanacialYear.Add(marchList.Last());
+            }
+
+            return filesOnLastDayOfFinanacialYear;
         }
     }
 }
