@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HousingFinanceInterimApi.V1.Domain;
-using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;
@@ -90,9 +89,43 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 {
                     var isSuccess = await _googleClientService.UploadCsvFile(rentPosition, $"{DateTime.Now:yyyyMMdd_HHmmss}.csv",
                         googleFileSetting.GoogleIdentifier).ConfigureAwait(false);
+                    var folderFiles = await _googleClientService.GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier)
+                        .ConfigureAwait(false);
 
                     if (!isSuccess)
                         throw new Exception("Failed to upload to Rent Position folder (Backup)");
+
+                    LoggingHandler.LogInfo("Deleting old files");
+
+                    // Keep a record of the last file for each financial year
+                    var lastFilesForFinancialYears = getLastFilesForFinancialYears(folderFiles);
+                    folderFiles = folderFiles.Where(f => !lastFilesForFinancialYears.Contains(f)).ToList();
+
+                    var filesToDelete = folderFiles.Where(f =>
+                            f.CreatedTime <= DateTime.Today.AddDays(-7)
+                            && !lastFilesForFinancialYears.Contains(f)
+                        ).ToList();
+
+                    LoggingHandler.LogInfo($"Will delete {filesToDelete.Count} files from {googleFileSetting.GoogleIdentifier}. Names: {string.Join(", ", filesToDelete.Select(f => f.Name))}");
+
+                    var deletionErrors = new List<Exception>();
+                    foreach (var file in filesToDelete)
+                    {
+                        try
+                        {
+                            LoggingHandler.LogInfo($"Deleting file {file.Name}, createdTime: {file.CreatedTime}");
+                            await _googleClientService.DeleteFileInDrive(file.Id).ConfigureAwait(false);
+                        }
+                        catch (Exception e)
+                        {
+                            LoggingHandler.LogInfo($"Could not delete file {file.Name}");
+                            deletionErrors.Add(e);
+                        }
+                    }
+                    if (deletionErrors.Any())
+                    {
+                        throw new AggregateException("Could not delete all files", deletionErrors);
+                    }
                 }
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
@@ -119,6 +152,29 @@ namespace HousingFinanceInterimApi.V1.UseCase
             LoggingHandler.LogInfo($"{googleFileSettings.Count} google file settings found");
 
             return googleFileSettings;
+        }
+
+        /// <summary>
+        /// Filters out each file that is the last file for a financial year (31st March)
+        /// </summary
+        static IEnumerable<File> getLastFilesForFinancialYears(IEnumerable<File> fileList)
+        {
+            // Get list of file groups on the last working in March for each year
+            var marchFileGroupsNotOnWeekend = fileList
+                .Where(f => f.CreatedTime.HasValue)
+                .OrderBy(f => f.CreatedTime)
+                .Where(f => !new[] { DayOfWeek.Saturday, DayOfWeek.Sunday }.Contains(f.CreatedTime.Value.DayOfWeek))
+                .Where(f => f.CreatedTime.Value.Month == 3)
+                .GroupBy(f => f.CreatedTime.Value.Year)
+                .ToList();
+
+            var filesOnLastDayOfFinanacialYear = new List<File>();
+            foreach (var marchList in marchFileGroupsNotOnWeekend)
+            {
+                filesOnLastDayOfFinanacialYear.Add(marchList.Last());
+            }
+
+            return filesOnLastDayOfFinanacialYear;
         }
     }
 }
