@@ -46,12 +46,6 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             Assert.NotNull(getResult);
             Assert.Equal(fileName, getResult.FileName);
         }
-
-        public async Task GetNotExists()
-        {
-
-        }
-
     }
 
 }

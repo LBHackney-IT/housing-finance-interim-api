@@ -24,6 +24,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         /// Gets the files in a drive folder asynchronously by name.
         /// </summary>
         /// <param name="driveId">The drive identifier.</param>
+        /// <param name="fileName"></param>
         /// <returns>The list of files for the given drive.</returns>
         public Task<Google.Apis.Drive.v3.Data.File> GetFileByNameInDriveAsync(string driveId, string fileName);
 
