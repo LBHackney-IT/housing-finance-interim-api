@@ -101,11 +101,15 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     var lastFilesForFinancialYears = getLastFilesForFinancialYears(folderFiles);
                     folderFiles = folderFiles.Where(f => !lastFilesForFinancialYears.Contains(f)).ToList();
 
+                    var filesToDelete = folderFiles.Where(f =>
+                            f.CreatedTime <= DateTime.Today.AddDays(-7)
+                            && !lastFilesForFinancialYears.Contains(f)
+                        ).ToList();
+
+                    LoggingHandler.LogInfo($"Will delete {filesToDelete.Count} files from {googleFileSetting.GoogleIdentifier}. Names: {string.Join(", ", filesToDelete.Select(f => f.Name))}");
+
                     var deletionErrors = new List<Exception>();
-                    foreach (var file in folderFiles.Where(f =>
-                                 f.CreatedTime <= DateTime.Today.AddDays(-7)
-                                    && !lastFilesForFinancialYears.Contains(f)).ToList()
-                             )
+                    foreach (var file in filesToDelete)
                     {
                         try
                         {
