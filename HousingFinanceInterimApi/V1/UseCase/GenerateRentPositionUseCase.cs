@@ -70,17 +70,18 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     LoggingHandler.LogInfo($"Folder ID: {googleFileSetting.GoogleIdentifier}");
                     LoggingHandler.LogInfo($"File count: {folderFiles.Count}");
 
+                    LoggingHandler.LogInfo($"Deleting old files");
+                    foreach (var file in folderFiles.Where(f => f.Name.Equals(fileName)).ToList())
+                    {
+                        await _googleClientService.DeleteFileInDrive(file.Id).ConfigureAwait(false);
+                    }
+
                     var isSuccess = await _googleClientService.UploadCsvFile(rentPosition, fileName, googleFileSetting.GoogleIdentifier)
                         .ConfigureAwait(false);
 
                     if (!isSuccess)
                         throw new Exception("Failed to upload to Rent Position folder (Qlik)");
 
-                    LoggingHandler.LogInfo($"Deleting old files");
-                    foreach (var file in folderFiles.Where(f => f.Name.Equals(fileName)).ToList())
-                    {
-                        await _googleClientService.DeleteFileInDrive(file.Id).ConfigureAwait(false);
-                    }
                 }
 
                 googleFileSettings = await GetGoogleFileSetting(_rentPositionBkpLabel).ConfigureAwait(false);
