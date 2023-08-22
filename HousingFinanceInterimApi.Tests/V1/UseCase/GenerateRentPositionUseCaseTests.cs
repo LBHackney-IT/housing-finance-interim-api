@@ -67,7 +67,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(RandomGen.RentPositionCsvRepresentation());
 
             _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), null))
+                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(new List<File>());
 
             _mockGoogleClientService
@@ -110,7 +110,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(RandomGen.RentPositionCsvRepresentation());
 
             _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), null))
+                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(new List<File>());
 
             _mockGoogleClientService
@@ -165,7 +165,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(RandomGen.RentPositionCsvRepresentation());
 
             _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), null))
+                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(fileList);
 
             _mockGoogleClientService
@@ -226,7 +226,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(RandomGen.RentPositionCsvRepresentation());
 
             _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), null))
+                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(fileList);
 
             // Upload to Rent Position folder fails
@@ -284,7 +284,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(RandomGen.RentPositionCsvRepresentation());
 
             _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), null))
+                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(fileList);
 
             _mockGoogleClientService
@@ -320,11 +320,14 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
             var rentPosition = ConstantsGen.RentPositionLabel;
             var rentPositionBkp = ConstantsGen.RentPositionBkpLabel;
-            var fileList = RandomGen.CreateMany<File>(quantity: 2).ToList();
-            var fileToBePreserved = fileList.First();
+            var fileList = RandomGen.CreateMany<File>(quantity: 3).ToList();
+            var fileToBePreserved1 = fileList.First();
+            var fileToBePreserved2 = fileList[1];
             var fileToBeDeleted = fileList.Last();
 
-            fileToBePreserved.CreatedTime = new DateTime(2020, 3, 31); // Tuesday
+
+            fileToBePreserved1.CreatedTime = new DateTime(2020, 3, 31); // Tuesday last wd of financial year
+            fileToBePreserved2.CreatedTime = DateTime.Today.AddDays(-3); // Less than 1 week old
             fileToBeDeleted.CreatedTime = new DateTime(2020, 4, 1);
 
             _mockBatchLogGateway
@@ -345,7 +348,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             // Returns the test files
             _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), null))
+                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(fileList);
 
             _mockGoogleClientService
@@ -367,8 +370,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             // Assert
             await useCaseCall.Should().NotThrowAsync<Exception>().ConfigureAwait(false);
-            _mockGoogleClientService.Verify(x => x.DeleteFileInDrive(It.Is<string>(s => s == fileToBeDeleted.Id)), Times.Once);
-            _mockGoogleClientService.Verify(x => x.DeleteFileInDrive(It.Is<string>(s => s == fileToBePreserved.Id)), Times.Never);
+            _mockGoogleClientService.Verify(s => s.DeleteFileInDrive(It.Is<string>(s => s == fileToBeDeleted.Id)), Times.Once);
+            _mockGoogleClientService.Verify(x => x.DeleteFileInDrive(It.Is<string>(s => s == fileToBePreserved1.Id)), Times.Never);
+            _mockGoogleClientService.Verify(x => x.DeleteFileInDrive(It.Is<string>(s => s == fileToBePreserved2.Id)), Times.Never);
         }
 
         [Fact]
@@ -404,7 +408,65 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             // Returns the test files
             _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), null))
+                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(fileList);
+
+            _mockGoogleClientService
+                .Setup(x => x.UploadCsvFile(
+                    It.IsAny<List<string[]>>(),
+                    It.IsAny<string>(),
+                    It.Is<string>(s => s == rentPositionFileSettings.First().GoogleIdentifier)))
+                .ReturnsAsync(true);
+
+            _mockGoogleClientService
+                .Setup(x => x.UploadCsvFile(
+                    It.IsAny<List<string[]>>(),
+                    It.IsAny<string>(),
+                    It.Is<string>(s => s == rentPositionBkpFileSettings.First().GoogleIdentifier)))
+                .ReturnsAsync(true);
+
+            // Act
+            Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // Assert
+            await useCaseCall.Should().NotThrowAsync<Exception>().ConfigureAwait(false);
+            _mockGoogleClientService.Verify(x => x.DeleteFileInDrive(It.Is<string>(s => s == fileToBeDeleted.Id)), Times.Once);
+            _mockGoogleClientService.Verify(x => x.DeleteFileInDrive(It.Is<string>(s => s == fileToBePreserved.Id)), Times.Never);
+        }
+
+        [Fact]
+        public async Task DoesNotDeleteFilesWithNoCreationDateSetOrFound()
+        {
+            // Arrange
+            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
+            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
+            var rentPosition = ConstantsGen.RentPositionLabel;
+            var rentPositionBkp = ConstantsGen.RentPositionBkpLabel;
+            var fileList = RandomGen.CreateMany<File>(quantity: 2).ToList();
+            var fileToBePreserved = fileList.First();
+            var fileToBeDeleted = fileList.Last();
+            fileToBePreserved.CreatedTime = null; // Friday
+            fileToBeDeleted.CreatedTime = new DateTime(2019, 3, 31); // Sunday
+
+            _mockBatchLogGateway
+                .Setup(g => g.CreateAsync(It.Is<string>(s => s == rentPosition), It.IsAny<bool>()))
+                .ReturnsAsync(RandomGen.BatchLogDomain());
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == rentPosition)))
+                .ReturnsAsync(rentPositionFileSettings);
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == rentPositionBkp)))
+                .ReturnsAsync(rentPositionBkpFileSettings);
+
+            _mockRentPositionGateway
+                .Setup(g => g.GetRentPosition())
+                .ReturnsAsync(RandomGen.RentPositionCsvRepresentation());
+
+            // Returns the test files
+            _mockGoogleClientService
+                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(fileList);
 
             _mockGoogleClientService
@@ -463,7 +525,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(RandomGen.RentPositionCsvRepresentation());
 
             _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), null))
+                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(fileList);
 
             _mockGoogleClientService
