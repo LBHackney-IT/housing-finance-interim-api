@@ -320,11 +320,14 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
             var rentPosition = ConstantsGen.RentPositionLabel;
             var rentPositionBkp = ConstantsGen.RentPositionBkpLabel;
-            var fileList = RandomGen.CreateMany<File>(quantity: 2).ToList();
-            var fileToBePreserved = fileList.First();
+            var fileList = RandomGen.CreateMany<File>(quantity: 3).ToList();
+            var fileToBePreserved1 = fileList.First();
+            var fileToBePreserved2 = fileList[1];
             var fileToBeDeleted = fileList.Last();
 
-            fileToBePreserved.CreatedTime = new DateTime(2020, 3, 31); // Tuesday
+
+            fileToBePreserved1.CreatedTime = new DateTime(2020, 3, 31); // Tuesday last wd of financial year
+            fileToBePreserved2.CreatedTime = DateTime.Today.AddDays(-3); // Less than 1 week old
             fileToBeDeleted.CreatedTime = new DateTime(2020, 4, 1);
 
             _mockBatchLogGateway
@@ -367,8 +370,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             // Assert
             await useCaseCall.Should().NotThrowAsync<Exception>().ConfigureAwait(false);
-            _mockGoogleClientService.Verify(x => x.DeleteFileInDrive(It.Is<string>(s => s == fileToBeDeleted.Id)), Times.Once);
-            _mockGoogleClientService.Verify(x => x.DeleteFileInDrive(It.Is<string>(s => s == fileToBePreserved.Id)), Times.Never);
+            _mockGoogleClientService.Verify(s => s.DeleteFileInDrive(It.Is<string>(s => s == fileToBeDeleted.Id)), Times.Once);
+            _mockGoogleClientService.Verify(x => x.DeleteFileInDrive(It.Is<string>(s => s == fileToBePreserved1.Id)), Times.Never);
+            _mockGoogleClientService.Verify(x => x.DeleteFileInDrive(It.Is<string>(s => s == fileToBePreserved2.Id)), Times.Never);
         }
 
         [Fact]

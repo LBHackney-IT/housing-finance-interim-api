@@ -95,18 +95,22 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     if (!isSuccess)
                         throw new Exception("Failed to upload to Rent Position folder (Backup)");
 
-                    LoggingHandler.LogInfo("Deleting old files");
+                    LoggingHandler.LogInfo("Deleting old backup files");
 
                     // Keep a record of the last file for each financial year
                     var lastFilesForFinancialYears = getLastFilesForFinancialYears(folderFiles);
-                    folderFiles = folderFiles.Where(f => !lastFilesForFinancialYears.Contains(f)).ToList();
+                    var filesCreatedInLast7Days = folderFiles.Where(file =>
+                        file.CreatedTime?.Date > DateTime.Today.AddDays(-7).Date).ToList();
 
-                    var filesToDelete = folderFiles.Where(f =>
-                            f.CreatedTime <= DateTime.Today.AddDays(-7)
-                            && !lastFilesForFinancialYears.Contains(f)
+                    var filesToDelete = folderFiles.Where(file =>
+                            !filesCreatedInLast7Days.Contains(file) && !lastFilesForFinancialYears.Contains(file)
                         ).ToList();
 
-                    LoggingHandler.LogInfo($"Will delete {filesToDelete.Count} files from {googleFileSetting.GoogleIdentifier}. Names: {string.Join(", ", filesToDelete.Select(f => f.Name))}");
+                    string fileSummary(File file) => $"{file.Name} Created:({file.CreatedTime?.Date:dd/MM/yyyy})";
+                    LoggingHandler.LogInfo($"All files: [{string.Join(", ", folderFiles.Select(fileSummary))}]");
+                    LoggingHandler.LogInfo($"Preserving last files for past financial years: [{string.Join(", ", lastFilesForFinancialYears.Select(fileSummary))}]");
+                    LoggingHandler.LogInfo($"Preserving files created in the last 7 days: [{string.Join(", ", filesCreatedInLast7Days.Select(fileSummary))}]");
+                    LoggingHandler.LogInfo($"Will delete {filesToDelete.Count} file(s) from {googleFileSetting.GoogleIdentifier}: [{string.Join(", ", filesToDelete.Select(f => f.Name))}]");
 
                     var deletionErrors = new List<Exception>();
                     foreach (var file in filesToDelete)
