@@ -97,13 +97,13 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         throw new Exception("Failed to upload to Rent Position folder (Backup)");
 
                     var filesCreatedInLast7Days = folderFiles.Where(file =>
-                        file.CreatedTime.HasValue &&
-                        file.CreatedTime?.Date > DateTime.Today.AddDays(-7).Date).ToList();
+                        file.CreatedTime.HasValue
+                        && file.CreatedTime?.Date > DateTime.Today.AddDays(-7).Date).ToList();
                     var lastFilesForFinancialYears = getLastFilesForFinancialYears(folderFiles);
 
                     var filesToDelete = folderFiles.Where(file =>
-                            file.CreatedTime.HasValue &&
-                            !filesCreatedInLast7Days.Contains(file)
+                            file.CreatedTime.HasValue
+                            && !filesCreatedInLast7Days.Contains(file)
                             && !lastFilesForFinancialYears.Contains(file)
                         ).ToList();
 
