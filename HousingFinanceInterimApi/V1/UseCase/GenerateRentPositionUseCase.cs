@@ -101,14 +101,14 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     var lastFilesForFinancialYears = getLastFilesForFinancialYears(folderFiles);
 
                     var filesToDelete = folderFiles.Where(file =>
-                            file.CreatedTime <= DateTime.Today.AddDays(-7)
+                            file.CreatedTime?.Date <= DateTime.Today.AddDays(-7).Date
                             && !lastFilesForFinancialYears.Contains(file)
                         ).ToList();
 
                     string fileSummary(File file) => $"{file.Name} Created:({file.CreatedTime?.Date:dd/MM/yyyy})";
                     LoggingHandler.LogInfo($"All files: [{string.Join(", ", folderFiles.Select(fileSummary))}]");
                     LoggingHandler.LogInfo($"Preserving last files for past financial years: [{string.Join(", ", lastFilesForFinancialYears.Select(fileSummary))}]");
-                    LoggingHandler.LogInfo($"Preserving files created in the last 7 days: [{string.Join(", ", folderFiles.Where(file => file.CreatedTime >= DateTime.Today.AddDays(-7)).Select(fileSummary))}]");
+                    LoggingHandler.LogInfo($"Preserving files created in the last 7 days: [{string.Join(", ", folderFiles.Where(file => file.CreatedTime?.Date >= DateTime.Today.AddDays(-7).Date).Select(fileSummary))}]");
 
                     LoggingHandler.LogInfo($"Will delete {filesToDelete.Count} file(s) from {googleFileSetting.GoogleIdentifier}: [{string.Join(", ", filesToDelete.Select(f => f.Name))}]");
 
