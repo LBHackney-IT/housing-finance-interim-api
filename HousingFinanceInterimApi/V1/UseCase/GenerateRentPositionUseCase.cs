@@ -89,28 +89,29 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 {
                     var isSuccess = await _googleClientService.UploadCsvFile(rentPosition, $"{DateTime.Now:yyyyMMdd_HHmmss}.csv",
                         googleFileSetting.GoogleIdentifier).ConfigureAwait(false);
-                    var folderFiles = await _googleClientService.GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier)
+                    var fileQueryFields = "nextPageToken, files(id, name, createdTime)";
+                    var folderFiles = await _googleClientService.GetFilesInDriveAsync(googleFileSetting.GoogleIdentifier, fileQueryFields)
                         .ConfigureAwait(false);
 
                     if (!isSuccess)
                         throw new Exception("Failed to upload to Rent Position folder (Backup)");
 
-                    LoggingHandler.LogInfo("Deleting old backup files");
-
-                    // Keep a record of the last file for each financial year
-                    var lastFilesForFinancialYears = getLastFilesForFinancialYears(folderFiles);
                     var filesCreatedInLast7Days = folderFiles.Where(file =>
+                        file.CreatedTime.HasValue &&
                         file.CreatedTime?.Date > DateTime.Today.AddDays(-7).Date).ToList();
+                    var lastFilesForFinancialYears = getLastFilesForFinancialYears(folderFiles);
 
                     var filesToDelete = folderFiles.Where(file =>
-                            !filesCreatedInLast7Days.Contains(file) && !lastFilesForFinancialYears.Contains(file)
+                            file.CreatedTime.HasValue &&
+                            !filesCreatedInLast7Days.Contains(file)
+                            && !lastFilesForFinancialYears.Contains(file)
                         ).ToList();
 
                     string fileSummary(File file) => $"{file.Name} Created:({file.CreatedTime?.Date:dd/MM/yyyy})";
                     LoggingHandler.LogInfo($"All files: [{string.Join(", ", folderFiles.Select(fileSummary))}]");
                     LoggingHandler.LogInfo($"Preserving last files for past financial years: [{string.Join(", ", lastFilesForFinancialYears.Select(fileSummary))}]");
                     LoggingHandler.LogInfo($"Preserving files created in the last 7 days: [{string.Join(", ", filesCreatedInLast7Days.Select(fileSummary))}]");
-                    LoggingHandler.LogInfo($"Will delete {filesToDelete.Count} file(s) from {googleFileSetting.GoogleIdentifier}: [{string.Join(", ", filesToDelete.Select(f => f.Name))}]");
+                    LoggingHandler.LogInfo($"Will delete {filesToDelete.Count} backup file(s) from {googleFileSetting.GoogleIdentifier}: [{string.Join(", ", filesToDelete.Select(f => f.Name))}]");
 
                     var deletionErrors = new List<Exception>();
                     foreach (var file in filesToDelete)
