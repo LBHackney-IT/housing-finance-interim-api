@@ -356,84 +356,84 @@ stepFunctions:
       dependsOn: lambdaExecutionRole
       tags:
         Team: HousingFinance
-    hfstepfunccharges:
-      name: HFChargesStateMachine
-      events:
-        - schedule: cron(30 0 * * ? *)
-      definition:
-        Comment: "Charges process step function deployed via serverless. Run at 12:30 AM"
-        StartAt: CheckChargesBatchYears
-        States:
-          CheckChargesBatchYears:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [ checkChargesBatchYears, Arn ]
-            Retry:
-              - ErrorEquals:
-                  - States.All
-                IntervalSeconds: 30
-                MaxAttempts: 3
-                BackoffRate: 2
-            Next: Choice_ExistPendingYear
-          Choice_ExistPendingYear:
-            Type: Choice
-            Choices:
-              - Variable: $.Continue
-                BooleanEquals: true
-                Next: Wait_0
-              - Variable: $.Continue
-                BooleanEquals: false
-                Next: EndStep
-          Wait_0:
-              Type: Wait
-              TimestampPath: $.NextStepTime
-              Next: ImportCharges
-          ImportCharges:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [ importCharges, Arn ]
-            Retry:
-              - ErrorEquals:
-                  - States.All
-                IntervalSeconds: 30
-                MaxAttempts: 3
-                BackoffRate: 2
-            Next: Wait_1          
-          Wait_1:
-              Type: Wait
-              TimestampPath: $.NextStepTime
-              Next: ImportChargesHistory
-          ImportChargesHistory:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [ importChargesHistory, Arn ]
-            Retry:
-              - ErrorEquals:
-                  - States.All
-                IntervalSeconds: 30
-                MaxAttempts: 3
-                BackoffRate: 2
-            Next: Wait_2
-          Wait_2:
-              Type: Wait
-              TimestampPath: $.NextStepTime
-              Next: ImportChargesTransactions          
-          ImportChargesTransactions:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [ importChargesTransactions, Arn ]
-            Retry:
-              - ErrorEquals:
-                  - States.All
-                IntervalSeconds: 30
-                MaxAttempts: 3
-                BackoffRate: 2
-            Next: CheckChargesBatchYears
-          EndStep:
-            Type: Succeed
-      dependsOn: lambdaExecutionRole
-      tags:
-        Team: HousingFinance
+    # hfstepfunccharges:
+    #   name: HFChargesStateMachine
+    #   events:
+    #     - schedule: cron(30 0 * * ? *)
+    #   definition:
+    #     Comment: "Charges process step function deployed via serverless. Run at 12:30 AM"
+    #     StartAt: CheckChargesBatchYears
+    #     States:
+    #       CheckChargesBatchYears:
+    #         Type: Task
+    #         Resource:
+    #           Fn::GetAtt: [ checkChargesBatchYears, Arn ]
+    #         Retry:
+    #           - ErrorEquals:
+    #               - States.All
+    #             IntervalSeconds: 30
+    #             MaxAttempts: 3
+    #             BackoffRate: 2
+    #         Next: Choice_ExistPendingYear
+    #       Choice_ExistPendingYear:
+    #         Type: Choice
+    #         Choices:
+    #           - Variable: $.Continue
+    #             BooleanEquals: true
+    #             Next: Wait_0
+    #           - Variable: $.Continue
+    #             BooleanEquals: false
+    #             Next: EndStep
+    #       Wait_0:
+    #           Type: Wait
+    #           TimestampPath: $.NextStepTime
+    #           Next: ImportCharges
+    #       ImportCharges:
+    #         Type: Task
+    #         Resource:
+    #           Fn::GetAtt: [ importCharges, Arn ]
+    #         Retry:
+    #           - ErrorEquals:
+    #               - States.All
+    #             IntervalSeconds: 30
+    #             MaxAttempts: 3
+    #             BackoffRate: 2
+    #         Next: Wait_1          
+    #       Wait_1:
+    #           Type: Wait
+    #           TimestampPath: $.NextStepTime
+    #           Next: ImportChargesHistory
+    #       ImportChargesHistory:
+    #         Type: Task
+    #         Resource:
+    #           Fn::GetAtt: [ importChargesHistory, Arn ]
+    #         Retry:
+    #           - ErrorEquals:
+    #               - States.All
+    #             IntervalSeconds: 30
+    #             MaxAttempts: 3
+    #             BackoffRate: 2
+    #         Next: Wait_2
+    #       Wait_2:
+    #           Type: Wait
+    #           TimestampPath: $.NextStepTime
+    #           Next: ImportChargesTransactions          
+    #       ImportChargesTransactions:
+    #         Type: Task
+    #         Resource:
+    #           Fn::GetAtt: [ importChargesTransactions, Arn ]
+    #         Retry:
+    #           - ErrorEquals:
+    #               - States.All
+    #             IntervalSeconds: 30
+    #             MaxAttempts: 3
+    #             BackoffRate: 2
+    #         Next: CheckChargesBatchYears
+    #       EndStep:
+    #         Type: Succeed
+    #   dependsOn: lambdaExecutionRole
+    #   tags:
+    #     Team: HousingFinance
     hfstepfunccurentbalance:
       name: HFCurrentBalanceStateMachine
       events:
