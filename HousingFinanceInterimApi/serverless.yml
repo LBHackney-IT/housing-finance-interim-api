@@ -185,7 +185,7 @@ functions:
         - schedule: cron(0 5 * * ? *)
   importAdjustmentsTransactions:
     name: ${self:service}-${self:provider.stage}-adjustments-trans
-    description: "The scheduler to import adjustments transactions from spreadsheet."
+    description: "The scheduler to import adjustments transactions from spreadsheet. Runs at 2:45 AM."
     timeout: 600
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadAdjustmentsTransactions
     role: lambdaExecutionRole
@@ -220,7 +220,7 @@ stepFunctions:
       events:
         - schedule: cron(0 2 * * ? *)
       definition:
-        Comment: "Cash files process step function deployed via serverless. Run at 01:00 AM"
+        Comment: "Cash files process step function deployed via serverless. Run at 02:00 AM"
         StartAt: ImportCashFile
         States:          
           ImportCashFile:
@@ -313,7 +313,7 @@ stepFunctions:
       events:
         - schedule: cron(30 2 * * ? *)
       definition:
-        Comment: "Direct debit process step function deployed via serverless. Run at 01:30 AM"
+        Comment: "Direct debit process step function deployed via serverless. Run at 02:30 AM"
         StartAt: ImportDirectDebit
         States:          
           ImportDirectDebit:
