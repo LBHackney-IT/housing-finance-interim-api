@@ -190,7 +190,7 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadAdjustmentsTransactions
     role: lambdaExecutionRole
     events:
-        - schedule: cron(45 1 * * ? *)
+        - schedule: cron(45 2 * * ? *)
   suspenseCash:
     name: ${self:service}-${self:provider.stage}-susp-cash
     description: "The scheduler to load and reverse suspense cash files. Run at 03:05 AM"
@@ -218,7 +218,7 @@ stepFunctions:
     hfstepfunccashfile:
       name: HFCashFileStateMachine
       events:
-        - schedule: cron(0 1 * * ? *)
+        - schedule: cron(0 2 * * ? *)
       definition:
         Comment: "Cash files process step function deployed via serverless. Run at 01:00 AM"
         StartAt: ImportCashFile
@@ -311,7 +311,7 @@ stepFunctions:
     hfstepfuncdirectdebit:
       name: HFDirectDebitStateMachine
       events:
-        - schedule: cron(30 1 * * ? *)
+        - schedule: cron(30 2 * * ? *)
       definition:
         Comment: "Direct debit process step function deployed via serverless. Run at 01:30 AM"
         StartAt: ImportDirectDebit
