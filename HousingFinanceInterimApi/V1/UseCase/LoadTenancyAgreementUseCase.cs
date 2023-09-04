@@ -50,20 +50,27 @@ namespace HousingFinanceInterimApi.V1.UseCase
             if (googleFileSettings == null)
                 throw new GoogleFileSettingNotFoundException(_tenancyAgreementLabel);
 
+            var sheetProcessingExceptions = new List<Exception>();
             foreach (var sheetName in Enum.GetValues(typeof(RentGroup)))
             {
                 var tenancyAgreementAux = await _googleClientService
                     .ReadSheetToEntitiesAsync<TenancyAgreementAuxDomain>(googleFileSettings.GoogleIdentifier, sheetName.ToString(), sheetRange)
                     .ConfigureAwait(false);
 
-                if (!tenancyAgreementAux.Any())
+                if (tenancyAgreementAux == null || !tenancyAgreementAux.Any())
                 {
-                    LoggingHandler.LogInfo($"No tenancy agreement data to import. Sheet name: {sheetName}");
+                    var message = "No tenancy agreement data to import. Sheet name: {sheetName}";
+                    var exc = new Exception(message);
+                    sheetProcessingExceptions.Add(exc);
+                    LoggingHandler.LogError(message);
                     continue;
                 }
 
                 await HandleSpreadSheet(batch.Id, tenancyAgreementAux, sheetName.ToString()).ConfigureAwait(false);
             }
+
+            if (sheetProcessingExceptions.Any())
+                throw new AggregateException(sheetProcessingExceptions);
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
             LoggingHandler.LogInfo($"End tenancy agreement import");

@@ -129,8 +129,9 @@ public class LoadTenancyAgreementUseCaseTests
         }
 
         [Fact]
-        public async Task DoesNotContinueWhenNoRentPositionFileSettingsFound()
+        public async Task ThrowsExceptionWhenNoRentPositionFileSettingsFound()
         {
+            // When no items in GoogleFileSetting table containing spreadsheet ID to read from for the load tenancy agreement label
             var emptyGoogleFileSettingList = new List<GoogleFileSettingDomain>();
 
             // Arrange
@@ -146,41 +147,22 @@ public class LoadTenancyAgreementUseCaseTests
         }
 
         [Fact]
-        public async Task ContinuesWhenNoDriveFilesFoundInFolder()
-        {
-            var emptyDriveFileList = new List<File>();
-
-            // Arrange
-            _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(emptyDriveFileList);
-
-            // Act
-            var useCaseCall = async () =>  await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
-
-            // Assert
-            var stepResponse = await useCaseCall().ConfigureAwait(false);
-            stepResponse.Continue.Should().BeTrue();
-            _mockBatchLogGateway.Verify(x => x.SetToSuccessAsync(It.IsAny<long>()), Times.Once);
-        }
-
-        [Fact]
         public async Task ThrowsUncaughtExceptionWhenFailingToReadSpreadsheet()
         {
-            var nullSheetEntities = (IList<TenancyAgreementAuxDomain>) null;
+            var emptySheetEntityList = new List<TenancyAgreementAuxDomain>();
 
             // Arrange
             _mockGoogleClientService
-                .Setup(x => x.ReadSheetToEntitiesAsync<TenancyAgreementAuxDomain>(
+                .Setup(service => service.ReadSheetToEntitiesAsync<TenancyAgreementAuxDomain>(
                     It.IsAny<string>(),
                     It.IsAny<string>(),
                     It.IsAny<string>())
-                ).ReturnsAsync(nullSheetEntities);
+                ).ReturnsAsync(emptySheetEntityList);
 
             // Act
             var useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // Assert
-            await useCaseCall.Should().ThrowAsync<ArgumentNullException>().ConfigureAwait(false);
+            await useCaseCall.Should().ThrowAsync<AggregateException>().ConfigureAwait(false);
         }
 }
