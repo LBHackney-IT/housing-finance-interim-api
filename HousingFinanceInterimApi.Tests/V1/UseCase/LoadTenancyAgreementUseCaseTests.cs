@@ -42,12 +42,11 @@ public class LoadTenancyAgreementUseCaseTests
                     _mockGoogleFileSettingGateway.Object,
                     _mockGoogleClientService.Object
                 );
-        }
 
-        [Fact]
-        public async Task ReturnsStepResponseWhenAllOK()
-        {
-            // Arrange
+            _mockBatchLogGateway
+                .Setup(g => g.CreateAsync(It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync(RandomGen.BatchLogDomain());
+
             _mockBatchLogGateway
                 .Setup(g => g.CreateAsync(It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(RandomGen.BatchLogDomain());
@@ -67,7 +66,11 @@ public class LoadTenancyAgreementUseCaseTests
                     It.IsAny<string>(),
                     It.IsAny<string>())
                 ).ReturnsAsync(RandomGen.CreateMany<TenancyAgreementAuxDomain>(quantity: 1).ToList());
+        }
 
+        [Fact]
+        public async Task ReturnsStepResponseWhenAllOK()
+        {
             // Act
             var useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
@@ -79,6 +82,34 @@ public class LoadTenancyAgreementUseCaseTests
         }
 
         [Fact]
+        public async Task RunsAllUpdateFunctionsForEachRentGroupWhenAllOK()
+        {
+            // Act
+            var useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // Assert
+            var result = await useCaseCall().ConfigureAwait(false);
+            result.Continue.Should().BeTrue();
+
+            var countOfRentGroups = Enum.GetValues(typeof(RentGroup)).Length;
+            var firstRentGroup = Enum.GetValues(typeof(RentGroup)).GetValue(0)?.ToString();
+
+            _mockTenancyAgreementGateway.Verify(gw =>
+                    gw.CreateBulkAsync(It.IsAny<IList<TenancyAgreementAuxDomain>>(), firstRentGroup),
+                Times.Once);
+
+            _mockTenancyAgreementGateway.Verify(gw =>
+                    gw.ClearTenancyAgreementAuxiliary(),
+                Times.Exactly(countOfRentGroups));
+            _mockTenancyAgreementGateway.Verify(gw =>
+                    gw.CreateBulkAsync(It.IsAny<IList<TenancyAgreementAuxDomain>>(), It.IsAny<string>()),
+                Times.Exactly(countOfRentGroups));
+            _mockTenancyAgreementGateway.Verify(gw =>
+                    gw.RefreshTenancyAgreement(It.IsAny<long>()),
+                Times.Exactly(countOfRentGroups));
+        }
+
+        [Fact]
         public async Task ThrowsExceptionWhenFailingToCreateBatchLogs()
         {
             var batchLogException = new Exception("Test exception");
@@ -87,22 +118,6 @@ public class LoadTenancyAgreementUseCaseTests
             _mockBatchLogGateway
                 .Setup(g => g.CreateAsync(It.IsAny<string>(), It.IsAny<bool>()))
                 .ThrowsAsync(batchLogException);
-
-            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
-            _mockGoogleFileSettingGateway
-                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
-                .ReturnsAsync(rentPositionFileSettings);
-
-            _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(RandomGen.CreateMany<File>(1).ToList());
-
-            _mockGoogleClientService
-                .Setup(x => x.ReadSheetToEntitiesAsync<TenancyAgreementAuxDomain>(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>())
-                ).ReturnsAsync(RandomGen.CreateMany<TenancyAgreementAuxDomain>(quantity: 1).ToList());
 
             // Act
             var useCaseCall = async () =>  await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
@@ -118,24 +133,9 @@ public class LoadTenancyAgreementUseCaseTests
             var emptyGoogleFileSettingList = new List<GoogleFileSettingDomain>();
 
             // Arrange
-            _mockBatchLogGateway
-                .Setup(g => g.CreateAsync(It.IsAny<string>(), It.IsAny<bool>()))
-                .ReturnsAsync(RandomGen.BatchLogDomain());
-
             _mockGoogleFileSettingGateway
                 .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
                 .ReturnsAsync(emptyGoogleFileSettingList);
-
-            _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(RandomGen.CreateMany<File>(1).ToList());
-
-            _mockGoogleClientService
-                .Setup(x => x.ReadSheetToEntitiesAsync<TenancyAgreementAuxDomain>(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>())
-                ).ReturnsAsync(RandomGen.CreateMany<TenancyAgreementAuxDomain>(quantity: 1).ToList());
 
             // Act
             var useCaseCall = async () =>  await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
@@ -152,25 +152,9 @@ public class LoadTenancyAgreementUseCaseTests
             var emptyDriveFileList = new List<File>();
 
             // Arrange
-            _mockBatchLogGateway
-                .Setup(g => g.CreateAsync(It.IsAny<string>(), It.IsAny<bool>()))
-                .ReturnsAsync(RandomGen.BatchLogDomain());
-
-            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
-            _mockGoogleFileSettingGateway
-                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
-                .ReturnsAsync(rentPositionFileSettings);
-
             _mockGoogleClientService
                 .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(emptyDriveFileList);
-
-            _mockGoogleClientService
-                .Setup(x => x.ReadSheetToEntitiesAsync<TenancyAgreementAuxDomain>(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>())
-                ).ReturnsAsync(RandomGen.CreateMany<TenancyAgreementAuxDomain>(quantity: 1).ToList());
 
             // Act
             var useCaseCall = async () =>  await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
@@ -187,19 +171,6 @@ public class LoadTenancyAgreementUseCaseTests
             var nullSheetEntities = (IList<TenancyAgreementAuxDomain>) null;
 
             // Arrange
-            _mockBatchLogGateway
-                .Setup(g => g.CreateAsync(It.IsAny<string>(), It.IsAny<bool>()))
-                .ReturnsAsync(RandomGen.BatchLogDomain());
-
-            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
-            _mockGoogleFileSettingGateway
-                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
-                .ReturnsAsync(rentPositionFileSettings);
-
-            _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(RandomGen.CreateMany<File>(1).ToList());
-
             _mockGoogleClientService
                 .Setup(x => x.ReadSheetToEntitiesAsync<TenancyAgreementAuxDomain>(
                     It.IsAny<string>(),
@@ -208,59 +179,9 @@ public class LoadTenancyAgreementUseCaseTests
                 ).ReturnsAsync(nullSheetEntities);
 
             // Act
-            var useCaseCall = async () =>  await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+            var useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // Assert
             await useCaseCall.Should().ThrowAsync<ArgumentNullException>().ConfigureAwait(false);
         }
-
-        [Fact]
-        public async Task RunsAllUpdateFunctionsForEachRentGroupWhenAllOK()
-        {
-            // Arrange
-            _mockBatchLogGateway
-                .Setup(g => g.CreateAsync(It.IsAny<string>(), It.IsAny<bool>()))
-                .ReturnsAsync(RandomGen.BatchLogDomain());
-
-            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
-            _mockGoogleFileSettingGateway
-                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
-                .ReturnsAsync(rentPositionFileSettings);
-
-            _mockGoogleClientService
-                .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(RandomGen.CreateMany<File>(1).ToList());
-
-            _mockGoogleClientService
-                .Setup(x => x.ReadSheetToEntitiesAsync<TenancyAgreementAuxDomain>(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>())
-                ).ReturnsAsync(RandomGen.CreateMany<TenancyAgreementAuxDomain>(quantity: 1).ToList());
-
-            // Act
-            var useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
-
-            // Assert
-            var result = await useCaseCall().ConfigureAwait(false);
-            result.Continue.Should().BeTrue();
-
-            var countOfRentGroups = Enum.GetValues(typeof(RentGroup)).Length;
-            var firstRentGroup = Enum.GetValues(typeof(RentGroup)).GetValue(0)?.ToString();
-
-            _mockTenancyAgreementGateway.Verify(gw =>
-                gw.CreateBulkAsync(It.IsAny<IList<TenancyAgreementAuxDomain>>(), firstRentGroup),
-                Times.Once);
-
-            _mockTenancyAgreementGateway.Verify(gw =>
-                gw.ClearTenancyAgreementAuxiliary(),
-                Times.Exactly(countOfRentGroups));
-            _mockTenancyAgreementGateway.Verify(gw =>
-                gw.CreateBulkAsync(It.IsAny<IList<TenancyAgreementAuxDomain>>(), It.IsAny<string>()),
-                Times.Exactly(countOfRentGroups));
-            _mockTenancyAgreementGateway.Verify(gw =>
-                gw.RefreshTenancyAgreement(It.IsAny<long>()),
-                Times.Exactly(countOfRentGroups));
-        }
 }
-
