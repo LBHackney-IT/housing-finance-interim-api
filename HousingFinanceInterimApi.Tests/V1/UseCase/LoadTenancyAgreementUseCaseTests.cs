@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 using Google.Apis.Drive.v3.Data;
+using HousingFinanceInterimApi.Tests.V1.UseCase.Exceptions;
 
 namespace HousingFinanceInterimApi.Tests.V1.UseCase;
 
@@ -141,9 +142,7 @@ public class LoadTenancyAgreementUseCaseTests
             var useCaseCall = async () =>  await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // Assert
-            var stepResponse = await useCaseCall().ConfigureAwait(false);
-            stepResponse.Continue.Should().BeFalse();
-            _mockBatchLogGateway.Verify(x => x.SetToSuccessAsync(It.IsAny<long>()), Times.Never);
+            await useCaseCall.Should().ThrowAsync<GoogleFileSettingNotFoundException>().ConfigureAwait(false);
         }
 
         [Fact]

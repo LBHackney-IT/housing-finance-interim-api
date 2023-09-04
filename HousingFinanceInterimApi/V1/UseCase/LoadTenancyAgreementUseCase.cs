@@ -2,14 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HousingFinanceInterimApi.V1.Domain;
-using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;
-using Google.Apis.Drive.v3.Data;
 using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Handlers;
-using HousingFinanceInterimApi.V1.Infrastructure;
+
+using HousingFinanceInterimApi.Tests.V1.UseCase.Exceptions;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
@@ -49,7 +48,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var googleFileSettings = await GetGoogleFileSetting(_tenancyAgreementLabel).ConfigureAwait(false);
 
             if (googleFileSettings == null)
-                return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
+                throw new GoogleFileSettingNotFoundException(_tenancyAgreementLabel);
 
             foreach (var sheetName in Enum.GetValues(typeof(RentGroup)))
             {
