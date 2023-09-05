@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Handlers;
 
-using HousingFinanceInterimApi.Tests.V1.UseCase.Exceptions;
+using HousingFinanceInterimApi.V1.Exceptions;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
@@ -53,20 +53,22 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var sheetProcessingExceptions = new List<Exception>();
             foreach (var sheetName in Enum.GetValues(typeof(RentGroup)))
             {
+                LoggingHandler.LogInfo($"BEGIN sheet {sheetName}");
+
                 var tenancyAgreementAux = await _googleClientService
                     .ReadSheetToEntitiesAsync<TenancyAgreementAuxDomain>(googleFileSettings.GoogleIdentifier, sheetName.ToString(), sheetRange)
                     .ConfigureAwait(false);
 
                 if (tenancyAgreementAux == null || !tenancyAgreementAux.Any())
                 {
-                    var message = "No tenancy agreement data to import. Sheet name: {sheetName}";
-                    var exc = new Exception(message);
+                    var exc = new NoDataForSheetException("tenancy agreement", sheetName.ToString(), googleFileSettings.GoogleIdentifier);
                     sheetProcessingExceptions.Add(exc);
-                    LoggingHandler.LogError(message);
                     continue;
                 }
 
                 await HandleSpreadSheet(batch.Id, tenancyAgreementAux, sheetName.ToString()).ConfigureAwait(false);
+
+                LoggingHandler.LogInfo($"END sheet {sheetName}");
             }
 
             if (sheetProcessingExceptions.Any())
@@ -83,7 +85,11 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var googleFileSettings = await _googleFileSettingGateway.GetSettingsByLabel(label).ConfigureAwait(false);
             LoggingHandler.LogInfo($"{googleFileSettings.Count} Google file settings found");
 
-            return googleFileSettings.FirstOrDefault();
+            var chosenFileSetting = googleFileSettings.FirstOrDefault();
+
+            LoggingHandler.LogInfo($"Processing Google file with ID '{chosenFileSetting?.Id}'");
+
+            return chosenFileSetting;
         }
 
         private async Task HandleSpreadSheet(long batchId, IList<TenancyAgreementAuxDomain> tenancyAgreementAux, string rentGroup)

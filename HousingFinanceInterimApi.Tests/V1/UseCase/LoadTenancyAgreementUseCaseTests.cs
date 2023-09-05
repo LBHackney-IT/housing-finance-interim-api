@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 using Google.Apis.Drive.v3.Data;
-using HousingFinanceInterimApi.Tests.V1.UseCase.Exceptions;
+using HousingFinanceInterimApi.V1.Exceptions;
 
 namespace HousingFinanceInterimApi.Tests.V1.UseCase;
 

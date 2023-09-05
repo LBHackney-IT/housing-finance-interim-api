@@ -1,5 +1,5 @@
 using System;
-namespace HousingFinanceInterimApi.Tests.V1.UseCase.Exceptions;
+namespace HousingFinanceInterimApi.V1.Exceptions;
 
 public class GoogleFileSettingNotFoundException : Exception
 {
