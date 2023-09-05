@@ -147,22 +147,36 @@ public class LoadTenancyAgreementUseCaseTests
     }
 
     [Fact]
-    public async Task ThrowsUncaughtExceptionWhenFailingToReadSpreadsheet()
+    public async Task DoesNotAttemptToLoadDatabaseWithUnreadSheets()
     {
         var emptySheetEntityList = new List<TenancyAgreementAuxDomain>();
+
+        var blankSheetName = Enum.GetValues(typeof(RentGroup)).GetValue(0)?.ToString();
 
         // Arrange
         _mockGoogleClientService
             .Setup(service => service.ReadSheetToEntitiesAsync<TenancyAgreementAuxDomain>(
                 It.IsAny<string>(),
-                It.IsAny<string>(),
+                blankSheetName,
                 It.IsAny<string>())
-            ).ReturnsAsync(emptySheetEntityList);
+            )
+            .ReturnsAsync(emptySheetEntityList);
+
+        _mockGoogleClientService
+            .Setup(service => service.ReadSheetToEntitiesAsync<TenancyAgreementAuxDomain>(
+                It.IsAny<string>(),
+                It.IsNotIn(blankSheetName),
+                It.IsAny<string>())
+            )
+            .ReturnsAsync(emptySheetEntityList);
 
         // Act
-        var useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+        await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
         // Assert
-        await useCaseCall.Should().ThrowAsync<AggregateException>().ConfigureAwait(false);
+        // Should not load database for blankSheetName
+        _mockTenancyAgreementGateway.Verify(gw =>
+                gw.CreateBulkAsync(It.IsAny<IList<TenancyAgreementAuxDomain>>(), blankSheetName),
+            Times.Never);
     }
 }
