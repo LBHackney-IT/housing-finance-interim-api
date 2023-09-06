@@ -91,7 +91,7 @@ public class LoadActionDiaryUseCaseTests
         // Assert
         var result = await useCaseCall().ConfigureAwait(false);
         result.Continue.Should().BeTrue();
-        
+
         _mockActionDiaryGateway.Verify(gw =>
                 gw.ClearActionDiaryAuxiliary(), Times.Once);
         _mockActionDiaryGateway.Verify(gw =>
@@ -106,7 +106,7 @@ public class LoadActionDiaryUseCaseTests
     {
         // Arrange
         var testException = new Exception("Test exception");
-        
+
         _mockBatchLogGateway
             .Setup(g => g.CreateAsync(It.IsAny<string>(), It.IsAny<bool>()))
             .ThrowsAsync(testException);
@@ -140,14 +140,13 @@ public class LoadActionDiaryUseCaseTests
     [Fact]
     public async Task DoesNotAttemptToLoadDatabaseWithEmptySheets()
     {
-        var emptySheetEntityList = new List<ActionDiaryAuxDomain>();
-        const string blankSheetName = "Blank";
-
         // Arrange
+        var emptySheetEntityList = new List<ActionDiaryAuxDomain>();
+
         _mockGoogleClientService
             .Setup(service => service.ReadSheetToEntitiesAsync<ActionDiaryAuxDomain>(
                 It.IsAny<string>(),
-                blankSheetName,
+                It.IsAny<string>(),
                 It.IsAny<string>())
             )
             .ReturnsAsync(emptySheetEntityList);
