@@ -50,7 +50,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
             if (googleFileSettings == null)
                 throw new GoogleFileSettingNotFoundException(_tenancyAgreementLabel);
 
-            var sheetProcessingExceptions = new List<Exception>();
+            var emptySheetNames = new List<string>();
+
             foreach (var sheetName in Enum.GetValues(typeof(RentGroup)))
             {
                 LoggingHandler.LogInfo($"BEGIN sheet {sheetName}");
@@ -61,8 +62,10 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
                 if (tenancyAgreementAux == null || !tenancyAgreementAux.Any())
                 {
-                    var exc = new NoDataForSheetException("tenancy agreement", sheetName.ToString(), googleFileSettings.GoogleIdentifier);
-                    sheetProcessingExceptions.Add(exc);
+                    emptySheetNames.Add(sheetName.ToString());
+                    LoggingHandler.LogWarning(
+                        $"No tenancy agreement data to import. Sheet name: ({sheetName})");
+                    LoggingHandler.LogInfo($"END sheet {sheetName}");
                     continue;
                 }
 
@@ -71,8 +74,10 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 LoggingHandler.LogInfo($"END sheet {sheetName}");
             }
 
-            if (sheetProcessingExceptions.Any())
-                throw new AggregateException(sheetProcessingExceptions);
+            if (emptySheetNames.Any())
+                LoggingHandler.LogWarning($"No tenancy agreement data to import " +
+                                          $"on spreadsheet {googleFileSettings.GoogleIdentifier} " +
+                                          $"for sheets: ({string.Join(", ", emptySheetNames)})");
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
             LoggingHandler.LogInfo($"End tenancy agreement import");
@@ -87,7 +92,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             var chosenFileSetting = googleFileSettings.FirstOrDefault();
 
-            LoggingHandler.LogInfo($"Processing Google file with ID '{chosenFileSetting?.Id}'");
+            LoggingHandler.LogInfo($"Processing Google file with ID '{chosenFileSetting?.GoogleIdentifier}'");
 
             return chosenFileSetting;
         }
