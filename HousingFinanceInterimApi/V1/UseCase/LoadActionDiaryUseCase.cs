@@ -58,7 +58,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 LoggingHandler.LogWarning(
                         $"No action diary data to import. Sheet name: ({sheetName})");
-                    LoggingHandler.LogInfo($"END sheet {sheetName}");
+                LoggingHandler.LogInfo($"END sheet {sheetName}");
                 return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
             }
 
