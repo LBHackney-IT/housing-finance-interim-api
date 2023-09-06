@@ -2,14 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HousingFinanceInterimApi.V1.Domain;
-using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;
-using Google.Apis.Drive.v3.Data;
 using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Handlers;
-using HousingFinanceInterimApi.V1.Infrastructure;
+
+using HousingFinanceInterimApi.V1.Exceptions;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
@@ -49,22 +48,36 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var googleFileSettings = await GetGoogleFileSetting(_tenancyAgreementLabel).ConfigureAwait(false);
 
             if (googleFileSettings == null)
-                return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
+                throw new GoogleFileSettingNotFoundException(_tenancyAgreementLabel);
+
+            var emptySheetNames = new List<string>();
 
             foreach (var sheetName in Enum.GetValues(typeof(RentGroup)))
             {
+                LoggingHandler.LogInfo($"BEGIN sheet {sheetName}");
+
                 var tenancyAgreementAux = await _googleClientService
                     .ReadSheetToEntitiesAsync<TenancyAgreementAuxDomain>(googleFileSettings.GoogleIdentifier, sheetName.ToString(), sheetRange)
                     .ConfigureAwait(false);
 
-                if (!tenancyAgreementAux.Any())
+                if (tenancyAgreementAux == null || !tenancyAgreementAux.Any())
                 {
-                    LoggingHandler.LogInfo($"No tenancy agreement data to import. Sheet name: {sheetName}");
+                    emptySheetNames.Add(sheetName.ToString());
+                    LoggingHandler.LogWarning(
+                        $"No tenancy agreement data to import. Sheet name: ({sheetName})");
+                    LoggingHandler.LogInfo($"END sheet {sheetName}");
                     continue;
                 }
 
                 await HandleSpreadSheet(batch.Id, tenancyAgreementAux, sheetName.ToString()).ConfigureAwait(false);
+
+                LoggingHandler.LogInfo($"END sheet {sheetName}");
             }
+
+            if (emptySheetNames.Any())
+                LoggingHandler.LogWarning($"No tenancy agreement data to import " +
+                                          $"on spreadsheet {googleFileSettings.GoogleIdentifier} " +
+                                          $"for sheets: ({string.Join(", ", emptySheetNames)})");
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
             LoggingHandler.LogInfo($"End tenancy agreement import");
@@ -77,7 +90,11 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var googleFileSettings = await _googleFileSettingGateway.GetSettingsByLabel(label).ConfigureAwait(false);
             LoggingHandler.LogInfo($"{googleFileSettings.Count} Google file settings found");
 
-            return googleFileSettings.FirstOrDefault();
+            var chosenFileSetting = googleFileSettings.FirstOrDefault();
+
+            LoggingHandler.LogInfo($"Processing Google file with ID '{chosenFileSetting?.GoogleIdentifier}'");
+
+            return chosenFileSetting;
         }
 
         private async Task HandleSpreadSheet(long batchId, IList<TenancyAgreementAuxDomain> tenancyAgreementAux, string rentGroup)
