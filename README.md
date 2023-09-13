@@ -179,7 +179,6 @@ If changes to the database schema are made then the docker image for the databas
 [docker-download]: https://www.docker.com/products/docker-desktop
 [docker-compose-download]: https://docs.docker.com/compose/install/
 [universal-housing-simulator]: https://github.com/LBHackney-IT/lbh-universal-housing-simulator
-[made-tech]: https://madetech.com/
 [aws-cli]: https://aws.amazon.com/cli/
 [session-manager-install]: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
 
