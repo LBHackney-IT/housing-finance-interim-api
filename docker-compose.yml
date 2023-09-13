@@ -8,8 +8,7 @@ services:
       dockerfile: HousingFinanceInterimApi/Dockerfile
       args:
       - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
-    ports:
-      - 5000:5000
+    network_mode: "host"
     environment:
       - CONNECTION_STRING=${CONNECTION_STRING}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
@@ -22,6 +21,8 @@ services:
       - S3_BUCKET_NAME=${S3_BUCKET_NAME}
       - S3_OBJECT_PREFIX=${S3_OBJECT_PREFIX}
       - HOUSING_FINANCE_ALLOWED_GROUPS=${HOUSING_FINANCE_ALLOWED_GROUPS}
+
+#    Dev database not working
 #    links:
 #      - dev-database
 
