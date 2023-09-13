@@ -5,7 +5,7 @@ Housing Finance API will be used to serve data for the interim housing finance s
 ## Stack
 
 - .NET Core as a web framework.
-- nUnit as a test framework.
+- xUnit as a test framework.
 
 ## Dependencies
 
@@ -21,23 +21,97 @@ Housing Finance API will be used to serve data for the interim housing finance s
 4. Rename the initial template.
 5. Open it in your IDE.
 
-### Development
+## Development
 
-To serve the application, run it using your IDE of choice, we use Visual Studio CE and JetBrains Rider on Mac.
+### Env variable setup:
+- See the [Serverless Configuration](HousingFinanceInterimApi/serverless.yml) under environment
+for the environment variables to set from parameter store
 
-The application can also be served locally using docker:
-1.  Add you security credentials to AWS CLI.
+- Copy `.env.sample` into the same directory and rename it to `.env`, then set the values
+
+- You can use the Makefile from the port forwarding step below to help with generating the `CONNECTION_STRING` env variable
+
+### Port forwarding to the finance DB:
+This is currently required in order to connect the API to a functional DB locally
+
+#### Requirements:
+- A recent version of [AWS CLI V2](https://aws.amazon.com/cli/)
+- An AWS CLI profile for an environment the Finance DB is deployed in (preferable SSO profile)
+- The [Session Manager Plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html) for the AWS CLI
+
+#### Steps:
+- Open the [finance_database.mk](finance_database.mk) Makefile with the port forwarding commands
+
+- There is a helper method for generating the connection string to the port forwarded db for a given AWS profile.
+Run this then copy the output into your `.env` file:
 ```sh
-$ aws configure
-```
-2. Log into AWS ECR.
+make -f finance_database.mk local_connection_string_to_env
+````
+
+- Ensure you have a corresponding AWS CLI profile (default `housing-{stage}`) that matches the `PROFILE` variable
+with the same AWS Profile that the credentials were sourced from.
+- Edit the file to use the correct stage (development / staging / production)
+- If you're using an SSO profile:
+  - you can run `make -f finance_database.mk sso-login` to refresh your login and verify your profile
+- Start the port forwarding with:
 ```sh
-$ aws ecr get-login --no-include-email
-```
-3. Build and serve the application. It will be available in the port 3000.
+make -f finance_database.mk port_forwarding_to_hfs_db
+````
+
+#### Connecting to the database with a local client (optional):
+If you want to connect the database through a graphical / other local client:
+- Connect to localhost or 192.0.0.1 at port 1433
+- Enter the username and password printed to the console after the port forwarding
+
+### Running with Docker
+Docker Compose will read the .env file in the root directory ( same directory as the `.env.sample` file), and will connect to the port forwarded database on localhost:1433
+
+Run these Make commands from the root directory to trigger the docker compose build and up steps:
 ```sh
-$ make build && make serve
+make build && make serve
 ```
+
+### Running locally without Docker
+The application will load an .env file in the root directory ( same directory as the `.env.sample` file) and will connect to the port forwarded database on localhost:1433
+
+Run this command from the root directory to start the application:
+
+```sh
+dotnet run --project HousingFinanceInterimApi/HousingFinanceInterimApi.csproj
+```
+
+You can also configure your IDE of choice to run the `HousingFinanceInterimApi` project.
+
+
+## Testing
+
+### Run the tests
+
+```sh
+$ make test
+```
+
+To run database tests locally without Docker (e.g. via Visual Studio) the `CONNECTION_STRING` environment variable will need to be populated with:
+
+`Host=localhost;Database=testdb;Username=postgres;Password=mypassword"`
+
+Note: The Host name needs to be the name of the stub database docker-compose service, in order to run tests via Docker.
+
+You will need to have the stub database running in order to run the tests outside of Docker
+
+If changes to the database schema are made then the docker image for the database will have to be removed and recreated. The restart-db make command will do this for you.
+
+### Agreed Testing Approach
+- Use xUnit, FluentAssertions and Moq
+- Always follow a TDD approach
+- Tests should be independent of each other
+- Gateway tests should interact with a real test instance of the database
+- Test coverage should never go down
+- All use cases should be covered by E2E tests
+- Optimise when test run speed starts to hinder development
+- Unit tests and E2E tests should run in CI
+- Test database schemas should match up with production database schema
+- Have integration tests which test from the PostgreSQL database to API Gateway
 
 ### Release process
 
@@ -47,7 +121,7 @@ We use a pull request workflow, where changes are made on a branch and approved 
 
 Then we have an automated six step deployment process, which runs in CircleCI.
 
-1. Automated tests (nUnit) are run to ensure the release is of good quality.
+1. Automated tests (xUnit) are run to ensure the release is of good quality.
 2. The application is deployed to development automatically, where we check our latest changes work well.
 3. We manually confirm a staging deployment in the CircleCI workflow once we're happy with our changes in development.
 4. The application is deployed to staging.
@@ -72,16 +146,6 @@ Both the API and Test projects have been set up to **treat all warnings from the
 
 However, we can select which errors to suppress by setting the severity of the responsible rule to none, e.g `dotnet_analyzer_diagnostic.<Category-or-RuleId>.severity = none`, within the `.editorconfig` file.
 Documentation on how to do this can be found [here](https://docs.microsoft.com/en-us/visualstudio/code-quality/use-roslyn-analyzers?view=vs-2019).
-
-## Testing
-
-### Run the tests
-
-```sh
-$ make test
-```
-
-To run database tests locally (e.g. via Visual Studio) the `CONNECTION_STRING` environment variable will need to be populated with:
 
 `Host=localhost;Database=testdb;Username=postgres;Password=mypassword"`
 
@@ -114,15 +178,16 @@ If changes to the database schema are made then the docker image for the databas
 
 ### Active Maintainers
 
-- **Selwyn Preston**, Lead Developer at London Borough of Hackney (selwyn.preston@hackney.gov.uk)
-- **Mirela Georgieva**, Lead Developer at London Borough of Hackney (mirela.georgieva@hackney.gov.uk)
-- **Matt Keyworth**, Lead Developer at London Borough of Hackney (matthew.keyworth@hackney.gov.uk)
+- **Faisal Gazi**, Lead Software Engineer at London Borough of Hackney (faisal.gazi@hackney.gov.uk)
+- **Humairaa Mulla**, Senior Software Engineer at London Borough of Hackney (humairaa.mulla@hackney.gov.uk)
+- **George Schena**, Senior Software Engineer at London Borough of Hackney (george.schena@hackney.gov.uk)
 
 ### Other Contacts
 
-- **Rashmi Shetty**, Product Owner at London Borough of Hackney (rashmi.shetty@hackney.gov.uk)
+- **Selwyn Preston**, Head of Engineering at London Borough of Hackney (selwyn.preston@hackney.gov.uk)
 
 [docker-download]: https://www.docker.com/products/docker-desktop
 [universal-housing-simulator]: https://github.com/LBHackney-IT/lbh-universal-housing-simulator
 [made-tech]: https://madetech.com/
 [AWS-CLI]: https://aws.amazon.com/cli/
+
