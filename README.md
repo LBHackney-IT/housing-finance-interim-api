@@ -16,6 +16,7 @@ Housing Finance API will be used to serve data for the interim housing finance s
 3. A recent version of [AWS CLI V2][aws-cli]
 4. An AWS CLI profile for an environment the Finance DB is deployed in
 5. A recent version of the [Session Manager Plugin][session-manager-install] for the AWS CLI
+6. On Windows you will need to use Git Bash or WSL to run the Make commands
 
 ### Env variable setup
 - See the [Serverless Configuration](HousingFinanceInterimApi/serverless.yml) under environment
