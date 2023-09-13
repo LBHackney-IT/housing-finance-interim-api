@@ -7,39 +7,28 @@ Housing Finance API will be used to serve data for the interim housing finance s
 - .NET Core as a web framework.
 - xUnit as a test framework.
 
-## Dependencies
-
-- Housing Finance database
-
-## Contributing
-
-### Setup
-
-1. Install [Docker][docker-download].
-2. Install [AWS CLI][AWS-CLI].
-3. Clone this repository.
-4. Rename the initial template.
-5. Open it in your IDE.
-
 ## Development
 
-### Env variable setup:
+### Requirements
+
+1. [Docker][docker-download]
+2. [Docker-Compose][docker-compose-download] (often installed automatically with Docker)
+3. A recent version of [AWS CLI V2][aws-cli]
+4. An AWS CLI profile for an environment the Finance DB is deployed in
+5. A recent version of the [Session Manager Plugin][session-manager-install] for the AWS CLI
+
+### Env variable setup
 - See the [Serverless Configuration](HousingFinanceInterimApi/serverless.yml) under environment
 for the environment variables to set from parameter store
 
 - Copy `.env.sample` into the same directory and rename it to `.env`, then set the values
-
 - You can use the Makefile from the port forwarding step below to help with generating the `CONNECTION_STRING` env variable
+- Pay particular attention to the `GOOGLE_API_KEY` variable, which must be JSON wrapped in single quotes and on a single line
 
-### Port forwarding to the finance DB:
+### Port forwarding to the finance DB
 This is currently required in order to connect the API to a functional DB locally
 
-#### Requirements:
-- A recent version of [AWS CLI V2](https://aws.amazon.com/cli/)
-- An AWS CLI profile for an environment the Finance DB is deployed in (preferable SSO profile)
-- The [Session Manager Plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html) for the AWS CLI
-
-#### Steps:
+#### Steps
 - Open the [finance_database.mk](finance_database.mk) Makefile with the port forwarding commands
 
 - There is a helper method for generating the connection string to the port forwarded db for a given AWS profile.
@@ -58,7 +47,7 @@ with the same AWS Profile that the credentials were sourced from.
 make -f finance_database.mk port_forwarding_to_hfs_db
 ````
 
-#### Connecting to the database with a local client (optional):
+#### Connecting to the database with a local client (optional)
 If you want to connect the database through a graphical / other local client:
 - Connect to localhost or 192.0.0.1 at port 1433
 - Enter the username and password printed to the console after the port forwarding
@@ -187,7 +176,9 @@ If changes to the database schema are made then the docker image for the databas
 - **Selwyn Preston**, Head of Engineering at London Borough of Hackney (selwyn.preston@hackney.gov.uk)
 
 [docker-download]: https://www.docker.com/products/docker-desktop
+[docker-compose-download]: https://docs.docker.com/compose/install/
 [universal-housing-simulator]: https://github.com/LBHackney-IT/lbh-universal-housing-simulator
 [made-tech]: https://madetech.com/
-[AWS-CLI]: https://aws.amazon.com/cli/
+[aws-cli]: https://aws.amazon.com/cli/
+[session-manager-install]: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
 
