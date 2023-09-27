@@ -38,6 +38,10 @@ restart-db:
 	docker rmi test-database
 	docker-compose up -d test-database
 
-.PHONY: remote_db
-remote_db:
+.PHONY: serve-local
+serve-local:
+	dotnet run --project HousingFinanceInterimApi/HousingFinanceInterimApi.csproj
+
+.PHONY: remote-db
+remote-db:
 	make -f finance_database.mk port_forwarding_to_hfs_db
