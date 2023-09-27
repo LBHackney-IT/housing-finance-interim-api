@@ -37,3 +37,7 @@ restart-db:
 	-docker rm $$(docker ps -q --filter ancestor=test-database -a)
 	docker rmi test-database
 	docker-compose up -d test-database
+
+.PHONY: remote_db
+remote_db:
+	make -f finance_database.mk port_forwarding_to_hfs_db

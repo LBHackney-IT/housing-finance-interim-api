@@ -58,5 +58,6 @@ port_forwarding_to_hfs_db:
 
 # This generates the connection string for connecting to the database through the port forwarding above
 # Set this in your .env file
+# Replace host.docker.internal with localhost if you are on Linux
 local_connection_string_to_env:
-	echo "CONNECTION_STRING='Server=localhost,${LOCAL_PORT};Initial Catalog=${DB_NAME};User Id=${DB_USERNAME};Password=${DB_PASSWORD};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;'"
+	echo "CONNECTION_STRING='Server=host.docker.internal,${LOCAL_PORT};Initial Catalog=${DB_NAME};User Id=${DB_USERNAME};Password=${DB_PASSWORD};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;'"
