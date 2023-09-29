@@ -17,7 +17,7 @@ Housing Finance API will be used to serve data for the interim housing finance s
 4. An AWS CLI profile for an environment the Finance DB is deployed in
 5. A recent version of the [Session Manager Plugin][session-manager-install] for the AWS CLI
 6. On Windows you will need to use Git Bash or WSL to run the Make commands
-7. On Windows to run with Docker you will need Windows Subsystem for Linux v2 with Docker Engine installed on it (NOT Docker Desktop on base Windows - this [does not support the DB connection](https://docs.docker.com/network/network-tutorial-host/#prerequisites))
+7. On Windows to run with Docker you will need Windows Subsystem for Linux v2 with Docker Engine installed on it (NOT Docker Desktop on base Windows - this [does not support the host networking driver](https://docs.docker.com/network/network-tutorial-host/#prerequisites))
 
 ### Env variable setup
 - See the [Serverless Configuration](HousingFinanceInterimApi/serverless.yml) under environment
