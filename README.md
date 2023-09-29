@@ -43,7 +43,7 @@ make -f finance_database.mk local_connection_string_to_env
 with the same AWS Profile that the credentials were sourced from.
 - Edit the file to use the correct stage (development / staging / production)
 - If you're using an SSO profile:
-  - you can run `make -f finance_database.mk sso-login` to refresh your login and verify your profile
+  - you can run `make -f finance_database.mk sso_login` to refresh your login and verify your profile
 - Start the port forwarding with:
 ```sh
 make -f finance_database.mk port_forwarding_to_hfs_db
@@ -56,6 +56,13 @@ If you want to connect the database through a graphical / other local client:
 
 ### Running with Docker
 Docker Compose will read the .env file in the root directory ( same directory as the `.env.sample` file), and will connect to the port forwarded database on localhost:1433
+
+On Windows you'll need Docker Desktop running with WSL2 integration enabled
+
+Replace the AWS CLI profile name and run this command to log in to AWS Elastic Container Registry and allow fetching the base Docker container:
+```sh
+aws ecr get-login-password --profile {profile}
+```
 
 Run these Make commands from the root directory to trigger the docker compose build and up steps:
 ```sh
