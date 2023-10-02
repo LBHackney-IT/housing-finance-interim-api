@@ -16,7 +16,13 @@ Housing Finance API will be used to serve data for the interim housing finance s
 3. A recent version of [AWS CLI V2][aws-cli]
 4. An AWS CLI profile for an environment the Finance DB is deployed in
 5. A recent version of the [Session Manager Plugin][session-manager-install] for the AWS CLI
-6. On Windows you will need to use Git Bash or WSL to run the Make commands
+
+On Windows:
+- You will need to use Git Bash or Windows Subsystem for Linux to run the Make commands
+- To run with Docker you will need Windows Subsystem for Linux v2 with Docker Engine installed on it (NOT Docker Desktop on base Windows - this [does not support the host networking driver](https://docs.docker.com/network/network-tutorial-host/#prerequisites))
+
+On MacOS (Monterey - possibly others):
+- You will need to [turn off AirPlay receiver](https://developer.apple.com/forums/thread/682332) from your sharing settings due to a port 5000 conflict
 
 ### Env variable setup
 - See the [Serverless Configuration](HousingFinanceInterimApi/serverless.yml) under environment
