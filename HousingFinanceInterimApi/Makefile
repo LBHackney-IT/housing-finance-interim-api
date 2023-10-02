@@ -41,10 +41,6 @@ S3_BUCKET_NAME := $(shell aws ssm get-parameter --name ${S3_BUCKET_NAME_PATH} --
 S3_OBJECT_PREFIX := $(shell aws ssm get-parameter --name ${S3_OBJECT_PREFIX_PATH} --region "eu-west-2" --profile ${PROFILE} --query Parameter.Value --output text)
 HOUSING_FINANCE_ALLOWED_GROUPS := $(shell aws ssm get-parameter --name ${HOUSING_FINANCE_ALLOWED_GROUPS_PATH} --region "eu-west-2" --profile ${PROFILE} --query Parameter.Value --output text)
 
-DB_NAME := "sow2b"
-
-DATABASE_PARAMS := '{"host":["${DB_ENDPOINT}"], "portNumber":["${REMOTE_PORT}"], "localPortNumber":["${LOCAL_PORT}"]}'
-
 # -- Commands --
 
 # Renews your login with your AWS CLI SSO profile
@@ -57,11 +53,9 @@ sso_login:
 		aws sso login --profile ${PROFILE}
 	fi
 
-trigger_lambda_locally:
-	echo hello
-
-# This generates the connection string for connecting to the database through the port forwarding above
-# Set this in your .env file
-# Replace host.docker.internal with localhost if you are on Linux
-local_connection_string_to_env:
-	echo "CONNECTION_STRING='Server=host.docker.internal,${LOCAL_PORT};Initial Catalog=${DB_NAME};User Id=${DB_USERNAME};Password=${DB_PASSWORD};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;'"
+trigger_lambda_on_AWS $(LAMBDA_FUNCTION_NAME):
+	echo "Connecting to Lambda function ${LAMBDA_FUNCTION_NAME}"
+	aws lambda invoke \
+		--function-name housing-finance-interim-api-${ENVIRONMENT}-${LAMBDA_FUNCTION_NAME} out --log-type Tail
+		--region eu-west-2 
+		--profile ${PROFILE}
