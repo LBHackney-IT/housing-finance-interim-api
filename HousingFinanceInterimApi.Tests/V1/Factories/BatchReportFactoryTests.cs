@@ -32,6 +32,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Factories
             batchReportInfrastructure.ReportName.Should().Be(batchReportDomain.ReportName);
             batchReportInfrastructure.RentGroup.Should().Be(batchReportDomain.RentGroup);
             batchReportInfrastructure.Group.Should().Be(batchReportDomain.Group);
+            batchReportInfrastructure.TransactionType.Should().Be(batchReportDomain.TransactionType);
             batchReportInfrastructure.ReportStartDate.Should().Be(batchReportDomain.ReportStartDate);
             batchReportInfrastructure.ReportEndDate.Should().Be(batchReportDomain.ReportEndDate);
             batchReportInfrastructure.ReportDate.Should().Be(batchReportDomain.ReportDate);
@@ -58,6 +59,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Factories
             batchReportDomain.ReportName.Should().Be(batchReportInfrastructure.ReportName);
             batchReportDomain.RentGroup.Should().Be(batchReportInfrastructure.RentGroup);
             batchReportDomain.Group.Should().Be(batchReportInfrastructure.Group);
+            batchReportDomain.TransactionType.Should().Be(batchReportInfrastructure.TransactionType);
             batchReportDomain.ReportStartDate.Should().Be(batchReportInfrastructure.ReportStartDate);
             batchReportDomain.ReportEndDate.Should().Be(batchReportInfrastructure.ReportEndDate);
             batchReportDomain.ReportDate.Should().Be(batchReportInfrastructure.ReportDate);
@@ -215,6 +217,72 @@ namespace HousingFinanceInterimApi.Tests.V1.Factories
             batchReportCResponse.StartTime.Should().Be(batchReportDomain.StartTime);
             batchReportCResponse.EndTime.Should().Be(batchReportDomain.EndTime);
             batchReportCResponse.IsSuccess.Should().Be(batchReportDomain.IsSuccess);
+        }
+        #endregion
+
+        #region Itemised Transactions
+        [Fact]
+        public void BatchReportItemisedTransactionRequestGetsMappedToDomain()
+        {
+            // arrange
+            var batchReportITRequest = RandomGen.Create<BatchReportItemisedTransactionRequest>();
+
+            // act
+            var batchReportDomain = batchReportITRequest.ToDomain();
+
+            // assert
+            batchReportDomain.Should().NotBeNull();
+
+            batchReportDomain.Id.Should().Be(default);
+            batchReportDomain.ReportName.Should().Be(default);
+            batchReportDomain.RentGroup.Should().Be(default);
+            batchReportDomain.Group.Should().Be(default);
+            batchReportDomain.TransactionType.Should().Be(batchReportITRequest.TransactionType);
+            batchReportDomain.ReportStartDate.Should().Be(default);
+            batchReportDomain.ReportEndDate.Should().Be(default);
+            batchReportDomain.ReportDate.Should().Be(default);
+            batchReportDomain.ReportYear.Should().Be(batchReportITRequest.Year);
+            batchReportDomain.Link.Should().Be(default);
+            batchReportDomain.StartTime.Should().Be(default);
+            batchReportDomain.EndTime.Should().Be(default);
+            batchReportDomain.IsSuccess.Should().Be(default);
+        }
+
+        [Fact]
+        public void BatchReportItemisedTransactionGetsMappedToNullIfSourceIsNullBetweenDomainAndPresentation()
+        {
+            // arrange
+            BatchReportItemisedTransactionRequest batchReportITRequest = null;
+            BatchReportDomain batchReportDomain = null;
+
+            // act
+            var resultBRDomain = batchReportITRequest.ToDomain();
+            var resultBRITResponse = batchReportDomain.ToReportItemisedTransactionResponse();
+
+            // assert
+            resultBRDomain.Should().BeNull();
+            resultBRITResponse.Should().BeNull();
+        }
+
+        [Fact]
+        public void BatchReportDomainGetsMappedToBatchReportItemisedTransactionResponse()
+        {
+            // arrange
+            var batchReportDomain = RandomGen.Create<BatchReportDomain>();
+
+            // act
+            var batchReportITResponse = batchReportDomain.ToReportItemisedTransactionResponse();
+
+            // assert
+            batchReportITResponse.Should().NotBeNull();
+        
+            batchReportITResponse.Id.Should().Be(batchReportDomain.Id);
+            batchReportITResponse.Year.Should().Be(batchReportDomain.ReportYear);
+            batchReportITResponse.TransactionType.Should().Be(batchReportDomain.TransactionType);
+            batchReportITResponse.Link.Should().Be(batchReportDomain.Link);
+            batchReportITResponse.StartTime.Should().Be(batchReportDomain.StartTime);
+            batchReportITResponse.EndTime.Should().Be(batchReportDomain.EndTime);
+            batchReportITResponse.IsSuccess.Should().Be(batchReportDomain.IsSuccess);
         }
         #endregion
 
