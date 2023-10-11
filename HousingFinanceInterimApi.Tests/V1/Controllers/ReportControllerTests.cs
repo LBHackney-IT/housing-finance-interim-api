@@ -404,6 +404,193 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
         }
         #endregion
 
+        #region Itemised Transactions
+        [Fact]
+        public async Task CreateReportItemisedTransactionReturnsSuccessResponseWithDataMatchingGWResponse()
+        {
+            // Arrange
+            var request = RandomGen.Create<BatchReportItemisedTransactionRequest>();
+            var batchReportItemisedTransactionGWResult = RandomGen.Create<BatchReportDomain>();
+            var batchReportItemisedTransactionResponse = batchReportItemisedTransactionGWResult.ToReportItemisedTransactionResponse();
+
+            _batchReportGatewayMock
+                .Setup(g => g.CreateAsync(It.IsAny<BatchReportDomain>()))
+                .ReturnsAsync(batchReportItemisedTransactionGWResult);
+
+            // Act
+            var response = await _classUnderTest
+                .CreateReportItemisedTransaction(request)
+                .ConfigureAwait(false);
+
+            // Assert
+            var createdResult = response as CreatedResult;
+            createdResult.Should().NotBeNull();
+            createdResult.StatusCode.Should().Be(201);
+
+            var responseObject = createdResult.Value as BatchReportItemisedTransactionResponse;
+            responseObject.Should().BeEquivalentTo(batchReportItemisedTransactionResponse);
+        }
+
+        [Fact]
+        public async Task CreateReportItemisedTransactionCallsBatchReportGWCreateMethodWithCorrectParameters()
+        {
+            // Arrange
+            var request = RandomGen.Create<BatchReportItemisedTransactionRequest>();
+            var batchReportItemisedTransactionGWResult = RandomGen.Create<BatchReportDomain>();
+
+            _batchReportGatewayMock
+                .Setup(g => g.CreateAsync(It.IsAny<BatchReportDomain>()))
+                .ReturnsAsync(batchReportItemisedTransactionGWResult);
+
+            // Act
+            await _classUnderTest
+                .CreateReportItemisedTransaction(request)
+                .ConfigureAwait(false);
+
+            // Assert
+            _batchReportGatewayMock.Verify(
+                g => g.CreateAsync(It.Is<BatchReportDomain>(brd => 
+                    brd.ReportYear == request.Year &&
+                    brd.TransactionType == request.TransactionType &&
+                    brd.ReportName == "ReportItemisedTransactions"
+                )),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task CreateReportItemisedTransactionThrowsWhenAnExceptionIsRaisedDuringItsExecutionFlow()
+        {
+            // Arrange
+            var request = RandomGen.Create<BatchReportItemisedTransactionRequest>();
+            var message = "15 minute lambda timeout reached!";
+
+            _batchReportGatewayMock
+                .Setup(g => g.CreateAsync(It.IsAny<BatchReportDomain>()))
+                .ThrowsAsync(new TimeoutException(message));
+
+            // Act
+            Func<Task> endpointCall = async () => await _classUnderTest
+                .CreateReportItemisedTransaction(request)
+                .ConfigureAwait(false);
+
+            // Assert
+            await endpointCall.Should().ThrowAsync<TimeoutException>().WithMessage(message);
+        }
+
+        [Fact]
+        public async Task ListReportItemisedTransactionsCallsBatchReportGWListMethodWithCorrectParameters()
+        {
+            // Arrange
+            var batchReportItemisedTransactionsGWResult = new List<BatchReportDomain>();
+
+            _batchReportGatewayMock
+                .Setup(g => g.ListAsync(It.IsAny<string>()))
+                .ReturnsAsync(batchReportItemisedTransactionsGWResult);
+
+            // Act
+            await _classUnderTest
+                .ListReportItemisedTransactions()
+                .ConfigureAwait(false);
+
+            // Assert
+            _batchReportGatewayMock.Verify(
+                g => g.ListAsync(It.Is<string>(reportName => reportName == "ReportItemisedTransactions")),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task ListReportItemisedTransactionsReturnsListOfBatchReportItemisedTransactionResponseItemsMatchingGWResponseWhenExecutionEndInSuccess()
+        {
+            // Arrange
+            var batchReportItemisedTransactionsGWResult = RandomGen.CreateMany<BatchReportDomain>().ToList();
+            var batchReportItemisedTransactionResponse = batchReportItemisedTransactionsGWResult.ToReportItemisedTransactionsResponse();
+
+            _batchReportGatewayMock
+                .Setup(g => g.ListAsync(It.IsAny<string>()))
+                .ReturnsAsync(batchReportItemisedTransactionsGWResult);
+
+            // Act
+            var response = await _classUnderTest
+                .ListReportItemisedTransactions()
+                .ConfigureAwait(false);
+
+            // Assert
+            var createdResult = response as OkObjectResult;
+            createdResult.Should().NotBeNull();
+            createdResult.StatusCode.Should().Be(200);
+
+            var responseObject = createdResult.Value as List<BatchReportItemisedTransactionResponse>;
+            responseObject.Should().HaveSameCount(batchReportItemisedTransactionsGWResult);
+            responseObject.Should().BeEquivalentTo(batchReportItemisedTransactionResponse);
+        }
+
+        [Fact]
+        public async Task ListReportItemisedTransactionsReturnsEmptyListResponseWhenGatewayFindsNoItems()
+        {
+            // Arrange
+            var batchReportItemisedTransactionsGWResult = new List<BatchReportDomain>();
+
+            _batchReportGatewayMock
+                .Setup(g => g.ListAsync(It.IsAny<string>()))
+                .ReturnsAsync(batchReportItemisedTransactionsGWResult);
+
+            // Act
+            var response = await _classUnderTest
+                .ListReportItemisedTransactions()
+                .ConfigureAwait(false);
+
+            // Assert
+            var createdResult = response as OkObjectResult;
+            createdResult.Should().NotBeNull();
+            createdResult.StatusCode.Should().Be(200);
+
+            var responseObject = createdResult.Value as List<BatchReportItemisedTransactionResponse>;
+            responseObject.Should().HaveCount(0);
+        }
+
+        [Fact]
+        public async Task ListReportItemisedTransactionsReturnsA404NotFoundResponseWhenGatewayIsUnableToFindTheCollection()
+        {
+            // Arrange
+            IList<BatchReportDomain> batchReportItemisedTransactionsGWResult = null;
+
+            _batchReportGatewayMock
+                .Setup(g => g.ListAsync(It.IsAny<string>()))
+                .ReturnsAsync(batchReportItemisedTransactionsGWResult);
+
+            // Act
+            var response = await _classUnderTest
+                .ListReportItemisedTransactions()
+                .ConfigureAwait(false);
+
+            // Assert
+            var createdResult = response as NotFoundResult;
+            createdResult.Should().NotBeNull();
+            createdResult.StatusCode.Should().Be(404);
+        }
+
+        [Fact]
+        public async Task ListReportItemisedTransactionsThrowsWhenAnExceptionIsRaisedDuringItsExecutionFlow()
+        {
+            // Arrange
+            var message = "Database credentials are not valid.";
+
+            _batchReportGatewayMock
+                .Setup(g => g.ListAsync(It.IsAny<string>()))
+                .ThrowsAsync(new ConnectionAbortedException(message));
+
+            // Act
+            Func<Task> endpointCall = async () => await _classUnderTest
+                .ListReportItemisedTransactions()
+                .ConfigureAwait(false);
+
+            // Assert
+            await endpointCall.Should().ThrowAsync<ConnectionAbortedException>().WithMessage(message);
+        }
+        #endregion
+
         #region Cash Suspense
         [Fact]
         public async Task CreateReportCashSuspenseReturnsSuccessResponseWithDataMatchingGWResponse()
@@ -965,3 +1152,6 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
         #endregion
     }
 }
+
+// Validation? BadRequest? For Itemised Transactions
+//new BadRequestObjectResult($"The value for {nameof(request.AddressLine1)} cannot be empty"));
