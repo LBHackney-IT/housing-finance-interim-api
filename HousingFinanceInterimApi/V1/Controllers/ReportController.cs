@@ -70,12 +70,16 @@ namespace HousingFinanceInterimApi.V1.Controllers
 
         # region Itemised Transactions
         [ProducesResponseType(typeof(BatchReportItemisedTransactionResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(BadRequestObjectResult), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost]
         [Route("itemised-transactions")]
         [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
         public async Task<IActionResult> CreateReportItemisedTransaction([FromBody] BatchReportItemisedTransactionRequest request)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var batchReport = request.ToDomain();
             batchReport.ReportName = ReportItemisedTransactionsLabel;
 
