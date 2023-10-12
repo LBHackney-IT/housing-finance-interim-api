@@ -21,6 +21,7 @@ namespace HousingFinanceInterimApi.Tests.V1.TestHelpers
             => _faker.Random.Int(min, max);
 
         public static TItem Create<TItem>() => _fixture.Create<TItem>();
+        public static TItem CreateCustom<TItem>(this IPostprocessComposer<TItem> itemComposer) => itemComposer.Create();
         public static ICustomizationComposer<TItem> Build<TItem>() => _fixture.Build<TItem>();
         public static IEnumerable<TItem> CreateMany<TItem>(int quantity = 3) => _fixture.CreateMany<TItem>(quantity);
 

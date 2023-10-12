@@ -13,6 +13,7 @@ using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Moq;
 using Xunit;
 
@@ -476,6 +477,50 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
 
             // Assert
             await endpointCall.Should().ThrowAsync<TimeoutException>().WithMessage(message);
+        }
+
+        [Fact]
+        public async Task CreateReportItemisedTransactionReturns400BadRequestWhenFinancialYearIsNotSpecified()
+        {
+            // Arrange
+            var request = RandomGen
+                .Build<BatchReportItemisedTransactionRequest>()
+                .With(r => r.Year, default(int))
+                .CreateCustom();
+
+           _classUnderTest.ModelState.AddModelError("Year", "The Year field is required.");
+
+            // Act
+            var response = await _classUnderTest
+                .CreateReportItemisedTransaction(request)
+                .ConfigureAwait(false);
+
+            // Assert
+            var statusCodeResult = response as IStatusCodeActionResult;
+            statusCodeResult.Should().NotBeNull();
+            statusCodeResult.StatusCode.Should().Be(400);
+        }
+
+        [Fact]
+        public async Task CreateReportItemisedTransactionReturns400BadRequestWhenFinancialTransactionTypeIsNotSpecified()
+        {
+            // Arrange
+            var request = RandomGen
+                .Build<BatchReportItemisedTransactionRequest>()
+                .With(r => r.TransactionType, default(string))
+                .CreateCustom();
+
+           _classUnderTest.ModelState.AddModelError("TransactionType", "The TransactionType field is required.");
+
+            // Act
+            var response = await _classUnderTest
+                .CreateReportItemisedTransaction(request)
+                .ConfigureAwait(false);
+
+            // Assert
+            var statusCodeResult = response as IStatusCodeActionResult;
+            statusCodeResult.Should().NotBeNull();
+            statusCodeResult.StatusCode.Should().Be(400);
         }
 
         [Fact]
@@ -1152,6 +1197,3 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
         #endregion
     }
 }
-
-// Validation? BadRequest? For Itemised Transactions
-//new BadRequestObjectResult($"The value for {nameof(request.AddressLine1)} cannot be empty"));
