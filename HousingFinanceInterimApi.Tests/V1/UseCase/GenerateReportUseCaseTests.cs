@@ -1276,5 +1276,841 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
         #endregion
 
+        #region Cash Suspense
+        [Fact]
+        public async Task GenerateReportUCSearchesForAnApproapriateGoogleFileSettingWhenRequestedReportIsACashSuspense()
+        {
+            // arrange
+            var requestedReportLabel = "ReportCashSuspense";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var cashSuspenseFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { cashSuspenseFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var irrelevantFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(irrelevantFile);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockGoogleFileSettingGateway.Verify(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel)), Times.Once);
+        }
+
+        [Fact]
+        public async Task GenerateReportUCMarksReportRequestAsFailureAndTerminatesExecutionWhenCashSuspenseFolderIdIsNotFound()
+        {
+            // arrange
+            var requestedReportLabel = "ReportCashSuspense";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>();
+
+            _mockGoogleFileSettingGateway.Setup(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel))).ReturnsAsync(googleFileSettingsFound);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockBatchReportGateway.Verify(
+                g => g.SetStatusAsync(
+                    It.Is<int>(id => id == unprocessedReport.Id),
+                    It.Is<string>(l => l == "Output folder not found"),
+                    It.Is<bool>(s => s == false)
+                ),
+                Times.Once
+            );
+
+            _mockReportGateway.Verify(
+                g => g.GetCashSuspenseAccountByYearAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<string>()
+                ),
+                Times.Never
+            );
+        }
+
+        [Fact]
+        public async Task GenerateReportUCCallsTheReportGWGetCashSuspenseAccountByYearWithApproapriateParametersFromTheReportRequest()
+        {
+            // arrange
+            var requestedReportLabel = "ReportCashSuspense";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var cashSuspenseFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { cashSuspenseFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var irrelevantFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(irrelevantFile);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockReportGateway.Verify(
+                g => g.GetCashSuspenseAccountByYearAsync(
+                    It.Is<int>(d => d.Equals(unprocessedReport.ReportYear.Value)),
+                    It.Is<string>(r => r == unprocessedReport.Group)
+                ),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task GenerateReportUCUploadsTheCashSuspenseDataRetrievedFromDabataseAsCSVIntoExpectedFolderUnderANameSpecifyingAReportTypeAndRequestParameters()
+        {
+            // arrange
+            var requestedReportLabel = "ReportCashSuspense";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var cashSuspenseFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { cashSuspenseFolder };
+
+            _mockGoogleFileSettingGateway.Setup(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel))).ReturnsAsync(googleFileSettingsFound);
+
+            var spreadSheetData = new List<string[]>() {
+                new string [] { "header 1", "header 2", "header 3" },
+                new string [] { "0000112", "TRA", "0.01" }
+            };
+
+            _mockReportGateway
+                .Setup(g => g.GetCashSuspenseAccountByYearAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(spreadSheetData);
+
+            var irrelevantFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(irrelevantFile);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockGoogleClientService.Verify(
+                g => g.UploadCsvFile(
+                    It.Is<List<string[]>>(t => ReferenceEquals(t, spreadSheetData)),
+                    It.Is<string>(fn =>
+                        fn.Contains("Cash_Suspense") &&
+                        fn.Contains(unprocessedReport.ReportYear.Value.ToString()) &&
+                        fn.Contains(unprocessedReport.Group) &&
+                        fn.Contains(unprocessedReport.Id.ToString())
+                    ),
+                    It.Is<string>(id => id == cashSuspenseFolder.GoogleIdentifier)
+                ),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task GenerateReportUCRetrievesTheUploadedCashSuspenseCSVFileIdAndUpdatesTheReportRequestByAttachingAFileLinkToItAndSettingItSuccessThenTheUCReturnsCorrectStepResponse()
+        {
+            // arrange
+            var requestedReportLabel = "ReportCashSuspense";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var cashSuspenseFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { cashSuspenseFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var spreadSheetData = new List<string[]>();
+
+            _mockReportGateway
+                .Setup(g => g.GetCashSuspenseAccountByYearAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(spreadSheetData);
+
+            _mockGoogleClientService
+                .Setup(g => g.UploadCsvFile(
+                    It.IsAny<List<string[]>>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(true);
+
+            var uploadedCSVFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(uploadedCSVFile);
+
+            // act
+            var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockGoogleClientService.Verify(
+                g => g.GetFileByNameInDriveAsync(
+                    It.Is<string>(fid => fid == cashSuspenseFolder.GoogleIdentifier),
+                    It.Is<string>(fn =>
+                        fn.Contains("Cash_Suspense") &&
+                        fn.Contains(unprocessedReport.ReportYear.Value.ToString()) &&
+                        fn.Contains(unprocessedReport.Group) &&
+                        fn.Contains(unprocessedReport.Id.ToString())
+                )),
+                Times.AtLeastOnce
+            );
+
+            _mockBatchReportGateway.Verify(
+                g => g.SetStatusAsync(
+                    It.Is<int>(id => id == unprocessedReport.Id),
+                    It.Is<string>(link => link == $"https://drive.google.com/file/d/{uploadedCSVFile.Id}"),
+                    It.Is<bool>(isSuccess => isSuccess == true)
+                ),
+                Times.Once
+            );
+
+            var nextStepTime = DateTime.Now.AddSeconds(_waitDuration);
+
+            stepResponse.Should().NotBeNull();
+            stepResponse.Continue.Should().BeTrue();
+            stepResponse.NextStepTime.Should().BeCloseTo(nextStepTime, precision: 1000);
+        }
+        #endregion
+
+        #region Cash Import
+        [Fact]
+        public async Task GenerateReportUCSearchesForAnApproapriateGoogleFileSettingWhenRequestedReportIsACashImport()
+        {
+            // arrange
+            var requestedReportLabel = "ReportCashImport";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var cashImportFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { cashImportFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var irrelevantFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(irrelevantFile);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockGoogleFileSettingGateway.Verify(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel)), Times.Once);
+        }
+
+        [Fact]
+        public async Task GenerateReportUCMarksReportRequestAsFailureAndTerminatesExecutionWhenCashImportFolderIdIsNotFound()
+        {
+            // arrange
+            var requestedReportLabel = "ReportCashImport";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>();
+
+            _mockGoogleFileSettingGateway.Setup(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel))).ReturnsAsync(googleFileSettingsFound);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockBatchReportGateway.Verify(
+                g => g.SetStatusAsync(
+                    It.Is<int>(id => id == unprocessedReport.Id),
+                    It.Is<string>(l => l == "Output folder not found"),
+                    It.Is<bool>(s => s == false)
+                ),
+                Times.Once
+            );
+
+            _mockReportGateway.Verify(
+                g => g.GetCashImportByDateAsync(
+                    It.IsAny<DateTime>(),
+                    It.IsAny<DateTime>()
+                ),
+                Times.Never
+            );
+        }
+
+        [Fact]
+        public async Task GenerateReportUCCallsTheReportGWGetCashImportByDateWithApproapriateParametersFromTheReportRequest()
+        {
+            // arrange
+            var requestedReportLabel = "ReportCashImport";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var cashImportFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { cashImportFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var irrelevantFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(irrelevantFile);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockReportGateway.Verify(
+                g => g.GetCashImportByDateAsync(
+                    It.Is<DateTime>(s => s.Equals(unprocessedReport.ReportStartDate.Value)),
+                    It.Is<DateTime>(e => e.Equals(unprocessedReport.ReportEndDate.Value))
+                ),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task GenerateReportUCUploadsTheCashImportDataRetrievedFromDabataseAsCSVIntoExpectedFolderUnderANameSpecifyingAReportTypeAndRequestParameters()
+        {
+            // arrange
+            var requestedReportLabel = "ReportCashImport";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var cashImportFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { cashImportFolder };
+
+            _mockGoogleFileSettingGateway.Setup(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel))).ReturnsAsync(googleFileSettingsFound);
+
+            var spreadSheetData = new List<string[]>() {
+                new string [] { "header 1", "header 2", "header 3" },
+                new string [] { "0000223", "LSC", "3.01" }
+            };
+
+            _mockReportGateway
+                .Setup(g => g.GetCashImportByDateAsync(
+                    It.IsAny<DateTime>(),
+                    It.IsAny<DateTime>()
+                ))
+                .ReturnsAsync(spreadSheetData);
+
+            var irrelevantFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(irrelevantFile);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockGoogleClientService.Verify(
+                g => g.UploadCsvFile(
+                    It.Is<List<string[]>>(t => ReferenceEquals(t, spreadSheetData)),
+                    It.Is<string>(fn =>
+                        fn.Contains("Cash_Import") &&
+                        fn.Contains(unprocessedReport.ReportStartDate.Value.ToString("ddMMyyyy")) &&
+                        fn.Contains(unprocessedReport.ReportEndDate.Value.ToString("ddMMyyyy")) &&
+                        fn.Contains(unprocessedReport.Id.ToString())
+                    ),
+                    It.Is<string>(id => id == cashImportFolder.GoogleIdentifier)
+                ),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task GenerateReportUCRetrievesTheUploadedCashImportCSVFileIdAndUpdatesTheReportRequestByAttachingAFileLinkToItAndSettingItSuccessThenTheUCReturnsCorrectStepResponse()
+        {
+            // arrange
+            var requestedReportLabel = "ReportCashImport";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var cashImportFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { cashImportFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var spreadSheetData = new List<string[]>();
+
+            _mockReportGateway
+                .Setup(g => g.GetCashImportByDateAsync(
+                    It.IsAny<DateTime>(),
+                    It.IsAny<DateTime>()
+                ))
+                .ReturnsAsync(spreadSheetData);
+
+            _mockGoogleClientService
+                .Setup(g => g.UploadCsvFile(
+                    It.IsAny<List<string[]>>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(true);
+
+            var uploadedCSVFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(uploadedCSVFile);
+
+            // act
+            var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockGoogleClientService.Verify(
+                g => g.GetFileByNameInDriveAsync(
+                    It.Is<string>(fid => fid == cashImportFolder.GoogleIdentifier),
+                    It.Is<string>(fn =>
+                        fn.Contains("Cash_Import") &&
+                        fn.Contains(unprocessedReport.ReportStartDate.Value.ToString("ddMMyyyy")) &&
+                        fn.Contains(unprocessedReport.ReportEndDate.Value.ToString("ddMMyyyy")) &&
+                        fn.Contains(unprocessedReport.Id.ToString())
+                )),
+                Times.AtLeastOnce
+            );
+
+            _mockBatchReportGateway.Verify(
+                g => g.SetStatusAsync(
+                    It.Is<int>(id => id == unprocessedReport.Id),
+                    It.Is<string>(link => link == $"https://drive.google.com/file/d/{uploadedCSVFile.Id}"),
+                    It.Is<bool>(isSuccess => isSuccess == true)
+                ),
+                Times.Once
+            );
+
+            var nextStepTime = DateTime.Now.AddSeconds(_waitDuration);
+
+            stepResponse.Should().NotBeNull();
+            stepResponse.Continue.Should().BeTrue();
+            stepResponse.NextStepTime.Should().BeCloseTo(nextStepTime, precision: 1000);
+        }
+        #endregion
+
+        #region Housing Benefit Academy
+        [Fact]
+        public async Task GenerateReportUCSearchesForAnApproapriateGoogleFileSettingWhenRequestedReportIsAHousingBenefitAcademy()
+        {
+            // arrange
+            var requestedReportLabel = "ReportHousingBenefitAcademy";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var housingBenefitAcademyFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { housingBenefitAcademyFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var irrelevantFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(irrelevantFile);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockGoogleFileSettingGateway.Verify(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel)), Times.Once);
+        }
+
+        [Fact]
+        public async Task GenerateReportUCMarksReportRequestAsFailureAndTerminatesExecutionWhenHousingBenefitAcademyFolderIdIsNotFound()
+        {
+            // arrange
+            var requestedReportLabel = "ReportHousingBenefitAcademy";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>();
+
+            _mockGoogleFileSettingGateway.Setup(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel))).ReturnsAsync(googleFileSettingsFound);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockBatchReportGateway.Verify(
+                g => g.SetStatusAsync(
+                    It.Is<int>(id => id == unprocessedReport.Id),
+                    It.Is<string>(l => l == "Output folder not found"),
+                    It.Is<bool>(s => s == false)
+                ),
+                Times.Once
+            );
+
+            _mockReportGateway.Verify(
+                g => g.GetHousingBenefitAcademyByYearAsync(
+                    It.IsAny<int>()
+                ),
+                Times.Never
+            );
+        }
+
+        [Fact]
+        public async Task GenerateReportUCCallsTheReportGWGetHousingBenefitAcademyByYearWithApproapriateParametersFromTheReportRequest()
+        {
+            // arrange
+            var requestedReportLabel = "ReportHousingBenefitAcademy";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var housingBenefitAcademyFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { housingBenefitAcademyFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var irrelevantFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(irrelevantFile);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockReportGateway.Verify(
+                g => g.GetHousingBenefitAcademyByYearAsync(
+                    It.Is<int>(s => s.Equals(unprocessedReport.ReportYear.Value))
+                ),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task GenerateReportUCUploadsTheHousingBenefitAcademyDataRetrievedFromDabataseAsCSVIntoExpectedFolderUnderANameSpecifyingAReportTypeAndRequestParameters()
+        {
+            // arrange
+            var requestedReportLabel = "ReportHousingBenefitAcademy";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var housingBenefitAcademyFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { housingBenefitAcademyFolder };
+
+            _mockGoogleFileSettingGateway.Setup(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel))).ReturnsAsync(googleFileSettingsFound);
+
+            var spreadSheetData = new List<string[]>() {
+                new string [] { "header 1", "header 2", "header 3" },
+                new string [] { "0001133", "LMW", "123.12" }
+            };
+
+            _mockReportGateway
+                .Setup(g => g.GetHousingBenefitAcademyByYearAsync(
+                    It.IsAny<int>()
+                ))
+                .ReturnsAsync(spreadSheetData);
+
+            var irrelevantFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(irrelevantFile);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockGoogleClientService.Verify(
+                g => g.UploadCsvFile(
+                    It.Is<List<string[]>>(t => ReferenceEquals(t, spreadSheetData)),
+                    It.Is<string>(fn =>
+                        fn.Contains("HB_Academy") &&
+                        fn.Contains(unprocessedReport.ReportYear.Value.ToString()) &&
+                        fn.Contains(unprocessedReport.Id.ToString())
+                    ),
+                    It.Is<string>(id => id == housingBenefitAcademyFolder.GoogleIdentifier)
+                ),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task GenerateReportUCRetrievesTheUploadedHousingBenefitAcademyCSVFileIdAndUpdatesTheReportRequestByAttachingAFileLinkToItAndSettingItSuccessThenTheUCReturnsCorrectStepResponse()
+        {
+            // arrange
+            var requestedReportLabel = "ReportHousingBenefitAcademy";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var housingBenefitAcademyFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { housingBenefitAcademyFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var spreadSheetData = new List<string[]>();
+
+            _mockReportGateway
+                .Setup(g => g.GetHousingBenefitAcademyByYearAsync(
+                    It.IsAny<int>()
+                ))
+                .ReturnsAsync(spreadSheetData);
+
+            _mockGoogleClientService
+                .Setup(g => g.UploadCsvFile(
+                    It.IsAny<List<string[]>>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(true);
+
+            var uploadedCSVFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(uploadedCSVFile);
+
+            // act
+            var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockGoogleClientService.Verify(
+                g => g.GetFileByNameInDriveAsync(
+                    It.Is<string>(fid => fid == housingBenefitAcademyFolder.GoogleIdentifier),
+                    It.Is<string>(fn =>
+                        fn.Contains("HB_Academy") &&
+                        fn.Contains(unprocessedReport.ReportYear.Value.ToString()) &&
+                        fn.Contains(unprocessedReport.Id.ToString())
+                )),
+                Times.AtLeastOnce
+            );
+
+            _mockBatchReportGateway.Verify(
+                g => g.SetStatusAsync(
+                    It.Is<int>(id => id == unprocessedReport.Id),
+                    It.Is<string>(link => link == $"https://drive.google.com/file/d/{uploadedCSVFile.Id}"),
+                    It.Is<bool>(isSuccess => isSuccess == true)
+                ),
+                Times.Once
+            );
+
+            var nextStepTime = DateTime.Now.AddSeconds(_waitDuration);
+
+            stepResponse.Should().NotBeNull();
+            stepResponse.Continue.Should().BeTrue();
+            stepResponse.NextStepTime.Should().BeCloseTo(nextStepTime, precision: 1000);
+        }
+        #endregion
     }
 }
