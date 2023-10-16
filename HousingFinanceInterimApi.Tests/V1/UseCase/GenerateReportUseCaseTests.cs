@@ -36,7 +36,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                     _mockReportGateway.Object,
                     _mockGoogleFileSettingGateway.Object,
                     _mockGoogleClientService.Object
-                );            
+                );
         }
 
         #region Shared
@@ -1273,6 +1273,519 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             stepResponse.Should().NotBeNull();
             stepResponse.Continue.Should().BeTrue();
             stepResponse.NextStepTime.Should().BeCloseTo(DateTime.Now.AddSeconds(_waitDuration), 1000);
+        }
+        #endregion
+
+        #region Itemised Transactions
+        [Fact]
+        public async Task GenerateReportUCSearchesForAnApproapriateGoogleFileSettingWhenRequestedReportIsAnItemisedTransactions()
+        {
+            // arrange
+            var requestedReportLabel = "ReportItemisedTransactions";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var itemisedTransactionsFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { itemisedTransactionsFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var irrelevantFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(irrelevantFile);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockGoogleFileSettingGateway.Verify(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel)), Times.Once);
+        }
+
+        [Fact]
+        public async Task GenerateReportUCMarksReportRequestAsFailureAndTerminatesExecutionWhenItemisedTransactionFolderIdIsNotFound()
+        {
+            // arrange
+            var requestedReportLabel = "ReportItemisedTransactions";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>();
+
+            _mockGoogleFileSettingGateway.Setup(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel))).ReturnsAsync(googleFileSettingsFound);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockBatchReportGateway.Verify(
+                g => g.SetStatusAsync(
+                    It.Is<int>(id => id == unprocessedReport.Id),
+                    It.Is<string>(l => l == "Output folder not found"),
+                    It.Is<bool>(s => s == false)
+                ),
+                Times.Once
+            );
+
+            _mockReportGateway.Verify(
+                g => g.GetItemisedTransactionsByYearAndTransactionTypeAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<string>()
+                ),
+                Times.Never
+            );
+        }
+
+        [Fact]
+        public async Task GenerateReportUCCallsTheReportGWGetItemisedTransactionsByYearAndTransactionTypeWithApproapriateParametersFromTheReportRequest()
+        {
+            // arrange
+            var requestedReportLabel = "ReportItemisedTransactions";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var itemisedTransactionsFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { itemisedTransactionsFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var irrelevantFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(irrelevantFile);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockReportGateway.Verify(
+                g => g.GetItemisedTransactionsByYearAndTransactionTypeAsync(
+                    It.Is<int>(y => y == unprocessedReport.ReportYear.Value),
+                    It.Is<string>(t => t == unprocessedReport.TransactionType)
+                ),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task GenerateReportUCUploadsTheItemisedTransactionsDataRetrievedFromDabataseAsCSVIntoExpectedFolderUnderANameSpecifyingAReportTypeAndRequestParameters()
+        {
+            // arrange
+            var requestedReportLabel = "ReportItemisedTransactions";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var itemisedTransactionsFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { itemisedTransactionsFolder };
+
+            _mockGoogleFileSettingGateway.Setup(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel))).ReturnsAsync(googleFileSettingsFound);
+
+            var spreadSheetData = new List<string[]>() {
+                new string [] { "header 1", "header 2", "header 3" },
+                new string [] { "00088255", "LMW", "251.23" }
+            };
+
+            _mockReportGateway
+                .Setup(g => g.GetItemisedTransactionsByYearAndTransactionTypeAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(spreadSheetData);
+
+            var irrelevantFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(irrelevantFile);
+
+            // act
+            await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockGoogleClientService.Verify(
+                g => g.UploadCsvFile(
+                    It.Is<List<string[]>>(t => ReferenceEquals(t, spreadSheetData)),
+                    It.Is<string>(fn =>
+                        fn.Contains("Itemised_Transactions") &&
+                        fn.Contains(unprocessedReport.ReportYear.Value.ToString()) &&
+                        fn.Contains(unprocessedReport.TransactionType) &&
+                        fn.Contains(unprocessedReport.Id.ToString())
+                    ),
+                    It.Is<string>(id => id == itemisedTransactionsFolder.GoogleIdentifier)
+                ),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task GenerateReportUCRetrievesTheUploadedItemisedTransactionsCSVFileIdAndUpdatesTheReportRequestByAttachingAFileLinkToItAndSettingItSuccessThenTheUCReturnsCorrectStepResponse()
+        {
+            // arrange
+            var requestedReportLabel = "ReportItemisedTransactions";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var itemisedTransactionsFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { itemisedTransactionsFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var spreadSheetData = new List<string[]>();
+
+            _mockReportGateway
+                .Setup(g => g.GetItemisedTransactionsByYearAndTransactionTypeAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(spreadSheetData);
+
+            _mockGoogleClientService
+                .Setup(g => g.UploadCsvFile(
+                    It.IsAny<List<string[]>>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(true);
+
+            var uploadedCSVFile = RandomGen.Create<GD.File>();
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(uploadedCSVFile);
+
+            // act
+            var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockGoogleClientService.Verify(
+                g => g.GetFileByNameInDriveAsync(
+                    It.Is<string>(fid => fid == itemisedTransactionsFolder.GoogleIdentifier),
+                    It.Is<string>(fn =>
+                        fn.Contains("Itemised_Transactions") &&
+                        fn.Contains(unprocessedReport.ReportYear.Value.ToString()) &&
+                        fn.Contains(unprocessedReport.TransactionType) &&
+                        fn.Contains(unprocessedReport.Id.ToString())
+                )),
+                Times.AtLeastOnce
+            );
+
+            _mockBatchReportGateway.Verify(
+                g => g.SetStatusAsync(
+                    It.Is<int>(id => id == unprocessedReport.Id),
+                    It.Is<string>(link => link == $"https://drive.google.com/file/d/{uploadedCSVFile.Id}"),
+                    It.Is<bool>(isSuccess => isSuccess == true)
+                ),
+                Times.Once
+            );
+
+            var nextStepTime = DateTime.Now.AddSeconds(_waitDuration);
+
+            stepResponse.Should().NotBeNull();
+            stepResponse.Continue.Should().BeTrue();
+            stepResponse.NextStepTime.Should().BeCloseTo(nextStepTime, precision: 1000);
+        }
+
+        [Fact]
+        public async Task GenerateReportUCMarksReportRequestAsFailureAndTerminatesExecutionWhenUploadedItemisedTransactionsFileIsNotFoundBeforeTheCutoffCheckingTime()
+        {
+            // arrange
+            var requestedReportLabel = "ReportItemisedTransactions";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var itemisedTransactionsFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { itemisedTransactionsFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var spreadSheetData = new List<string[]>();
+
+            _mockReportGateway
+                .Setup(g => g.GetItemisedTransactionsByYearAndTransactionTypeAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(spreadSheetData);
+
+            _mockGoogleClientService
+                .Setup(g => g.UploadCsvFile(
+                    It.IsAny<List<string[]>>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(true);
+
+            GD.File uploadedCSVFile = null;
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(uploadedCSVFile);
+
+            // act
+            Func<Task> generateAReportCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            await generateAReportCall.Should().NotThrowAsync();
+
+            // assert
+            _mockBatchReportGateway.Verify(
+                g => g.SetStatusAsync(
+                    It.Is<int>(id => id == unprocessedReport.Id),
+                    It.Is<string>(l => l == "Uploaded report file not found"),
+                    It.Is<bool>(s => s == false)
+                ),
+                Times.Once
+            );
+
+            _mockBatchReportGateway.Verify(
+                g => g.SetStatusAsync(
+                    It.Is<int>(id => id == unprocessedReport.Id),
+                    It.IsAny<string>(),
+                    It.Is<bool>(isSuccess => isSuccess == true)
+                ),
+                Times.Never
+            );
+        }
+
+        [Fact]
+        public async Task GenerateReportUCAttemptsToRetrieveTheUploadedItemisedTransactionsCSVFileIdIn1SecondPeriodsSoLongItHasntSpent30SecondsDoingIt()
+        {
+            // arrange
+            var requestedReportLabel = "ReportItemisedTransactions";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var itemisedTransactionsFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { itemisedTransactionsFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var spreadSheetData = new List<string[]>();
+
+            _mockReportGateway
+                .Setup(g => g.GetItemisedTransactionsByYearAndTransactionTypeAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(spreadSheetData);
+
+            _mockGoogleClientService
+                .Setup(g => g.UploadCsvFile(
+                    It.IsAny<List<string[]>>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(true);
+
+            var uploadedCSVFile = RandomGen.Create<GD.File>();
+            int expectedNumberOfFileRetrievalAttempts = 30; //RandomGen.WholeNumber(1, 30);
+            int csvUploadDelaySeconds = expectedNumberOfFileRetrievalAttempts;
+            var uploadedCSVBecomesAvailableAtTime = DateTime.Now.AddSeconds(csvUploadDelaySeconds);
+            GD.File fileReturnedFromGDrive = null;
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .Callback(() => fileReturnedFromGDrive = DateTime.Now < uploadedCSVBecomesAvailableAtTime ? null : uploadedCSVFile)
+                .ReturnsAsync(fileReturnedFromGDrive);
+
+            // act
+            var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            _mockGoogleClientService.Verify(
+                g => g.GetFileByNameInDriveAsync(
+                    It.Is<string>(fid => fid == itemisedTransactionsFolder.GoogleIdentifier),
+                    It.Is<string>(fn =>
+                        fn.Contains("Itemised_Transactions") &&
+                        fn.Contains(unprocessedReport.ReportYear.Value.ToString()) &&
+                        fn.Contains(unprocessedReport.TransactionType) &&
+                        fn.Contains(unprocessedReport.Id.ToString())
+                )),
+                Times.Exactly(expectedNumberOfFileRetrievalAttempts)
+            );
+        }
+
+        [Fact]
+        public async Task GenerateReportUCStopsItsAttemptsToRetrieveTheUploadedItemisedTransactionsCSVFileIdAfterSpending30SecondsDoingIt()
+        {
+            // arrange
+            var requestedReportLabel = "ReportItemisedTransactions";
+
+            var unprocessedReport = RandomGen
+                .Build<BatchReportDomain>()
+                .With(r => r.ReportName, requestedReportLabel)
+                .CreateCustom();
+
+            var unprocessedReports = new List<BatchReportDomain>() { unprocessedReport };
+
+            _mockBatchReportGateway.Setup(g => g.ListPendingAsync()).ReturnsAsync(unprocessedReports);
+
+            var itemisedTransactionsFolder = RandomGen
+                .Build<GoogleFileSettingDomain>()
+                .With(f => f.Label, requestedReportLabel)
+                .CreateCustom();
+
+            var googleFileSettingsFound = new List<GoogleFileSettingDomain>() { itemisedTransactionsFolder };
+
+            _mockGoogleFileSettingGateway
+                .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
+                .ReturnsAsync(googleFileSettingsFound);
+
+            var spreadSheetData = new List<string[]>();
+
+            _mockReportGateway
+                .Setup(g => g.GetItemisedTransactionsByYearAndTransactionTypeAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(spreadSheetData);
+
+            _mockGoogleClientService
+                .Setup(g => g.UploadCsvFile(
+                    It.IsAny<List<string[]>>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .ReturnsAsync(true);
+
+            var uploadedCSVFile = RandomGen.Create<GD.File>();
+            int cutOffForNumberOfAttempts = 30;
+            DateTime? firstAttempt = null;
+            DateTime lastAttempt = DateTime.MinValue;
+            GD.File fileReturnedFromGDrive = null;
+
+            _mockGoogleClientService
+                .Setup(g => g.GetFileByNameInDriveAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                ))
+                .Callback(() => {
+                    firstAttempt ??= DateTime.Now;
+                    lastAttempt = DateTime.Now;
+                })
+                .ReturnsAsync(fileReturnedFromGDrive);
+
+            // act
+            var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+            // assert
+            var secondsSpentInWaitForTheFile = (int)(lastAttempt - firstAttempt.Value).TotalSeconds + 1;
+
+            secondsSpentInWaitForTheFile.Should().Be(cutOffForNumberOfAttempts);
+
+            _mockGoogleClientService.Verify(
+                g => g.GetFileByNameInDriveAsync(
+                    It.Is<string>(fid => fid == itemisedTransactionsFolder.GoogleIdentifier),
+                    It.Is<string>(fn =>
+                        fn.Contains("Itemised_Transactions") &&
+                        fn.Contains(unprocessedReport.ReportYear.Value.ToString()) &&
+                        fn.Contains(unprocessedReport.TransactionType) &&
+                        fn.Contains(unprocessedReport.Id.ToString())
+                )),
+                Times.Exactly(cutOffForNumberOfAttempts)
+            );
         }
         #endregion
 
