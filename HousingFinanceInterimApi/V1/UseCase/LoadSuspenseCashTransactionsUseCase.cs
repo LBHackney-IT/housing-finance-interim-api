@@ -70,7 +70,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             return googleFileSettings.FirstOrDefault();
         }
-        
+
         private async Task LoadSuspenseTransactions(BatchLogDomain batch, string sheetName, string sheetRange, GoogleFileSettingDomain googleFileSettings)
         {
             var allSuspenseTransactions = await _googleClientService
@@ -87,7 +87,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 LoggingHandler.LogInfo($"No suspense cash transactions found in spreadsheet {CashSuspenseLabel}");
             }
         }
-        
+
         private async Task<List<IList<object>>> GetSuspenseAccountsAsRows()
         {
             var suspenseTransactions = await _upCashLoadSuspenseAccountsGateway.GetCashSuspenseTransactions().ConfigureAwait(false);
