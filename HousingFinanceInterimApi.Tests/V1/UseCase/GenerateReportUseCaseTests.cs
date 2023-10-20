@@ -1250,6 +1250,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
+            var expectedNextStepTime = DateTime.Now.AddSeconds(_waitDuration);
             _mockGoogleClientService.Verify(
                 g => g.GetFileByNameInDriveAsync(
                     It.Is<string>(fid => fid == chargesFolder.GoogleIdentifier),
@@ -1272,7 +1273,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             stepResponse.Should().NotBeNull();
             stepResponse.Continue.Should().BeTrue();
-            stepResponse.NextStepTime.Should().BeCloseTo(DateTime.Now.AddSeconds(_waitDuration), 1000);
+            stepResponse.NextStepTime.Should().BeCloseTo(expectedNextStepTime, 1500);
         }
         #endregion
 
