@@ -275,7 +275,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Factories
 
             // assert
             batchReportITResponse.Should().NotBeNull();
-        
+
             batchReportITResponse.Id.Should().Be(batchReportDomain.Id);
             batchReportITResponse.Year.Should().Be(batchReportDomain.ReportYear);
             batchReportITResponse.TransactionType.Should().Be(batchReportDomain.TransactionType);
