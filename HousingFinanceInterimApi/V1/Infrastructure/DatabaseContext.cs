@@ -14,7 +14,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
     /// The database context class.
     /// </summary>
     /// <seealso cref="DbContext" />
-    public class DatabaseContext : DbContext
+    public class DatabaseContext : DbContext, IDatabaseContext
     {
 
         /// <summary>

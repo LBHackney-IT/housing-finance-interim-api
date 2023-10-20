@@ -20,6 +20,10 @@ namespace HousingFinanceInterimApi.Tests.V1.TestHelpers
         public static int WholeNumber(int min = int.MinValue, int max = int.MinValue)
             => _faker.Random.Int(min, max);
 
+        public static string String2(int length = 10) => _faker.Random.String2(length);
+        public static DateTime DateTimeBetween(DateTime? dateTimeStart = null, DateTime? dateTimeEnd = null)
+            => _faker.Date.Between(dateTimeStart ?? DateTime.MinValue, dateTimeEnd ?? DateTime.MaxValue);
+
         public static TItem Create<TItem>() => _fixture.Create<TItem>();
         public static TItem CreateCustom<TItem>(this IPostprocessComposer<TItem> itemComposer) => itemComposer.Create();
         public static ICustomizationComposer<TItem> Build<TItem>() => _fixture.Build<TItem>();
