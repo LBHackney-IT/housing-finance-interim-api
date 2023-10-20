@@ -1762,7 +1762,8 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                     It.IsAny<string>(),
                     It.IsAny<string>()
                 ))
-                .Callback(() => {
+                .Callback(() =>
+                {
                     firstAttempt ??= DateTime.Now;
                     lastAttempt = DateTime.Now;
                 })
@@ -1772,7 +1773,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            var secondsSpentInWaitForTheFile = (int)(lastAttempt - firstAttempt.Value).TotalSeconds + 1;
+            var secondsSpentInWaitForTheFile = (int) (lastAttempt - firstAttempt.Value).TotalSeconds + 1;
 
             secondsSpentInWaitForTheFile.Should().Be(cutOffForNumberOfAttempts);
 

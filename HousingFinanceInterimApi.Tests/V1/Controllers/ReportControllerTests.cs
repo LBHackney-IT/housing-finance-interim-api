@@ -75,7 +75,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
 
             // Assert
             _batchReportGatewayMock.Verify(
-                g => g.CreateAsync(It.Is<BatchReportDomain>(brd => 
+                g => g.CreateAsync(It.Is<BatchReportDomain>(brd =>
                     brd.RentGroup == request.RentGroup &&
                     brd.ReportDate == request.ReportDate &&
                     brd.ReportName == "ReportAccountBalanceByDate"
@@ -262,7 +262,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
 
             // Assert
             _batchReportGatewayMock.Verify(
-                g => g.CreateAsync(It.Is<BatchReportDomain>(brd => 
+                g => g.CreateAsync(It.Is<BatchReportDomain>(brd =>
                     brd.ReportYear == request.Year &&
                     brd.RentGroup == request.RentGroup &&
                     brd.Group == request.Group &&
@@ -450,7 +450,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
 
             // Assert
             _batchReportGatewayMock.Verify(
-                g => g.CreateAsync(It.Is<BatchReportDomain>(brd => 
+                g => g.CreateAsync(It.Is<BatchReportDomain>(brd =>
                     brd.ReportYear == request.Year &&
                     brd.TransactionType == request.TransactionType &&
                     brd.ReportName == "ReportItemisedTransactions"
@@ -488,7 +488,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .With(r => r.Year, default(int))
                 .CreateCustom();
 
-           _classUnderTest.ModelState.AddModelError("Year", "The Year field is required.");
+            _classUnderTest.ModelState.AddModelError("Year", "The Year field is required.");
 
             // Act
             var response = await _classUnderTest
@@ -510,7 +510,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .With(r => r.TransactionType, default(string))
                 .CreateCustom();
 
-           _classUnderTest.ModelState.AddModelError("TransactionType", "The TransactionType field is required.");
+            _classUnderTest.ModelState.AddModelError("TransactionType", "The TransactionType field is required.");
 
             // Act
             var response = await _classUnderTest
@@ -681,7 +681,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
 
             // Assert
             _batchReportGatewayMock.Verify(
-                g => g.CreateAsync(It.Is<BatchReportDomain>(brd => 
+                g => g.CreateAsync(It.Is<BatchReportDomain>(brd =>
                     brd.ReportYear == request.Year &&
                     brd.Group == request.SuspenseAccountType &&
                     brd.ReportName == "ReportCashSuspense"
@@ -868,7 +868,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
 
             // Assert
             _batchReportGatewayMock.Verify(
-                g => g.CreateAsync(It.Is<BatchReportDomain>(brd => 
+                g => g.CreateAsync(It.Is<BatchReportDomain>(brd =>
                     brd.ReportStartDate == request.StartDate &&
                     brd.ReportEndDate == request.EndDate &&
                     brd.ReportName == "ReportCashImport"
@@ -1055,7 +1055,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
 
             // Assert
             _batchReportGatewayMock.Verify(
-                g => g.CreateAsync(It.Is<BatchReportDomain>(brd => 
+                g => g.CreateAsync(It.Is<BatchReportDomain>(brd =>
                     brd.ReportYear == request.Year &&
                     brd.ReportName == "ReportHousingBenefitAcademy"
                 )),
