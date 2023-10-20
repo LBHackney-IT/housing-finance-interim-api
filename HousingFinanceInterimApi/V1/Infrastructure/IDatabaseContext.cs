@@ -59,6 +59,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         Task<List<string[]>> GetChargesByYearAndRentGroupAsync(int year, string rentGroup);
         Task<List<string[]>> GetChargesByGroupType(int year, string type);
         Task<List<string[]>> GetChargesByYear(int year);
+        Task<List<string[]>> GetItemisedTransactionsByYearAndTransactionTypeAsync(int year, string transactionType);
         Task<List<string[]>> GetHousingBenefitAcademyByYear(int year);
         Task<IList<string[]>> GetReportAccountBalance(DateTime reportDate, string rentGroup);
     }

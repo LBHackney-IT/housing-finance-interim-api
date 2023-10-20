@@ -54,7 +54,11 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
         public async Task<IList<string[]>> GetItemisedTransactionsByYearAndTransactionTypeAsync(int year, string transactionType)
         {
-            throw new NotImplementedException();
+            var results = await _context
+                .GetItemisedTransactionsByYearAndTransactionTypeAsync(year, transactionType)
+                .ConfigureAwait(false);
+
+            return results;
         }
 
         public async Task<IList<string[]>> GetCashSuspenseAccountByYearAsync(int year, string suspenseAccountType)

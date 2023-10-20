@@ -374,6 +374,95 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
         #endregion
 
+        #region Itemised Transactions
+        [Fact]
+        public async Task ReportGatewayItemisedTransactionsMethodReturnsTheTableDataThatItHasReceivedFromTheHFSDatabaseContext()
+        {
+            // arrange
+            int financialYear = RandomGen.WholeNumber();
+            string transactionType = RandomGen.String2(3);
+
+            var dbContextResult = new List<string[]>()
+            {
+                new string[] { "some_header", "other_header" }
+            };
+
+            _mockHFSDatabaseContext
+                .Setup(
+                    g => g.GetItemisedTransactionsByYearAndTransactionTypeAsync(It.IsAny<int>(), It.IsAny<string>())
+                )
+                .ReturnsAsync(dbContextResult);
+
+            // act
+            var tableDataFromGW = await _classUnderTest
+                .GetItemisedTransactionsByYearAndTransactionTypeAsync(financialYear, transactionType)
+                .ConfigureAwait(false);
+
+            // assert
+            tableDataFromGW.Should().IsSameOrEqualTo(dbContextResult);
+        }
+
+        [Fact]
+        public async Task ReportGatewayItemisedTransactionsMethodThrowsWhenHFSDatabaseContextThrows()
+        {
+            // arrange
+            int financialYear = RandomGen.WholeNumber();
+            string transactionType = RandomGen.String2(3);
+
+            var errorMessage = "An existing connection was forcibly closed by the remote host.";
+            var dbContextResult = new ConnectionResetException(errorMessage);
+
+            _mockHFSDatabaseContext
+                .Setup(g => g.GetItemisedTransactionsByYearAndTransactionTypeAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<string>()
+                ))
+                .ThrowsAsync(dbContextResult);
+
+            // act
+            Func<Task> getReportDataGWCall = async () => await _classUnderTest
+                .GetItemisedTransactionsByYearAndTransactionTypeAsync(financialYear, transactionType)
+                .ConfigureAwait(false);
+
+            // assert
+            await getReportDataGWCall.Should().ThrowAsync<ConnectionResetException>().WithMessage(errorMessage).ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task ReportGatewayItemisedTransactionsMethodCallsTheHFSDatabaseContextItemisedTransactionsMethodWithExpectedParameters()
+        {
+            // arrange
+            int financialYear = RandomGen.WholeNumber();
+            string transactionType = RandomGen.String2(3);
+
+            var dbContextResult = new List<string[]>()
+            {
+                new string[] { "some_header", "other_header" }
+            };
+
+            _mockHFSDatabaseContext
+                .Setup(
+                    g => g.GetItemisedTransactionsByYearAndTransactionTypeAsync(It.IsAny<int>(), It.IsAny<string>())
+                )
+                .ReturnsAsync(dbContextResult);
+
+            // act
+            await _classUnderTest
+                .GetItemisedTransactionsByYearAndTransactionTypeAsync(financialYear, transactionType)
+                .ConfigureAwait(false);
+
+            // assert
+            _mockHFSDatabaseContext
+                .Verify(
+                    g => g.GetItemisedTransactionsByYearAndTransactionTypeAsync(
+                        It.Is<int>(y => y == financialYear),
+                        It.Is<string>(t => t == transactionType)
+                    ),
+                    Times.Once
+                );
+        }
+        #endregion
+
         #region Cash Suspense
         [Fact]
         public async Task ReportGatewayCashSuspenseAccountByYearMethodReturnsTheTableDataThatItHasReceivedFromTheHFSDatabaseContext()
