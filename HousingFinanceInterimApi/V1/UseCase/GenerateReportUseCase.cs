@@ -6,7 +6,7 @@ using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;
-using Google.Apis.Drive.v3.Data;
+using GD = Google.Apis.Drive.v3.Data;
 using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Handlers;
 
@@ -28,6 +28,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
         private const string ReportChargesLabel = "ReportCharges";
+        private const string ReportItemisedTransactionsLabel = "ReportItemisedTransactions";
         private const string ReportCashSuspenseLabel = "ReportCashSuspense";
         private const string ReportCashImportLabel = "ReportCashImport";
         private const string ReportHousingBenefitAcademyLabel = "ReportHousingBenefitAcademy";
@@ -60,6 +61,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     break;
                 case ReportChargesLabel:
                     await CreateChargesReport(batchReport).ConfigureAwait(false);
+                    break;
+                case ReportItemisedTransactionsLabel:
+                    await CreateItemisedTransactionsReport(batchReport).ConfigureAwait(false);
                     break;
                 case ReportCashSuspenseLabel:
                     await CreateCashSuspenseReport(batchReport).ConfigureAwait(false);
@@ -163,6 +167,51 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var file = await _googleClientService
                 .GetFileByNameInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
                 .ConfigureAwait(false);
+
+            var fileLink = $"https://drive.google.com/file/d/{file.Id}";
+            await _batchReportGateway.SetStatusAsync(batchReport.Id, fileLink, true).ConfigureAwait(false);
+        }
+
+        private async Task CreateItemisedTransactionsReport(BatchReportDomain batchReport)
+        {
+            var itemisedTransactionFolderGFS = await GetGoogleFileSetting(ReportItemisedTransactionsLabel).ConfigureAwait(false);
+            if (itemisedTransactionFolderGFS == null)
+            {
+                LoggingHandler.LogInfo($"Output folder not found");
+                await _batchReportGateway.SetStatusAsync(batchReport.Id, "Output folder not found", false).ConfigureAwait(false);
+                return;
+            }
+
+            var fileName = $"Itemised_Transactions_{batchReport.TransactionType}_{batchReport.ReportYear}_{batchReport.Id}.csv";
+            var reportCharges = (List<string[]>) await _reportGateway
+                .GetItemisedTransactionsByYearAndTransactionTypeAsync(batchReport.ReportYear.Value, batchReport.TransactionType)
+                .ConfigureAwait(false);
+
+            await _googleClientService
+                .UploadCsvFile(reportCharges, fileName, itemisedTransactionFolderGFS.GoogleIdentifier)
+                .ConfigureAwait(false);
+
+            GD.File file = null;
+
+            var waitDurationInSeconds = _sleepDuration / 1000;
+            var cuttoffTime = DateTime.Now.AddSeconds(waitDurationInSeconds);
+
+            do
+            {
+                System.Threading.Thread.Sleep(1000);
+
+                file = await _googleClientService
+                    .GetFileByNameInDriveAsync(itemisedTransactionFolderGFS.GoogleIdentifier, fileName)
+                    .ConfigureAwait(false);
+            }
+            while (file is null && DateTime.Now < cuttoffTime);
+
+            if (file is null)
+            {
+                LoggingHandler.LogInfo($"File with name: '{fileName}' was not found within the {itemisedTransactionFolderGFS.GoogleIdentifier} directory.");
+                await _batchReportGateway.SetStatusAsync(batchReport.Id, "Uploaded report file not found", false).ConfigureAwait(false);
+                return;
+            }
 
             var fileLink = $"https://drive.google.com/file/d/{file.Id}";
             await _batchReportGateway.SetStatusAsync(batchReport.Id, fileLink, true).ConfigureAwait(false);

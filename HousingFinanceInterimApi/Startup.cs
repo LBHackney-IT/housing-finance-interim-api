@@ -138,10 +138,17 @@ namespace HousingFinanceInterimApi
         private static void ConfigureDbContext(IServiceCollection services)
         {
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-            services.AddDbContext<DatabaseContext>(opt => opt.UseSqlServer(connectionString, sqlOptions =>
-            {
-                sqlOptions.CommandTimeout(360);
-            }));
+
+            Action<DbContextOptionsBuilder> hfsDbContextOptionsAction = (opt) => opt.UseSqlServer(
+                connectionString,
+                sqlOptions =>
+                {
+                    sqlOptions.CommandTimeout(360);
+                }
+            );
+
+            services.AddDbContext<DatabaseContext>(hfsDbContextOptionsAction);
+            services.AddDbContext<IDatabaseContext, DatabaseContext>(hfsDbContextOptionsAction);
         }
 
         private static void RegisterGateways(IServiceCollection services)

@@ -38,7 +38,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         private UPCashDumpFileNameDomain _uPCashDumpFileNameDomain;
 
         private string _cashFileRegex = "^CashFile\\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01]).dat$";
-        private string _waitDuration = "1234567";
+        private string _waitDuration = "30";
 
         public ImportCashFileUseCaseTests()
         {
