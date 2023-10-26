@@ -3,6 +3,8 @@ using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.Tests.V1.TestHelpers;
+using HousingFinanceInterimApi.V1.Exceptions;
+using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using Moq;
 using Xunit;
 using FluentAssertions;
@@ -10,7 +12,6 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 using Google.Apis.Drive.v3.Data;
-using HousingFinanceInterimApi.V1.Exceptions;
 
 namespace HousingFinanceInterimApi.Tests.V1.UseCase;
 
@@ -21,8 +22,9 @@ public class LoadActionDiaryUseCaseTests
     private readonly Mock<IActionDiaryGateway> _mockActionDiaryGateway;
     private readonly Mock<IGoogleFileSettingGateway> _mockGoogleFileSettingGateway;
     private readonly Mock<IGoogleClientService> _mockGoogleClientService;
+    private List<ActionDiaryAuxDomain> _sheetEntities;
 
-    private readonly LoadActionDiaryUseCase _classUnderTest;
+    private readonly ILoadActionDiaryUseCase _classUnderTest;
 
     public LoadActionDiaryUseCaseTests()
     {
@@ -61,48 +63,44 @@ public class LoadActionDiaryUseCaseTests
             .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync(RandomGen.CreateMany<File>(1).ToList());
 
+        _sheetEntities = RandomGen.CreateMany<ActionDiaryAuxDomain>(quantity: 1).ToList();
         _mockGoogleClientService
             .Setup(x => x.ReadSheetToEntitiesAsync<ActionDiaryAuxDomain>(
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<string>())
-            ).ReturnsAsync(RandomGen.CreateMany<ActionDiaryAuxDomain>(quantity: 1).ToList());
+            ).ReturnsAsync(_sheetEntities);
     }
 
     [Fact]
     public async Task ReturnsStepResponseWhenAllOK()
     {
         // Act
-        var useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+        var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+        // Assert 
+        var waitDurationEnvVar = Environment.GetEnvironmentVariable("WAIT_DURATION");
+        var expectedNextStepTime = DateTime.UtcNow.AddSeconds(int.Parse(waitDurationEnvVar));
 
-        // Assert
-        await useCaseCall.Should().NotThrowAsync().ConfigureAwait(false);
-
-        var stepResponse = await useCaseCall().ConfigureAwait(false);
         stepResponse.Continue.Should().BeTrue();
+        stepResponse.NextStepTime.Should().BeCloseTo(expectedNextStepTime);
     }
 
     [Fact]
     public async Task LoadsActionDiaryWhenAllOK()
     {
         // Act
-        var useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+        var result = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
         // Assert
-        var result = await useCaseCall().ConfigureAwait(false);
         result.Continue.Should().BeTrue();
 
-        _mockActionDiaryGateway.Verify(gw =>
-                gw.ClearActionDiaryAuxiliary(), Times.Once);
-        _mockActionDiaryGateway.Verify(gw =>
-                gw.CreateBulkAsync(It.IsAny<IList<ActionDiaryAuxDomain>>()),
-            Times.Once);
-        _mockActionDiaryGateway.Verify(gw =>
-                gw.LoadActionDiary(), Times.Once);
+        _mockActionDiaryGateway.Verify(gw => gw.ClearActionDiaryAuxiliary(), Times.Once);
+        _mockActionDiaryGateway.Verify(gw => gw.CreateBulkAsync(_sheetEntities), Times.Once);
+        _mockActionDiaryGateway.Verify(gw => gw.LoadActionDiary(), Times.Once);
     }
 
     [Fact]
-    public async Task ThrowsExceptionWhenFailingToClearAuxTable()
+    public async Task ThrowsExceptionWhenCreateBatchFails()
     {
         // Arrange
         var testException = new Exception("Test exception");
@@ -138,6 +136,60 @@ public class LoadActionDiaryUseCaseTests
     }
 
     [Fact]
+    public async Task ErrorLoggedWhenClearAuxTableThrows()
+    {
+        // Arrange
+        var testException = new Exception("Test exception");
+
+        _mockActionDiaryGateway
+            .Setup(g => g.ClearActionDiaryAuxiliary())
+            .ThrowsAsync(testException);
+
+        // Act
+        var useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+        // Assert
+        await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(testException.Message).ConfigureAwait(false);
+        _mockBatchLogErrorGateway.Verify(x => x.CreateAsync(It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ErrorLoggedWhenCreateBulkInsertThrows()
+    {
+        // Arrange
+        var testException = new Exception("Test exception");
+
+        _mockActionDiaryGateway
+            .Setup(g => g.CreateBulkAsync(_sheetEntities))
+            .ThrowsAsync(testException);
+
+        // Act
+        var useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+        // Assert
+        await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(testException.Message).ConfigureAwait(false);
+        _mockBatchLogErrorGateway.Verify(x => x.CreateAsync(It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ErrorLoggedWhenMergeActionDiaryThrows()
+    {
+        // Arrange
+        var testException = new Exception("Test exception");
+
+        _mockActionDiaryGateway
+            .Setup(g => g.LoadActionDiary())
+            .ThrowsAsync(testException);
+
+        // Act
+        var useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+
+        // Assert
+        await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(testException.Message).ConfigureAwait(false);
+        _mockBatchLogErrorGateway.Verify(x => x.CreateAsync(It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+    }
+
+    [Fact]
     public async Task DoesNotAttemptToLoadDatabaseWithEmptySheets()
     {
         // Arrange
@@ -155,12 +207,8 @@ public class LoadActionDiaryUseCaseTests
         await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
         // Assert
-        _mockActionDiaryGateway.Verify(gw =>
-                gw.ClearActionDiaryAuxiliary(), Times.Never);
-        _mockActionDiaryGateway.Verify(gw =>
-                gw.CreateBulkAsync(It.IsAny<IList<ActionDiaryAuxDomain>>()),
-            Times.Never);
-        _mockActionDiaryGateway.Verify(gw =>
-                gw.LoadActionDiary(), Times.Never);
+        _mockActionDiaryGateway.Verify(gw => gw.ClearActionDiaryAuxiliary(), Times.Never);
+        _mockActionDiaryGateway.Verify(gw => gw.CreateBulkAsync(_sheetEntities), Times.Never);
+        _mockActionDiaryGateway.Verify(gw => gw.LoadActionDiary(), Times.Never);
     }
 }
