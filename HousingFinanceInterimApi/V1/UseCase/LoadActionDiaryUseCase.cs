@@ -59,14 +59,14 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 LoggingHandler.LogWarning(
                         $"No action diary data to import. Sheet name: ({sheetName})");
                 LoggingHandler.LogInfo($"END sheet {sheetName}");
-                return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
+                return new StepResponse() { Continue = false, NextStepTime = DateTime.UtcNow.AddSeconds(int.Parse(_waitDuration)) };
             }
 
             await HandleSpreadSheet(batch.Id, actionDiaryAux).ConfigureAwait(false);
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
             LoggingHandler.LogInfo($"End action diary import");
-            return new StepResponse() { Continue = true, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
+            return new StepResponse() { Continue = true, NextStepTime = DateTime.UtcNow.AddSeconds(int.Parse(_waitDuration)) };
         }
 
         private async Task<GoogleFileSettingDomain> GetGoogleFileSetting(string label)
