@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using HousingFinanceInterimApi.V1.Domain;
-using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
@@ -19,9 +17,12 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         private readonly Mock<IUPCashLoadGateway> _mockUpCashLoadGateway;
         private readonly Mock<ITransactionGateway> _mockTransactionGateway;
         private readonly ILoadCashFileTransactionsUseCase _classUnderTest;
+        private readonly int _waitDuration = 30;
 
         public LoadCashFileTransactionsUseCaseTests()
         {
+            Environment.SetEnvironmentVariable("WAIT_DURATION", _waitDuration.ToString());
+
             _mockBatchLogGateway = new Mock<IBatchLogGateway>();
             _mockBatchLogErrorGateway = new Mock<IBatchLogErrorGateway>();
             _mockUpCashLoadGateway = new Mock<IUPCashLoadGateway>();
@@ -46,12 +47,12 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // Assert
             response.Should().NotBeNull();
             response.Continue.Should().BeTrue();
-            response.NextStepTime.Should().BeCloseTo(DateTime.Now);
+            response.NextStepTime.Should().BeCloseTo(DateTime.Now.AddSeconds(_waitDuration));
 
             _mockBatchLogGateway.Verify(x => x.CreateAsync(It.IsAny<string>(), false), Times.Once);
             _mockUpCashLoadGateway.Verify(x => x.LoadCashFiles(), Times.Once);
             _mockTransactionGateway.Verify(x => x.LoadCashFilesTransactions(), Times.Once);
-            _mockBatchLogGateway.Verify(x => x.SetToSuccessAsync(It.IsAny<int>()), Times.Once);
+            _mockBatchLogGateway.Verify(x => x.SetToSuccessAsync(It.IsAny<long>()), Times.Once);
         }
 
         [Fact]
@@ -70,7 +71,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             _mockUpCashLoadGateway.Verify(x => x.LoadCashFiles(), Times.Once);
             _mockTransactionGateway.Verify(x => x.LoadCashFilesTransactions(), Times.Never);
             _mockBatchLogGateway.Verify(x => x.SetToSuccessAsync(It.IsAny<int>()), Times.Never);
-            // _mockBatchLogErrorGateway.Verify(x => x.CreateAsync(It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockBatchLogErrorGateway.Verify(x => x.CreateAsync(It.IsAny<long>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
     }
 }
