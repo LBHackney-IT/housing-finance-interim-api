@@ -2,9 +2,7 @@ using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using HousingFinanceInterimApi.V1.Handlers;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -12,9 +10,9 @@ namespace HousingFinanceInterimApi.V1.Gateways
     public class ReportGateway : IReportGateway
     {
 
-        private readonly DatabaseContext _context;
+        private readonly IDatabaseContext _context;
 
-        public ReportGateway(DatabaseContext context)
+        public ReportGateway(IDatabaseContext context)
         {
             _context = context;
         }
@@ -50,6 +48,15 @@ namespace HousingFinanceInterimApi.V1.Gateways
         public async Task<IList<string[]>> GetChargesByYearAsync(int year)
         {
             var results = await _context.GetChargesByYear(year).ConfigureAwait(false);
+
+            return results;
+        }
+
+        public async Task<IList<string[]>> GetItemisedTransactionsByYearAndTransactionTypeAsync(int year, string transactionType)
+        {
+            var results = await _context
+                .GetItemisedTransactionsByYearAndTransactionTypeAsync(year, transactionType)
+                .ConfigureAwait(false);
 
             return results;
         }

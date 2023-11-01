@@ -14,9 +14,17 @@ serve:
 shell:
 	docker-compose run housing-finance-interim-api bash
 
+
+.PHONY: clean
+clean:
+	docker rm $$(docker ps -a --filter "status=exited" | grep housing-finance-interim-api-test | grep -oE "^[[:xdigit:]]+")
+	docker rmi $$(docker images --filter "dangling=true" -q)
+
 .PHONY: test
 test:
-	docker-compose up test-database & docker-compose build housing-finance-interim-api-test && docker-compose up housing-finance-interim-api-test
+	-docker-compose build housing-finance-interim-api-test && docker-compose run housing-finance-interim-api-test
+	-make clean
+
 .PHONY: lint
 lint:
 	-dotnet tool install -g dotnet-format

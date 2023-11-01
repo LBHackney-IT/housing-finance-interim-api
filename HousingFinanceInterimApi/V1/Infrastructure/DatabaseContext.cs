@@ -14,7 +14,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
     /// The database context class.
     /// </summary>
     /// <seealso cref="DbContext" />
-    public class DatabaseContext : DbContext
+    public class DatabaseContext : DbContext, IDatabaseContext
     {
 
         /// <summary>
@@ -673,6 +673,50 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
             return results;
         }
+
+        #region Itemised Transactions
+        public async Task<List<string[]>> GetItemisedTransactionsByYearAndTransactionTypeAsync(int year, string transactionType)
+        {
+            var results = new List<string[]>();
+
+            var dbConnection = Database.GetDbConnection() as SqlConnection;
+            var command = new SqlCommand($"usp_GetChargesByYearAndTransactionType", dbConnection)
+            {
+                CommandType = CommandType.StoredProcedure,
+                CommandTimeout = 900
+            };
+
+            command.Parameters.Add(new SqlParameter("@year", year));
+            command.Parameters.Add(new SqlParameter("@transaction_type", transactionType));
+
+            dbConnection.Open();
+            await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            {
+                var columnNames = new string[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    columnNames[i] = reader.GetName(i);
+                }
+
+                while (reader.Read())
+                {
+                    var result = new string[reader.FieldCount];
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        result[i] = reader[i].ToString();
+                    }
+
+                    results.Add(result);
+                }
+
+                results.Insert(0, columnNames);
+            }
+            dbConnection.Close();
+            command.Dispose();
+
+            return results;
+        }
+        #endregion
 
         public async Task<List<string[]>> GetHousingBenefitAcademyByYear(int year)
         {
