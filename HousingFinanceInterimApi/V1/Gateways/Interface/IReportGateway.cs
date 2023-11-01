@@ -12,6 +12,7 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         Task<IList<string[]>> GetChargesByYearAndRentGroupAsync(int year, string rentGroup);
         Task<IList<string[]>> GetChargesByGroupTypeAsync(int year, string type);
         Task<IList<string[]>> GetChargesByYearAsync(int year);
+        Task<IList<string[]>> GetItemisedTransactionsByYearAndTransactionTypeAsync(int year, string transactionType);
         Task<IList<string[]>> GetCashSuspenseAccountByYearAsync(int year, string suspenseAccountType);
         Task<IList<string[]>> GetHousingBenefitAcademyByYearAsync(int year);
     }
