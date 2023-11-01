@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HousingFinanceInterimApi.V1.Domain;
-using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;
-using Google.Apis.Drive.v3.Data;
 using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Handlers;
-using HousingFinanceInterimApi.V1.Infrastructure;
+using HousingFinanceInterimApi.V1.Exceptions;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
@@ -50,7 +48,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var googleFileSettings = await GetGoogleFileSetting(_actionDiaryLabel).ConfigureAwait(false);
 
             if (googleFileSettings == null)
-                return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
+                throw new GoogleFileSettingNotFoundException(_actionDiaryLabel);
 
             var actionDiaryAux = await _googleClientService
                 .ReadSheetToEntitiesAsync<ActionDiaryAuxDomain>(googleFileSettings.GoogleIdentifier, sheetName, sheetRange)
@@ -58,15 +56,17 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             if (!actionDiaryAux.Any())
             {
-                LoggingHandler.LogInfo($"No action diary data to import");
-                return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
+                LoggingHandler.LogWarning(
+                        $"No action diary data to import. Sheet name: ({sheetName})");
+                LoggingHandler.LogInfo($"END sheet {sheetName}");
+                return new StepResponse() { Continue = false, NextStepTime = DateTime.UtcNow.AddSeconds(int.Parse(_waitDuration)) };
             }
 
             await HandleSpreadSheet(batch.Id, actionDiaryAux).ConfigureAwait(false);
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
             LoggingHandler.LogInfo($"End action diary import");
-            return new StepResponse() { Continue = true, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
+            return new StepResponse() { Continue = true, NextStepTime = DateTime.UtcNow.AddSeconds(int.Parse(_waitDuration)) };
         }
 
         private async Task<GoogleFileSettingDomain> GetGoogleFileSetting(string label)
