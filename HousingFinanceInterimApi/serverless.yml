@@ -649,7 +649,7 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-check-housing-files
-    RentPositionLambdaAlarm:
+    OperatingBalanceLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
         AlarmName: "${self:provider.stage}-housing-finance-refresh-op-bal-lambda-alarm"
@@ -661,6 +661,7 @@ resources:
         ComparisonOperator: GreaterThanThreshold
         EvaluationPeriods: 1
         Period: 60
+        TreatMissingData: notBreaching
         AlarmActions: 
           - 'Fn::Join':
             - ':'
