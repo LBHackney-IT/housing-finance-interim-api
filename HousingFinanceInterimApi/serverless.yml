@@ -596,6 +596,7 @@ resources:
         ComparisonOperator: GreaterThanThreshold
         EvaluationPeriods: 1
         Period: 60
+        TreatMissingData: notBreaching
         AlarmActions:
           - 'Fn::Join':
               - ':'
@@ -652,7 +653,6 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-rent-position
-  
     LoadActionDiaryLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
@@ -676,7 +676,6 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-action-diary
-    
     HousingFileLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
