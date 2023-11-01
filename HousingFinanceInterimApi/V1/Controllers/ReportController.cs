@@ -23,6 +23,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
 
         private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
         private const string ReportChargesLabel = "ReportCharges";
+        private const string ReportItemisedTransactionsLabel = "ReportItemisedTransactions";
         private const string ReportCashSuspenseLabel = "ReportCashSuspense";
         private const string ReportCashImportLabel = "ReportCashImport";
         private const string ReportHousingBenefitAcademyLabel = "ReportHousingBenefitAcademy";
@@ -66,6 +67,50 @@ namespace HousingFinanceInterimApi.V1.Controllers
                 return NotFound();
             return Ok(batchReportCharges.ToReportChargesResponse());
         }
+
+        # region Itemised Transactions
+        [ProducesResponseType(typeof(BatchReportItemisedTransactionResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(BadRequestObjectResult), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPost]
+        [Route("itemised-transactions")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
+        public async Task<IActionResult> CreateReportItemisedTransaction([FromBody] BatchReportItemisedTransactionRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var batchReport = request.ToDomain();
+            batchReport.ReportName = ReportItemisedTransactionsLabel;
+
+            var batchReportItemisedTransaction = await _batchReportGateway
+                .CreateAsync(batchReport)
+                .ConfigureAwait(false);
+
+            return Created(
+                    "Report request created",
+                    batchReportItemisedTransaction.ToReportItemisedTransactionResponse()
+                );
+        }
+
+        [ProducesResponseType(typeof(List<BatchReportChargesResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet]
+        [Route("itemised-transactions")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
+        public async Task<IActionResult> ListReportItemisedTransactions()
+        {
+            var batchReportItemisedTransactions = await _batchReportGateway
+                .ListAsync(ReportItemisedTransactionsLabel)
+                .ConfigureAwait(false);
+
+            if (batchReportItemisedTransactions is null)
+                return NotFound();
+
+            return Ok(batchReportItemisedTransactions.ToReportItemisedTransactionsResponse());
+        }
+        #endregion
 
         [ProducesResponseType(typeof(List<BatchReportCashSuspenseResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

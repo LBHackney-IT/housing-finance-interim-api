@@ -14,6 +14,8 @@ namespace HousingFinanceInterimApi.V1.Domain
 
         public string Group { get; set; }
 
+        public string TransactionType { get; set; }
+
         public DateTime? ReportStartDate { get; set; }
 
         public DateTime? ReportEndDate { get; set; }
