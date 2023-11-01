@@ -573,6 +573,7 @@ resources:
         ComparisonOperator: GreaterThanThreshold
         EvaluationPeriods: 1
         Period: 60
+        TreatMissingData: notBreaching
         AlarmActions:
           - 'Fn::Join':
               - ':'
@@ -617,6 +618,7 @@ resources:
         ComparisonOperator: GreaterThanThreshold
         EvaluationPeriods: 1
         Period: 60
+        TreatMissingData: notBreaching
         AlarmActions: 
           - 'Fn::Join':
             - ':'
@@ -639,6 +641,7 @@ resources:
         ComparisonOperator: GreaterThanThreshold
         EvaluationPeriods: 1
         Period: 60
+        TreatMissingData: notBreaching
         AlarmActions: 
           - 'Fn::Join':
             - ':'
@@ -662,6 +665,7 @@ resources:
         ComparisonOperator: GreaterThanThreshold
         EvaluationPeriods: 1
         Period: 60
+        TreatMissingData: notBreaching
         AlarmActions: 
           - 'Fn::Join':
             - ':'
@@ -685,6 +689,7 @@ resources:
         ComparisonOperator: GreaterThanThreshold
         EvaluationPeriods: 1
         Period: 60
+        TreatMissingData: notBreaching
         AlarmActions: 
           - 'Fn::Join':
             - ':'
