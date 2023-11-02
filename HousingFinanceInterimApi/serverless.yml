@@ -699,11 +699,11 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-check-housing-files
-    ImportDirectDebitAlarm:
+    OperatingBalanceLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
-        AlarmName: "${self:provider.stage}-housing-finance-direct-debit-lambda-alarm"
-        AlarmDescription: Errors detected in AWS Lambda for Import Direct Debit function
+        AlarmName: "${self:provider.stage}-housing-finance-refresh-op-bal-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Refresh Operating Balance function
         Namespace: AWS/Lambda
         MetricName: "Errors"
         Statistic: Sum
@@ -721,7 +721,7 @@ resources:
               - 'housing-finance-alarms'
         Dimensions:
           - Name: FunctionName
-            Value: ${self:service}-${self:provider.stage}-direct-debit
+            Value: ${self:service}-${self:provider.stage}-refresh-op-bal
     ImportDirectDebitTransactionsAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
