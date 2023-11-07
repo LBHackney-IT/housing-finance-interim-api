@@ -699,7 +699,7 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-check-housing-files
-  SuspenseHousingBenefitLambdaAlarm:
+    SuspenseHousingBenefitLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
         AlarmName: "${self:provider.stage}-susp-hb-lambda-alarm"
@@ -722,7 +722,7 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-susp-hb
-  OperatingBalanceLambdaAlarm:
+    OperatingBalanceLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
         AlarmName: "${self:provider.stage}-housing-finance-refresh-op-bal-lambda-alarm"
