@@ -50,7 +50,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             _mockBatchLogGateway
                 .Setup(x => x.CreateAsync(It.IsAny<string>(), false))
                 .ReturnsAsync(new BatchLogDomain { Id = 1 });
-            
+
             var googleFileSettings = new List<GoogleFileSettingDomain>
             {
                 new() { GoogleIdentifier = _sheetId }
@@ -68,7 +68,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // Arrange
             var sheetCount = _sheetNames.Length;
             var directDebits = _fixture.CreateMany<DirectDebitAuxDomain>(10).ToList();
-            
+
             _mockGoogleClientService
                 .Setup(x => x.ReadSheetToEntitiesAsync<DirectDebitAuxDomain>(_sheetId, It.IsAny<string>(), _sheetRange))
                 .ReturnsAsync(directDebits);
@@ -83,7 +83,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             _mockBatchLogGateway.Verify(x => x.CreateAsync(It.IsAny<string>(), false), Times.Once);
             _mockGoogleFileSettingGateway.Verify(x => x.GetSettingsByLabel(It.IsAny<string>()), Times.Once);
-  
+
             _mockGoogleClientService.Verify(x => x.ReadSheetToEntitiesAsync<DirectDebitAuxDomain>(_sheetId, It.IsIn<string>("Rent", "LH"), _sheetRange),
                                             Times.Exactly(sheetCount));
             _mockDirectDebitGateway.Verify(x => x.ClearDirectDebitAuxiliary(), Times.Exactly(sheetCount));
@@ -99,11 +99,11 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // Arrange
             var sheetCount = _sheetNames.Length;
             var directDebits = new List<DirectDebitAuxDomain>();
-            
+
             _mockGoogleClientService
                 .Setup(x => x.ReadSheetToEntitiesAsync<DirectDebitAuxDomain>(_sheetId, It.IsIn(_sheetNames), _sheetRange))
                 .ReturnsAsync(directDebits);
-            
+
             // Act
             var result = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
@@ -114,7 +114,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             _mockBatchLogGateway.Verify(x => x.CreateAsync(It.IsAny<string>(), false), Times.Once);
             _mockGoogleFileSettingGateway.Verify(x => x.GetSettingsByLabel(It.IsAny<string>()), Times.Once);
-  
+
             _mockGoogleClientService.Verify(x => x.ReadSheetToEntitiesAsync<DirectDebitAuxDomain>(_sheetId, It.IsIn(_sheetNames), _sheetRange),
                                             Times.Exactly(sheetCount));
             _mockDirectDebitGateway.Verify(x => x.ClearDirectDebitAuxiliary(), Times.Never);
