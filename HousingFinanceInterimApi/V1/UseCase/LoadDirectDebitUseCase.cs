@@ -46,7 +46,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             var batch = await _batchLogGateway.CreateAsync(DirectDebitLabel).ConfigureAwait(false);
             var googleFileSettings = await GetGoogleFileSetting(DirectDebitLabel).ConfigureAwait(false)
-                                      ?? throw new GoogleFileSettingNotFoundException($"Google file setting not found for '{DirectDebitLabel}' label");
+                                      ?? throw new GoogleFileSettingNotFoundException(DirectDebitLabel);
 
             foreach (var sheetName in sheetNames.Split(";"))
             {
