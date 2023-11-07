@@ -128,10 +128,15 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public void ExecuteAsyncShouldCatchExceptionAndThrow()
         {
             // Arrange
+            var directDebits = _fixture.CreateMany<DirectDebitAuxDomain>(10).ToList();
+            _mockGoogleClientService
+                .Setup(x => x.ReadSheetToEntitiesAsync<DirectDebitAuxDomain>(_sheetId, It.IsAny<string>(), _sheetRange))
+                .ReturnsAsync(directDebits);
+
             var testException = new Exception("Test Exception");
 
-            _mockBatchLogGateway
-                .Setup(x => x.CreateAsync(It.IsAny<string>(), false))
+            _mockDirectDebitGateway
+                .Setup(x => x.ClearDirectDebitAuxiliary())
                 .ThrowsAsync(testException);
 
             // Act + Assert
