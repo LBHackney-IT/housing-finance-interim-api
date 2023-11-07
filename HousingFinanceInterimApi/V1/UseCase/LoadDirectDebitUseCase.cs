@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HousingFinanceInterimApi.V1.Domain;
-using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;
-using Google.Apis.Drive.v3.Data;
 using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Handlers;
-using HousingFinanceInterimApi.V1.Infrastructure;
+using HousingFinanceInterimApi.V1.Exceptions;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
@@ -47,10 +45,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
             const string sheetRange = "A:C";
 
             var batch = await _batchLogGateway.CreateAsync(DirectDebitLabel).ConfigureAwait(false);
-            var googleFileSettings = await GetGoogleFileSetting(DirectDebitLabel).ConfigureAwait(false);
-
-            if (googleFileSettings == null)
-                return new StepResponse() { Continue = false, NextStepTime = DateTime.Now.AddSeconds(0) };
+            var googleFileSettings = await GetGoogleFileSetting(DirectDebitLabel).ConfigureAwait(false)
+                                      ?? throw new GoogleFileSettingNotFoundException($"Google file setting not found for '{DirectDebitLabel}' label");
 
             foreach (var sheetName in sheetNames.Split(";"))
             {
