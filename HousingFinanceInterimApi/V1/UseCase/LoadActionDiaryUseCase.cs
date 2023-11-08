@@ -39,6 +39,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<StepResponse> ExecuteAsync()
         {
+            throw new NotImplementedException();
+            #pragma warning disable CS0162 // Unreachable code detected
             LoggingHandler.LogInfo($"Starting action diary import");
 
             const string sheetName = "Active";
