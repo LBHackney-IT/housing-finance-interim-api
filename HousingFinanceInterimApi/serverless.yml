@@ -771,7 +771,7 @@ resources:
     ImportDirectDebitTransactionsAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
-        AlarmName: "${self:provider.stage}-housing-financedirect-debit-trans-alarm"
+        AlarmName: "${self:provider.stage}-housing-finance-direct-debit-trans-alarm"
         AlarmDescription: Errors detected in AWS Lambda for Import Direct Debit Transactions function
         Namespace: AWS/Lambda
         MetricName: "Errors"
@@ -791,6 +791,53 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-direct-debit-trans
+    RefreshCurrentBalanceAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-housing-finance-refresh-cur-bal-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Refresh Current Balance function
+        Namespace: AWS/Lambda
+        MetricName: "Errors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions: 
+          - 'Fn::Join':
+            - ':'
+            - - 'arn:aws:sns'
+              - Ref: 'AWS::Region'
+              - Ref: 'AWS::AccountId'
+              - 'housing-finance-alarms'
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-refresh-cur-bal
+    RefreshManageArrearsTablesAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-housing-finance-refresh-ma-cur-bal-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Refresh Manage Arrears Tables function
+        Namespace: AWS/Lambda
+        MetricName: "Errors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions: 
+          - 'Fn::Join':
+            - ':'
+            - - 'arn:aws:sns'
+              - Ref: 'AWS::Region'
+              - Ref: 'AWS::AccountId'
+              - 'housing-finance-alarms'
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-refresh-ma-cur-bal
+
 custom:    
   vpc:
     development:
