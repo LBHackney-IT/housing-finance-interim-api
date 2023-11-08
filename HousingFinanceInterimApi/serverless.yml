@@ -745,6 +745,29 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-cash-file-trans        
+    ImportDirectDebitAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-housing-finance-direct-debit-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Import Direct Debit function
+        Namespace: AWS/Lambda
+        MetricName: "Errors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions: 
+          - 'Fn::Join':
+            - ':'
+            - - 'arn:aws:sns'
+              - Ref: 'AWS::Region'
+              - Ref: 'AWS::AccountId'
+              - 'housing-finance-alarms'
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-direct-debit
     OperatingBalanceLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
