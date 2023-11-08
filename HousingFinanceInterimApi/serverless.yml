@@ -510,7 +510,7 @@ stepFunctions:
       dependsOn: lambdaExecutionRole
       tags:
         Team: HousingFinance
-resources:  
+resources:
   Resources:
     lambdaExecutionRole:
       Type: AWS::IAM::Role
@@ -722,7 +722,7 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-susp-hb
-  importCashFileTransactionsAlarm:
+    ImportCashFileTransactionsAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
         AlarmName: "${self:provider.stage}-cash-file-trans-alarm"
@@ -744,8 +744,7 @@ resources:
               - 'housing-finance-alarms'
         Dimensions:
           - Name: FunctionName
-            Value: ${self:service}-${self:provider.stage}-cash-file-trans
-          
+            Value: ${self:service}-${self:provider.stage}-cash-file-trans        
     OperatingBalanceLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
@@ -769,7 +768,30 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-refresh-op-bal
-custom:
+    ImportDirectDebitTransactionsAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-housing-financedirect-debit-trans-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Import Direct Debit Transactions function
+        Namespace: AWS/Lambda
+        MetricName: "Errors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions: 
+          - 'Fn::Join':
+            - ':'
+            - - 'arn:aws:sns'
+              - Ref: 'AWS::Region'
+              - Ref: 'AWS::AccountId'
+              - 'housing-finance-alarms'
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-direct-debit-trans
+      
   vpc:
     development:
       securityGroupIds:
