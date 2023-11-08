@@ -18,6 +18,7 @@ provider:
     CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
     GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
     WAIT_DURATION: ${ssm:/housing-finance/${self:provider.stage}/step-function-wait-duration}
+    SLEEP_DURATION: ${ssm:/housing-finance/${self:provider.stage}/report-generation-sleep-duration}
     BATCH_SIZE: ${ssm:/housing-finance/${self:provider.stage}/bulk-insert-batch-size}
     CASH_FILE_REGEX: ${ssm:/housing-finance/${self:provider.stage}/cash-file-regex}
     HOUSING_FILE_REGEX: ${ssm:/housing-finance/${self:provider.stage}/housing-benefit-file-regex}

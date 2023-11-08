@@ -20,6 +20,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         private readonly Mock<IGoogleFileSettingGateway> _mockGoogleFileSettingGateway;
         private readonly Mock<IGoogleClientService> _mockGoogleClientService;
         private readonly int _waitDuration = 30;
+        private readonly int _sleepDuration = 1;
         private readonly IGenerateReportUseCase _classUnderTest;
 
         public GenerateReportUseCaseTests()
@@ -30,6 +31,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             _mockGoogleClientService = new Mock<IGoogleClientService>();
 
             Environment.SetEnvironmentVariable("WAIT_DURATION", _waitDuration.ToString());
+            Environment.SetEnvironmentVariable("SLEEP_DURATION", _sleepDuration.ToString());
 
             _classUnderTest = new GenerateReportUseCase(
                     _mockBatchReportGateway.Object,
@@ -1635,7 +1637,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public async Task GenerateReportUCAttemptsToRetrieveTheUploadedItemisedTransactionsCSVFileIdIn1SecondPeriodsSoLongItHasntSpent30SecondsDoingIt()
+        public async Task GenerateReportUCAttemptsToRetrieveTheUploadedItemisedTransactionsCSVFileIdIn1SecondPeriodsSoLongItHasntSpentConfigurdSecondsDoingIt()
         {
             // arrange
             var requestedReportLabel = "ReportItemisedTransactions";
@@ -1678,7 +1680,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(true);
 
             var uploadedCSVFile = RandomGen.Create<GD.File>();
-            int expectedNumberOfFileRetrievalAttempts = 30; //RandomGen.WholeNumber(1, 30);
+            int expectedNumberOfFileRetrievalAttempts = _sleepDuration; //RandomGen.WholeNumber(1, 30);
             int csvUploadDelaySeconds = expectedNumberOfFileRetrievalAttempts;
             var uploadedCSVBecomesAvailableAtTime = DateTime.Now.AddSeconds(csvUploadDelaySeconds);
             GD.File fileReturnedFromGDrive = null;
@@ -1709,7 +1711,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public async Task GenerateReportUCStopsItsAttemptsToRetrieveTheUploadedItemisedTransactionsCSVFileIdAfterSpending30SecondsDoingIt()
+        public async Task GenerateReportUCStopsItsAttemptsToRetrieveTheUploadedItemisedTransactionsCSVFileIdAfterSpendingConfiguredSecondsDoingIt()
         {
             // arrange
             var requestedReportLabel = "ReportItemisedTransactions";
@@ -1752,7 +1754,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(true);
 
             var uploadedCSVFile = RandomGen.Create<GD.File>();
-            int cutOffForNumberOfAttempts = 30;
+            int cutOffForNumberOfAttempts = _sleepDuration;
             DateTime? firstAttempt = null;
             DateTime lastAttempt = DateTime.MinValue;
             GD.File fileReturnedFromGDrive = null;

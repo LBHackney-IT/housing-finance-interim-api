@@ -24,7 +24,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IGoogleClientService _googleClientService;
 
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
-        private readonly int _sleepDuration = 30000;
+        private readonly int _sleepDuration = int.Parse(Environment.GetEnvironmentVariable("SLEEP_DURATION"));
 
         private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
         private const string ReportChargesLabel = "ReportCharges";
