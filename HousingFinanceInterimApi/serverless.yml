@@ -791,7 +791,7 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-direct-debit-trans
-      
+custom:    
   vpc:
     development:
       securityGroupIds:
