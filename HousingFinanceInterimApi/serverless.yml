@@ -510,7 +510,7 @@ stepFunctions:
       dependsOn: lambdaExecutionRole
       tags:
         Team: HousingFinance
-resources:  
+resources:
   Resources:
     lambdaExecutionRole:
       Type: AWS::IAM::Role
@@ -722,7 +722,7 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-susp-hb
-  importCashFileTransactionsAlarm:
+    ImportCashFileTransactionsAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
         AlarmName: "${self:provider.stage}-cash-file-trans-alarm"
@@ -744,8 +744,7 @@ resources:
               - 'housing-finance-alarms'
         Dimensions:
           - Name: FunctionName
-            Value: ${self:service}-${self:provider.stage}-cash-file-trans
-          
+            Value: ${self:service}-${self:provider.stage}-cash-file-trans        
     OperatingBalanceLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
