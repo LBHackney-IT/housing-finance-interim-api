@@ -699,52 +699,75 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-check-housing-files
-  SuspenseHousingBenefitLambdaAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmName: "${self:provider.stage}-susp-hb-lambda-alarm"
-      AlarmDescription: Errors detected in AWS Lambda for Suspense Housing Benefit (susp-hb) function
-      Namespace: AWS/Lambda
-      MetricName: "Errors"
-      Statistic: Sum
-      Threshold: 0
-      ComparisonOperator: GreaterThanThreshold
-      EvaluationPeriods: 1
-      Period: 60
-      TreatMissingData: notBreaching
-      AlarmActions:
-        - 'Fn::Join':
+    SuspenseHousingBenefitLambdaAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-susp-hb-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Suspense Housing Benefit (susp-hb) function
+        Namespace: AWS/Lambda
+        MetricName: "Errors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join':
+              - ':'
+              - - 'arn:aws:sns'
+                - Ref: 'AWS::Region'
+                - Ref: 'AWS::AccountId'
+                - 'housing-finance-alarms'
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-susp-hb
+    OperatingBalanceLambdaAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-housing-finance-refresh-op-bal-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Refresh Operating Balance function
+        Namespace: AWS/Lambda
+        MetricName: "Errors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions: 
+          - 'Fn::Join':
             - ':'
             - - 'arn:aws:sns'
               - Ref: 'AWS::Region'
               - Ref: 'AWS::AccountId'
               - 'housing-finance-alarms'
-      Dimensions:
-        - Name: FunctionName
-          Value: ${self:service}-${self:provider.stage}-susp-hb
-  OperatingBalanceLambdaAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmName: "${self:provider.stage}-housing-finance-refresh-op-bal-lambda-alarm"
-      AlarmDescription: Errors detected in AWS Lambda for Refresh Operating Balance function
-      Namespace: AWS/Lambda
-      MetricName: "Errors"
-      Statistic: Sum
-      Threshold: 0
-      ComparisonOperator: GreaterThanThreshold
-      EvaluationPeriods: 1
-      Period: 60
-      TreatMissingData: notBreaching
-      AlarmActions: 
-        - 'Fn::Join':
-          - ':'
-          - - 'arn:aws:sns'
-            - Ref: 'AWS::Region'
-            - Ref: 'AWS::AccountId'
-            - 'housing-finance-alarms'
-      Dimensions:
-        - Name: FunctionName
-          Value: ${self:service}-${self:provider.stage}-refresh-op-bal
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-refresh-op-bal
+    HousingFileTransactionsLambdaAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-housing-file-trans-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Import Housing Files Transactions function
+        Namespace: AWS/Lambda
+        MetricName: "Errors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions: 
+          - 'Fn::Join':
+            - ':'
+            - - 'arn:aws:sns'
+              - Ref: 'AWS::Region'
+              - Ref: 'AWS::AccountId'
+              - 'housing-finance-alarms'
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-housing-file-trans
 custom:
   vpc:
     development:
