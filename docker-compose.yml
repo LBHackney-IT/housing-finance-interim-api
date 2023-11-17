@@ -4,20 +4,32 @@ services:
   housing-finance-interim-api:
     image: housing-finance-interim-api
     build:
-      context: HousingFinanceInterimApi/
-      dockerfile: ./Dockerfile
+      context: .
+      dockerfile: HousingFinanceInterimApi/Dockerfile
       args:
       - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
-    ports:
-      - 3000:3000
+    network_mode: "host"
     environment:
-      - CONNECTION_STRING=Server=dev-database;Database=testdb;User Id=myuser;Password=mypassword
-    links:
-      - dev-database
+      - CONNECTION_STRING=${CONNECTION_STRING}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - WAIT_DURATION=${WAIT_DURATION}
+      - BATCH_SIZE=${BATCH_SIZE}
+      - CASH_FILE_REGEX=${CASH_FILE_REGEX}
+      - HOUSING_FILE_REGEX=${HOUSING_FILE_REGEX}
+      - ACCEPTED_ORIGINS=${ACCEPTED_ORIGINS}
+      - CHARGES_BATCH_YEARS=${CHARGES_BATCH_YEARS}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - S3_OBJECT_PREFIX=${S3_OBJECT_PREFIX}
+      - HOUSING_FINANCE_ALLOWED_GROUPS=${HOUSING_FINANCE_ALLOWED_GROUPS}
+
+#    Dev database not working
+#    links:
+#      - dev-database
+
   dev-database:
     env_file:
       - database.env
-    image: microsoft/mssql-server-windows-express
+    image: mcr.microsoft.com/mssql/server:2019-latest
     volumes:
       - ./database:/docker-entrypoint-initdb.d
 
@@ -35,7 +47,7 @@ services:
       - DB_DATABASE=testdb
     links:
       - test-database
-      
+
   test-database:
     image: test-database
     build:

@@ -66,3 +66,6 @@ tmp/
 /HousingFinanceInterimApi/Properties/launchSettings.json
 
 *.env
+
+.vscode
+HousingFinanceInterimApi/out
