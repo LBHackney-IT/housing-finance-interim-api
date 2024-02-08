@@ -884,7 +884,10 @@ resources:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-refresh-ma-cur-bal
 
-custom:    
+custom:
+  associateWaf:
+    name: Platform_APIs_Web_ACL
+    version: V2
   vpc:
     development:
       securityGroupIds:
@@ -907,3 +910,4 @@ custom:
 
 plugins:
   - serverless-step-functions
+  - serverless-associate-waf
