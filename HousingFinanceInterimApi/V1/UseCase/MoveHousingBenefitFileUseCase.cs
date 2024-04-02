@@ -139,19 +139,19 @@ namespace HousingFinanceInterimApi.V1.UseCase
             catch (GoogleApiException ex)
             {
                 LoggingHandler.LogError(ex.Message);
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message);
+                await _batchLogErrorGateway.CreateAsync(batch?.Id, "ERROR", ex.Message);
                 throw;
             }
             catch (SIO.FileNotFoundException ex)
             {
                 LoggingHandler.LogError(ex.Message);
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message);
+                await _batchLogErrorGateway.CreateAsync(batch?.Id, "ERROR", ex.Message);
                 throw;
             }
             catch (Exception ex)
             {
                 LoggingHandler.LogError(ex.Message);
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message);
+                await _batchLogErrorGateway.CreateAsync(batch?.Id, "ERROR", ex.Message);
                 throw;
             }
         }

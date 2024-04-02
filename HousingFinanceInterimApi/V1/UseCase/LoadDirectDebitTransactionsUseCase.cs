@@ -51,7 +51,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
 
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"Application error. Not possible to load direct debit transactions").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batch?.Id, "ERROR", $"Application error. Not possible to load direct debit transactions").ConfigureAwait(false);
 
                 LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());
@@ -89,7 +89,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
 
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"Application error. Not possible to load direct debit transactions on demand").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batch?.Id, "ERROR", $"Application error. Not possible to load direct debit transactions on demand").ConfigureAwait(false);
 
                 LoggingHandler.LogError($"{namespaceLabel} Application error");
                 LoggingHandler.LogError(exc.ToString());
