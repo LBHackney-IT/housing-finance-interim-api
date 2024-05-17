@@ -44,7 +44,7 @@ namespace HousingFinanceInterimApi
         public void ConfigureServices(IServiceCollection services)
         {
             // Load environment variables from .env file in parent directory if it exists when running locally
-            var deployedEnvironments = new List<string>{"development", "staging", "production"};
+            var deployedEnvironments = new List<string> { "development", "staging", "production" };
             if (!deployedEnvironments.Contains(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")))
                 DotEnv.Fluent().WithEnvFiles(Path.Combine(Directory.GetCurrentDirectory(), "../.env")).Load();
 
