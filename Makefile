@@ -36,5 +36,5 @@ serve-local:
 
 .PHONY: remote-db
 remote-db:
-	make -f finance_database.mk sso_login
-	make -f finance_database.mk port_forwarding_to_hfs_db
+	-make -f finance_database.mk sso_login PROFILE=housing-development;
+	make -f finance_database.mk port_forwarding_to_hfs_db PROFILE=housing-development;
