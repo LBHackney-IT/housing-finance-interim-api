@@ -43,9 +43,9 @@ namespace HousingFinanceInterimApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            #if DEBUG
-                DotEnv.Fluent().WithEnvFiles(Path.Combine(Directory.GetCurrentDirectory(), "../.env")).Load();
-            #endif
+#if DEBUG
+            DotEnv.Fluent().WithEnvFiles(Path.Combine(Directory.GetCurrentDirectory(), "../.env")).Load();
+#endif
 
             // Setup configuration
             IConfigurationSection settingsSection = Configuration.GetSection("Settings");
