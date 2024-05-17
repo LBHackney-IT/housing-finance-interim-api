@@ -51,7 +51,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public async Task ExecuteAsyncThrowsErrorWhenFileSettingIsRentPositionLabelAndExceptionIsNotNull()
         {
             // Arrange
-            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
+            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
             var rentPosition = ConstantsGen.RentPositionLabel;
 
             _mockBatchLogGateway
@@ -88,8 +88,8 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public async Task ExecuteAsyncThrowsErrorWhenFileSettingIsRentPositionBkpLabelAndExceptionIsNotNull()
         {
             // Arrange
-            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
-            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
+            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
             var rentPosition = ConstantsGen.RentPositionLabel;
             var rentPositionBkp = ConstantsGen.RentPositionBkpLabel;
 
@@ -138,11 +138,11 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public async Task DeletesFilesOlderThan7Days()
         {
             // Arrange
-            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
-            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
+            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
             var rentPosition = ConstantsGen.RentPositionLabel;
             var rentPositionBkp = ConstantsGen.RentPositionBkpLabel;
-            var fileList = RandomGen.CreateMany<File>(quantity: 2).ToList();
+            var fileList = RandomGen.CreateMany<File>(quantity: 2);
             var fileToBeDeleted = fileList.First();
             var fileToNotBeDeleted = fileList.Last();
             fileToBeDeleted.CreatedTime = new DateTime(2020, 1, 1);
@@ -199,11 +199,11 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         {
             // Arrange
             const string expectedErrorMessage = "Failed to upload to Rent Position folder (Qlik)";
-            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
-            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
+            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
             var rentPosition = ConstantsGen.RentPositionLabel;
             var rentPositionBkp = ConstantsGen.RentPositionBkpLabel;
-            var fileList = RandomGen.CreateMany<File>(quantity: 2).ToList();
+            var fileList = RandomGen.CreateMany<File>(quantity: 2);
             var fileToBeDeleted = fileList.First();
             var fileToNotBeDeleted = fileList.Last();
             fileToBeDeleted.CreatedTime = new DateTime(2020, 6, 4);
@@ -259,11 +259,11 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         {
             // Arrange
             const string expectedErrorMessage = "Failed to upload to Rent Position folder (Backup)";
-            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
-            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
+            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
             var rentPosition = ConstantsGen.RentPositionLabel;
             var rentPositionBkp = ConstantsGen.RentPositionBkpLabel;
-            var fileList = RandomGen.CreateMany<File>(quantity: 2).ToList();
+            var fileList = RandomGen.CreateMany<File>(quantity: 2);
             fileList.First().CreatedTime = DateTime.Today.AddDays(-10);
             fileList.Last().CreatedTime = DateTime.Today.AddDays(-2);
 
@@ -316,11 +316,11 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         {
             // Does not delete files created on 31st March
             // Arrange
-            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
-            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
+            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
             var rentPosition = ConstantsGen.RentPositionLabel;
             var rentPositionBkp = ConstantsGen.RentPositionBkpLabel;
-            var fileList = RandomGen.CreateMany<File>(quantity: 3).ToList();
+            var fileList = RandomGen.CreateMany<File>(quantity: 3);
             var fileToBePreserved1 = fileList.First();
             var fileToBePreserved2 = fileList[1];
             var fileToBeDeleted = fileList.Last();
@@ -379,11 +379,11 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public async Task DoesNotDeleteFilesCreatedOnLastWeekdayOfPreviousFinancialYears()
         {
             // Arrange
-            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
-            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
+            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
             var rentPosition = ConstantsGen.RentPositionLabel;
             var rentPositionBkp = ConstantsGen.RentPositionBkpLabel;
-            var fileList = RandomGen.CreateMany<File>(quantity: 2).ToList();
+            var fileList = RandomGen.CreateMany<File>(quantity: 2);
             var fileToBePreserved = fileList.First();
             var fileToBeDeleted = fileList.Last();
 
@@ -438,11 +438,11 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public async Task DoesNotDeleteFilesWithNoCreationDateSetOrFound()
         {
             // Arrange
-            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
-            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
+            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
             var rentPosition = ConstantsGen.RentPositionLabel;
             var rentPositionBkp = ConstantsGen.RentPositionBkpLabel;
-            var fileList = RandomGen.CreateMany<File>(quantity: 2).ToList();
+            var fileList = RandomGen.CreateMany<File>(quantity: 2);
             var fileToBePreserved = fileList.First();
             var fileToBeDeleted = fileList.Last();
             fileToBePreserved.CreatedTime = null; // Friday
@@ -496,11 +496,11 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public async Task ThrowsExceptionIfAnyFilesFailToDelete()
         {
             // Arrange
-            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
-            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
+            var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+            var rentPositionBkpFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
             var rentPosition = ConstantsGen.RentPositionLabel;
             var rentPositionBkp = ConstantsGen.RentPositionBkpLabel;
-            var fileList = RandomGen.CreateMany<File>(quantity: 3).ToList();
+            var fileList = RandomGen.CreateMany<File>(quantity: 3);
             var fileToBePreserved = fileList.First();
             var fileToBeDeleted1 = fileList[1];
             var fileToBeDeleted2 = fileList.Last();
