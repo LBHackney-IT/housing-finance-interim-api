@@ -43,10 +43,9 @@ namespace HousingFinanceInterimApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Load environment variables from .env file in parent directory if it exists when running locally
-            var deployedEnvironments = new List<string> { "development", "staging", "production" };
-            if (!deployedEnvironments.Contains(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")))
+            #if DEBUG
                 DotEnv.Fluent().WithEnvFiles(Path.Combine(Directory.GetCurrentDirectory(), "../.env")).Load();
+            #endif
 
             // Setup configuration
             IConfigurationSection settingsSection = Configuration.GetSection("Settings");
