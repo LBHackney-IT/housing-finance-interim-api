@@ -85,19 +85,6 @@ dotnet run --project HousingFinanceInterimApi/HousingFinanceInterimApi.csproj
 
 You can also configure your IDE of choice to run the `HousingFinanceInterimApi` project.
 
-### Running Lambda via AWS
-This command would run lambda on your machine via the AWS Profile you provide. 
-
-Run this command from the `HousingFinanceInterimAPI/` directory:
-
-```sh
-make trigger_lambda_on_AWS $(LAMBDA_FUNCTION_NAME):
-```
-You would need to provide the lambda function name as a parameter, this would be the name that you see on AWS Lambda or serverless name parameter. 
-(e.g: `make trigger_lambda_on_AWS LAMBDA_FUNCTION_NAME=charges`)
-
-The results of the from the lambda function would be produced in the out file. This would show any error messages that may have occurred when running the lambda. 
-
 ## Testing
 
 ### Run the tests
