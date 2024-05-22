@@ -20,15 +20,12 @@ using Data = Google.Apis.Sheets.v4.Data;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
-
     /// <summary>
     /// The google client service implementation.
     /// </summary>
     /// <seealso cref="IGoogleClientService" />
     public class GoogleClientService : IGoogleClientService
     {
-
-        #region Private
 
         /// <summary>
         /// The service initializer
@@ -40,8 +37,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// </summary>
         private readonly ILogger _logger;
 
-        #region Drive service
-
         /// <summary>
         /// The drive service backing variable
         /// </summary>
@@ -52,10 +47,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// </summary>
         private DriveService _driveService => _driveServiceBacking ??= new DriveService(_initializer);
 
-        #endregion
-
-        #region Sheets service
-
         /// <summary>
         /// The sheets service backing variable
         /// </summary>
@@ -65,12 +56,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// Gets the sheets service.
         /// </summary>
         private SheetsService _sheetsService => _sheetsServiceBacking ??= new SheetsService(_initializer);
-
-        #endregion
-
-        #endregion
-
-        #region Public
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GoogleClientService" /> class.
