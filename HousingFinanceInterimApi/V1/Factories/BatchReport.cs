@@ -3,7 +3,6 @@ using System.Linq;
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Domain;
-using HousingFinanceInterimApi.V1.Infrastructure;
 
 namespace HousingFinanceInterimApi.V1.Factories
 {
@@ -25,6 +24,8 @@ namespace HousingFinanceInterimApi.V1.Factories
                 ReportEndDate = batchReport.ReportEndDate,
                 ReportYear = batchReport.ReportYear,
                 ReportDate = batchReport.ReportDate,
+                ReportStartWeekOrMonth = batchReport.ReportStartWeekOrMonth,
+                ReportEndWeekOrMonth = batchReport.ReportEndWeekOrMonth,
                 Link = batchReport.Link,
                 StartTime = batchReport.StartTime,
                 EndTime = batchReport.EndTime,
@@ -165,6 +166,7 @@ namespace HousingFinanceInterimApi.V1.Factories
             return batchReportHousingBenefitAcademy?.Select(b => b.ToDomain()).ToList();
         }
 
+        // TODO: this change belongs to the POST endpoint PR.
         public static Infrastructure.BatchReport ToDatabase(this BatchReportDomain batchReport)
         {
             if (batchReport == null)
