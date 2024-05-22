@@ -33,6 +33,13 @@ namespace HousingFinanceInterimApi.V1.Gateways
             _sheetsService = new SheetsService(initializer);
         }
 
+        public GoogleClientService(ILogger logger, DriveService driveService, SheetsService sheetsService)
+        {
+            _logger = logger;
+            _driveService = driveService;
+            _sheetsService = sheetsService;
+        }
+
         #region Google Drive
 
         public async Task<IList<string>> ReadFileLineDataAsync(string fileName, string fileId, string mime)
