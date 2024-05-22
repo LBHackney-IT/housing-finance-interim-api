@@ -22,16 +22,15 @@ namespace HousingFinanceInterimApi.V1.Gateways
 {
     public class GoogleClientService : IGoogleClientService
     {
-        private readonly BaseClientService.Initializer _initializer;
         private readonly ILogger _logger;
-        private DriveService _driveServiceBacking;
-        private DriveService _driveService => _driveServiceBacking ??= new DriveService(_initializer);
-        private SheetsService _sheetsServiceBacking;
-        private SheetsService _sheetsService => _sheetsServiceBacking ??= new SheetsService(_initializer);
+        private DriveService _driveService;
+        private SheetsService _sheetsService;
+
         public GoogleClientService(ILogger logger, BaseClientService.Initializer initializer)
         {
             _logger = logger;
-            _initializer = initializer;
+            _driveService = new DriveService(initializer);
+            _sheetsService = new SheetsService(initializer);
         }
 
         #region Google Drive
