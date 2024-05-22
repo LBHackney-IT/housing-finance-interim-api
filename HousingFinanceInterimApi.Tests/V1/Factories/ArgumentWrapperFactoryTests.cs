@@ -10,6 +10,21 @@ namespace HousingFinanceInterimApi.Tests.V1.Factories
     public class ArgumentWrapperFactoryTests
     {
         [Fact]
+        public void ArgumentWrapperFactoryThrowsWhilstMappingToGetPRNTransactionFiltersWrapperWhenBatchReportIsNull()
+        {
+            // arrange
+            var pulledBatchReportEvent = null as BatchReportDomain;
+
+            var expectedErrorMsg = "Batch Report event is missing.";
+
+            // act
+            Action mapBatchReportToFilterWrapper = () => ArgumentWrapperFactory.ExtractPRNTransactionArgs(pulledBatchReportEvent);
+
+            // assert
+            mapBatchReportToFilterWrapper.Should().Throw<ArgumentException>().WithMessage(expectedErrorMsg);
+        }
+
+        [Fact]
         public void ArgumentWrapperFactoryCorrectlyMapsBatchReportToGetPRNTransactionFiltersWrapper()
         {
             // arrange

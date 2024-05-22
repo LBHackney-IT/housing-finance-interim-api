@@ -4,11 +4,13 @@ using HousingFinanceInterimApi.V1.Domain.ArgumentWrappers;
 
 namespace HousingFinanceInterimApi.V1.Factories
 {
-    // TODO: leave null checks for last.
     public static class ArgumentWrapperFactory
     {
         public static GetPRNTransactionsDomain ExtractPRNTransactionArgs(this BatchReportDomain batchReport)
         {
+            if (batchReport is null)
+                throw new ArgumentException("Batch Report event is missing.");
+
             var rentGroup = batchReport.RentGroup;
 
             if (string.IsNullOrWhiteSpace(rentGroup))
