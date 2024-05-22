@@ -20,48 +20,14 @@ using Data = Google.Apis.Sheets.v4.Data;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
-    /// <summary>
-    /// The google client service implementation.
-    /// </summary>
-    /// <seealso cref="IGoogleClientService" />
     public class GoogleClientService : IGoogleClientService
     {
-
-        /// <summary>
-        /// The service initializer
-        /// </summary>
         private readonly BaseClientService.Initializer _initializer;
-
-        /// <summary>
-        /// The logger
-        /// </summary>
         private readonly ILogger _logger;
-
-        /// <summary>
-        /// The drive service backing variable
-        /// </summary>
         private DriveService _driveServiceBacking;
-
-        /// <summary>
-        /// Gets the drive service.
-        /// </summary>
         private DriveService _driveService => _driveServiceBacking ??= new DriveService(_initializer);
-
-        /// <summary>
-        /// The sheets service backing variable
-        /// </summary>
         private SheetsService _sheetsServiceBacking;
-
-        /// <summary>
-        /// Gets the sheets service.
-        /// </summary>
         private SheetsService _sheetsService => _sheetsServiceBacking ??= new SheetsService(_initializer);
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GoogleClientService" /> class.
-        /// </summary>
-        /// <param name="logger">The logger.</param>
-        /// <param name="initializer">The initializer.</param>
         public GoogleClientService(ILogger logger, BaseClientService.Initializer initializer)
         {
             _logger = logger;
@@ -70,15 +36,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
         #region Google Drive
 
-        /// <summary>
-        /// Reads the file line data asynchronous.
-        /// </summary>
-        /// <param name="fileName">Name of the file.</param>
-        /// <param name="fileId">The file identifier.</param>
-        /// <param name="mime">The MIME.</param>
-        /// <returns>
-        /// The file contents line by line.
-        /// </returns>
         public async Task<IList<string>> ReadFileLineDataAsync(string fileName, string fileId, string mime)
         {
             FilesResource.GetRequest request = _driveService.Files.Get(fileId);
@@ -113,14 +70,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
             return results;
         }
 
-        /// <summary>
-        /// Gets the files in drive asynchronous.
-        /// </summary>
-        /// <param name="driveId">The drive identifier.</param>
-        /// <param name="fieldsOverride"></param>
-        /// <returns>
-        /// The list of files for the given drive.
-        /// </returns>
         public async Task<IList<Google.Apis.Drive.v3.Data.File>> GetFilesInDriveAsync(string driveId, string fieldsOverride = null)
         {
             FilesResource.ListRequest listRequest = _driveService.Files.List();
@@ -144,12 +93,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
             return files.Where(f => f.Name == fileName).FirstOrDefault();
         }
 
-        /// <summary>
-        /// Recursively gets the files in the given drive for the given request.
-        /// </summary>
-        /// <param name="listRequest">The list request.</param>
-        /// <param name="nextPage">The next page.</param>
-        /// <returns>The full list of drive files.</returns>
         private static async Task<IList<File>> GetFilesInDrive(FilesResource.ListRequest listRequest, string nextPage)
         {
             var results = new List<File>();
