@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using FluentAssertions;
 using HousingFinanceInterimApi.Tests.V1.TestHelpers;
 using HousingFinanceInterimApi.V1.Domain;
@@ -9,6 +10,45 @@ namespace HousingFinanceInterimApi.Tests.V1.Factories
 {
     public class OpBalTransactionFactoryTests
     {
+        [Fact]
+        public void PRNTransactionCollectionGetsMappedToNullWhenInputIsNull()
+        {
+            // arrange
+            var missingCollection = null as List<PRNTransactionEntity>;
+
+            // act
+            var mappedCollection = missingCollection.ToDomain();
+
+            // assert
+            mappedCollection.Should().BeNull();
+        }
+
+        [Fact]
+        public void PRNTransactionGetsMappedToNullnWhenInputIsNull()
+        {
+            // arrange
+            var nullPRNTransaction = null as PRNTransactionEntity;
+
+            // act
+            var mappedPRNTransaction = nullPRNTransaction.ToDomain();
+
+            // assert
+            mappedPRNTransaction.Should().BeNull();
+        }
+
+        [Fact]
+        public void BaseOpBalTransactionGetsMappedToNullWhenInputIsNull()
+        {
+            // arrange
+            var nullBaseOpBalTransaction = null as BaseOperatingBalanceTransactionEntity;
+
+            // act
+            var mappedPRNTransaction = nullBaseOpBalTransaction.BaseToDomain<PRNTransactionDomain>();
+
+            // assert
+            mappedPRNTransaction.Should().BeNull();
+        }
+
         [Fact]
         public void PRNTransactionCollectionGetsMappedCorrectlyFromEntityToDomain()
         {

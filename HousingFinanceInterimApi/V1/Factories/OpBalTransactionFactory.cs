@@ -8,10 +8,20 @@ namespace HousingFinanceInterimApi.V1.Factories
     public static class OpBalTransactionFactory
     {
         public static IList<PRNTransactionDomain> ToDomain(this IList<PRNTransactionEntity> dbEntityCollection)
-            => dbEntityCollection.Select(t => t.ToDomain()).ToList();
+        {
+            if (dbEntityCollection is null)
+                return null;
+
+            return dbEntityCollection
+                .Select(t => t.ToDomain())
+                .ToList();
+        }
 
         public static PRNTransactionDomain ToDomain(this PRNTransactionEntity dbEntity)
         {
+            if (dbEntity is null)
+                return null;
+
             var extensionModel = BaseToDomain<PRNTransactionDomain>(dbEntity);
 
             extensionModel.RentAccount = dbEntity.RentAccount;
@@ -22,6 +32,9 @@ namespace HousingFinanceInterimApi.V1.Factories
         public static TDomain BaseToDomain<TDomain>(this BaseOperatingBalanceTransactionEntity dbEntity)
             where TDomain : BaseOperatingBalanceTransactionDomain, new()
         {
+            if (dbEntity is null)
+                return null;
+
             return new TDomain {
                 RentGroup = dbEntity.RentGroup,
                 Year = dbEntity.Year,
