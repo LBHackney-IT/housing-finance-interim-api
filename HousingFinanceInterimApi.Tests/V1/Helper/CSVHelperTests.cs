@@ -146,5 +146,29 @@ namespace HousingFinanceInterimApi.Tests.V1.Helpers
             // assert
             csvStringOutput.Should().Be(expectedCSVString);
         }
+
+        [Fact]
+        public void CSVHelperCreatesTheFileInMemoryCorrectly()
+        {
+            // arrange
+            var aFewModels = RandomGen.CreateMany<GetPRNTransactionsDomain>(quantity: 2);
+
+            var usedModelHeaders = "RentGroup,FinancialYear,StartWeekOrMonth,EndWeekOrMonth";
+            var expectedFileName = RandomGen.String2();
+            var csvMimeType = "text/csv";
+
+            // act
+            var fileInMemoryOutput = CSVHelper.ToCSVInMemoryFile(aFewModels, expectedFileName);
+
+            // assert
+            fileInMemoryOutput.Should().NotBeNull();
+            fileInMemoryOutput.DataStream.Should().NotBeNull();
+
+            var textWithinCSV = Encoding.UTF8.GetString(fileInMemoryOutput.DataStream.ToArray());
+            textWithinCSV.Length.Should().BeGreaterThan(usedModelHeaders.Length);
+
+            fileInMemoryOutput.Name.Should().Be(expectedFileName);
+            fileInMemoryOutput.MimeType.Should().Be(csvMimeType);
+        }
     }
 }

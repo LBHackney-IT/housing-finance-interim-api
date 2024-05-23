@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using HousingFinanceInterimApi.V1.Domain;
 
 namespace HousingFinanceInterimApi.V1.Helpers
 {
@@ -49,6 +50,17 @@ namespace HousingFinanceInterimApi.V1.Helpers
         {
             var csvString = ToCSVString(modelCollection);
             return CSVStringToStreamFile(csvString);
+        }
+
+        public static FileInMemory ToCSVInMemoryFile<T>(IList<T> modelCollection, string fileName) where T : class, new()
+        {
+            var csvStream = ToCSVStreamFile(modelCollection);
+
+            return new FileInMemory(
+                DataStream: csvStream,
+                Name: fileName,
+                MimeType: "text/csv"
+            );
         }
     }
 }
