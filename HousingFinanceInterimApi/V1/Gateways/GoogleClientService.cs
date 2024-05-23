@@ -16,7 +16,10 @@ using System.Threading.Tasks;
 using Google.Apis.Upload;
 using HousingFinanceInterimApi.V1.Handlers;
 using File = Google.Apis.Drive.v3.Data.File;
+using FileDescription = Google.Apis.Drive.v3.Data.File;
 using Data = Google.Apis.Sheets.v4.Data;
+using HousingFinanceInterimApi.V1.Domain;
+using static Google.Apis.Drive.v3.FilesResource;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -359,8 +362,41 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
         #endregion
 
+
+        #region Clean Google Drive code
+
+        private CreateMediaUpload GetCreateFileOnDriveRequest(FileInMemory fileInMemory, string targetFolderId)
+        {
+            var newFileDescription = new FileDescription()
+            {
+                Name = fileInMemory.Name,
+                MimeType = fileInMemory.MimeType,
+                Parents = new List<string> { targetFolderId }
+            };
+
+            var createFileRequest = _driveService.Files
+                .Create(newFileDescription, fileInMemory.DataStream, fileInMemory.MimeType);
+
+            return createFileRequest;
+        }
+
+        public async Task<IUploadProgress> UploadFileToDrive(FileInMemory fileInMemory, string targetFolderId)
+        {
+            var createFileRequest = GetCreateFileOnDriveRequest(fileInMemory, targetFolderId);
+            var uploadProgress = await createFileRequest.UploadAsync().ConfigureAwait(false);
+            return uploadProgress;
+        }
+
+        public async Task UploadFileOrThrow(FileInMemory fileInMemory, string targetFolderId)
+        {
+            var uploadStateWrapper = await UploadFileToDrive(fileInMemory, targetFolderId).ConfigureAwait(false);
+
+            if (uploadStateWrapper.Status == UploadStatus.Failed)
+            {
+                throw uploadStateWrapper.Exception;
+            }
+        }
+
         #endregion
-
     }
-
 }

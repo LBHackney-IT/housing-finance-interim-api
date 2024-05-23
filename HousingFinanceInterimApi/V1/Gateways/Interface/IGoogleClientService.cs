@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Google.Apis.Drive.v3.Data;
+using Google.Apis.Upload;
+using HousingFinanceInterimApi.V1.Domain;
 
 namespace HousingFinanceInterimApi.V1.Gateways.Interface
 {
@@ -62,6 +63,10 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
 
         public Task DeleteFileInDrive(string fileId);
 
+        #region Clean Google Drive interface
+        public Task<IUploadProgress> UploadFileToDrive(FileInMemory fileInMemory, string targetFolderId);
+        public Task UploadFileOrThrow(FileInMemory fileInMemory, string targetFolderId);
+        #endregion
     }
 
 }
