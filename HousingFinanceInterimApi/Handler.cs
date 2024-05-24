@@ -124,7 +124,7 @@ namespace HousingFinanceInterimApi
             _refreshManageArrearsUseCase = new RefreshManageArrearsUseCase(manageArrearsGateway);
             _refreshOperatingBalanceUseCase = new RefreshOperatingBalanceUseCase(operatingBalanceGateway);
             _generateReportUseCase = new GenerateReportUseCase(batchReportGateway,
-                reportGateway, googleFileSettingGateway, googleClientService);
+                reportGateway, transactionGateway, googleFileSettingGateway, googleClientService);
             _moveHousingBenefitFileUseCase = new MoveHousingBenefitFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService);
         }

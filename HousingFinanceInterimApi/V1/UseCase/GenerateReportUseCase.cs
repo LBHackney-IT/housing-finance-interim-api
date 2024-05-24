@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using GD = Google.Apis.Drive.v3.Data;
 using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Handlers;
+using HousingFinanceInterimApi.V1.Helpers;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
@@ -16,6 +17,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
     {
         private readonly IBatchReportGateway _batchReportGateway;
         private readonly IReportGateway _reportGateway;
+        private readonly ITransactionGateway _transactionGateway;
         //private readonly IReportAccountBalanceGateway _reportAccountBalanceGateway;
         //private readonly IReportChargesGateway _reportChargesGateway;
         //private readonly IReportCashImportGateway _reportCashImportGateway;
@@ -28,18 +30,22 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
         private const string ReportChargesLabel = "ReportCharges";
+        private const string ReportOperatingBalancesByRentAccount = "ReportOperatingBalancesByRentAccount";
         private const string ReportItemisedTransactionsLabel = "ReportItemisedTransactions";
         private const string ReportCashSuspenseLabel = "ReportCashSuspense";
         private const string ReportCashImportLabel = "ReportCashImport";
         private const string ReportHousingBenefitAcademyLabel = "ReportHousingBenefitAcademy";
 
-        public GenerateReportUseCase(IBatchReportGateway batchReportGateway,
+        public GenerateReportUseCase(
+            IBatchReportGateway batchReportGateway,
             IReportGateway reportGateway,
+            ITransactionGateway transactionGateway,
             IGoogleFileSettingGateway googleFileSettingGateway,
             IGoogleClientService googleClientService)
         {
             _batchReportGateway = batchReportGateway;
             _reportGateway = reportGateway;
+            _transactionGateway = transactionGateway;
             _googleFileSettingGateway = googleFileSettingGateway;
             _googleClientService = googleClientService;
         }
@@ -61,6 +67,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     break;
                 case ReportChargesLabel:
                     await CreateChargesReport(batchReport).ConfigureAwait(false);
+                    break;
+                case ReportOperatingBalancesByRentAccount:
+                    await CreateOperatingBalancesByRentAccount(batchReport).ConfigureAwait(false);
                     break;
                 case ReportItemisedTransactionsLabel:
                     await CreateItemisedTransactionsReport(batchReport).ConfigureAwait(false);
@@ -167,6 +176,56 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var file = await _googleClientService
                 .GetFileByNameInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
                 .ConfigureAwait(false);
+
+            var fileLink = $"https://drive.google.com/file/d/{file.Id}";
+            await _batchReportGateway.SetStatusAsync(batchReport.Id, fileLink, true).ConfigureAwait(false);
+        }
+
+        private async Task CreateOperatingBalancesByRentAccount(BatchReportDomain batchReport)
+        {
+            var opBalsByRentAccFolderGFS = await GetGoogleFileSetting(ReportOperatingBalancesByRentAccount).ConfigureAwait(false);
+            if (opBalsByRentAccFolderGFS == null)
+            {
+                LoggingHandler.LogInfo($"Output folder not found");
+                await _batchReportGateway.SetStatusAsync(batchReport.Id, "Output folder not found", false).ConfigureAwait(false);
+                return;
+            }
+
+            var fileName = $"Operating_Balances_by_Rent_Account_{batchReport.RentGroup}" +
+                $"_y{batchReport.ReportYear}_s{batchReport.ReportStartWeekOrMonth}" +
+                $"_e{batchReport.ReportEndWeekOrMonth}_id{batchReport.Id}.csv";
+
+            var reportCharges = await _transactionGateway
+                .GetPRNTransactions(batchReport.ExtractPRNTransactionArgs())
+                .ConfigureAwait(false);
+
+            var csvFile = CSVHelper.ToCSVInMemoryFile(reportCharges, fileName);
+
+            await _googleClientService
+                .UploadFileOrThrow(csvFile, opBalsByRentAccFolderGFS.GoogleIdentifier)
+                .ConfigureAwait(false);
+
+            GD.File file = null;
+
+            var waitDurationInSeconds = _sleepDuration / 1000;
+            var cuttoffTime = DateTime.Now.AddSeconds(waitDurationInSeconds);
+
+            do
+            {
+                System.Threading.Thread.Sleep(1000);
+
+                file = await _googleClientService
+                    .GetFileByNameInDriveAsync(opBalsByRentAccFolderGFS.GoogleIdentifier, fileName)
+                    .ConfigureAwait(false);
+            }
+            while (file is null && DateTime.Now < cuttoffTime);
+
+            if (file is null)
+            {
+                LoggingHandler.LogInfo($"File with name: '{fileName}' was not found within the {opBalsByRentAccFolderGFS.GoogleIdentifier} directory.");
+                await _batchReportGateway.SetStatusAsync(batchReport.Id, "Uploaded report file not found", false).ConfigureAwait(false);
+                return;
+            }
 
             var fileLink = $"https://drive.google.com/file/d/{file.Id}";
             await _batchReportGateway.SetStatusAsync(batchReport.Id, fileLink, true).ConfigureAwait(false);
@@ -315,5 +374,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var fileLink = $"https://drive.google.com/file/d/{file.Id}";
             await _batchReportGateway.SetStatusAsync(batchReport.Id, fileLink, true).ConfigureAwait(false);
         }
+
+        // private <----- Not a testable pattern... all UCS smushed together rather than being their own thing.
     }
 }
