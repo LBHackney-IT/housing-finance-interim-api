@@ -60,6 +60,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<BatchLog> BatchLogs { get; set; }
         public DbSet<BatchLogError> BatchLogErrors { get; set; }
         private DbSet<Transaction> Transactions { get; set; }
+        private DbSet<PRNTransactionEntity> PRNTransaction { get; set; }
         public DbSet<ChargesBatchYear> ChargesBatchYears { get; set; }
 
         /// <summary>
@@ -349,6 +350,13 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public async Task<IList<Transaction>> GetTransactionsAsync(DateTime? startDate, DateTime? endDate)
             => await Transactions
                 .FromSqlInterpolated($"usp_GetTransactions {startDate:yyyy-MM-dd}, {endDate:yyyy-MM-dd}")
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+        public async Task<IList<PRNTransactionEntity>> GetPRNTransactionsByRentGroupAsync(string rentGroup, int financialYear, int startWeekOrMonth, int endWeekOrMonth)
+            => await PRNTransaction
+                .FromSqlInterpolated(
+                    $"usp_GenerateOperatingBalanceAccounts @rent_group={rentGroup}, @post_year={financialYear}, @start_period={startWeekOrMonth}, @end_period={endWeekOrMonth}")
                 .ToListAsync()
                 .ConfigureAwait(false);
 

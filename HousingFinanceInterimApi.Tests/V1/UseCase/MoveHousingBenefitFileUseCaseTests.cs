@@ -53,11 +53,11 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             _mockGoogleFileSettingGateway
                 .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.AcademyFileFolderLabel)))
-                .ReturnsAsync(academyFolders.ToList());
+                .ReturnsAsync(academyFolders);
 
             _mockGoogleFileSettingGateway
                 .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.HousingBenefitFileLabel)))
-                .ReturnsAsync(destinationFolders.ToList());
+                .ReturnsAsync(destinationFolders);
 
             // destination folder files
             _mockGoogleClientService.Setup(g => g.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new List<File>());
@@ -65,7 +65,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // source folder files
             _mockGoogleClientService
                 .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolders.First().GoogleIdentifier), It.IsAny<string>()))
-                .ReturnsAsync(academyFolderFiles.ToList());
+                .ReturnsAsync(academyFolderFiles);
         }
 
         // UC calls the Batch Log GW with correct params
@@ -128,7 +128,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public async Task UCCallsGoogleClientServiceGetFilesInDriveMethodWithEachAcademyFolderIdentifierReturnedByGoogleFileSettingGateway()
         {
             // arrange
-            var academyFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>().ToList();
+            var academyFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>();
 
             _mockGoogleFileSettingGateway
                 .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.AcademyFileFolderLabel)))
@@ -137,7 +137,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // Return a couple files to avoid failure
             _mockGoogleClientService
                 .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFileSettings.First().GoogleIdentifier), It.IsAny<string>()))
-                .ReturnsAsync(RandomGen.GoogleDriveFiles(true).ToList());
+                .ReturnsAsync(RandomGen.GoogleDriveFiles(true));
 
             // act
             await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
@@ -156,7 +156,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public async Task UCCallsGoogleClientServiceGetFilesInDriveMethodWithEachHousingBenefitDestinationFolderGIdReturnedByGoogleFileSettingGateway()
         {
             // arrange
-            var destinationFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(1).ToList();
+            var destinationFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(1);
 
             _mockGoogleFileSettingGateway
                 .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.HousingBenefitFileLabel)))
@@ -200,24 +200,24 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             _mockGoogleFileSettingGateway
                 .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.AcademyFileFolderLabel)))
-                .ReturnsAsync(academyFolders.ToList());
+                .ReturnsAsync(academyFolders);
 
             var destinationFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
 
             _mockGoogleFileSettingGateway
                 .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.HousingBenefitFileLabel)))
-                .ReturnsAsync(destinationFolders.ToList());
+                .ReturnsAsync(destinationFolders);
 
             var academyFolderGId = academyFolders.First().GoogleIdentifier;
             var destinationFolderGId = destinationFolders.First().GoogleIdentifier;
 
             _mockGoogleClientService
                     .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolderGId), It.IsAny<string>()))
-                    .ReturnsAsync(academyFolderFiles.ToList());
+                    .ReturnsAsync(academyFolderFiles);
 
             _mockGoogleClientService
                     .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == destinationFolderGId), It.IsAny<string>()))
-                    .ReturnsAsync(destinationFolderFiles.ToList());
+                    .ReturnsAsync(destinationFolderFiles);
 
             // act
             await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
@@ -247,7 +247,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var referenceDate = new DateTime(2023, 05, 01);
 
             // Create 1 file that already exists at destination
-            var academyFolderFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: 1).ToList();
+            var academyFolderFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: 1);
             academyFolderFiles.First().CreatedTime = referenceDate - TimeSpan.FromDays(6);
 
             // Mapping of file names in source folder to corresponding file names in destination folder
@@ -267,24 +267,24 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             _mockGoogleFileSettingGateway
                 .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.AcademyFileFolderLabel)))
-                .ReturnsAsync(academyFolders.ToList());
+                .ReturnsAsync(academyFolders);
 
             var destinationFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
 
             _mockGoogleFileSettingGateway
                 .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.HousingBenefitFileLabel)))
-                .ReturnsAsync(destinationFolders.ToList());
+                .ReturnsAsync(destinationFolders);
 
             var academyFolderGId = academyFolders.First().GoogleIdentifier;
             var destinationFolderGId = destinationFolders.First().GoogleIdentifier;
 
             _mockGoogleClientService
                 .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolderGId), It.IsAny<string>()))
-                .ReturnsAsync(academyFolderFiles.ToList());
+                .ReturnsAsync(academyFolderFiles);
 
             _mockGoogleClientService
                 .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == destinationFolderGId), It.IsAny<string>()))
-                .ReturnsAsync(destinationFolderFiles.ToList());
+                .ReturnsAsync(destinationFolderFiles);
 
             // act
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
@@ -360,7 +360,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             _mockGoogleFileSettingGateway
                 .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.AcademyFileFolderLabel)))
-                .ReturnsAsync(academyFolders.ToList());
+                .ReturnsAsync(academyFolders);
 
             // act
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
@@ -384,15 +384,15 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var academyFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
             var academyFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: 1);
 
-            var destinationFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
+            var destinationFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
 
             _mockGoogleFileSettingGateway
                 .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.AcademyFileFolderLabel)))
-                .ReturnsAsync(academyFolders.ToList());
+                .ReturnsAsync(academyFolders);
 
             _mockGoogleClientService
                     .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolders.First().GoogleIdentifier), It.IsAny<string>()))
-                    .ReturnsAsync(academyFiles.ToList());
+                    .ReturnsAsync(academyFiles);
 
             _mockGoogleFileSettingGateway
                 .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.HousingBenefitFileLabel)))
@@ -422,7 +422,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var referenceDate = new DateTime(2023, 05, 01);
 
             var academyFolders = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
-            var academyFolderFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: 1).ToList();
+            var academyFolderFiles = RandomGen.GoogleDriveFiles(filesValidity: true, count: 1);
 
             var academyFile = academyFolderFiles[0];
             academyFile.Name = "06052022_Something_Academy_20052022";
@@ -437,7 +437,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             _mockGoogleFileSettingGateway
                 .Setup(g => g.GetSettingsByLabel(It.Is<string>(s => s == ConstantsGen.AcademyFileFolderLabel)))
-                .ReturnsAsync(academyFolders.ToList());
+                .ReturnsAsync(academyFolders);
 
             _mockGoogleClientService
                     .Setup(g => g.GetFilesInDriveAsync(It.Is<string>(s => s == academyFolders.First().GoogleIdentifier), It.IsAny<string>()))
