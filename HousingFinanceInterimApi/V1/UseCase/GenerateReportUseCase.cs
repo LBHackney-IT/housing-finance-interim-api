@@ -374,7 +374,5 @@ namespace HousingFinanceInterimApi.V1.UseCase
             var fileLink = $"https://drive.google.com/file/d/{file.Id}";
             await _batchReportGateway.SetStatusAsync(batchReport.Id, fileLink, true).ConfigureAwait(false);
         }
-
-        // private <----- Not a testable pattern... all UCS smushed together rather than being their own thing.
     }
 }
