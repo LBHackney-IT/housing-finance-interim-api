@@ -31,7 +31,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         {
             _mockBatchReportGateway = new Mock<IBatchReportGateway>();
             _mockReportGateway = new Mock<IReportGateway>();
-            _mockTransactionGateway = new ();
+            _mockTransactionGateway = new();
             _mockGoogleFileSettingGateway = new Mock<IGoogleFileSettingGateway>();
             _mockGoogleClientService = new Mock<IGoogleClientService>();
 
@@ -2758,7 +2758,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // assert
             _mockTransactionGateway.Verify(
                 g => g.GetPRNTransactions(
-                    It.Is<GetPRNTransactionsDomain>(w => 
+                    It.Is<GetPRNTransactionsDomain>(w =>
                         w.RentGroup == unprocessedReport.RentGroup &&
                         w.FinancialYear == unprocessedReport.ReportYear.Value &&
                         w.StartWeekOrMonth == unprocessedReport.ReportStartWeekOrMonth.Value &&
@@ -2815,7 +2815,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // assert
             _mockGoogleClientService.Verify(
                 g => g.UploadFileOrThrow(
-                    It.Is<FileInMemory>(fim => 
+                    It.Is<FileInMemory>(fim =>
                         Encoding.UTF8.GetString(fim.DataStream.ToArray()) == Encoding.UTF8.GetString(csvStream.ToArray()) &&
                         fim.Name.Contains("Operating_Balances_by_Rent_Account") &&
                         fim.Name.Contains(unprocessedReport.RentGroup) &&

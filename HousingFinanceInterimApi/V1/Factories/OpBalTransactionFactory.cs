@@ -35,7 +35,8 @@ namespace HousingFinanceInterimApi.V1.Factories
             if (dbEntity is null)
                 return null;
 
-            return new TDomain {
+            return new TDomain
+            {
                 RentGroup = dbEntity.RentGroup,
                 Year = dbEntity.Year,
                 TotalCharged = dbEntity.TotalCharged,
