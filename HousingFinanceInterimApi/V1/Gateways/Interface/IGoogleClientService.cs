@@ -64,8 +64,8 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
         public Task DeleteFileInDrive(string fileId);
 
         #region Clean Google Drive interface
-        public Task<IUploadProgress> UploadFileToDrive(FileInMemory fileInMemory, string targetFolderId);
-        public Task UploadFileOrThrow(FileInMemory fileInMemory, string targetFolderId);
+        Task<IUploadProgress> UploadFileToDrive(FileInMemory fileInMemory, string targetFolderId);
+        Task UploadFileOrThrow(FileInMemory fileInMemory, string targetFolderId);
         #endregion
     }
 
