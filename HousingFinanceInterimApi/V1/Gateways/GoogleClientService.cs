@@ -16,35 +16,84 @@ using System.Threading.Tasks;
 using Google.Apis.Upload;
 using HousingFinanceInterimApi.V1.Handlers;
 using File = Google.Apis.Drive.v3.Data.File;
-using FileDescription = Google.Apis.Drive.v3.Data.File;
 using Data = Google.Apis.Sheets.v4.Data;
-using HousingFinanceInterimApi.V1.Domain;
-using static Google.Apis.Drive.v3.FilesResource;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
+
+    /// <summary>
+    /// The google client service implementation.
+    /// </summary>
+    /// <seealso cref="IGoogleClientService" />
     public class GoogleClientService : IGoogleClientService
     {
-        private readonly ILogger _logger;
-        private DriveService _driveService;
-        private SheetsService _sheetsService;
 
+        #region Private
+
+        /// <summary>
+        /// The service initializer
+        /// </summary>
+        private readonly BaseClientService.Initializer _initializer;
+
+        /// <summary>
+        /// The logger
+        /// </summary>
+        private readonly ILogger _logger;
+
+        #region Drive service
+
+        /// <summary>
+        /// The drive service backing variable
+        /// </summary>
+        private DriveService _driveServiceBacking;
+
+        /// <summary>
+        /// Gets the drive service.
+        /// </summary>
+        private DriveService _driveService => _driveServiceBacking ??= new DriveService(_initializer);
+
+        #endregion
+
+        #region Sheets service
+
+        /// <summary>
+        /// The sheets service backing variable
+        /// </summary>
+        private SheetsService _sheetsServiceBacking;
+
+        /// <summary>
+        /// Gets the sheets service.
+        /// </summary>
+        private SheetsService _sheetsService => _sheetsServiceBacking ??= new SheetsService(_initializer);
+
+        #endregion
+
+        #endregion
+
+        #region Public
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GoogleClientService" /> class.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        /// <param name="initializer">The initializer.</param>
         public GoogleClientService(ILogger logger, BaseClientService.Initializer initializer)
         {
             _logger = logger;
-            _driveService = new DriveService(initializer);
-            _sheetsService = new SheetsService(initializer);
-        }
-
-        public GoogleClientService(ILogger logger, DriveService driveService, SheetsService sheetsService)
-        {
-            _logger = logger;
-            _driveService = driveService;
-            _sheetsService = sheetsService;
+            _initializer = initializer;
         }
 
         #region Google Drive
 
+        /// <summary>
+        /// Reads the file line data asynchronous.
+        /// </summary>
+        /// <param name="fileName">Name of the file.</param>
+        /// <param name="fileId">The file identifier.</param>
+        /// <param name="mime">The MIME.</param>
+        /// <returns>
+        /// The file contents line by line.
+        /// </returns>
         public async Task<IList<string>> ReadFileLineDataAsync(string fileName, string fileId, string mime)
         {
             FilesResource.GetRequest request = _driveService.Files.Get(fileId);
@@ -79,6 +128,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
             return results;
         }
 
+        /// <summary>
+        /// Gets the files in drive asynchronous.
+        /// </summary>
+        /// <param name="driveId">The drive identifier.</param>
+        /// <param name="fieldsOverride"></param>
+        /// <returns>
+        /// The list of files for the given drive.
+        /// </returns>
         public async Task<IList<Google.Apis.Drive.v3.Data.File>> GetFilesInDriveAsync(string driveId, string fieldsOverride = null)
         {
             FilesResource.ListRequest listRequest = _driveService.Files.List();
@@ -102,6 +159,12 @@ namespace HousingFinanceInterimApi.V1.Gateways
             return files.Where(f => f.Name == fileName).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Recursively gets the files in the given drive for the given request.
+        /// </summary>
+        /// <param name="listRequest">The list request.</param>
+        /// <param name="nextPage">The next page.</param>
+        /// <returns>The full list of drive files.</returns>
         private static async Task<IList<File>> GetFilesInDrive(FilesResource.ListRequest listRequest, string nextPage)
         {
             var results = new List<File>();
@@ -362,41 +425,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
         #endregion
 
-
-        #region Clean Google Drive code
-
-        private CreateMediaUpload GetCreateFileOnDriveRequest(FileInMemory fileInMemory, string targetFolderId)
-        {
-            var newFileDescription = new FileDescription()
-            {
-                Name = fileInMemory.Name,
-                MimeType = fileInMemory.MimeType,
-                Parents = new List<string> { targetFolderId }
-            };
-
-            var createFileRequest = _driveService.Files
-                .Create(newFileDescription, fileInMemory.DataStream, fileInMemory.MimeType);
-
-            return createFileRequest;
-        }
-
-        public async Task<IUploadProgress> UploadFileToDrive(FileInMemory fileInMemory, string targetFolderId)
-        {
-            var createFileRequest = GetCreateFileOnDriveRequest(fileInMemory, targetFolderId);
-            var uploadProgress = await createFileRequest.UploadAsync().ConfigureAwait(false);
-            return uploadProgress;
-        }
-
-        public async Task UploadFileOrThrow(FileInMemory fileInMemory, string targetFolderId)
-        {
-            var uploadStateWrapper = await UploadFileToDrive(fileInMemory, targetFolderId).ConfigureAwait(false);
-
-            if (uploadStateWrapper.Status == UploadStatus.Failed)
-            {
-                throw uploadStateWrapper.Exception;
-            }
-        }
-
         #endregion
+
     }
+
 }

@@ -25,7 +25,6 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         Task<List<SuspenseTransaction>> GetCashSuspenseTransactions();
         Task<List<SuspenseTransaction>> GetHousingBenefitSuspenseTransactions();
         Task<IList<Transaction>> GetTransactionsAsync(DateTime? startDate, DateTime? endDate);
-        Task<IList<PRNTransactionEntity>> GetPRNTransactionsByRentGroupAsync(string rentGroup, int financialYear, int startWeekOrMonth, int endWeekOrMonth);
         Task RefreshTenancyAgreementTables(long batchLogId);
         Task LoadCashFiles();
         Task LoadHousingFiles();

@@ -130,7 +130,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
         public async Task ListReportAccountBalanceReturnsListOfBatchReportAccountBalanceResponseItemsMatchingGWResponseWhenExecutionEndInSuccess()
         {
             // Arrange
-            var batchReportAccountBalanceGWResult = RandomGen.CreateMany<BatchReportDomain>();
+            var batchReportAccountBalanceGWResult = RandomGen.CreateMany<BatchReportDomain>().ToList();
             var batchReportAccountBalanceResponse = batchReportAccountBalanceGWResult.ToReportAccountBalanceResponse();
 
             _batchReportGatewayMock
@@ -318,7 +318,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
         public async Task ListReportChargesReturnsListOfBatchReportChargesResponseItemsMatchingGWResponseWhenExecutionEndInSuccess()
         {
             // Arrange
-            var batchReportChargesGWResult = RandomGen.CreateMany<BatchReportDomain>();
+            var batchReportChargesGWResult = RandomGen.CreateMany<BatchReportDomain>().ToList();
             var batchReportChargesResponse = batchReportChargesGWResult.ToReportChargesResponse();
 
             _batchReportGatewayMock
@@ -549,7 +549,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
         public async Task ListReportItemisedTransactionsReturnsListOfBatchReportItemisedTransactionResponseItemsMatchingGWResponseWhenExecutionEndInSuccess()
         {
             // Arrange
-            var batchReportItemisedTransactionsGWResult = RandomGen.CreateMany<BatchReportDomain>();
+            var batchReportItemisedTransactionsGWResult = RandomGen.CreateMany<BatchReportDomain>().ToList();
             var batchReportItemisedTransactionResponse = batchReportItemisedTransactionsGWResult.ToReportItemisedTransactionsResponse();
 
             _batchReportGatewayMock
@@ -736,7 +736,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
         public async Task ListReportCashSuspenseReturnsListOfBatchReportCashSuspenseResponseItemsMatchingGWResponseWhenExecutionEndInSuccess()
         {
             // Arrange
-            var batchReportCashSuspenseGWResult = RandomGen.CreateMany<BatchReportDomain>();
+            var batchReportCashSuspenseGWResult = RandomGen.CreateMany<BatchReportDomain>().ToList();
             var batchReportCashSuspenseResponse = batchReportCashSuspenseGWResult.ToReportCashSuspenseResponse();
 
             _batchReportGatewayMock
@@ -923,7 +923,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
         public async Task ListReportCashImportReturnsListOfBatchReportCashImportResponseItemsMatchingGWResponseWhenExecutionEndInSuccess()
         {
             // Arrange
-            var batchReportCashImportGWResult = RandomGen.CreateMany<BatchReportDomain>();
+            var batchReportCashImportGWResult = RandomGen.CreateMany<BatchReportDomain>().ToList();
             var batchReportCashImportResponse = batchReportCashImportGWResult.ToReportCashImportResponse();
 
             _batchReportGatewayMock
@@ -1109,7 +1109,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
         public async Task ListReportHousingBenefitAcademyReturnsListOfBatchReportHousingBenefitAcademyResponseItemsMatchingGWResponseWhenExecutionEndInSuccess()
         {
             // Arrange
-            var batchReportHousingBenefitAcademyGWResult = RandomGen.CreateMany<BatchReportDomain>();
+            var batchReportHousingBenefitAcademyGWResult = RandomGen.CreateMany<BatchReportDomain>().ToList();
             var batchReportHousingBenefitAcademyResponse = batchReportHousingBenefitAcademyGWResult.ToReportHousingBenefitAcademyResponse();
 
             _batchReportGatewayMock

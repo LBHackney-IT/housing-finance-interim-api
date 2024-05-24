@@ -54,23 +54,23 @@ public class LoadSuspenseCashTransactionsUseCaseTests
 
         _mockSuspenseAccountsGateway
             .Setup(x => x.GetCashSuspenseTransactions())
-            .ReturnsAsync(RandomGen.CreateMany<SuspenseTransactionAuxDomain>(quantity: 1));
+            .ReturnsAsync(RandomGen.CreateMany<SuspenseTransactionAuxDomain>(quantity: 1).ToList());
 
-        var fileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+        var fileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
         _mockGoogleFileSettingGateway
             .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
             .ReturnsAsync(fileSettings);
 
         _mockGoogleClientService
             .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(RandomGen.CreateMany<File>(1));
+            .ReturnsAsync(RandomGen.CreateMany<File>(1).ToList());
 
         _mockGoogleClientService
             .Setup(x => x.ReadSheetToEntitiesAsync<SuspenseTransactionAuxDomain>(
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<string>())
-            ).ReturnsAsync(RandomGen.CreateMany<SuspenseTransactionAuxDomain>(quantity: 1));
+            ).ReturnsAsync(RandomGen.CreateMany<SuspenseTransactionAuxDomain>(quantity: 1).ToList());
     }
 
     [Fact]
@@ -107,7 +107,7 @@ public class LoadSuspenseCashTransactionsUseCaseTests
         var suspenseTransactionsCount = 4;
         _mockSuspenseAccountsGateway
             .Setup(x => x.GetCashSuspenseTransactions())
-            .ReturnsAsync(RandomGen.CreateMany<SuspenseTransactionAuxDomain>(quantity: suspenseTransactionsCount));
+            .ReturnsAsync(RandomGen.CreateMany<SuspenseTransactionAuxDomain>(quantity: suspenseTransactionsCount).ToList());
 
         // Act
         await _classUnderTest.ExecuteAsync().ConfigureAwait(false);

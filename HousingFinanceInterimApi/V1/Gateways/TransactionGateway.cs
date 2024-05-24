@@ -2,11 +2,9 @@ using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Handlers;
-using HousingFinanceInterimApi.V1.Domain;
-using HousingFinanceInterimApi.V1.Domain.ArgumentWrappers;
-using HousingFinanceInterimApi.V1.Factories;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -14,9 +12,9 @@ namespace HousingFinanceInterimApi.V1.Gateways
     public class TransactionGateway : ITransactionGateway
     {
 
-        private readonly IDatabaseContext _context;
+        private readonly DatabaseContext _context;
 
-        public TransactionGateway(IDatabaseContext context)
+        public TransactionGateway(DatabaseContext context)
         {
             _context = context;
         }
@@ -26,20 +24,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
             var results = await _context.GetTransactionsAsync(startDate, endDate).ConfigureAwait(false);
 
             return results;
-        }
-
-        public async Task<IList<PRNTransactionDomain>> GetPRNTransactions(GetPRNTransactionsDomain filterArguments)
-        {
-            var prnTransactions = await _context
-                .GetPRNTransactionsByRentGroupAsync(
-                    filterArguments.RentGroup,
-                    filterArguments.FinancialYear,
-                    filterArguments.StartWeekOrMonth,
-                    filterArguments.EndWeekOrMonth
-                )
-                .ConfigureAwait(false);
-
-            return prnTransactions.ToDomain();
         }
 
         public async Task LoadCashFilesTransactions()

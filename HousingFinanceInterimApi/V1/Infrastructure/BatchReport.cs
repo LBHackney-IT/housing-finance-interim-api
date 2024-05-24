@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -25,9 +26,6 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DateTime? ReportDate { get; set; }
 
         public int? ReportYear { get; set; }
-        public int? ReportStartWeekOrMonth { get; set; }
-
-        public int? ReportEndWeekOrMonth { get; set; }
 
         public string Link { get; set; }
 

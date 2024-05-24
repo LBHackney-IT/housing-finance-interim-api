@@ -54,16 +54,16 @@ public class LoadActionDiaryUseCaseTests
             .Setup(g => g.CreateAsync(It.IsAny<string>(), It.IsAny<bool>()))
             .ReturnsAsync(RandomGen.BatchLogDomain());
 
-        var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1);
+        var rentPositionFileSettings = RandomGen.CreateMany<GoogleFileSettingDomain>(quantity: 1).ToList();
         _mockGoogleFileSettingGateway
             .Setup(g => g.GetSettingsByLabel(It.IsAny<string>()))
             .ReturnsAsync(rentPositionFileSettings);
 
         _mockGoogleClientService
             .Setup(x => x.GetFilesInDriveAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(RandomGen.CreateMany<File>(1));
+            .ReturnsAsync(RandomGen.CreateMany<File>(1).ToList());
 
-        _sheetEntities = RandomGen.CreateMany<ActionDiaryAuxDomain>(quantity: 1);
+        _sheetEntities = RandomGen.CreateMany<ActionDiaryAuxDomain>(quantity: 1).ToList();
         _mockGoogleClientService
             .Setup(x => x.ReadSheetToEntitiesAsync<ActionDiaryAuxDomain>(
                 It.IsAny<string>(),
