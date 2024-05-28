@@ -76,6 +76,21 @@ namespace HousingFinanceInterimApi.V1.Factories
             return batchReportCharges?.Select(b => b.ToDomain()).ToList();
         }
 
+        #region Operating Balances by Rent Account
+        public static BatchReportDomain ToDomain(this BatchReportOperatingBalancesByRentAccountRequest batchReportRequest)
+        {
+            if (batchReportRequest == null)
+                return null;
+
+            return new BatchReportDomain
+            {
+                RentGroup = batchReportRequest.RentGroup,
+                ReportYear = batchReportRequest.FinancialYear,
+                ReportStartWeekOrMonth = batchReportRequest.StartWeekOrMonth,
+                ReportEndWeekOrMonth = batchReportRequest.EndWeekOrMonth
+            };
+        }
+        #endregion
         #region Itemised Transactions
         public static BatchReportDomain ToDomain(this BatchReportItemisedTransactionRequest batchReportRequest)
         {
