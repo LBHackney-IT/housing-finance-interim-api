@@ -262,6 +262,44 @@ namespace HousingFinanceInterimApi.Tests.V1.Factories
             batchReportDomain.ReportEndWeekOrMonth.Should().Be(batchReportOBRARequest.EndWeekOrMonth);
             batchReportDomain.IsSuccess.Should().Be(default);
         }
+
+        [Fact]
+        public void BatchReportOperatingBalancesByRentAccountGetsMappedToNullIfBatchReportDomainSourceIsNull()
+        {
+            // arrange
+            BatchReportDomain batchReportDomain = null;
+
+            // act
+            var resultOBRAResponse = batchReportDomain.ToReportOperatingBalancesByRentAccountResponse();
+
+            // assert
+            resultOBRAResponse.Should().BeNull();
+        }
+
+        [Fact]
+        public void BatchReportDomainGetsMappedToBatchReportOperatingBalancesByRentAccountResponse()
+        {
+            // arrange
+            var batchReportDomain = RandomGen.Create<BatchReportDomain>();
+
+            // act
+            var batchReportITResponse = batchReportDomain.ToReportOperatingBalancesByRentAccountResponse();
+
+            // assert
+            batchReportITResponse.Should().NotBeNull();
+
+            batchReportITResponse.Id.Should().Be(batchReportDomain.Id);
+            batchReportITResponse.RentGroup.Should().Be(batchReportDomain.RentGroup);
+            batchReportITResponse.FinancialYear.Should().Be(batchReportDomain.ReportYear);
+
+            batchReportITResponse.StartWeekOrMonth.Should().Be(batchReportDomain.ReportStartWeekOrMonth);
+            batchReportITResponse.EndWeekOrMonth.Should().Be(batchReportDomain.ReportEndWeekOrMonth);
+
+            batchReportITResponse.StartTime.Should().Be(batchReportDomain.StartTime);
+            batchReportITResponse.EndTime.Should().Be(batchReportDomain.EndTime);
+            batchReportITResponse.Link.Should().Be(batchReportDomain.Link);
+            batchReportITResponse.IsSuccess.Should().Be(batchReportDomain.IsSuccess);
+        }
         #endregion
 
         #region Itemised Transactions

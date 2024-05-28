@@ -90,6 +90,25 @@ namespace HousingFinanceInterimApi.V1.Factories
                 ReportEndWeekOrMonth = batchReportRequest.EndWeekOrMonth
             };
         }
+
+        public static BatchReportOperatingBalancesByRentAccountResponse ToReportOperatingBalancesByRentAccountResponse(this BatchReportDomain batchReport)
+        {
+            if (batchReport == null)
+                return null;
+
+            return new BatchReportOperatingBalancesByRentAccountResponse
+            {
+                Id = batchReport.Id,
+                RentGroup = batchReport.RentGroup,
+                FinancialYear = batchReport.ReportYear.Value,
+                StartWeekOrMonth = batchReport.ReportStartWeekOrMonth.Value,
+                EndWeekOrMonth = batchReport.ReportEndWeekOrMonth.Value,
+                StartTime = batchReport.StartTime,
+                EndTime = batchReport.EndTime,
+                Link = batchReport.Link,
+                IsSuccess = batchReport.IsSuccess
+            };
+        }
         #endregion
         #region Itemised Transactions
         public static BatchReportDomain ToDomain(this BatchReportItemisedTransactionRequest batchReportRequest)
