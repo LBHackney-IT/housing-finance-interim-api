@@ -36,6 +36,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<Tenancy>().HasNoKey().ToView(null);
             modelBuilder.Entity<TenancyTransaction>().HasNoKey().ToView(null);
             modelBuilder.Entity<Transaction>().HasNoKey().ToView(null);
+            modelBuilder.Entity<PRNTransactionEntity>().HasNoKey().ToView(null);
             modelBuilder.Entity<ReportCashSuspenseAccount>().HasNoKey().ToView(null);
             modelBuilder.Entity<ReportCashImport>().HasNoKey().ToView(null);
             modelBuilder.Entity<ReportAccountBalance>().HasNoKey().ToView(null);

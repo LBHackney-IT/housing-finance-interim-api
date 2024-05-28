@@ -37,7 +37,7 @@ namespace HousingFinanceInterimApi.V1.Helpers
         {
             var csvFile = new MemoryStream();
 
-            using (TextWriter tw = new StreamWriter(csvFile))
+            using (TextWriter tw = new StreamWriter(stream: csvFile, leaveOpen: true))
             {
                 tw.Write(csvString);
                 tw.Flush();

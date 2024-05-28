@@ -1,4 +1,3 @@
-
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
     /// <summary>
