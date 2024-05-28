@@ -54,7 +54,7 @@ commands:
             apt-get update && apt-get install -y nodejs
       - run:
           name: Install serverless CLI
-          command: npm i -g serverless
+          command: npm i -g serverless@3.38.0
       - run:
           name: Install step function plugin          
           command: npm i serverless-step-functions
