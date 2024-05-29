@@ -355,11 +355,14 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
                 .ConfigureAwait(false);
 
         public async Task<IList<PRNTransactionEntity>> GetPRNTransactionsByRentGroupAsync(string rentGroup, int financialYear, int startWeekOrMonth, int endWeekOrMonth)
-            => await PRNTransaction
+        {
+            Database.SetCommandTimeout(timeout: 900); // set it equal to lambda timeout
+            return await PRNTransaction
                 .FromSqlInterpolated(
                     $"usp_GenerateOperatingBalanceAccounts @rent_group={rentGroup}, @post_year={financialYear}, @start_period={startWeekOrMonth}, @end_period={endWeekOrMonth}")
                 .ToListAsync()
                 .ConfigureAwait(false);
+        }
 
         public async Task RefreshTenancyAgreementTables(long batchLogId)
             => await PerformTransaction($"usp_RefreshTenancyAgreement {batchLogId}", 600).ConfigureAwait(false);
