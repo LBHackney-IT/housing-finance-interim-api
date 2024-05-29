@@ -36,6 +36,8 @@ namespace HousingFinanceInterimApi.Tests.V1.Factories
             batchReportInfrastructure.ReportStartDate.Should().Be(batchReportDomain.ReportStartDate);
             batchReportInfrastructure.ReportEndDate.Should().Be(batchReportDomain.ReportEndDate);
             batchReportInfrastructure.ReportDate.Should().Be(batchReportDomain.ReportDate);
+            batchReportInfrastructure.ReportStartWeekOrMonth.Should().Be(batchReportDomain.ReportStartWeekOrMonth);
+            batchReportInfrastructure.ReportEndWeekOrMonth.Should().Be(batchReportDomain.ReportEndWeekOrMonth);
             batchReportInfrastructure.ReportYear.Should().Be(batchReportDomain.ReportYear);
             batchReportInfrastructure.Link.Should().Be(batchReportDomain.Link);
             batchReportInfrastructure.StartTime.Should().Be(batchReportDomain.StartTime);

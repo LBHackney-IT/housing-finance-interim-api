@@ -217,6 +217,8 @@ namespace HousingFinanceInterimApi.V1.Factories
                 ReportEndDate = batchReport.ReportEndDate,
                 ReportYear = batchReport.ReportYear,
                 ReportDate = batchReport.ReportDate,
+                ReportStartWeekOrMonth = batchReport.ReportStartWeekOrMonth,
+                ReportEndWeekOrMonth = batchReport.ReportEndWeekOrMonth,
                 Link = batchReport.Link,
                 StartTime = batchReport.StartTime,
                 EndTime = batchReport.EndTime,
