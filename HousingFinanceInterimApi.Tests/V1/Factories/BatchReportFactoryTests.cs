@@ -1,6 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using HousingFinanceInterimApi.Tests.V1.TestHelpers;
 using HousingFinanceInterimApi.V1.Boundary.Request;
+using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Factories;
 using Xunit;
@@ -301,6 +305,58 @@ namespace HousingFinanceInterimApi.Tests.V1.Factories
             batchReportITResponse.EndTime.Should().Be(batchReportDomain.EndTime);
             batchReportITResponse.Link.Should().Be(batchReportDomain.Link);
             batchReportITResponse.IsSuccess.Should().Be(batchReportDomain.IsSuccess);
+        }
+
+        [Fact]
+        public void BatchReportDomainCollectionGetsMappedToNullWhenTheItIsNull()
+        {
+            // arrange
+            var batchReportDomainCollection = null as List<BatchReportDomain>;
+
+            // act
+            var mappedResult = batchReportDomainCollection.ToReportOperatingBalancesByRentAccountResponse();
+
+            // assert
+            mappedResult.Should().BeNull();
+        }
+
+        [Fact]
+        public void EmptyBatchReportDomainCollectionGetsMappedToEmptyBatchReportOperatingBalancesByRentAccountResponseCollection()
+        {
+            // arrange
+            var batchReportDomainCollection = RandomGen.CreateMany<BatchReportDomain>(quantity: 0);
+
+            // act
+            var mappedResult = batchReportDomainCollection.ToReportOperatingBalancesByRentAccountResponse();
+
+            // assert
+            mappedResult.Should().NotBeNull();
+            mappedResult.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void BatchReportDomainCollectionGetsMappedToBatchReportOperatingBalancesByRentAccountResponseCollection()
+        {
+            // arrange
+            var expectedItemCount = 4;
+            var batchReportDomainCollection = RandomGen.CreateMany<BatchReportDomain>(quantity: expectedItemCount);
+
+            // act
+            var mappedResult = batchReportDomainCollection.ToReportOperatingBalancesByRentAccountResponse();
+
+            // assert
+            Predicate<BatchReportOperatingBalancesByRentAccountResponse> checkMappingNotBlank =
+                (BatchReportOperatingBalancesByRentAccountResponse responseItem) =>
+                {
+                    var domainItem = batchReportDomainCollection.FirstOrDefault(i => i.Id == responseItem.Id, defaultValue: null);
+                    return domainItem is not null &&
+                        domainItem.RentGroup == responseItem.RentGroup &&
+                        domainItem.Link == responseItem.Link;
+                };
+
+            mappedResult.Should().NotBeNull();
+            mappedResult.Should().HaveCount(expectedItemCount);
+            mappedResult.Should().OnlyContain(mi => checkMappingNotBlank(mi));
         }
         #endregion
 
