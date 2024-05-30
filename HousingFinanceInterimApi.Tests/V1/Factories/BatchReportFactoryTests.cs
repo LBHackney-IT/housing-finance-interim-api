@@ -346,7 +346,8 @@ namespace HousingFinanceInterimApi.Tests.V1.Factories
 
             // assert
             Predicate<BatchReportOperatingBalancesByRentAccountResponse> checkMappingNotBlank =
-                (BatchReportOperatingBalancesByRentAccountResponse responseItem) => {
+                (BatchReportOperatingBalancesByRentAccountResponse responseItem) =>
+                {
                     var domainItem = batchReportDomainCollection.FirstOrDefault(i => i.Id == responseItem.Id, defaultValue: null);
                     return domainItem is not null &&
                         domainItem.RentGroup == responseItem.RentGroup &&
