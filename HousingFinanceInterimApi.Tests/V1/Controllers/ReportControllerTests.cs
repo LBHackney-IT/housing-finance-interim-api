@@ -526,7 +526,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
         }
 
         [Fact]
-        public async Task ListReportOperatingBalancesByRentAccountReturnsListOfBatchReportOperatingBalancesByRentAccountResponseItemsMatchingGWResponseWhenExecutionEndInSuccess()
+        public async Task OnSuccessTheListReportOperatingBalancesByRentAccountEPReturnsResponseItemsMatchingGWResponse()
         {
             // Arrange
             var batchReportOpBalsByRentAccGWResult = RandomGen.CreateMany<BatchReportDomain>();
