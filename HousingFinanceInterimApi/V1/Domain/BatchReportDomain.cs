@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using HousingFinanceInterimApi.V1.Infrastructure;
 
 namespace HousingFinanceInterimApi.V1.Domain
 {
@@ -23,6 +21,9 @@ namespace HousingFinanceInterimApi.V1.Domain
         public DateTime? ReportDate { get; set; }
 
         public int? ReportYear { get; set; }
+        public int? ReportStartWeekOrMonth { get; set; }
+
+        public int? ReportEndWeekOrMonth { get; set; }
 
         public string Link { get; set; }
 

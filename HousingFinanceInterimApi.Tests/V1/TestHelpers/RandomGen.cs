@@ -27,9 +27,9 @@ namespace HousingFinanceInterimApi.Tests.V1.TestHelpers
         public static TItem Create<TItem>() => _fixture.Create<TItem>();
         public static TItem CreateCustom<TItem>(this IPostprocessComposer<TItem> itemComposer) => itemComposer.Create();
         public static ICustomizationComposer<TItem> Build<TItem>() => _fixture.Build<TItem>();
-        public static IEnumerable<TItem> CreateMany<TItem>(int quantity = 3) => _fixture.CreateMany<TItem>(quantity);
+        public static List<TItem> CreateMany<TItem>(int quantity = 3) => _fixture.CreateMany<TItem>(quantity).ToList();
 
-        public static IEnumerable<TItem> CreateMany<TItem>(Func<TItem> creatorDelegate, int itemCount)
+        public static List<TItem> CreateMany<TItem>(Func<TItem> creatorDelegate, int itemCount)
             => Enumerable.Range(1, itemCount).Select(_ => creatorDelegate()).ToList();
 
         // The "Do" saves 1 step of assignment by converting to PostProcessComposer immediately.
@@ -46,8 +46,8 @@ namespace HousingFinanceInterimApi.Tests.V1.TestHelpers
             return batchLogBuilder.Create();
         }
 
-        public static IEnumerable<File> GoogleDriveFiles(bool filesValidity, int count = 3)
-            => CreateMany(() => GoogleDriveFile(filesValidity), count);
+        public static IList<File> GoogleDriveFiles(bool filesValidity, int count = 3)
+            => CreateMany(() => GoogleDriveFile(filesValidity), count).ToList();
 
         private static File GoogleDriveFile(bool isValidFile)
         {
