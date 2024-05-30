@@ -109,6 +109,12 @@ namespace HousingFinanceInterimApi.V1.Factories
                 IsSuccess = batchReport.IsSuccess
             };
         }
+
+        public static List<BatchReportOperatingBalancesByRentAccountResponse> ToReportOperatingBalancesByRentAccountResponse(
+            this ICollection<BatchReportDomain> batchReports)
+        {
+            return batchReports?.Select(b => b.ToReportOperatingBalancesByRentAccountResponse()).ToList();
+        }
         #endregion
         #region Itemised Transactions
         public static BatchReportDomain ToDomain(this BatchReportItemisedTransactionRequest batchReportRequest)
