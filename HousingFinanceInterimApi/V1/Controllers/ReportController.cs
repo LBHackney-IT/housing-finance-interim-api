@@ -95,6 +95,30 @@ namespace HousingFinanceInterimApi.V1.Controllers
                         .ToReportOperatingBalancesByRentAccountResponse()
                 );
         }
+
+        [ProducesResponseType(
+            typeof(List<BatchReportOperatingBalancesByRentAccountResponse>),
+            StatusCodes.Status200OK
+        )]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet]
+        [Route("operating-balances-by-rent-account")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
+        public async Task<IActionResult> ListReportOperatingBalancesByRentAccount()
+        {
+            var batchReportOperatingBalancesByRentAccount = await _batchReportGateway
+                .ListAsync(ReportOperatingBalancesByRentAccount)
+                .ConfigureAwait(false);
+
+            if (batchReportOperatingBalancesByRentAccount is null)
+                return NotFound();
+
+            return Ok(
+                batchReportOperatingBalancesByRentAccount
+                    .ToReportOperatingBalancesByRentAccountResponse()
+            );
+        }
         #endregion
         # region Itemised Transactions
         [ProducesResponseType(typeof(BatchReportItemisedTransactionResponse), StatusCodes.Status201Created)]
