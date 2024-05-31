@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HousingFinanceInterimApi.V1.Domain;
-using HousingFinanceInterimApi.V1.Factories;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;
@@ -26,7 +25,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IGoogleClientService _googleClientService;
 
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
-        private readonly int _sleepDuration = 30000;
+        private readonly int _sleepDuration = int.Parse(Environment.GetEnvironmentVariable("SLEEP_DURATION"));
 
         private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
         private const string ReportChargesLabel = "ReportCharges";
