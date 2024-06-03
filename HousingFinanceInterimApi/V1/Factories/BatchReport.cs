@@ -76,6 +76,46 @@ namespace HousingFinanceInterimApi.V1.Factories
             return batchReportCharges?.Select(b => b.ToDomain()).ToList();
         }
 
+        #region Operating Balances by Rent Account
+        public static BatchReportDomain ToDomain(this BatchReportOperatingBalancesByRentAccountRequest batchReportRequest)
+        {
+            if (batchReportRequest == null)
+                return null;
+
+            return new BatchReportDomain
+            {
+                RentGroup = batchReportRequest.RentGroup,
+                ReportYear = batchReportRequest.FinancialYear,
+                ReportStartWeekOrMonth = batchReportRequest.StartWeekOrMonth,
+                ReportEndWeekOrMonth = batchReportRequest.EndWeekOrMonth
+            };
+        }
+
+        public static BatchReportOperatingBalancesByRentAccountResponse ToReportOperatingBalancesByRentAccountResponse(this BatchReportDomain batchReport)
+        {
+            if (batchReport == null)
+                return null;
+
+            return new BatchReportOperatingBalancesByRentAccountResponse
+            {
+                Id = batchReport.Id,
+                RentGroup = batchReport.RentGroup,
+                FinancialYear = batchReport.ReportYear.Value,
+                StartWeekOrMonth = batchReport.ReportStartWeekOrMonth.Value,
+                EndWeekOrMonth = batchReport.ReportEndWeekOrMonth.Value,
+                StartTime = batchReport.StartTime,
+                EndTime = batchReport.EndTime,
+                Link = batchReport.Link,
+                IsSuccess = batchReport.IsSuccess
+            };
+        }
+
+        public static List<BatchReportOperatingBalancesByRentAccountResponse> ToReportOperatingBalancesByRentAccountResponse(
+            this ICollection<BatchReportDomain> batchReports)
+        {
+            return batchReports?.Select(b => b.ToReportOperatingBalancesByRentAccountResponse()).ToList();
+        }
+        #endregion
         #region Itemised Transactions
         public static BatchReportDomain ToDomain(this BatchReportItemisedTransactionRequest batchReportRequest)
         {
@@ -183,6 +223,8 @@ namespace HousingFinanceInterimApi.V1.Factories
                 ReportEndDate = batchReport.ReportEndDate,
                 ReportYear = batchReport.ReportYear,
                 ReportDate = batchReport.ReportDate,
+                ReportStartWeekOrMonth = batchReport.ReportStartWeekOrMonth,
+                ReportEndWeekOrMonth = batchReport.ReportEndWeekOrMonth,
                 Link = batchReport.Link,
                 StartTime = batchReport.StartTime,
                 EndTime = batchReport.EndTime,

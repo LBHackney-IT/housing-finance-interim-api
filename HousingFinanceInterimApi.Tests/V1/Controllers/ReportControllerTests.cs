@@ -405,6 +405,218 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
         }
         #endregion
 
+        #region Operating Balances by Rent Account
+        [Fact]
+        public async Task CreateReportOperatingBalancesByRentAccountReturnsSuccessResponseWithDataMatchingGWResponse()
+        {
+            // Arrange
+            var irrelevant = RandomGen.Create<BatchReportOperatingBalancesByRentAccountRequest>();
+            var batchReportOBRAGWResult = RandomGen.Create<BatchReportDomain>();
+            var batchReportOBRAResponse = batchReportOBRAGWResult.ToReportOperatingBalancesByRentAccountResponse();
+
+            _batchReportGatewayMock
+                .Setup(g => g.CreateAsync(It.IsAny<BatchReportDomain>()))
+                .ReturnsAsync(batchReportOBRAGWResult);
+
+            // Act
+            var response = await _classUnderTest
+                .CreateReportOperatingBalancesByRentAccount(irrelevant)
+                .ConfigureAwait(false);
+
+            // Assert
+            var createdResult = response as CreatedResult;
+            createdResult.Should().NotBeNull();
+            createdResult.StatusCode.Should().Be(201);
+
+            var responseObject = createdResult.Value as BatchReportOperatingBalancesByRentAccountResponse;
+            responseObject.Should().BeEquivalentTo(batchReportOBRAResponse);
+        }
+
+        [Fact]
+        public async Task CreateReportOperatingBalancesByRentAccountCallsBatchReportGWCreateMethodWithCorrectParameters()
+        {
+            // Arrange
+            var request = RandomGen.Create<BatchReportOperatingBalancesByRentAccountRequest>();
+            var irrelevant = RandomGen.Create<BatchReportDomain>();
+
+            _batchReportGatewayMock
+                .Setup(g => g.CreateAsync(It.IsAny<BatchReportDomain>()))
+                .ReturnsAsync(irrelevant);
+
+            // Act
+            await _classUnderTest
+                .CreateReportOperatingBalancesByRentAccount(request)
+                .ConfigureAwait(false);
+
+            // Assert
+            _batchReportGatewayMock.Verify(
+                g => g.CreateAsync(It.Is<BatchReportDomain>(brd =>
+                    brd.RentGroup == request.RentGroup &&
+                    brd.ReportYear == request.FinancialYear &&
+                    brd.ReportStartWeekOrMonth == request.StartWeekOrMonth &&
+                    brd.ReportEndWeekOrMonth == request.EndWeekOrMonth &&
+                    brd.ReportName == "ReportOperatingBalancesByRentAccount"
+                )),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task CreateReportOperatingBalancesByRentAccountThrowsWhenAnExceptionIsRaisedDuringItsExecutionFlow()
+        {
+            // Arrange
+            var request = RandomGen.Create<BatchReportOperatingBalancesByRentAccountRequest>();
+            var message = "15 minute lambda timeout reached!";
+
+            _batchReportGatewayMock
+                .Setup(g => g.CreateAsync(It.IsAny<BatchReportDomain>()))
+                .ThrowsAsync(new TimeoutException(message));
+
+            // Act
+            Func<Task> endpointCall = async () => await _classUnderTest
+                .CreateReportOperatingBalancesByRentAccount(request)
+                .ConfigureAwait(false);
+
+            // Assert
+            await endpointCall.Should().ThrowAsync<TimeoutException>().WithMessage(message);
+        }
+
+        [Fact]
+        public async Task CreateReportOperatingBalancesByRentAccountReturns400BadRequestWhenModelStateErrorIsEncountered()
+        {
+            // Arrange
+            var request = RandomGen
+                .Build<BatchReportOperatingBalancesByRentAccountRequest>()
+                .With(r => r.FinancialYear, default(int))
+                .CreateCustom();
+
+            _classUnderTest.ModelState.AddModelError("FinancialYear", "The FinancialYear field is required.");
+
+            // Act
+            var response = await _classUnderTest
+                .CreateReportOperatingBalancesByRentAccount(request)
+                .ConfigureAwait(false);
+
+            // Assert
+            var statusCodeResult = response as IStatusCodeActionResult;
+            statusCodeResult.Should().NotBeNull();
+            statusCodeResult.StatusCode.Should().Be(400);
+        }
+
+        [Fact]
+        public async Task ListReportOperatingBalancesByRentAccountCallsBatchReportGWListMethodWithCorrectParameters()
+        {
+            // Arrange
+            var batchReportOpBalsByRentAccGWResult = new List<BatchReportDomain>();
+
+            _batchReportGatewayMock
+                .Setup(g => g.ListAsync(It.IsAny<string>()))
+                .ReturnsAsync(batchReportOpBalsByRentAccGWResult);
+
+            // Act
+            await _classUnderTest
+                .ListReportOperatingBalancesByRentAccount()
+                .ConfigureAwait(false);
+
+            // Assert
+            _batchReportGatewayMock.Verify(
+                g => g.ListAsync(It.Is<string>(reportName => reportName == "ReportOperatingBalancesByRentAccount")),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task OnSuccessTheListReportOperatingBalancesByRentAccountEPReturnsResponseItemsMatchingGWResponse()
+        {
+            // Arrange
+            var batchReportOpBalsByRentAccGWResult = RandomGen.CreateMany<BatchReportDomain>();
+            var batchReportOpBalsByRentAccResponse = batchReportOpBalsByRentAccGWResult
+                .ToReportOperatingBalancesByRentAccountResponse();
+
+            _batchReportGatewayMock
+                .Setup(g => g.ListAsync(It.IsAny<string>()))
+                .ReturnsAsync(batchReportOpBalsByRentAccGWResult);
+
+            // Act
+            var response = await _classUnderTest
+                .ListReportOperatingBalancesByRentAccount()
+                .ConfigureAwait(false);
+
+            // Assert
+            var createdResult = response as OkObjectResult;
+            createdResult.Should().NotBeNull();
+            createdResult.StatusCode.Should().Be(200);
+
+            var responseObject = createdResult.Value as List<BatchReportOperatingBalancesByRentAccountResponse>;
+            responseObject.Should().HaveSameCount(batchReportOpBalsByRentAccGWResult);
+            responseObject.Should().BeEquivalentTo(batchReportOpBalsByRentAccResponse);
+        }
+
+        [Fact]
+        public async Task ListReportOperatingBalancesByRentAccountReturnsEmptyListResponseWhenGatewayFindsNoItems()
+        {
+            // Arrange
+            var batchReportOpBalsByRentAccGWResult = new List<BatchReportDomain>();
+
+            _batchReportGatewayMock
+                .Setup(g => g.ListAsync(It.IsAny<string>()))
+                .ReturnsAsync(batchReportOpBalsByRentAccGWResult);
+
+            // Act
+            var response = await _classUnderTest
+                .ListReportOperatingBalancesByRentAccount()
+                .ConfigureAwait(false);
+
+            // Assert
+            var createdResult = response as OkObjectResult;
+            createdResult.Should().NotBeNull();
+            createdResult.StatusCode.Should().Be(200);
+
+            var responseObject = createdResult.Value as List<BatchReportOperatingBalancesByRentAccountResponse>;
+            responseObject.Should().HaveCount(0);
+        }
+
+        [Fact]
+        public async Task ListReportOperatingBalancesByRentAccountReturnsA404NotFoundResponseWhenGatewayIsUnableToFindTheCollection()
+        {
+            // Arrange
+            IList<BatchReportDomain> batchReportOpBalsByRentAccGWResult = null;
+
+            _batchReportGatewayMock
+                .Setup(g => g.ListAsync(It.IsAny<string>()))
+                .ReturnsAsync(batchReportOpBalsByRentAccGWResult);
+
+            // Act
+            var response = await _classUnderTest
+                .ListReportOperatingBalancesByRentAccount()
+                .ConfigureAwait(false);
+
+            // Assert
+            var createdResult = response as NotFoundResult;
+            createdResult.Should().NotBeNull();
+            createdResult.StatusCode.Should().Be(404);
+        }
+
+        [Fact]
+        public async Task ListReportOperatingBalancesByRentAccountThrowsWhenAnExceptionIsRaisedDuringItsExecutionFlow()
+        {
+            // Arrange
+            var message = "Database credentials are not valid.";
+
+            _batchReportGatewayMock
+                .Setup(g => g.ListAsync(It.IsAny<string>()))
+                .ThrowsAsync(new ConnectionAbortedException(message));
+
+            // Act
+            Func<Task> endpointCall = async () => await _classUnderTest
+                .ListReportOperatingBalancesByRentAccount()
+                .ConfigureAwait(false);
+
+            // Assert
+            await endpointCall.Should().ThrowAsync<ConnectionAbortedException>().WithMessage(message);
+        }
+        #endregion
+
         #region Itemised Transactions
         [Fact]
         public async Task CreateReportItemisedTransactionReturnsSuccessResponseWithDataMatchingGWResponse()

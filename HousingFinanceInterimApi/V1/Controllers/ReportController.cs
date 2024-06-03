@@ -23,6 +23,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
 
         private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
         private const string ReportChargesLabel = "ReportCharges";
+        private const string ReportOperatingBalancesByRentAccount = "ReportOperatingBalancesByRentAccount";
         private const string ReportItemisedTransactionsLabel = "ReportItemisedTransactions";
         private const string ReportCashSuspenseLabel = "ReportCashSuspense";
         private const string ReportCashImportLabel = "ReportCashImport";
@@ -68,6 +69,57 @@ namespace HousingFinanceInterimApi.V1.Controllers
             return Ok(batchReportCharges.ToReportChargesResponse());
         }
 
+        # region Operating Balances by Rent Account
+        [ProducesResponseType(typeof(BatchReportOperatingBalancesByRentAccountResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(BadRequestObjectResult), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPost]
+        [Route("operating-balances-by-rent-account")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
+        public async Task<IActionResult> CreateReportOperatingBalancesByRentAccount(
+            [FromBody] BatchReportOperatingBalancesByRentAccountRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var batchReport = request.ToDomain();
+            batchReport.ReportName = ReportOperatingBalancesByRentAccount;
+
+            var batchReportOperatingBalancesByRentAccount = await _batchReportGateway
+                .CreateAsync(batchReport)
+                .ConfigureAwait(false);
+
+            return Created(
+                    "Report request created",
+                    batchReportOperatingBalancesByRentAccount
+                        .ToReportOperatingBalancesByRentAccountResponse()
+                );
+        }
+
+        [ProducesResponseType(
+            typeof(List<BatchReportOperatingBalancesByRentAccountResponse>),
+            StatusCodes.Status200OK
+        )]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet]
+        [Route("operating-balances-by-rent-account")]
+        [AuthorizeEndpointByGroups("HOUSING_FINANCE_ALLOWED_GROUPS")]
+        public async Task<IActionResult> ListReportOperatingBalancesByRentAccount()
+        {
+            var batchReportOperatingBalancesByRentAccount = await _batchReportGateway
+                .ListAsync(ReportOperatingBalancesByRentAccount)
+                .ConfigureAwait(false);
+
+            if (batchReportOperatingBalancesByRentAccount is null)
+                return NotFound();
+
+            return Ok(
+                batchReportOperatingBalancesByRentAccount
+                    .ToReportOperatingBalancesByRentAccountResponse()
+            );
+        }
+        #endregion
         # region Itemised Transactions
         [ProducesResponseType(typeof(BatchReportItemisedTransactionResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(BadRequestObjectResult), StatusCodes.Status400BadRequest)]
