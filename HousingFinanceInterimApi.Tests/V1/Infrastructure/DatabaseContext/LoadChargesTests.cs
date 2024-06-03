@@ -2,12 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using AutoFixture;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
-using HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext.TestFactories;
 
 
 namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext;
@@ -20,13 +18,13 @@ public class LoadChargesTests : IClassFixture<BaseContextTest>
     private readonly HousingFinanceInterimApi.V1.Infrastructure.DatabaseContext _context;
     private readonly Fixture _fixture;
     private readonly List<Action> _cleanups;
-    private readonly Func<string, Task> _executeProcedure;
+    private readonly Action<string> _executeProcedure;
 
     public LoadChargesTests(BaseContextTest baseContextTest)
     {
-        _context = baseContextTest.Context;
-        _fixture = baseContextTest.Fixture;
-        _cleanups = baseContextTest.Cleanups;
+        _context = baseContextTest._context;
+        _fixture = baseContextTest._fixture;
+        _cleanups = baseContextTest._cleanups;
         _executeProcedure = baseContextTest.ExecuteProcedure;
     }
 
@@ -37,7 +35,7 @@ public class LoadChargesTests : IClassFixture<BaseContextTest>
     }
 
     [Fact]
-    public async Task LoadChargesWorks()
+    public void LoadChargesWorks()
     {
         var expectedChargeCount = 49; // This many types of charge in ChargesAux
 
@@ -48,8 +46,8 @@ public class LoadChargesTests : IClassFixture<BaseContextTest>
             .With(chargeAux => chargeAux.PropertyRef, GeneratePropRef())
             .With(chargeAux => chargeAux.Year, DateTime.Now.Year).Create();
 
-        await _context.ChargesAux.AddAsync(newChargeAux).ConfigureAwait(false);
-        await _context.SaveChangesAsync().ConfigureAwait(false);
+        _context.ChargesAux.Add(newChargeAux);
+        _context.SaveChanges();
 
         _cleanups.Add(() =>
         {
@@ -58,12 +56,12 @@ public class LoadChargesTests : IClassFixture<BaseContextTest>
         });
 
         // Act
-        await _executeProcedure("usp_LoadCharges").ConfigureAwait(false);
+        _executeProcedure("usp_LoadCharges");
 
         // Fetch
-        var relatedCharges = await _context.Charges.Where(
+        var relatedCharges = _context.Charges.Where(
             charge => charge.PropertyRef == newChargeAux.PropertyRef
-        ).ToListAsync().ConfigureAwait(false);
+        ).ToList();
 
         _cleanups.Add(() =>
         {
