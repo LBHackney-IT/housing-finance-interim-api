@@ -33,7 +33,7 @@ test:
 
 .PHONY: test-db
 test-db:
-	# Ensure you are port forwarding to the Development database and have the CONNECTION_STRING env var set correctly
+	# Ensure you have the CONNECTION_STRING env var set correctly in an .env file and an AWS profile accessed in the finance_database.mk
 	make -f finance_database.mk sso_login ENVIRONMENT=development;
 	make -f finance_database.mk port_forwarding_to_hfs_db ENVIRONMENT=development & \
 	$(call setup_env)
