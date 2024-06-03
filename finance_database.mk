@@ -14,11 +14,7 @@ ENVIRONMENT = development
 PROFILE = housing-${ENVIRONMENT}
 
 # -- Parameter Store paths --
-ifeq (${ENVIRONMENT}, development)
-	INSTANCE_ID_PATH := " /housing-finance/${ENVIRONMENT}/instance-id"
-else
-	INSTANCE_ID_PATH := " /platform-apis-jump-box-instance-name"
-endif
+INSTANCE_ID_PATH := " /platform-apis-jump-box-instance-name"
 DB_ENDPOINT_PATH := " /housing-finance/${ENVIRONMENT}/db-host"
 REMOTE_PORT_PATH := " /housing-finance/${ENVIRONMENT}/db-port"
 DB_USERNAME_PATH := " /housing-finance/${ENVIRONMENT}/db-username"

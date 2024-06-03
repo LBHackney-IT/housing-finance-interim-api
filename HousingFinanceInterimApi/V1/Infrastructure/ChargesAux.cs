@@ -8,6 +8,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
     public class ChargesAux
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
         public string PropertyRef { get; set; }

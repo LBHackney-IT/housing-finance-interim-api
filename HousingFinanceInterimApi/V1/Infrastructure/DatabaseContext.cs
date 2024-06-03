@@ -131,6 +131,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<BatchReport> BatchReports { get; set; }
         public DbSet<ReportAccountBalance> ReportAccountBalances { get; set; }
 
+        public DbSet<ChargesAux> ChargesAux { get; set; }
+        public DbSet<Charges> Charges { get; set; }
+
         /// <summary>
         /// Gets the operating balances.
         /// </summary>
