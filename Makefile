@@ -1,18 +1,24 @@
+define setup_env
+    $(eval ENV_FILE := .env)
+    $(eval include .env)
+    $(eval export)
+endef
+
 .PHONY: setup
 setup:
-	docker-compose build
+	docker compose build
 
 .PHONY: build
 build:
-	docker-compose build housing-finance-interim-api
+	docker compose build housing-finance-interim-api
 
 .PHONY: serve
 serve:
-	docker-compose build housing-finance-interim-api && docker-compose up housing-finance-interim-api
+	docker compose build housing-finance-interim-api && docker compose up housing-finance-interim-api
 
 .PHONY: shell
 shell:
-	docker-compose run housing-finance-interim-api bash
+	docker compose run housing-finance-interim-api bash
 
 
 .PHONY: clean
@@ -22,8 +28,16 @@ clean:
 
 .PHONY: test
 test:
-	-docker-compose build housing-finance-interim-api-test && docker-compose run housing-finance-interim-api-test
+	-docker compose build housing-finance-interim-api-test && docker compose run housing-finance-interim-api-test
 	-make clean
+
+.PHONY: test-db
+test-db:
+	# Ensure you are port forwarding to the Development database and have the CONNECTION_STRING env var set correctly
+	make -f finance_database.mk sso_login ENVIRONMENT=development;
+	make -f finance_database.mk port_forwarding_to_hfs_db ENVIRONMENT=development & \
+	$(call setup_env)
+	dotnet test --filter FullyQualifiedName~Infrastructure.DatabaseContext
 
 .PHONY: lint
 lint:
@@ -36,7 +50,7 @@ restart-db:
 	docker stop $$(docker ps -q --filter ancestor=test-database -a)
 	-docker rm $$(docker ps -q --filter ancestor=test-database -a)
 	docker rmi test-database
-	docker-compose up -d test-database
+	docker compose up -d test-database
 
 .PHONY: serve-local
 serve-local:

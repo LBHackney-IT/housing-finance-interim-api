@@ -23,4 +23,5 @@ COPY . .
 
 RUN dotnet build ./HousingFinanceInterimApi.Tests/HousingFinanceInterimApi.Tests.csproj
 
-CMD dotnet test
+# Run tests except in Infrastructure.DatabaseContext
+CMD dotnet test --filter FullyQualifiedName!~Infrastructure.DatabaseContext

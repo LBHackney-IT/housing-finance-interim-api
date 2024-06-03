@@ -45,7 +45,8 @@ public class LoadChargesTests
     {
         var expectedChargeCount = 49; // The types of charge
         var cleanups = new List<Action>();
-        try {
+        try
+        {
             // Arrange
             var newChargeAux = _fixture.Build<ChargesAux>()
                 .Without(chargeAux => chargeAux.Id)
@@ -56,7 +57,8 @@ public class LoadChargesTests
             await _context.ChargesAux.AddAsync(newChargeAux).ConfigureAwait(false);
             await _context.SaveChangesAsync().ConfigureAwait(false);
 
-            cleanups.Add(() => {
+            cleanups.Add(() =>
+            {
                 _context.ChargesAux.Remove(newChargeAux);
                 _context.SaveChanges();
             });
@@ -69,7 +71,8 @@ public class LoadChargesTests
                 charge => charge.PropertyRef == newChargeAux.PropertyRef
             ).ToListAsync().ConfigureAwait(false);
 
-            cleanups.Add(() => {
+            cleanups.Add(() =>
+            {
                 _context.Charges.RemoveRange(relatedCharges);
             });
 
@@ -77,7 +80,7 @@ public class LoadChargesTests
             Assert.NotNull(relatedCharges);
             Assert.Equal(relatedCharges.Count, expectedChargeCount);
 
-            // Ensure correct charges are loaded
+            // Ensure correct charges are loaded (correct amount per charge type)
             PropertyInfo[] properties = typeof(ChargesAux).GetProperties();
 
             foreach (var charge in relatedCharges)
@@ -88,7 +91,9 @@ public class LoadChargesTests
                 Assert.Equal(value, charge.Amount);
             }
 
-        } finally {
+        }
+        finally
+        {
             foreach (var cleanup in cleanups)
             {
                 cleanup();
