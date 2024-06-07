@@ -54,4 +54,5 @@ for filename in stored_procedures/*.sql; do mv {stored_procedures/,${object_pref
 
 rm -r tables functions views stored_procedures
 
-rm -r tables
+# prevent being triggered by base image
+rm -f $(basename "$0")
