@@ -3,6 +3,19 @@
 # Some SQL references other SQL, as such clear run order is required.
 set -e 
 
+function create_object_prefix_map {
+    local -n arr_ref=$1
+    local object_types=("${!2}")
+    local lower_a=97
+    local i=0
+    for type in "${object_types[@]}"; do
+        char_numb=$(($lower_a + $i))
+        ascii_character=$(printf "\\$(printf '%03o' $char_numb)")
+        arr_ref["$type"]=$ascii_character
+        i=$((i + 1))
+    done
+}
+
 function get_sql_script_order {
     local file_path=$1
     if [ -f "$file_path" ]; then
@@ -24,11 +37,10 @@ function order_dependent_scripts {
     done
 }
 
+db_object_types=( tables functions views stored_procedures )
+
 declare -A object_prefixes
-object_prefixes[tables]="a"
-object_prefixes[functions]="b"
-object_prefixes[views]="c"
-object_prefixes[stored_procedures]="d"
+create_object_prefix_map object_prefixes db_object_types[@]
 
 function unpack_object_scripts {
     local object_type=$1
