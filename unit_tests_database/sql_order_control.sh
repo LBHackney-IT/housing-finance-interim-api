@@ -31,11 +31,11 @@ object_prefixes[views]="c"
 object_prefixes[stored_procedures]="d"
 
 function unpack_object_scripts {
-    local object_type=$1 $object_type
-    for filename in tables/*.sql; do
-        echo {tables/,${object_prefixes[tables]}_}"$(basename $filename)";
+    local object_type=$1
+    for filename in $object_type/*.sql; do
+        mv {$object_type/,${object_prefixes[$object_type]}_}"$(basename $filename)";
     done
-    rm -r tables
+    rm -r $object_type
 }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -44,7 +44,7 @@ cd $SCRIPT_DIR
 relative_table_order=$( get_sql_script_order "./table_script_order.dat" )
 
 order_dependent_scripts "tables" $relative_table_order
-unpack_object_scripts
+unpack_object_scripts "tables"
 
 
 for filename in functions/*.sql; do mv {functions/,${object_prefixes[functions]}_}"$(basename $filename)"; done;
