@@ -37,21 +37,23 @@ function order_dependent_scripts {
     done
 }
 
-db_object_types=( tables functions views stored_procedures )
-
-declare -A object_prefixes
-create_object_prefix_map object_prefixes db_object_types[@]
-
 function unpack_object_scripts {
     local object_type=$1
+    local -n prefix_map_ref=$2
     for filename in $object_type/*.sql; do
-        mv {$object_type/,${object_prefixes[$object_type]}_}"$(basename $filename)";
+        mv {$object_type/,${prefix_map_ref[$object_type]}_}"$(basename $filename)";
     done
     rm -r $object_type
 }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
+
+db_object_types=( tables functions views stored_procedures )
+
+declare -A object_prefixes
+create_object_prefix_map object_prefixes db_object_types[@]
+
 
 relative_table_order=$( get_sql_script_order "./table_script_order.dat" )
 
