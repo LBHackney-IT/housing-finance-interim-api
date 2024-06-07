@@ -59,10 +59,10 @@ relative_table_order=$( get_sql_script_order "./table_script_order.dat" )
 
 order_dependent_scripts "tables" $relative_table_order
 
-unpack_object_scripts "tables"
-unpack_object_scripts "functions"
-unpack_object_scripts "views"
-unpack_object_scripts "stored_procedures"
+unpack_object_scripts "tables" object_prefixes
+unpack_object_scripts "functions" object_prefixes
+unpack_object_scripts "views" object_prefixes
+unpack_object_scripts "stored_procedures" object_prefixes
 
 # prevent being triggered by base image
 rm -f $(basename "$0")
