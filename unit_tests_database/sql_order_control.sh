@@ -12,6 +12,18 @@ function get_sql_script_order {
     fi
 }
 
+function order_dependent_scripts {
+    local object_type=$1
+    shift
+    local relative_order=("$@")
+    local i=0
+    for file in "${relative_order[@]}"; do
+        i=$((i + 1))
+        padded_i=$(printf "%02d" "$i")
+        mv "${object_type}/$file.sql" "${object_type}/${padded_i}_${file}.sql"
+    done
+}
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
 
@@ -24,12 +36,7 @@ object_prefixes[stored_procedures]="d"
 
 relative_table_order=$( get_sql_script_order "./table_script_order.dat" )
 
-i=0
-for file in "${relative_table_order[@]}"; do
-    i=$((i + 1))
-    padded_i=$(printf "%02d" "$i")
-    mv "tables/$file.sql" "tables/${padded_i}_${file}.sql"
-done
+order_dependent_scripts "tables" $relative_table_order
 
 for filename in tables/*.sql; do mv {tables/,${object_prefixes[tables]}_}"$(basename $filename)"; done;
 for filename in functions/*.sql; do mv {functions/,${object_prefixes[functions]}_}"$(basename $filename)"; done;
