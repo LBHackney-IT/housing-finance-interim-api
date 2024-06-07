@@ -3,6 +3,14 @@
 # Some SQL references other SQL, as such clear run order is required.
 set -e 
 
+function get_sql_script_order {
+    local file_path=$1
+    if [ -f "$file_path" ]; then
+        grep -iP "^\w+$" $file_path
+    else
+        echo ""
+    fi
+}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
@@ -14,31 +22,7 @@ object_prefixes[functions]="b"
 object_prefixes[views]="c"
 object_prefixes[stored_procedures]="d"
 
-relative_table_order=(
-    # batch log group
-    batch_log
-    batch_log_error
-
-    # charges group
-    charges
-    charges_history
-
-    # direct debit group
-    direct_debit_history
-    direct_debit_suspense_accounts
-
-    # cash load group
-    "up_cash_dump_file_name"
-    "up_cash_dump"
-    "up_cash_load"
-    "up_cash_load_suspense_accounts"
-
-    # housing cash load group
-    "up_housing_cash_dump_file_name"
-    "up_housing_cash_dump"
-    "up_housing_cash_load"
-    "up_housing_cash_load_suspense_accounts"
-)
+relative_table_order=$( get_sql_script_order "./table_script_order.dat" )
 
 i=0
 for file in "${relative_table_order[@]}"; do
