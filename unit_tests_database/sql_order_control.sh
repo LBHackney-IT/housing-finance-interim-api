@@ -24,21 +24,29 @@ function order_dependent_scripts {
     done
 }
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd $SCRIPT_DIR
-
-
 declare -A object_prefixes
 object_prefixes[tables]="a"
 object_prefixes[functions]="b"
 object_prefixes[views]="c"
 object_prefixes[stored_procedures]="d"
 
+function unpack_object_scripts {
+    local object_type=$1 $object_type
+    for filename in tables/*.sql; do
+        echo {tables/,${object_prefixes[tables]}_}"$(basename $filename)";
+    done
+    rm -r tables
+}
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd $SCRIPT_DIR
+
 relative_table_order=$( get_sql_script_order "./table_script_order.dat" )
 
 order_dependent_scripts "tables" $relative_table_order
+unpack_object_scripts
 
-for filename in tables/*.sql; do mv {tables/,${object_prefixes[tables]}_}"$(basename $filename)"; done;
+
 for filename in functions/*.sql; do mv {functions/,${object_prefixes[functions]}_}"$(basename $filename)"; done;
 for filename in views/*.sql; do mv {views/,${object_prefixes[views]}_}"$(basename $filename)"; done;
 for filename in stored_procedures/*.sql; do mv {stored_procedures/,${object_prefixes[stored_procedures]}_}"$(basename $filename)"; done;
