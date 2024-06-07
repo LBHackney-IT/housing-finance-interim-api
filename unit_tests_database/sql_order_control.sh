@@ -44,14 +44,11 @@ cd $SCRIPT_DIR
 relative_table_order=$( get_sql_script_order "./table_script_order.dat" )
 
 order_dependent_scripts "tables" $relative_table_order
+
 unpack_object_scripts "tables"
-
-
-for filename in functions/*.sql; do mv {functions/,${object_prefixes[functions]}_}"$(basename $filename)"; done;
-for filename in views/*.sql; do mv {views/,${object_prefixes[views]}_}"$(basename $filename)"; done;
-for filename in stored_procedures/*.sql; do mv {stored_procedures/,${object_prefixes[stored_procedures]}_}"$(basename $filename)"; done;
-
-rm -r tables functions views stored_procedures
+unpack_object_scripts "functions"
+unpack_object_scripts "views"
+unpack_object_scripts "stored_procedures"
 
 # prevent being triggered by base image
 rm -f $(basename "$0")
