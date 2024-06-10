@@ -9,8 +9,8 @@ function create_object_prefix_map {
     local lower_a=97
     local i=0
     for type in "${object_types[@]}"; do
-        char_numb=$(($lower_a + $i))
-        ascii_character=$(printf "\\$(printf '%03o' $char_numb)")
+        local char_numb=$(($lower_a + $i))
+        local ascii_character=$(printf "\\$(printf '%03o' $char_numb)")
         arr_ref["$type"]=$ascii_character
         i=$((i + 1))
     done
@@ -32,7 +32,7 @@ function order_dependent_scripts {
     local i=0
     for file in "${relative_order[@]}"; do
         i=$((i + 1))
-        padded_i=$(printf "%02d" "$i")
+        local padded_i=$(printf "%02d" "$i")
         mv "${object_type}/$file.sql" "${object_type}/${padded_i}_${file}.sql"
     done
 }
@@ -50,7 +50,7 @@ function prepare_scripts_by_type {
     local object_type=$1
     local -n prefixes_ref=$2
     local orderFilePath="./${object_type}_script.order"
-    script_order=$( get_sql_script_order $orderFilePath )
+    local script_order=$( get_sql_script_order $orderFilePath )
     order_dependent_scripts $object_type $script_order
     unpack_object_scripts $object_type prefixes_ref
 }
