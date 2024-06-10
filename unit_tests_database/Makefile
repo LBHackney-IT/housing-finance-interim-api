@@ -14,3 +14,6 @@ run:
 launch:
 	@$(MAKE) -f $(THIS_FILE) build
 	@$(MAKE) -f $(THIS_FILE) run
+# Use if the container didn't stop
+clean-containers:
+	docker stop $$(docker ps -aq --filter "name=hfs-psql-tests-db-container")
