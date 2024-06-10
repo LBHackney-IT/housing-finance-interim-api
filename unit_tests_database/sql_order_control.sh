@@ -19,7 +19,7 @@ function create_object_prefix_map {
 function get_sql_script_order {
     local file_path=$1
     if [ -f "$file_path" ]; then
-        grep -iP "^\w+$" $file_path
+        grep -i "^[a-z_]\+$" $file_path
     else
         echo ""
     fi
