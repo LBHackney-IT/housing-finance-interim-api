@@ -19,7 +19,7 @@ DB_ENDPOINT_PATH := " /housing-finance/${ENVIRONMENT}/db-host"
 REMOTE_PORT_PATH := " /housing-finance/${ENVIRONMENT}/db-port"
 DB_USERNAME_PATH := " /housing-finance/${ENVIRONMENT}/db-username"
 DB_PASSWORD_PATH := " /housing-finance/${ENVIRONMENT}/db-password"
-DB_DATABASE_PATH := " /housing-finance/${ENVIRONMENT}/hfs-postgres-database"
+DB_DATABASE_PATH := " /housing-finance/${ENVIRONMENT}/db-database"
 
 # -- Secrets Manager paths --
 DB_CREDENTIALS_PATH := " /housing-finance/${ENVIRONMENT}/master-db-credentials"
@@ -29,7 +29,7 @@ DB_CREDENTIALS_PATH := " /housing-finance/${ENVIRONMENT}/master-db-credentials"
 INSTANCE_ID := $(shell aws ssm get-parameter --name ${INSTANCE_ID_PATH} --region "eu-west-2" --profile ${PROFILE} --query Parameter.Value --output text)
 DB_USERNAME := $(shell aws ssm get-parameter --name ${DB_USERNAME_PATH} --region "eu-west-2" --profile ${PROFILE} --query Parameter.Value --output text)
 DB_PASSWORD := $(shell aws ssm get-parameter --name ${DB_PASSWORD_PATH} --region "eu-west-2" --profile ${PROFILE} --query Parameter.Value --output text)
-DB_DATABASE := $(shell aws ssm get-parameter --name ${DB_DATABASE_PATH} --region "eu-west-2" --profile ${PROFILE} --query Parameter.Value --output text)
+DB_DATABASE := $(shell aws ssm get-parameter --name ${DB_DATABASE_PATH} --region "eu-west-2" --profile ${PROFILE} --query Parameter.Value --output text | tr '[:upper:]' '[:lower:]')
 DB_ENDPOINT := housing-finance-master-db-development.cqqi6ipffe40.eu-west-2.rds.amazonaws.com
 REMOTE_PORT := 5432
 
