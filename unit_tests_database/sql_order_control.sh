@@ -46,6 +46,15 @@ function unpack_object_scripts {
     rm -r $object_type
 }
 
+function prepare_scripts_by_type {
+    local object_type=$1
+    local -n prefixes_ref=$2
+    local orderFilePath="./${object_type}_script.order"
+    script_order=$( get_sql_script_order $orderFilePath )
+    order_dependent_scripts $object_type $script_order
+    unpack_object_scripts $object_type prefixes_ref
+}
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
 
@@ -54,15 +63,10 @@ db_object_types=( tables functions views stored_procedures )
 declare -A object_prefixes
 create_object_prefix_map object_prefixes db_object_types[@]
 
-
-relative_table_order=$( get_sql_script_order "./table_script_order.dat" )
-
-order_dependent_scripts "tables" $relative_table_order
-
-unpack_object_scripts "tables" object_prefixes
-unpack_object_scripts "functions" object_prefixes
-unpack_object_scripts "views" object_prefixes
-unpack_object_scripts "stored_procedures" object_prefixes
+prepare_scripts_by_type "tables" object_prefixes
+prepare_scripts_by_type "functions" object_prefixes
+prepare_scripts_by_type "views" object_prefixes
+prepare_scripts_by_type "stored_procedures" object_prefixes
 
 # prevent being triggered by base image
 rm -f $(basename "$0")
