@@ -63,10 +63,9 @@ db_object_types=( tables functions views stored_procedures )
 declare -A object_prefixes
 create_object_prefix_map object_prefixes db_object_types[@]
 
-prepare_scripts_by_type "tables" object_prefixes
-prepare_scripts_by_type "functions" object_prefixes
-prepare_scripts_by_type "views" object_prefixes
-prepare_scripts_by_type "stored_procedures" object_prefixes
+for type in "${db_object_types[@]}"; do
+    prepare_scripts_by_type $type object_prefixes
+done
 
 # prevent being triggered by base image
 rm -f $(basename "$0")
