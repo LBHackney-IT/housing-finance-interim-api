@@ -14,6 +14,11 @@ run:
 launch:
 	@$(MAKE) -f $(THIS_FILE) build
 	@$(MAKE) -f $(THIS_FILE) run
+	@$(MAKE) -f $(THIS_FILE) clean-images
+
+clean-images:
+	@docker rmi $$(docker images --filter "dangling=true" -q --no-trunc)
+
 # Use if the container didn't stop
 clean-containers:
 	docker stop $$(docker ps -aq --filter "name=hfs-psql-tests-db-container")
