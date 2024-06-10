@@ -19,7 +19,7 @@ We want a clean database, where we can mess with it's state worry-free.
 # Connect
 1. To connect use your GUI client, or `psql` cli:
    ```sh
-      psql -h localhost -p 5432 -U housingadmin -d mydatabase 
+      psql -h localhost -p 5432 -U housingadmin -d sow2b 
    ```
    You'll need to use the password specified within the `Dockerfile` `ENV` command.
 2. To connect from within an application plainly create your PostgreSQL connection string.
