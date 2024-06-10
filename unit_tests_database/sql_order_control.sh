@@ -61,18 +61,23 @@ function validate_source_data {
     printf -v joined '[ -d ./%s ] && ' "${script_folders[@]}"
     eval $(echo "${joined% && } || (echo '$err_msg'; exit 1)")
 }
+
+# Init
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
 
 db_object_types=( tables functions views stored_procedures )
-
 declare -A object_prefixes
 create_object_prefix_map object_prefixes db_object_types[@]
 
+# Validate
 validate_source_data db_object_types[@]
+
+# Process
 for type in "${db_object_types[@]}"; do
     prepare_scripts_by_type $type object_prefixes
 done
 
+# End
 # prevent being triggered by base image
 rm -f $(basename "$0")
