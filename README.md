@@ -23,3 +23,6 @@ Can be launched from the root of the repository via its Makefile commands. To do
 - While port forwarding in a separate process, run `make test-db` to run the tests, or use a test runner extension in VSCode or other IDE
 
 NOTE: The CLI profile in the Makefile must be the same one Pytest uses to connect to the database. Check `conftest.py` for the default profile name, or pass the command line argument `pytest --aws-profile <profile>` as in the Makefile to override it.
+
+## Local Unit Tests Database
+The dockerised PostgreSQL database is also expected to be launched from the root of the repository via its Makefile. See further instructions [here](unit_tests_database/README.md)
