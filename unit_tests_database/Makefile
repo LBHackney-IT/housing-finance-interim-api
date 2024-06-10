@@ -9,6 +9,9 @@ build:
 	@docker build -t hfs-psql-tests-db -f $(DOCKERFILE) .
 
 run:
+	@bash -c "trap 'trap - SIGINT SIGTERM ERR; $(MAKE) -f $(THIS_FILE) clean-images; exit 1' SIGINT SIGTERM ERR; $(MAKE) -f $(THIS_FILE) run-internal"
+
+run-internal:
 	@docker run --rm --name hfs-psql-tests-db-container -p 127.0.0.1:5432:5432 hfs-psql-tests-db
 
 launch:
