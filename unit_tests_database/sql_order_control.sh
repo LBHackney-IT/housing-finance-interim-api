@@ -55,6 +55,12 @@ function prepare_scripts_by_type {
     unpack_object_scripts $object_type prefixes_ref
 }
 
+function validate_source_data {
+    local script_folders=("${!1}")
+    local err_msg='One or more script folders missing!'
+    printf -v joined '[ -d ./%s ] && ' "${script_folders[@]}"
+    eval $(echo "${joined% && } || (echo '$err_msg'; exit 1)")
+}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
 
@@ -63,6 +69,7 @@ db_object_types=( tables functions views stored_procedures )
 declare -A object_prefixes
 create_object_prefix_map object_prefixes db_object_types[@]
 
+validate_source_data db_object_types[@]
 for type in "${db_object_types[@]}"; do
     prepare_scripts_by_type $type object_prefixes
 done
