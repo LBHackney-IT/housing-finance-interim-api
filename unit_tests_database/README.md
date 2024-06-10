@@ -14,7 +14,7 @@ We want a clean database, where we can mess with it's state worry-free.
 # To run the database
 1. You need to have `docker` installed on your system.
 2. You can't use `Powershell` as it poorly interprets some `Makefile` syntax.
-3. run `make run-db` from the root of the repository.
+3. run `make unit_db` from the root of the repository.
 
 # Connect
 1. To connect use your GUI client, or `psql` cli:
