@@ -1,0 +1,5 @@
+_scripts_archive/
+builtins/
+**/Dockerfile
+**/Makefile
+**/README.md
