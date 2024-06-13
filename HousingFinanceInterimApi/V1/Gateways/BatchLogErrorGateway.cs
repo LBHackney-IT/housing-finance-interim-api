@@ -20,14 +20,19 @@ namespace HousingFinanceInterimApi.V1.Gateways
             _context = context;
         }
 
-        public async Task<BatchLogErrorDomain> CreateAsync(long batchId, string type, string message)
+        public async Task<BatchLogErrorDomain> CreateAsync(long? batchId, string type, string message)
         {
             try
             {
+                long concreteBatchId = batchId.HasValue ? batchId.Value : -1;
+
+                if (!batchId.HasValue)
+                    message += "\n'batchId' is missing.";
+
                 var newBatchError = new BatchLogError()
                 {
                     Type = type,
-                    BatchLogId = batchId,
+                    BatchLogId = concreteBatchId,
                     Message = message
                 };
                 await _context.BatchLogErrors.AddAsync(newBatchError).ConfigureAwait(false);

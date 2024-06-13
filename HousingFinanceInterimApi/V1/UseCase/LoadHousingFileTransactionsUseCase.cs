@@ -53,7 +53,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 var namespaceLabel = $"{nameof(HousingFinanceInterimApi)}.{nameof(Handler)}.{nameof(ExecuteAsync)}";
 
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", $"Application error. Not possible to load housing files transactions").ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batch?.Id, "ERROR", $"Application error. Not possible to load housing files transactions").ConfigureAwait(false);
 
                 LoggingHandler.LogError($"{namespaceLabel} application error");
                 LoggingHandler.LogError(exc.ToString());
