@@ -13,7 +13,7 @@ COPY tables/ /usr/config/tables
 COPY functions/ /usr/config/functions
 COPY stored_procedures/ /usr/config/stored_procedures
 COPY views/ /usr/config/views
-COPY tests/test_data/ /usr/config/test_data
+COPY database/seed_data/ /usr/config/seed_data
 
 # Move initialiser scripts
 COPY database/unit_tests_database_ee/db_setup.sh /usr/config/db_setup.sh
