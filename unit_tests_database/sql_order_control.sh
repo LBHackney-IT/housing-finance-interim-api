@@ -66,7 +66,7 @@ function validate_source_data {
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
 
-db_object_types=( schemas tables functions views stored_procedures )
+db_object_types=( schemas tables functions views stored_procedures seed_scripts )
 declare -A object_prefixes
 create_object_prefix_map object_prefixes db_object_types[@]
 
