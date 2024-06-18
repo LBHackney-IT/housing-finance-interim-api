@@ -18,9 +18,7 @@ echo "[db_setup] Initialising database state..."
 /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d sow2b -Q "EXEC sp_defaultdb 'sa', 'sow2b'"
 
 # Create tables
-for file in /usr/config/tables/*.sql; do
-    /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d sow2b -i $file
-done
+/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d sow2b -i /usr/config/tables.sql
 
 # Create functions
 for file in /usr/config/functions/*.sql; do

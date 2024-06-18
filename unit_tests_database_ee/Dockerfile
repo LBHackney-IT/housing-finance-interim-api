@@ -9,7 +9,7 @@ RUN mkdir -p /usr/config
 WORKDIR /usr/config
 
 # Move SQL
-COPY tables/ /usr/config/tables
+COPY database/unit_tests_database_ee/tables.sql /usr/config/tables.sql
 COPY functions/ /usr/config/functions
 COPY stored_procedures/ /usr/config/stored_procedures
 COPY views/ /usr/config/views
