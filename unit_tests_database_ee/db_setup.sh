@@ -1,4 +1,15 @@
-sleep 10s
+# Wait for database to be ready
+DBSTATUS=1
+ERRCODE=1
+
+while [ $ERRCODE -ne 0 ] || [ -z $DBSTATUS ] || [ $DBSTATUS -ne 0 ]; do
+	echo "[db_setup] Waiting for database to start up..."
+    DBSTATUS=$(/opt/mssql-tools/bin/sqlcmd -h -1 -t 1 -U sa -P $SA_PASSWORD -Q "SET NOCOUNT ON; Select SUM(state) from sys.databases")
+	ERRCODE=$?
+	sleep 1s
+done
+
+echo "[db_setup] Initialising database state..."
 
 # Create database
 /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -Q "CREATE DATABASE sow2b"
