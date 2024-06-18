@@ -23,3 +23,8 @@ done
 for file in /usr/config/views/*.sql; do
     /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d sow2b -i $file
 done
+
+# Insert test data
+for file in /usr/config/test_data/*.sql; do
+    /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d sow2b -i $file
+done
