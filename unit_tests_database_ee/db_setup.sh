@@ -1,3 +1,5 @@
+sleep 10s
+
 # Create database
 /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -Q "CREATE DATABASE sow2b"
 
