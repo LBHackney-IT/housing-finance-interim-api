@@ -47,6 +47,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<UPCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<UPHousingCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<AdjustmentAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
+            modelBuilder.Entity<MAProperty>().HasKey(x => x.PropRef);
+            modelBuilder.Entity<UHProperty>().HasKey(x => x.PropRef);
         }
 
         /// <summary>
@@ -63,6 +65,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         private DbSet<Transaction> Transactions { get; set; }
         private DbSet<PRNTransactionEntity> PRNTransaction { get; set; }
         public DbSet<ChargesBatchYear> ChargesBatchYears { get; set; }
+        public DbSet<MAProperty> MAProperty { get; set; }
+        public DbSet<UHProperty> UHProperty { get; set; }
 
         /// <summary>
         /// Gets or sets the google file settings.
