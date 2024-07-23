@@ -29,7 +29,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
         [Fact]
         public async void Should_Update_AssetDetails_With_Values_Requested()
         {
-            var propRef = TestDataGenerator.PropRef();
+            var propRef = TestDataGenerator.PopRef;
             var query = new UpdateAssetDetailsQuery
             {
                 PropertyReference = propRef
