@@ -1,7 +1,7 @@
 using System;
 using AutoFixture;
 
-namespace HousingFinanceInterimApi.Tests.V1.Helper
+namespace HousingFinanceInterimApi.Tests.V1.TestHelpers
 {
     public static class TestDataGenerator
     {
