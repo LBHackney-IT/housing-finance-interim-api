@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
-using HousingFinanceInterimApi.Tests.V1.Helper;
+using HousingFinanceInterimApi.Tests.V1.TestHelpers;
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Infrastructure;
