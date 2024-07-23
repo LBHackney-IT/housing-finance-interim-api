@@ -15,6 +15,5 @@ namespace HousingFinanceInterimApi.Tests.V1.Helper
             // 8 Digit random number that leads with 9 to prevent clashes e.g. "90023871"
             return string.Concat("9", fixture.Create<int>().ToString().PadLeft(7, '0').AsSpan(0, 7));
         }
-
     }
 }

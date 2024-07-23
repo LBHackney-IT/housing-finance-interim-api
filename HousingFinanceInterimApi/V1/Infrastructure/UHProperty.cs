@@ -66,7 +66,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public string PostPreamble { get; set; }
 
         [Column("property_sid")]
-        public int PropertySid { get; set; }
+        public int? PropertySid { get; set; }
 
         [Column("arr_patch")]
         [StringLength(3)]
@@ -77,7 +77,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public string Address1 { get; set; }
 
         [Column("num_bedrooms")]
-        public int NumBedrooms { get; set; }
+        public int? NumBedrooms { get; set; }
 
         [Column("post_desig")]
         [StringLength(60)]

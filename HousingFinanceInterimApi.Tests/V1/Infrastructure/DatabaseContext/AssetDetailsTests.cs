@@ -1,12 +1,12 @@
-using AutoFixture;
-using System.Collections.Generic;
 using System;
-using Xunit;
-using HousingFinanceInterimApi.V1.Boundary.Request;
-using HousingFinanceInterimApi.V1.Infrastructure;
-using HousingFinanceInterimApi.V1.Gateways;
+using System.Collections.Generic;
 using System.Linq;
+using AutoFixture;
 using HousingFinanceInterimApi.Tests.V1.Helper;
+using HousingFinanceInterimApi.V1.Boundary.Request;
+using HousingFinanceInterimApi.V1.Gateways;
+using HousingFinanceInterimApi.V1.Infrastructure;
+using Xunit;
 
 namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 {
@@ -34,15 +34,12 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             {
                 PropertyReference = propRef
             };
-
             var request = new UpdateAssetDetailsRequest
             {
                 AddressLine1 = "100 Acacia Avenue",
                 PostPreamble = "33 Mountain View Court"
             };
-
             var testClass = new AssetGateway(_context);
-
 
             // Arrange
             var newMaPropertyTableRow = _fixture.Build<MAProperty>()
