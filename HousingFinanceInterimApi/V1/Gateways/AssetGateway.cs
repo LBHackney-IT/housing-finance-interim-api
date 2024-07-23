@@ -33,8 +33,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     maPropertyToUpdate.ShortAddress = $"{request.PostPreamble} {request.AddressLine1}";
                     maPropertyToUpdate.Address1 = $"{request.PostPreamble} {request.AddressLine1}";
                     maPropertyToUpdate.PostPreamble = request.PostPreamble ?? request.AddressLine1;
-
-                    await _context.SaveChangesAsync().ConfigureAwait(false);
                 }
 
                 if (uhPropertyToUpdate != null)
@@ -42,9 +40,9 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     uhPropertyToUpdate.ShortAddress = $"{request.PostPreamble} {request.AddressLine1}";
                     uhPropertyToUpdate.Address1 = $"{request.PostPreamble} {request.AddressLine1}";
                     uhPropertyToUpdate.PostPreamble = request.PostPreamble ?? request.AddressLine1;
-
-                    await _context.SaveChangesAsync().ConfigureAwait(false);
                 }
+
+                await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (System.Exception ex)
             {
