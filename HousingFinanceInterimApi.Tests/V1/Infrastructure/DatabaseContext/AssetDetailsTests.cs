@@ -6,6 +6,7 @@ using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using HousingFinanceInterimApi.V1.Gateways;
 using System.Linq;
+using HousingFinanceInterimApi.Tests.V1.Helper;
 
 namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 {
@@ -28,13 +29,17 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
         [Fact]
         public async void Should_Update_AssetDetails_With_Values_Requested()
         {
-            var propRef = GeneratePropRef();
-            var query = new UpdateAssetDetailsQuery();
-            query.PropertyReference = propRef;
+            var propRef = TestDataGenerator.PropRef();
+            var query = new UpdateAssetDetailsQuery
+            {
+                PropertyReference = propRef
+            };
 
-            var request = new UpdateAssetDetailsRequest();
-            request.AddressLine1 = "100 Acacia Avenue";
-            request.PostPreamble = "33 Mountain View Court";
+            var request = new UpdateAssetDetailsRequest
+            {
+                AddressLine1 = "100 Acacia Avenue",
+                PostPreamble = "33 Mountain View Court"
+            };
 
             var testClass = new AssetGateway(_context);
 
@@ -42,44 +47,10 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             // Arrange
             var newMaPropertyTableRow = _fixture.Build<MAProperty>()
                 .With(table => table.PropRef, propRef)
-                .With(table => table.Address1, "Default Address 1 value")
-                .With(table => table.Ownership, "DefaultOwn")
-                .With(table => table.PostPreamble, "Default Postpreamble value")
-                .With(table => table.Agent, "Age")
-                .With(table => table.Agent, "Are")
-                .With(table => table.AreaOffice, "Are")
-                .With(table => table.CatType, "Cat")
-                .With(table => table.OccStatus, "Occ")
-                .With(table => table.ArrPatch, "Arr")
-                .With(table => table.HouseRef, "1234567890")
-                .With(table => table.MajorRef, "majorred00")
-                .With(table => table.ManScheme, "manscheme8")
-                .With(table => table.PostCode, "n115tg")
-                .With(table => table.NumBedrooms, 3)
-                .With(table => table.PropertySid, 5000)
-                .With(table => table.SubtypeCode, "SC1")
-                .With(table => table.Telephone, "898987845")
                 .Create();           
 
             var newUhPropertyTableRow = _fixture.Build<UHProperty>()
                 .With(table => table.PropRef, propRef)
-                .With(table => table.Address1, "Default Address 1 value")
-                .With(table => table.Ownership, "DefaultOwn")
-                .With(table => table.PostPreamble, "Default Postpreamble value")
-                .With(table => table.Agent, "Age")
-                .With(table => table.Agent, "Are")
-                .With(table => table.AreaOffice, "Are")
-                .With(table => table.CatType, "Cat")
-                .With(table => table.OccStatus, "Occ")
-                .With(table => table.ArrPatch, "Arr")
-                .With(table => table.HouseRef, "1234567890")
-                .With(table => table.MajorRef, "majorred00")
-                .With(table => table.ManScheme, "manscheme8")
-                .With(table => table.PostCode, "n115tg")
-                .With(table => table.NumBedrooms, 3)
-                .With(table => table.PropertySid, 5000)
-                .With(table => table.SubtypeCode, "SC1")
-                .With(table => table.Telephone, "898987845")
                 .Create();
 
             _context.MAProperty.Add(newMaPropertyTableRow);
@@ -97,26 +68,19 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             await testClass.UpdateAssetDetails(query, request).ConfigureAwait(false);
 
             // Assert
-            var newMAProperty = _context.MAProperty.SingleOrDefault(p => p.PropRef == query.PropertyReference);
-            var newUHProperty = _context.UHProperty.SingleOrDefault(p => p.PropRef == query.PropertyReference);
-
             var address1 = $"{request.PostPreamble} {request.AddressLine1}";
 
+            var newMAProperty = _context.MAProperty.SingleOrDefault(p => p.PropRef == query.PropertyReference);
             Assert.NotNull(newMAProperty);         
             Assert.Equal(newMAProperty.PostPreamble, request.PostPreamble);
             Assert.Equal(newMAProperty.Address1, address1);
             Assert.Equal(newMAProperty.ShortAddress, address1);
 
+            var newUHProperty = _context.UHProperty.SingleOrDefault(p => p.PropRef == query.PropertyReference);
             Assert.NotNull(newUHProperty);
             Assert.Equal(newUHProperty.PostPreamble, request.PostPreamble);
             Assert.Equal(newUHProperty.Address1, address1);
             Assert.Equal(newUHProperty.ShortAddress, address1);
-        }
-
-        private string GeneratePropRef()
-        {
-            // 8 Digit random number that leads with 9 to prevent clashes e.g. "90023871"
-            return string.Concat("9", _fixture.Create<int>().ToString().PadLeft(7, '0').AsSpan(0, 7));
         }
     }
 }
