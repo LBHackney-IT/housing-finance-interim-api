@@ -11,7 +11,7 @@ namespace HousingFinanceInterimApi.Tests.V1.TestHelpers
         /// Property Reference known locally as  prop_ref
         /// </summary>
         /// <returns></returns>
-        public static string PopRef
+        public static string PropRef
         {
             get
             {
