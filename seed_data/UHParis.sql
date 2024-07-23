@@ -1,0 +1,17 @@
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('BNC', 'RRC', 'Returned cheque');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('GIR', 'RBR', 'Paypoint/Post Office');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('BNK', 'RBP', 'Bank payment');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('CAS', 'RCO', 'Cash office payment');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('CHQ', 'RQP', 'Cheque payment');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('POS', 'RPO', 'Postal order');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('CRD', 'RCP', 'Debit/credit card');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('DDN', 'RDN', 'Direct debit unpaid');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('DDE', 'RDD', 'Direct debit');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('PPT', 'RPY', 'Paypoint/Post Office');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('TRN', 'RIT', 'Internal transfer');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('STO', 'RSO', 'Standing order');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('BAI', 'RBA', 'Bailiff payment');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('DSS', 'RDT', 'DSS transfer');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('DDR', 'RDR', 'BACS Refund');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('DDW', 'RDS', 'Salary Deduction');
+INSERT INTO sow2b.dbo.UHParis (PCRTransactionType, UHTReceiptType, Description) VALUES ('UCD', 'RUC', 'Universal Credit');
