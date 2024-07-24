@@ -46,7 +46,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         [StringLength(3)]
         public string SubtypeCode { get; set; }
 
-        [Column("letable")]       
+        [Column("letable")]
         public bool Letable { get; set; }
 
         [Column("cat_type")]
@@ -65,7 +65,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         [StringLength(60)]
         public string PostPreamble { get; set; }
 
-        [Column("property_sid")]      
+        [Column("property_sid")]
         public int? PropertySid { get; set; }
 
         [Column("arr_patch")]
