@@ -2,10 +2,9 @@ version: "3.2"
 
 services:
   housing-finance-interim-api:
-    image: housing-finance-interim-api
+    image: mcr.microsoft.com/mssql/server
     build:
       context: .
-      dockerfile: HousingFinanceInterimApi/Dockerfile
       args:
       - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
     network_mode: "host"
@@ -34,10 +33,9 @@ services:
       - ./database:/docker-entrypoint-initdb.d
 
   housing-finance-interim-api-test:
-    image: housing-finance-interim-api-test
+    image: mcr.microsoft.com/mssql/server
     build:
       context: .
-      dockerfile: HousingFinanceInterimApi.Tests/Dockerfile
       args:
       - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
     environment:
@@ -49,10 +47,9 @@ services:
       - test-database
 
   test-database:
-    image: test-database
+    image: mcr.microsoft.com/mssql/server
     build:
       context: .
-      dockerfile: database/Dockerfile
     ports:
       - 1433:1433
     env_file:
