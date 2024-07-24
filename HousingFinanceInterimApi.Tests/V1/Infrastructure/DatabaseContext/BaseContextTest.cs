@@ -63,7 +63,10 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
                 try
                 {
                     foreach (var cleanup in _cleanups)
+                    {
                         cleanup();
+                        _context.SaveChanges();
+                    }
                     transaction.Commit();
                 }
                 catch (Exception)
