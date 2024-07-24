@@ -19,7 +19,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
         private readonly Action<string> _executeProcedure;
 
         public AssetDetailsTests(BaseContextTest baseContextTest)
-        {            
+        {
             _context = baseContextTest._context;
             _fixture = baseContextTest._fixture;
             _cleanups = baseContextTest._cleanups;

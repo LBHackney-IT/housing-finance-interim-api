@@ -28,14 +28,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 var maPropertyToUpdate = _context.MAProperty.SingleOrDefault(p => p.PropRef == query.PropertyReference);
                 var uhPropertyToUpdate = _context.UHProperty.SingleOrDefault(p => p.PropRef == query.PropertyReference);
 
-                if (maPropertyToUpdate != null)
+                if (maPropertyToUpdate is not null)
                 {
                     maPropertyToUpdate.ShortAddress = $"{request.PostPreamble} {request.AddressLine1}";
                     maPropertyToUpdate.Address1 = $"{request.PostPreamble} {request.AddressLine1}";
                     maPropertyToUpdate.PostPreamble = request.PostPreamble ?? request.AddressLine1;
                 }
 
-                if (uhPropertyToUpdate != null)
+                if (uhPropertyToUpdate is not null)
                 {
                     uhPropertyToUpdate.ShortAddress = $"{request.PostPreamble} {request.AddressLine1}";
                     uhPropertyToUpdate.Address1 = $"{request.PostPreamble} {request.AddressLine1}";
