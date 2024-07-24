@@ -44,7 +44,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             // Arrange
             var newMaPropertyTableRow = _fixture.Build<MAProperty>()
                 .With(table => table.PropRef, propRef)
-                .Create();           
+                .Create();
 
             var newUhPropertyTableRow = _fixture.Build<UHProperty>()
                 .With(table => table.PropRef, propRef)
@@ -68,7 +68,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             var address1 = $"{request.PostPreamble} {request.AddressLine1}";
 
             var newMAProperty = _context.MAProperty.SingleOrDefault(p => p.PropRef == query.PropertyReference);
-            Assert.NotNull(newMAProperty);         
+            Assert.NotNull(newMAProperty);
             Assert.Equal(newMAProperty.PostPreamble, request.PostPreamble);
             Assert.Equal(newMAProperty.Address1, address1);
             Assert.Equal(newMAProperty.ShortAddress, address1);
