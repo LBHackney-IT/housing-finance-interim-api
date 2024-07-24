@@ -1,0 +1,23 @@
+# batch log group
+batch_log
+batch_log_error
+
+# charges group
+charges
+charges_history
+
+# direct debit group
+direct_debit_history
+direct_debit_suspense_accounts
+
+# cash load group
+up_cash_dump_file_name
+up_cash_dump
+up_cash_load
+up_cash_load_suspense_accounts
+
+# housing cash load group
+up_housing_cash_dump_file_name
+up_housing_cash_dump
+up_housing_cash_load
+up_housing_cash_load_suspense_accounts
