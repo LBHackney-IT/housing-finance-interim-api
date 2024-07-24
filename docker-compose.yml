@@ -49,10 +49,9 @@ services:
       - test-database
 
   test-database:
-    image: test-database
+    image: mcr.microsoft.com/mssql/server
     build:
       context: .
-      dockerfile: database/Dockerfile
     ports:
       - 1433:1433
     env_file:
