@@ -45,6 +45,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<ActionDiaryAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<TenancyAgreementAux>().Property(x => x.TimeStamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<UPCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
+            modelBuilder.Entity<UPCashLoad>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<UPHousingCashDump>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<AdjustmentAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<MAProperty>().HasKey(x => x.PropRef);
@@ -82,6 +83,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the up cash dumps.
         /// </summary>
         public DbSet<UPCashDump> UpCashDumps { get; set; }
+
+        public DbSet<UPCashLoad> UPCashLoads { get; set; }
 
         /// <summary>
         /// Gets or sets the up cash dump file names.

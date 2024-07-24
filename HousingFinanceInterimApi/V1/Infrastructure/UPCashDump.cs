@@ -17,6 +17,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the identifier.
         /// </summary>
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
         /// <summary>
@@ -39,9 +40,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// <summary>
         /// Gets or sets the timestamp.
         /// </summary>
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public DateTimeOffset Timestamp { get; private set; }
-
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public DateTimeOffset Timestamp { get; set; }
     }
 
 }
