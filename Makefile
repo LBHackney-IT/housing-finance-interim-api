@@ -43,10 +43,16 @@ serve-local:
 	dotnet run --project HousingFinanceInterimApi/HousingFinanceInterimApi.csproj
 
 .PHONY: remote-db
-remote-db:
-	-make -f finance_database.mk sso_login PROFILE=housing-development;
-	make -f finance_database.mk port_forwarding_to_hfs_db PROFILE=housing-development;
+remote_db:
+	-make -f HFSDatabaseObjects/database/ee/Makefile sso_login;
+	make -f HFSDatabaseObjects/database/ee/Makefile ee_db;
 
 # Update HFSDatabaseObjects submodule
 update_submodule:
 	git submodule update --init --recursive
+
+unit_db:
+	@make -f HFSDatabaseObjects/database/unit_tests_database/Makefile launch
+
+unit_db_ee:
+	@make -f HFSDatabaseObjects/database/unit_tests_database_ee/Makefile launch
