@@ -46,3 +46,7 @@ serve-local:
 remote-db:
 	-make -f finance_database.mk sso_login PROFILE=housing-development;
 	make -f finance_database.mk port_forwarding_to_hfs_db PROFILE=housing-development;
+
+# Update HFSDatabaseObjects submodule
+update_submodule:
+	git submodule update --init --recursive
