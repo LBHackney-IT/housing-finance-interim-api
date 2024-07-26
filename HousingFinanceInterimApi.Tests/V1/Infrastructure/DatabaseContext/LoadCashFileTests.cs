@@ -8,6 +8,7 @@ using Xunit;
 using Bogus;
 using HousingFinanceInterimApi.Tests.V1.TestHelpers;
 using System.Threading.Tasks;
+using HousingFinanceInterimApi.V1.Exceptions;
 
 namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 {
@@ -32,7 +33,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
                 typeof(UPCashDumpFileName), typeof(UPCashDump), typeof(UPCashLoad)
             };
             ClearTable.ClearTables(_context, tablesToClear);
-            _cleanups.Add(() => ClearTable.ClearTables(_context, tablesToClear ));
+            _cleanups.Add(() => ClearTable.ClearTables(_context, tablesToClear));
         }
 
         // For data that's specific to this test
@@ -91,9 +92,9 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 
             // Act
             await testClass.LoadCashFiles().ConfigureAwait(false);
-            var matchingCashLoad = _context.UPCashLoads.Where(x => x.UPCashDumpId == cashDump.Id).First();
 
             // Assert
+            var matchingCashLoad = _context.UpCashLoads.Where(x => x.UPCashDumpId == cashDump.Id).First();
             Assert.NotNull(matchingCashLoad);
             Assert.Equal(rentAccount, matchingCashLoad.RentAccount);
             Assert.Equal(paymentSource.Trim(), matchingCashLoad.PaymentSource);
@@ -117,9 +118,9 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
         /// </summary>
         /// <param name="rentAccount"></param>
         [Theory]
-        [InlineData(false, false)]
-        [InlineData(true, true)]
-        public async void Given_An_Invalid_Cash_Dump__Does_Not_Create_UPCashLoad(bool fileNameIsSuccess, bool cashDumpIsRead)
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        public async void Given_An_Invalid_Cash_Dump__Does_Not_Create_UPCashLoad(bool fileNameIsSuccessful, bool cashDumpNotAlreadyRead)
         {
             // Arrange
             var testClass = new UPCashLoadGateway(_context);
@@ -127,7 +128,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             var cashDumpFileName = _fixture.Build<UPCashDumpFileName>()
                 .Without(x => x.Id)
                 .Without(x => x.Timestamp)
-                .With(x => x.IsSuccess, fileNameIsSuccess)
+                .With(x => x.IsSuccess, fileNameIsSuccessful)
                 .Create();
             _context.UpCashDumpFileNames.Add(cashDumpFileName);
             _context.SaveChanges();
@@ -136,20 +137,24 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
                 .Without(x => x.Id)
                 .With(x => x.UpCashDumpFileName, cashDumpFileName)
                 .With(x => x.FullText, DataGen.FullText())
-                .With(x => x.IsRead, cashDumpIsRead)
+                .With(x => x.IsRead, !cashDumpNotAlreadyRead)
                 .Create();
             _context.Add(cashDump);
             _context.SaveChanges();
 
             // Act
             await testClass.LoadCashFiles().ConfigureAwait(false);
-            
+
             // Assert
-            var matchingCashLoad = _context.UPCashLoads.Where(x => x.UPCashDumpId == cashDump.Id).FirstOrDefault();
+            var matchingCashLoad = _context.UpCashLoads.Where(x => x.UPCashDumpId == cashDump.Id).FirstOrDefault();
             Assert.Null(matchingCashLoad);
         }
-        [Fact]
-        public async void Given_A_UPCashDump_With_Invalid_FullText__ThrowsError()
+
+
+        [Theory]
+        [InlineData("invalid rent account")]
+        [InlineData("invalid payment source")]
+        public async void Given_A_UPCashDump_With_Invalid_FullText__ThrowsError(string fullText)
         {
             // Arrange
             var testClass = new UPCashLoadGateway(_context);
@@ -161,7 +166,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             var cashDump = _fixture.Build<UPCashDump>()
                 .Without(x => x.Id)
                 .With(x => x.UpCashDumpFileName, cashDumpFileName)
-                .With(x => x.FullText, "invalid full text")
+                .With(x => x.FullText, fullText)
                 .Create();
             _context.Add(cashDump);
             _context.SaveChanges();
@@ -170,8 +175,8 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             async Task Act() => await testClass.LoadCashFiles().ConfigureAwait(false);
 
             // Assert
-            await Assert.ThrowsAsync<Microsoft.Data.SqlClient.SqlException>(Act).ConfigureAwait(false);
-            
+            await Assert.ThrowsAsync<InvalidCashFileTextException>(Act).ConfigureAwait(false);
+
         }
     }
 
