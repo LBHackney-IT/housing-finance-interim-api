@@ -25,6 +25,9 @@ test:
 	-docker-compose build housing-finance-interim-api-test && docker-compose run housing-finance-interim-api-test
 	-make clean
 
+test-db:
+	dotnet test --filter FullyQualifiedName~Infrastructure.DatabaseContext
+
 .PHONY: lint
 lint:
 	-dotnet tool install -g dotnet-format
