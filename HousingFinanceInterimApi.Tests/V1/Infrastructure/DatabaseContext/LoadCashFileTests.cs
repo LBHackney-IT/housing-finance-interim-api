@@ -6,47 +6,71 @@ using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using Xunit;
 using Bogus;
+using HousingFinanceInterimApi.Tests.V1.TestHelpers;
 
 namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "This is a test class")]
     public class LoadCashFileTests : IClassFixture<BaseContextTest>
     {
         private readonly HousingFinanceInterimApi.V1.Infrastructure.DatabaseContext _context;
-        private readonly Fixture _fixture;
-        private readonly Faker _faker;
+        private static readonly Fixture _fixture = new();
+        private static readonly Faker _faker = new();
         private readonly List<Action> _cleanups;
 
         public LoadCashFileTests(BaseContextTest baseContextTest)
         {
             _context = baseContextTest._context;
-            _fixture = baseContextTest._fixture;
-            _faker = baseContextTest._faker;
             _cleanups = baseContextTest._cleanups;
 
             _fixture.Customize<UPCashDumpFileName>(composer => composer
                 .Without(x => x.Id)
                 .Without(x => x.Timestamp)
             );
+
+            _context.RemoveRange(_context.UpCashDumps);
+            _context.RemoveRange(_context.UpCashDumpFileNames);
+            _cleanups.Add(() => _context.RemoveRange(_context.UpCashDumps));
+            _cleanups.Add(() => _context.RemoveRange(_context.UpCashDumpFileNames));
+            _cleanups.Add(() => _context.RemoveRange(_context.UPCashLoads));
         }
 
-        [Fact]
-        public async void Should_Load_Cash_File()
+        private static class DataGen
         {
-            _context.RemoveRange(_context.UpCashDumpFileNames);
-            _context.RemoveRange(_context.UpCashDumps);
-            _cleanups.Add(() => _context.UPCashLoads.RemoveRange(_context.UPCashLoads));
-            _cleanups.Add(() => _context.UpCashDumps.RemoveRange(_context.UpCashDumps));
+            public static string PaymentSource() =>
+                _faker.Random.Word().Replace(" ", "").PadRight(10)[..10].ToUpper();
 
-            var rentAccount = _faker.Random.Long(0, 9_999_999_999).ToString().PadLeft(10, '0');
-            var paymentSource = _faker.Random.Word().Replace(" ", "").PadRight(10)[..10].ToUpper();
-            var amountPaid = _faker.Random.Decimal(0, 1000).ToString().PadLeft(9, '0')[..9];
-            var paymentDate = _faker.Date.Past().ToString("dd/MM/yyyy");
-            var transactionType = _faker.Random.AlphaNumeric(3).ToUpper();
-            var civicaCode = _faker.Random.Number(1, 99).ToString().PadLeft(2, '0');
-            var fullText = $"{rentAccount}{paymentSource}".PadRight(30) + $"{transactionType}+{amountPaid}{paymentDate}{civicaCode}";
+            public static string AmountPaid() =>
+                _faker.Random.Decimal(0, 1000).ToString().PadLeft(9, '0')[..9];
 
+            public static string PaymentDate() =>
+                _faker.Date.Past().ToString("dd/MM/yyyy");
+
+            public static string TransactionType() =>
+                _faker.Random.AlphaNumeric(3).ToUpper();
+
+            public static string CivicaCode() =>
+                _faker.Random.Number(1, 99).ToString().PadLeft(2, '0');
+
+            public static string FullText(string rentAccount, string paymentSource, string amountPaid, string paymentDate, string transactionType, string civicaCode) =>
+                $"{rentAccount}{paymentSource}".PadRight(30) + $"{transactionType}+{amountPaid}{paymentDate}{civicaCode}";
+        }
+
+
+        [Fact]
+        public async void Given_A_Valid_UPCashDump_Creates_A_Matching_UPCashLoad()
+        {
             // Arrange
+            var rentAccount = TestDataGenerator.RentAccount();
+            var paymentSource = DataGen.PaymentSource();
+            var amountPaid = DataGen.AmountPaid();
+            var paymentDate = DataGen.PaymentDate();
+            var transactionType = DataGen.TransactionType();
+            var civicaCode = DataGen.CivicaCode();
+            // var fullText = $"{rentAccount}{paymentSource}".PadRight(30) + $"{transactionType}+{amountPaid}{paymentDate}{civicaCode}";
+            var fullText = DataGen.FullText(
+                rentAccount, paymentSource, amountPaid, paymentDate, transactionType, civicaCode
+            );
+
             var testClass = new UPCashLoadGateway(_context);
 
             var cashDumpFileName = _fixture.Create<UPCashDumpFileName>();
@@ -54,8 +78,8 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             _context.SaveChanges();
 
             var cashDump = _fixture.Build<UPCashDump>()
-                .Without(cashDump => cashDump.Id)
-                .With(cashDump => cashDump.UpCashDumpFileName, cashDumpFileName)
+                .Without(x => x.Id)
+                .With(x => x.UpCashDumpFileName, cashDumpFileName)
                 .With(x => x.FullText, fullText)
                 .Create();
             _context.Add(cashDump);
@@ -67,8 +91,18 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 
             // Assert
             Assert.NotNull(matchingCashLoad);
+            Assert.Equal(rentAccount, matchingCashLoad.RentAccount);
+            Assert.Equal(paymentSource.Trim(), matchingCashLoad.PaymentSource);
+            Assert.Equal(transactionType, matchingCashLoad.MethodOfPayment);
+            Assert.Equal(Math.Round(decimal.Parse(amountPaid), 2), matchingCashLoad.AmountPaid);
+            Assert.Equal(DateTime.Parse(paymentDate).Date, matchingCashLoad.DatePaid.Date);
+            Assert.Equal(civicaCode, matchingCashLoad.CivicaCode);
+            Assert.Equal(cashDump.Id, matchingCashLoad.UPCashDumpId);
+            Assert.Equal(DateTime.Today.Date, matchingCashLoad.Timestamp.Date);
 
 
+            _context.Entry(cashDump).Reload();
+            Assert.True(cashDump.IsRead);
         }
     }
 }
