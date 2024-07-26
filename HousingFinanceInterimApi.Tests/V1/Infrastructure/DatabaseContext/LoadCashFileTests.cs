@@ -7,6 +7,7 @@ using HousingFinanceInterimApi.V1.Infrastructure;
 using Xunit;
 using Bogus;
 using HousingFinanceInterimApi.Tests.V1.TestHelpers;
+using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 {
@@ -147,5 +148,31 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             var matchingCashLoad = _context.UPCashLoads.Where(x => x.UPCashDumpId == cashDump.Id).FirstOrDefault();
             Assert.Null(matchingCashLoad);
         }
+        [Fact]
+        public async void Given_A_UPCashDump_With_Invalid_FullText__ThrowsError()
+        {
+            // Arrange
+            var testClass = new UPCashLoadGateway(_context);
+
+            var cashDumpFileName = _fixture.Create<UPCashDumpFileName>();
+            _context.UpCashDumpFileNames.Add(cashDumpFileName);
+            _context.SaveChanges();
+
+            var cashDump = _fixture.Build<UPCashDump>()
+                .Without(x => x.Id)
+                .With(x => x.UpCashDumpFileName, cashDumpFileName)
+                .With(x => x.FullText, "invalid full text")
+                .Create();
+            _context.Add(cashDump);
+            _context.SaveChanges();
+
+            // Act
+            async Task Act() => await testClass.LoadCashFiles().ConfigureAwait(false);
+
+            // Assert
+            await Assert.ThrowsAsync<Microsoft.Data.SqlClient.SqlException>(Act).ConfigureAwait(false);
+            
+        }
     }
+
 }
