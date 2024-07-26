@@ -27,13 +27,14 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
                 .Without(x => x.Timestamp)
             );
 
-            _context.RemoveRange(_context.UpCashDumps);
-            _context.RemoveRange(_context.UpCashDumpFileNames);
-            _cleanups.Add(() => _context.RemoveRange(_context.UpCashDumps));
-            _cleanups.Add(() => _context.RemoveRange(_context.UpCashDumpFileNames));
-            _cleanups.Add(() => _context.RemoveRange(_context.UPCashLoads));
+            var tablesToClear = new List<Type> {
+                typeof(UPCashDumpFileName), typeof(UPCashDump), typeof(UPCashLoad)
+            };
+            ClearTable.ClearTables(_context, tablesToClear);
+            _cleanups.Add(() => ClearTable.ClearTables(_context, tablesToClear ));
         }
 
+        // For data that's specific to this test
         private static class DataGen
         {
             public static string PaymentSource() =>
@@ -51,8 +52,11 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             public static string CivicaCode() =>
                 _faker.Random.Number(1, 99).ToString().PadLeft(2, '0');
 
-            public static string FullText(string rentAccount, string paymentSource, string amountPaid, string paymentDate, string transactionType, string civicaCode) =>
+            public static string FullTextBuild(string rentAccount, string paymentSource, string amountPaid, string paymentDate, string transactionType, string civicaCode) =>
                 $"{rentAccount}{paymentSource}".PadRight(30) + $"{transactionType}+{amountPaid}{paymentDate}{civicaCode}";
+
+            public static string FullText() =>
+                FullTextBuild(TestDataGenerator.RentAccount(), PaymentSource(), AmountPaid(), PaymentDate(), TransactionType(), CivicaCode());
         }
 
 
@@ -66,8 +70,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             var paymentDate = DataGen.PaymentDate();
             var transactionType = DataGen.TransactionType();
             var civicaCode = DataGen.CivicaCode();
-            // var fullText = $"{rentAccount}{paymentSource}".PadRight(30) + $"{transactionType}+{amountPaid}{paymentDate}{civicaCode}";
-            var fullText = DataGen.FullText(
+            var fullText = DataGen.FullTextBuild(
                 rentAccount, paymentSource, amountPaid, paymentDate, transactionType, civicaCode
             );
 
@@ -103,6 +106,46 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 
             _context.Entry(cashDump).Reload();
             Assert.True(cashDump.IsRead);
+        }
+
+        /// <summary>
+        /// Given an invalid cash dump
+        ///     which has an unsuccessful filename
+        ///     or which is already read
+        /// Then does not create UPCashLoad
+        /// </summary>
+        /// <param name="rentAccount"></param>
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, true)]
+        public async void Given_An_Invalid_Cash_Dump__Does_Not_Create_UPCashLoad(bool fileNameIsSuccess, bool cashDumpIsRead)
+        {
+            // Arrange
+            var testClass = new UPCashLoadGateway(_context);
+
+            var cashDumpFileName = _fixture.Build<UPCashDumpFileName>()
+                .Without(x => x.Id)
+                .Without(x => x.Timestamp)
+                .With(x => x.IsSuccess, fileNameIsSuccess)
+                .Create();
+            _context.UpCashDumpFileNames.Add(cashDumpFileName);
+            _context.SaveChanges();
+
+            var cashDump = _fixture.Build<UPCashDump>()
+                .Without(x => x.Id)
+                .With(x => x.UpCashDumpFileName, cashDumpFileName)
+                .With(x => x.FullText, DataGen.FullText())
+                .With(x => x.IsRead, cashDumpIsRead)
+                .Create();
+            _context.Add(cashDump);
+            _context.SaveChanges();
+
+            // Act
+            await testClass.LoadCashFiles().ConfigureAwait(false);
+            
+            // Assert
+            var matchingCashLoad = _context.UPCashLoads.Where(x => x.UPCashDumpId == cashDump.Id).FirstOrDefault();
+            Assert.Null(matchingCashLoad);
         }
     }
 }
