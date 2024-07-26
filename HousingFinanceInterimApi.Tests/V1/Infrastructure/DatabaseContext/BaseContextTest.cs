@@ -1,17 +1,18 @@
 using AutoFixture;
+using Bogus;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 
 namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "This is a test class")]
     public class DbConnectionException : Exception { public DbConnectionException(string message) : base(message) { } }
 
     public class BaseContextTest : IDisposable
     {
         internal readonly HousingFinanceInterimApi.V1.Infrastructure.DatabaseContext _context;
         internal readonly Fixture _fixture;
+        internal readonly Faker _faker;
         internal List<Action> _cleanups;
         private bool _disposed;
 
@@ -19,6 +20,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
         {
             _context = CreateDbContext();
             _fixture = new Fixture();
+            _faker = new Faker();
             _cleanups = new List<Action>();
         }
 
