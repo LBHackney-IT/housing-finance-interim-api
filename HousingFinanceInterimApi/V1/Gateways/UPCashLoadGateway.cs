@@ -46,30 +46,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
                 var unreadCashDumps = _context.UpCashDumps.Where(cashDump => !cashDump.IsRead).ToList();
 
-                decimal parseAmountPaid(string amountPaidSubstring)
-                {
-                    // Example: +0000000001.00
-                    bool isPositive = amountPaidSubstring[0] == '+';
-                    var amountString = amountPaidSubstring[1..];
-                    var amount = Math.Round(decimal.Parse(amountString), 2);
-                    if (!isPositive)
-                        amount *= -1;
-                    return amount;
-                }
-
-                var newCashLoads = unreadCashDumps
-                    .Select(cashDump => new UPCashLoad
-                    {
-                        RentAccount = cashDump.FullText.Substring(0, 10).Trim(),
-                        PaymentSource = cashDump.FullText.Substring(10, 20).Trim(),
-                        MethodOfPayment = cashDump.FullText.Substring(30, 3).Trim(),
-                        AmountPaid = parseAmountPaid(cashDump.FullText.Substring(33, 10)),
-                        DatePaid = DateTime.ParseExact(cashDump.FullText.Substring(43, 10), "dd/MM/yyyy", null),
-                        CivicaCode = cashDump.FullText.Substring(53, 2).Trim(),
-                        IsRead = false,
-                        UPCashDumpId = cashDump.Id
-                    })
-                    .ToList();
+                var newCashLoads = unreadCashDumps.Select(CashDumpFromCashLoad).ToList();
 
                 newCashLoads.ForEach(x => _context.UpCashLoads.Add(x));
 
@@ -102,6 +79,21 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 LoggingHandler.LogError(e.StackTrace);
                 throw;
             }
+        }
+
+        private static UPCashLoad CashDumpFromCashLoad(UPCashDump cashDump)
+        {
+            return new UPCashLoad
+            {
+                RentAccount = cashDump.FullText[..10].Trim(),
+                PaymentSource = cashDump.FullText[10..30].Trim(),
+                MethodOfPayment = cashDump.FullText[30..33].Trim(),
+                AmountPaid = Math.Round(decimal.Parse(cashDump.FullText[33..43]), 2),
+                DatePaid = DateTime.ParseExact(cashDump.FullText[43..53], "dd/MM/yyyy", null),
+                CivicaCode = cashDump.FullText[53..55].Trim(),
+                IsRead = false,
+                UPCashDumpId = cashDump.Id
+            };
         }
     }
 
