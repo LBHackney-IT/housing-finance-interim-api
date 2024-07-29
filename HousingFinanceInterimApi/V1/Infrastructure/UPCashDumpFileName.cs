@@ -17,6 +17,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the identifier.
         /// </summary>
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
         /// <summary>

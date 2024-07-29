@@ -7,6 +7,9 @@
     <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+    <NoWarn>
+      CA1707 <!-- "Identifiers should not contain underscores" -->
+    </NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
