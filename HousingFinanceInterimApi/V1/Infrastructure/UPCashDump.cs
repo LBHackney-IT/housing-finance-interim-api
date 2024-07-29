@@ -6,7 +6,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 {
 
     /// <summary>
-    /// This is a line entry against a file name.
+    /// This represents a row in the cash .dat file loaded overnight
     /// </summary>
     [Table("UPCashDump")]
     public class UPCashDump
