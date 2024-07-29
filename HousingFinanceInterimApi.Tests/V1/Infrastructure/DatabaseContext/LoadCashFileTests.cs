@@ -150,7 +150,6 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             Assert.Null(matchingCashLoad);
         }
 
-
         [Theory]
         [InlineData("invalid rent account")]
         [InlineData("invalid payment source")]
