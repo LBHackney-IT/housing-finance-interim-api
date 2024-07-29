@@ -18,10 +18,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IBatchReportGateway _batchReportGateway;
         private readonly IReportGateway _reportGateway;
         private readonly ITransactionGateway _transactionGateway;
-        //private readonly IReportAccountBalanceGateway _reportAccountBalanceGateway;
-        //private readonly IReportChargesGateway _reportChargesGateway;
-        //private readonly IReportCashImportGateway _reportCashImportGateway;
-        //private readonly IReportSuspenseAccountGateway _reportSuspenseAccountGateway;
         private readonly IGoogleFileSettingGateway _googleFileSettingGateway;
         private readonly IGoogleClientService _googleClientService;
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
@@ -41,8 +37,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
             ITransactionGateway transactionGateway,
             IGoogleFileSettingGateway googleFileSettingGateway,
             IGoogleClientService googleClientService,
-            int sleepDuration = 30_000,
-            int retryInterval = 200
+            int sleepDuration = 30_000, // ms
+            int retryInterval = 200 // ms
             )
         {
             _batchReportGateway = batchReportGateway;
