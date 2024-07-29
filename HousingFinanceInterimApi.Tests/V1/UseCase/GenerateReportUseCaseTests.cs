@@ -3074,24 +3074,6 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             DateTime lastAttempt = DateTime.MinValue;
             GD.File fileReturnedFromGDrive = null;
 
-            // _mockGoogleClientService
-            //     .Setup(g => g.GetFileByNameInDriveAsync(
-            //         It.IsAny<string>(),
-            //         It.IsAny<string>()
-            //     ))
-            //     .Callback(() =>
-            //     {
-            //         firstAttempt ??= DateTime.Now;
-            //         lastAttempt = DateTime.Now;
-            //     })
-            //     .ReturnsAsync(fileReturnedFromGDrive);
-            // act
-
-            // var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
-            //
-            // // assert
-            // var secondsSpentInWaitForTheFile = (int) (lastAttempt - firstAttempt.Value).TotalSeconds + 1;
-
             _mockGoogleClientService
                 .Setup(g => g.GetFileByNameInDriveAsync(
                     It.IsAny<string>(),
