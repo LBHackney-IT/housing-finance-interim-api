@@ -35,34 +35,59 @@ namespace HousingFinanceInterimApi.Tests.V1.TestHelpers
         private static List<IEntityType> GetEntitiesInDependencyOrder(DbContext context, List<System.Type> entityTypes)
         {
             var entities = context.Model.GetEntityTypes()
-            .Where(e => entityTypes.Contains(e.ClrType))
-            .ToList();
+                .Where(e => entityTypes.Contains(e.ClrType))
+                .ToList();
 
+            var dependencyCount = new Dictionary<IEntityType, int>();
+            var dependents = new Dictionary<IEntityType, List<IEntityType>>();
+            var queue = new Queue<IEntityType>();
             var sortedEntities = new List<IEntityType>();
-            var visitedEntities = new HashSet<IEntityType>();
 
-            void Visit(IEntityType entity)
+            // Initialize the dictionaries
+            foreach (var entity in entities)
             {
-                if (!visitedEntities.Contains(entity))
-                {
-                    visitedEntities.Add(entity);
+                dependencyCount[entity] = 0;
+                dependents[entity] = new List<IEntityType>();
+            }
 
-                    foreach (var foreignKey in entity.GetForeignKeys())
+            // Fill the dependency count and dependents
+            foreach (var entity in entities)
+            {
+                foreach (var foreignKey in entity.GetForeignKeys())
+                {
+                    var principalEntity = foreignKey.PrincipalEntityType;
+                    if (entityTypes.Contains(principalEntity.ClrType))
                     {
-                        if (entityTypes.Contains(foreignKey.PrincipalEntityType.ClrType))
-                        {
-                            Visit(foreignKey.PrincipalEntityType);
-                        }
+                        dependencyCount[entity]++;
+                        dependents[principalEntity].Add(entity);
                     }
-                    sortedEntities.Add(entity);
                 }
             }
 
+            // Add entities with no dependencies to the queue
             foreach (var entity in entities)
             {
-                Visit(entity);
+                if (dependencyCount[entity] == 0)
+                {
+                    queue.Enqueue(entity);
+                }
             }
 
+            // Process the entities
+            while (queue.Count > 0)
+            {
+                var entity = queue.Dequeue();
+                sortedEntities.Add(entity);
+
+                foreach (var dependent in dependents[entity])
+                {
+                    dependencyCount[dependent]--;
+                    if (dependencyCount[dependent] == 0)
+                    {
+                        queue.Enqueue(dependent);
+                    }
+                }
+            }
             sortedEntities.Reverse();
 
             return sortedEntities;
