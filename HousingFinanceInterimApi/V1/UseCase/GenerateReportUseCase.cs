@@ -254,7 +254,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 .UploadCsvFile(reportCharges, fileName, itemisedTransactionFolderGFS.GoogleIdentifier)
                 .ConfigureAwait(false);
 
-            GD.File file = null;
+            GD.File file;
 
             var waitDurationInSeconds = _sleepDuration / 1000;
             var cuttoffTime = DateTime.Now.AddSeconds(waitDurationInSeconds);

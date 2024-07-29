@@ -23,8 +23,8 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         private readonly Mock<ITransactionGateway> _mockTransactionGateway;
         private readonly Mock<IGoogleFileSettingGateway> _mockGoogleFileSettingGateway;
         private readonly Mock<IGoogleClientService> _mockGoogleClientService;
-        private readonly int _waitDuration = 3000; // 3 seconds
-        private readonly int _retryInterval = 200; // 0.2 seconds
+        private readonly int _waitDuration = 1000; // ms
+        private readonly int _retryInterval = 200; // ms
         private readonly IGenerateReportUseCase _classUnderTest;
 
         public GenerateReportUseCaseTests()
@@ -1644,7 +1644,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public async Task GenerateReportUCAttemptsToRetrieveTheUploadedItemisedTransactionsCSVFileIdIn1SecondPeriodsSoLongItHasntSpent30SecondsDoingIt()
+        public async Task GenerateReportUCAttemptsToRetrieveTheUploadedItemisedTransactionsCSVFileIdEveryRetryIntervalUntilTheWaitDuration()
         {
             // arrange
             var requestedReportLabel = "ReportItemisedTransactions";
@@ -1687,25 +1687,25 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(true);
 
             var uploadedCSVFile = RandomGen.Create<GD.File>();
-            var secondsUntilFileAvailable = 2;
-            int expectedNumberOfFileRetrievalAttempts = Math.Min(secondsUntilFileAvailable * 1000, _waitDuration) / _retryInterval;
-            var uploadedCSVBecomesAvailableAtTime = DateTime.Now.AddSeconds(secondsUntilFileAvailable);
+            int expectedNumberOfFileRetrievalAttempts = _waitDuration / _retryInterval;
+
+            var returnQueue = new Queue<GD.File>();
+            for (int i = 0; i < expectedNumberOfFileRetrievalAttempts -1; i++)
+                returnQueue.Enqueue(null);
+            returnQueue.Enqueue(uploadedCSVFile);
 
             _mockGoogleClientService
                 .Setup(g => g.GetFileByNameInDriveAsync(
                     It.IsAny<string>(),
                     It.IsAny<string>()
                 ))
-                .ReturnsAsync(() => DateTime.Now < uploadedCSVBecomesAvailableAtTime ? null : uploadedCSVFile);
-
-
+                .ReturnsAsync(() => returnQueue.Dequeue());
 
             // act
             var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
             Assert.True(stepResponse.Continue);
-
 
             _mockGoogleClientService.Verify(
                 g => g.GetFileByNameInDriveAsync(
@@ -3008,23 +3008,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .Setup(g => g.GetPRNTransactions(It.IsAny<GetPRNTransactionsDomain>()))
                 .ReturnsAsync(opBalTransactions);
 
-            // var uploadedCSVFile = RandomGen.Create<GD.File>();
-            // var secondsUntilFileAvailable = 2;
-            // int expectedNumberOfFileRetrievalAttempts = Math.Min(secondsUntilFileAvailable * 1000, _waitDuration) / _retryInterval;
-            // var fileAvailabilityTime = DateTime.Now.AddSeconds(secondsUntilFileAvailable);
-            //
-            // _mockGoogleClientService
-            //     .Setup(g => g.GetFileByNameInDriveAsync(
-            //         It.IsAny<string>(),
-            //         It.IsAny<string>()
-            //     ))
-            //     .ReturnsAsync(() =>
-            //     {
-            //         return DateTime.Now < fileAvailabilityTime ? null : uploadedCSVFile;
-            //     });
             var uploadedCSVFileRepresentation = RandomGen.Create<GD.File>();
             var secondsUntilFileAvailable = 3;
-            int expectedNumberOfFileRetrievalAttempts = 600 / _retryInterval;
+            int expectedNumberOfFileRetrievalAttempts = _waitDuration / _retryInterval;
             var uploadedCSVBecomesAvailableAtTime = DateTime.Now.AddSeconds(secondsUntilFileAvailable);
 
             _mockGoogleClientService
