@@ -22,13 +22,7 @@ services:
       - S3_OBJECT_PREFIX=${S3_OBJECT_PREFIX}
       - HOUSING_FINANCE_ALLOWED_GROUPS=${HOUSING_FINANCE_ALLOWED_GROUPS}
 
-#    Dev database not working
-#    links:
-#      - dev-database
-
   dev-database:
-    env_file:
-      - database.env
     image: mcr.microsoft.com/mssql/server:2019-latest
     volumes:
       - ./database:/docker-entrypoint-initdb.d
@@ -40,11 +34,6 @@ services:
       dockerfile: HousingFinanceInterimApi.Tests/Dockerfile
       args:
       - LBHPACKAGESTOKEN=${LBHPACKAGESTOKEN}
-    environment:
-      - DB_SERVER=test-database
-      - DB_USERNAME=myuser
-      - DB_PASSWORD=mypassword
-      - DB_DATABASE=testdb
     links:
       - test-database
 
@@ -52,5 +41,3 @@ services:
     image: mcr.microsoft.com/mssql/server
     ports:
       - 1433:1433
-    env_file:
-      - database.env
