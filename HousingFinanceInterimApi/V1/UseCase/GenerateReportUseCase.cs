@@ -25,8 +25,8 @@ public class GenerateReportUseCase : IGenerateReportUseCase
     private readonly IGoogleFileSettingGateway _googleFileSettingGateway;
     private readonly IGoogleClientService _googleClientService;
     private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
-    private readonly int _sleepDuration;
-
+    private readonly int _sleepDuration; // ms
+    private readonly int _retryInterval; // ms
     private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
     private const string ReportChargesLabel = "ReportCharges";
     private const string ReportOperatingBalancesByRentAccount = "ReportOperatingBalancesByRentAccount";
@@ -41,7 +41,8 @@ public class GenerateReportUseCase : IGenerateReportUseCase
         ITransactionGateway transactionGateway,
         IGoogleFileSettingGateway googleFileSettingGateway,
         IGoogleClientService googleClientService,
-        int sleepDuration = 30_000
+        int sleepDuration = 30_000,
+        int retryInterval = 200
         )
     {
         _batchReportGateway = batchReportGateway;
@@ -50,6 +51,7 @@ public class GenerateReportUseCase : IGenerateReportUseCase
         _googleFileSettingGateway = googleFileSettingGateway;
         _googleClientService = googleClientService;
         _sleepDuration = sleepDuration;
+        _retryInterval = retryInterval;
     }
 
     public async Task<StepResponse> ExecuteAsync()
@@ -259,7 +261,7 @@ public class GenerateReportUseCase : IGenerateReportUseCase
 
         do
         {
-            System.Threading.Thread.Sleep(200);
+            System.Threading.Thread.Sleep(_retryInterval);
 
             file = await _googleClientService
                 .GetFileByNameInDriveAsync(itemisedTransactionFolderGFS.GoogleIdentifier, fileName)

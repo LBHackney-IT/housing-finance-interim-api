@@ -14,6 +14,7 @@ using HousingFinanceInterimApi.V1.Domain.ArgumentWrappers;
 using HousingFinanceInterimApi.V1.Helpers;
 using FluentAssertions.Common;
 using System.Text;
+using HousingFinanceInterimApi.V1.Boundary.Response;
 
 namespace HousingFinanceInterimApi.Tests.V1.UseCase;
 
@@ -24,7 +25,8 @@ public class GenerateReportUseCaseTests
     private readonly Mock<ITransactionGateway> _mockTransactionGateway;
     private readonly Mock<IGoogleFileSettingGateway> _mockGoogleFileSettingGateway;
     private readonly Mock<IGoogleClientService> _mockGoogleClientService;
-    private readonly int _waitDuration = 30;
+    private readonly int _waitDuration = 3000; // 3 seconds
+    private readonly int _retryInterval = 200; // 0.2 seconds
     private readonly IGenerateReportUseCase _classUnderTest;
 
     public GenerateReportUseCaseTests()
@@ -43,7 +45,8 @@ public class GenerateReportUseCaseTests
                 _mockTransactionGateway.Object,
                 _mockGoogleFileSettingGateway.Object,
                 _mockGoogleClientService.Object,
-                1000
+                _waitDuration,
+                _retryInterval
             );
     }
 
@@ -1686,23 +1689,28 @@ public class GenerateReportUseCaseTests
             .ReturnsAsync(true);
 
         var uploadedCSVFile = RandomGen.Create<GD.File>();
-        int expectedNumberOfFileRetrievalAttempts = 30; //RandomGen.WholeNumber(1, 30);
-        int csvUploadDelaySeconds = expectedNumberOfFileRetrievalAttempts;
-        var uploadedCSVBecomesAvailableAtTime = DateTime.Now.AddSeconds(csvUploadDelaySeconds);
-        GD.File fileReturnedFromGDrive = null;
+        var secondsUntilFileAvailable = 2;
+        int expectedNumberOfFileRetrievalAttempts = Math.Min(secondsUntilFileAvailable * 1000, _waitDuration) / _retryInterval;
+        var fileAvailabilityTime = DateTime.Now.AddSeconds(secondsUntilFileAvailable);
 
         _mockGoogleClientService
             .Setup(g => g.GetFileByNameInDriveAsync(
                 It.IsAny<string>(),
                 It.IsAny<string>()
             ))
-            .Callback(() => fileReturnedFromGDrive = DateTime.Now < uploadedCSVBecomesAvailableAtTime ? null : uploadedCSVFile)
-            .ReturnsAsync(fileReturnedFromGDrive);
+            .ReturnsAsync(() =>
+            {
+                return DateTime.Now < fileAvailabilityTime ? null : uploadedCSVFile;
+            });
+
 
         // act
         var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
         // assert
+        Assert.True(stepResponse.Continue);
+
+
         _mockGoogleClientService.Verify(
             g => g.GetFileByNameInDriveAsync(
                 It.Is<string>(fid => fid == itemisedTransactionsFolder.GoogleIdentifier),
