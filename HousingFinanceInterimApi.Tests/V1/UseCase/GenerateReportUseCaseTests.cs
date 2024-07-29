@@ -42,7 +42,8 @@ public class GenerateReportUseCaseTests
                 _mockReportGateway.Object,
                 _mockTransactionGateway.Object,
                 _mockGoogleFileSettingGateway.Object,
-                _mockGoogleClientService.Object
+                _mockGoogleClientService.Object,
+                1000
             );
     }
 
@@ -168,7 +169,7 @@ public class GenerateReportUseCaseTests
         Func<Task> generateReportCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
         // assert
-        await generateReportCall.Should().ThrowAsync<ArgumentException>().WithMessage(message);
+        await generateReportCall.Should().ThrowAsync<ArgumentException>().WithMessage(message).ConfigureAwait(false);
     }
     #endregion
 
