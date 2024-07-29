@@ -1718,7 +1718,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public async Task GenerateReportUCStopsItsAttemptsToRetrieveTheUploadedItemisedTransactionsCSVFileIdAfterSpending30SecondsDoingIt()
+        public async Task GenerateReportUCStopsItsAttemptsToRetrieveTheUploadedItemisedTransactionsCSVFileIdAfterReachingTheWaitDuration()
         {
             // arrange
             var requestedReportLabel = "ReportItemisedTransactions";
@@ -2974,7 +2974,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public async Task GenerateReportUCAttemptsToRetrieveTheUploadedOperatingBalancesByRentAccountCSVFileIdIn1SecondPeriodsSoLongItHasntSpent30SecondsDoingIt()
+        public async Task GenerateReportUCAttemptsToRetrieveTheUploadedOperatingBalancesByRentAccountCSVFileIdEveryRetryIntervalUntilTheWaitDuration()
         {
             // arrange
             var requestedReportLabel = "ReportOperatingBalancesByRentAccount";
@@ -3037,7 +3037,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public async Task GenerateReportUCStopsItsAttemptsToRetrieveTheUploadedOperatingBalancesByRentAccountCSVFileIdAfterSpending30SecondsDoingIt()
+        public async Task GenerateReportUCStopsItsAttemptsToRetrieveTheUploadedOperatingBalancesByRentAccountCSVFileIdAfterReachingTheWaitDuration()
         {
             // arrange
             var requestedReportLabel = "ReportOperatingBalancesByRentAccount";
