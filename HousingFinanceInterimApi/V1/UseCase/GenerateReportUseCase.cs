@@ -11,7 +11,8 @@ using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Handlers;
 using HousingFinanceInterimApi.V1.Helpers;
 
-namespace HousingFinanceInterimApi.V1.UseCase {
+namespace HousingFinanceInterimApi.V1.UseCase
+{
     public class GenerateReportUseCase : IGenerateReportUseCase
     {
         private readonly IBatchReportGateway _batchReportGateway;
