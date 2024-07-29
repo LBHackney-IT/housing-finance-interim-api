@@ -216,7 +216,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             do
             {
-                System.Threading.Thread.Sleep(1000);
+                System.Threading.Thread.Sleep(_retryInterval);
 
                 file = await _googleClientService
                     .GetFileByNameInDriveAsync(opBalsByRentAccFolderGFS.GoogleIdentifier, fileName)
