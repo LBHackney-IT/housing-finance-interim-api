@@ -39,6 +39,25 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             // Arrange
             var testClass = new ReportGateway(_context);
 
+            var cashDumpFileName = _fixture.Create<UPCashDumpFileName>();
+            _context.UpCashDumpFileNames.Add(cashDumpFileName);
+            _context.SaveChanges();   
+
+            var cashDump = _fixture.Build<UPCashDump>()
+                .Without(x => x.Id)
+                .With(x => x.UpCashDumpFileName, cashDumpFileName)
+                .With(x => x.FullText, _fixture.Create<string>())
+                .Create();
+            _context.Add(cashDump);
+            _context.SaveChanges();
+
+            var cashLoad = _fixture.Build<UPCashLoad>()
+                .Without(x => x.Id)
+                .With(x => x.UpCashDump, cashDump)
+                .Create();
+            _context.UpCashLoads.Add(cashLoad);
+            _context.SaveChanges();
+
             var reportStartDate = DateTime.Now - TimeSpan.FromDays(1);
             var reportEndDate = DateTime.Now;
 
