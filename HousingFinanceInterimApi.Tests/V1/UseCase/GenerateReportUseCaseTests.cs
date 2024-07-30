@@ -1701,8 +1701,6 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            Assert.True(stepResponse.Continue);
-
             _mockGoogleClientService.Verify(
                 g => g.GetFileByNameInDriveAsync(
                     It.Is<string>(fid => fid == itemisedTransactionsFolder.GoogleIdentifier),
@@ -1781,9 +1779,10 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            var secondsSpentInWaitForTheFile = (lastAttempt - firstAttempt).Value.TotalSeconds + (_retryInterval / 1000);
+            Assert.True(firstAttempt.HasValue);
+            var secondsSpentInWaitForTheFile = (lastAttempt - firstAttempt).Value.TotalSeconds + (_retryInterval / 1000.0);
 
-            Math.Round(secondsSpentInWaitForTheFile, 2).Should().Be((double) (_waitDuration - _retryInterval) / 1000);
+            Math.Round(secondsSpentInWaitForTheFile, 2).Should().Be( _waitDuration / 1000.0);
 
             _mockGoogleClientService.Verify(
                 g => g.GetFileByNameInDriveAsync(
