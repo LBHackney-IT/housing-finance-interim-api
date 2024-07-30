@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Factories;
@@ -18,16 +19,11 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IBatchReportGateway _batchReportGateway;
         private readonly IReportGateway _reportGateway;
         private readonly ITransactionGateway _transactionGateway;
-        //private readonly IReportAccountBalanceGateway _reportAccountBalanceGateway;
-        //private readonly IReportChargesGateway _reportChargesGateway;
-        //private readonly IReportCashImportGateway _reportCashImportGateway;
-        //private readonly IReportSuspenseAccountGateway _reportSuspenseAccountGateway;
         private readonly IGoogleFileSettingGateway _googleFileSettingGateway;
         private readonly IGoogleClientService _googleClientService;
-
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
-        private readonly int _sleepDuration = 30000;
-
+        private readonly int _sleepDuration; // ms
+        private readonly int _retryInterval; // ms
         private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
         private const string ReportChargesLabel = "ReportCharges";
         private const string ReportOperatingBalancesByRentAccount = "ReportOperatingBalancesByRentAccount";
@@ -41,13 +37,18 @@ namespace HousingFinanceInterimApi.V1.UseCase
             IReportGateway reportGateway,
             ITransactionGateway transactionGateway,
             IGoogleFileSettingGateway googleFileSettingGateway,
-            IGoogleClientService googleClientService)
+            IGoogleClientService googleClientService,
+            int sleepDuration = 30_000, // ms
+            int retryInterval = 1000 // ms
+            )
         {
             _batchReportGateway = batchReportGateway;
             _reportGateway = reportGateway;
             _transactionGateway = transactionGateway;
             _googleFileSettingGateway = googleFileSettingGateway;
             _googleClientService = googleClientService;
+            _sleepDuration = sleepDuration;
+            _retryInterval = retryInterval;
         }
 
         public async Task<StepResponse> ExecuteAsync()
@@ -212,7 +213,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             do
             {
-                System.Threading.Thread.Sleep(1000);
+                System.Threading.Thread.Sleep(_retryInterval);
 
                 file = await _googleClientService
                     .GetFileByNameInDriveAsync(opBalsByRentAccFolderGFS.GoogleIdentifier, fileName)
@@ -257,7 +258,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             do
             {
-                System.Threading.Thread.Sleep(1000);
+                System.Threading.Thread.Sleep(_retryInterval);
 
                 file = await _googleClientService
                     .GetFileByNameInDriveAsync(itemisedTransactionFolderGFS.GoogleIdentifier, fileName)
