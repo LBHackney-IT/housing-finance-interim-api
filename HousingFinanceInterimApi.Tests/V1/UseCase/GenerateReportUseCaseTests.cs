@@ -407,9 +407,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             _mockGoogleFileSettingGateway.Setup(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel))).ReturnsAsync(googleFileSettingsFound);
 
             var spreadSheetData = new List<string[]>() {
-                        new string [] { "header 1", "header 2", "header 3", "header 4" },
-                        new string [] { "0008425", "HRA", "520.36", "2020-08-08" }
-                    };
+                new string [] { "header 1", "header 2", "header 3", "header 4" },
+                new string [] { "0008425", "HRA", "520.36", "2020-08-08" }
+            };
 
             _mockReportGateway
                 .Setup(g => g.GetReportAccountBalanceAsync(
