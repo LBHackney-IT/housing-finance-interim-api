@@ -39,7 +39,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             IGoogleFileSettingGateway googleFileSettingGateway,
             IGoogleClientService googleClientService,
             int sleepDuration = 30_000, // ms
-            int retryInterval = 200 // ms
+            int retryInterval = 1000 // ms
             )
         {
             _batchReportGateway = batchReportGateway;
