@@ -879,9 +879,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(googleFileSettingsFound);
 
             var spreadSheetData = new List<string[]>() {
-                        new string [] { "header 1", "header 2", "header 3", "header 4" },
-                        new string [] { "0001234", "TRA", "130.36", "2025-01-06" }
-                    };
+                new string [] { "header 1", "header 2", "header 3", "header 4" },
+                new string [] { "0001234", "TRA", "130.36", "2025-01-06" }
+            };
 
             _mockReportGateway
                 .Setup(g => g.GetChargesByYearAndRentGroupAsync(
@@ -941,9 +941,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(googleFileSettingsFound);
 
             var spreadSheetData = new List<string[]>() {
-                        new string [] { "header 1", "header 2", "header 3", "header 4" },
-                        new string [] { "0022455", "LSC", "7.88", "2023-04-22" }
-                    };
+                new string [] { "header 1", "header 2", "header 3", "header 4" },
+                new string [] { "0022455", "LSC", "7.88", "2023-04-22" }
+            };
 
             _mockReportGateway
                 .Setup(g => g.GetChargesByGroupTypeAsync(
@@ -1004,9 +1004,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(googleFileSettingsFound);
 
             var spreadSheetData = new List<string[]>() {
-                        new string [] { "header 1", "header 2", "header 3", "header 4" },
-                        new string [] { "0004567", "LMW", "70.11", "2015-02-14" }
-                    };
+                new string [] { "header 1", "header 2", "header 3", "header 4" },
+                new string [] { "0004567", "LMW", "70.11", "2015-02-14" }
+            };
 
             _mockReportGateway
                 .Setup(g => g.GetChargesByYearAsync(
