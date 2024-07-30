@@ -1782,7 +1782,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             Assert.True(firstAttempt.HasValue);
             var secondsSpentInWaitForTheFile = (lastAttempt - firstAttempt).Value.TotalSeconds + (_retryInterval / 1000.0);
 
-            Math.Round(secondsSpentInWaitForTheFile, 2).Should().Be( _waitDuration / 1000.0);
+            Math.Round(secondsSpentInWaitForTheFile, 2).Should().Be(_waitDuration / 1000.0);
 
             _mockGoogleClientService.Verify(
                 g => g.GetFileByNameInDriveAsync(
