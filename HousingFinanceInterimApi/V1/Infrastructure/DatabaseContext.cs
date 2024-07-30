@@ -554,7 +554,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             command.Parameters.Add(new SqlParameter("@endDate", endDate.ToString("yyyy-MM-dd")));
             command.CommandTimeout = 900;
 
-            dbConnection.Open();
+            if (dbConnection.State != ConnectionState.Open)
+                dbConnection.Open();
+
             await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
             {
                 var columnNames = new string[reader.FieldCount];
