@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Factories;
@@ -250,7 +251,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 .UploadCsvFile(reportCharges, fileName, itemisedTransactionFolderGFS.GoogleIdentifier)
                 .ConfigureAwait(false);
 
-            GD.File file;
+            GD.File file = null;
 
             var waitDurationInSeconds = _sleepDuration / 1000;
             var cuttoffTime = DateTime.Now.AddSeconds(waitDurationInSeconds);
