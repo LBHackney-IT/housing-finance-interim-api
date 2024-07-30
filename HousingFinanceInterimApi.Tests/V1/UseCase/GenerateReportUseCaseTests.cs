@@ -23,8 +23,8 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         private readonly Mock<ITransactionGateway> _mockTransactionGateway;
         private readonly Mock<IGoogleFileSettingGateway> _mockGoogleFileSettingGateway;
         private readonly Mock<IGoogleClientService> _mockGoogleClientService;
-        private readonly int _waitDuration = 2000; // ms
-        private readonly int _retryInterval = 400; // ms
+        private readonly int _waitDuration = 1000; // ms
+        private readonly int _retryInterval = 200; // ms
         private readonly IGenerateReportUseCase _classUnderTest;
 
         public GenerateReportUseCaseTests()
