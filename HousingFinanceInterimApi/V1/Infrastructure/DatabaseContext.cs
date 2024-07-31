@@ -50,6 +50,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<AdjustmentAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<MAProperty>().HasKey(x => x.PropRef);
             modelBuilder.Entity<UHProperty>().HasKey(x => x.PropRef);
+            modelBuilder.Entity<SSMiniTransaction>()
+                .HasKey(ss => new { ss.PropRef, ss.TagRef, ss.Origin, ss.PostDate });
         }
 
         /// <summary>
@@ -68,70 +70,20 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<ChargesBatchYear> ChargesBatchYears { get; set; }
         public DbSet<MAProperty> MAProperty { get; set; }
         public DbSet<UHProperty> UHProperty { get; set; }
-
-        /// <summary>
-        /// Gets or sets the google file settings.
-        /// </summary>
         public DbSet<GoogleFileSetting> GoogleFileSettings { get; set; }
-
-        /// <summary>
-        /// Gets or sets the up cash dump file names.
-        /// </summary>
         public DbSet<UPCashDumpFileName> UpCashDumpFileNames { get; set; }
-
-        /// <summary>
-        /// Gets or sets the up cash dumps.
-        /// </summary>
         public DbSet<UPCashDump> UpCashDumps { get; set; }
-
         public DbSet<UPCashLoad> UpCashLoads { get; set; }
-
-
-        /// <summary>
-        /// Gets or sets the up cash dump file names.
-        /// </summary>
+        public DbSet<SSMiniTransaction> SSMiniTransactions { get; set; }
         public DbSet<UPHousingCashDumpFileName> UpHousingCashDumpFileNames { get; set; }
-
-        /// <summary>
-        /// Gets or sets the up cash dumps.
-        /// </summary>
         public DbSet<UPHousingCashDump> UpHousingCashDumps { get; set; }
-
-        /// <summary>
-        /// Gets or sets the error logs.
-        /// </summary>
         public DbSet<ErrorLog> ErrorLogs { get; set; }
-
-        /// <summary>
-        /// Gets or sets the rent breakdowns.
-        /// </summary>
         public DbSet<RentBreakdown> RentBreakdowns { get; set; }
-
-        /// <summary>
-        /// Gets or sets the current rent positions.
-        /// </summary>
         public DbSet<CurrentRentPosition> CurrentRentPositions { get; set; }
-
-        /// <summary>
-        /// Gets or sets the service charges payments received.
-        /// </summary>
         public DbSet<ServiceChargePaymentsReceived> ServiceChargesPaymentsReceived { get; set; }
-
-        /// <summary>
-        /// Gets or sets the leasehold accounts.
-        /// </summary>
         public DbSet<LeaseholdAccount> LeaseholdAccounts { get; set; }
-
-        /// <summary>
-        /// Gets or sets the garages.
-        /// </summary>
         public DbSet<Garage> Garages { get; set; }
-
-        /// <summary>
-        /// Gets or sets the garages.
-        /// </summary>
         public DbSet<OtherHRA> OtherHRA { get; set; }
-
         public DbSet<SuspenseTransaction> SuspenseTransactions { get; set; }
         public DbSet<SuspenseTransactionAux> SuspenseTransactionsAux { get; set; }
         public DbSet<ReportCashSuspenseAccount> ReportCashSuspenseAccounts { get; set; }
