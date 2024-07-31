@@ -1,71 +1,141 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AutoFixture;
+using Bogus;
 using HousingFinanceInterimApi.Tests.V1.TestHelpers;
 using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using Xunit;
 
-namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
+namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext.Reports;
+
+public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
 {
-    public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
+    private readonly HousingFinanceInterimApi.V1.Infrastructure.DatabaseContext _context;
+    private readonly Fixture _fixture;
+    private static readonly Faker _faker = new();
+
+    public GetCashImportByDateTests(BaseContextTest baseContextTest)
     {
-        private readonly HousingFinanceInterimApi.V1.Infrastructure.DatabaseContext _context;
-        private readonly Fixture _fixture;
-        private readonly List<Action> _cleanups;
+        _context = baseContextTest._context;
+        var cleanups = baseContextTest._cleanups;
+        _fixture = new Fixture();
 
-        public GetCashImportByDateTests(BaseContextTest baseContextTest)
+        _fixture.Customize<UPCashDumpFileName>(composer => composer
+            .Without(x => x.Id)
+            .Without(x => x.Timestamp)
+        );
+
+        var tablesToClear = new List<Type>
         {
-            _context = baseContextTest._context;
-            _cleanups = baseContextTest._cleanups;
-            _fixture = new Fixture();
+            typeof(SSMiniTransaction), typeof(UPCashDumpFileName), typeof(UPCashDump), typeof(UPCashLoad)
+        };
+        ClearTable.ClearTables(_context, tablesToClear);
+        cleanups.Add(() => ClearTable.ClearTables(_context, tablesToClear));
+    }
 
-            _fixture.Customize<UPCashDumpFileName>(composer => composer
-                .Without(x => x.Id)
-                .Without(x => x.Timestamp)
-            );
+    // TODO: Combine with LoadCashFileTests.DataGen
+    private static class DataGen
+    {
+        public static string PaymentSource() =>
+            _faker.Random.Word().Replace(" ", "").PadRight(10)[..10].ToUpper();
 
-            var tablesToClear = new List<Type> {
-                typeof(SSMiniTransaction), typeof(UPCashDumpFileName), typeof(UPCashDump), typeof(UPCashLoad)
-            };
-            ClearTable.ClearTables(_context, tablesToClear);
-            _cleanups.Add(() => ClearTable.ClearTables(_context, tablesToClear));
+        public static string AmountPaid() =>
+            _faker.Random.Decimal(0, 1000).ToString().PadLeft(9, '0')[..9];
 
+        public static string PaymentDate() =>
+            _faker.Date.Past().ToString("dd/MM/yyyy");
+
+        public static string TransactionType() =>
+            _faker.Random.AlphaNumeric(3).ToUpper();
+
+        public static string CivicaCode() =>
+            _faker.Random.Number(1, 99).ToString().PadLeft(2, '0');
+
+        public static string FullTextBuild(string rentAccount, string paymentSource, string amountPaid, string paymentDate, string transactionType, string civicaCode) =>
+            $"{rentAccount}{paymentSource}".PadRight(30) + $"{transactionType}+{amountPaid}{paymentDate}{civicaCode}";
+
+        public static string FullText() =>
+            FullTextBuild(TestDataGenerator.RentAccount(), PaymentSource(), AmountPaid(), PaymentDate(), TransactionType(), CivicaCode());
+    }
+
+    [Fact]
+    public async void ShouldGetCashImportByDate()
+    {
+        // Arrange
+        var testClass = new ReportGateway(_context);
+
+        var cashDumpFileName = _fixture.Build<UPCashDumpFileName>()
+            .Without(x => x.Id)
+            .With(x => x.FileName, "CashFile20240727.dat")
+            .Create();
+        _context.UpCashDumpFileNames.Add(cashDumpFileName);
+        _context.SaveChanges();
+
+        var cashDump = _fixture.Build<UPCashDump>()
+            .Without(x => x.Id)
+            .With(x => x.UpCashDumpFileName, cashDumpFileName)
+            .With(x => x.FullText, DataGen.FullText())
+            .Create();
+        _context.Add(cashDump);
+        _context.SaveChanges();
+
+        var cashLoad = _fixture.Build<UPCashLoad>()
+            .Without(x => x.Id)
+            .With(x => x.UpCashDump, cashDump)
+            .Create();
+        _context.UpCashLoads.Add(cashLoad);
+        _context.SaveChanges();
+
+        var ssminiDict = new Dictionary<string, SSMiniTransaction>();
+        var rentGroups = new List<string> { "GPS", "HGF", "HRA", "LMW", "LSC", "TAG", "TAH", "TRA", "ZZZZZZ", "SSSSSS" };
+
+        foreach (var rentGroup in rentGroups)
+        {
+            var ssmini = _fixture.Build<SSMiniTransaction>()
+                .With(x => x.PostDate, DateTime.Now.Date - TimeSpan.FromDays(4))
+                .With(x => x.OriginDesc,  "Cash File")
+                .With(x => x.RentGroup, rentGroup[..3])
+                .With(x => x.RealValue, _fixture.Create<decimal>())
+                .Create();
+            _context.Add(ssmini);
+            ssminiDict.Add(rentGroup, ssmini);
+        }
+        _context.SaveChanges();
+
+        var reportStartDate = DateTime.Now - TimeSpan.FromDays(7);
+        var reportEndDate = DateTime.Now;
+
+        // Act
+        var reportCashImport = await testClass.GetCashImportByDateAsync(reportStartDate, reportEndDate).ConfigureAwait(false);
+
+        // Assert
+        Assert.NotNull(reportCashImport);
+
+        // Parse list of lists csv to list of objects
+        var header = reportCashImport[0];
+        var data = reportCashImport.Skip(1).ToList();
+        var reportData = new List<Dictionary<string, object>>();
+        foreach (var row in data)
+        {
+            var rowData = new Dictionary<string, object>();
+            for (var i = 0; i < header.Length; i++)
+                rowData.Add(header[i], row[i]);
+            reportData.Add(rowData);
         }
 
-        [Fact]
-        public async void ShouldGetCashImportByDate()
-        {
-            // Arrange
-            var testClass = new ReportGateway(_context);
+        Assert.Single(reportData);
+        var reportItem = reportData[0];
 
-            var cashDumpFileName = _fixture.Create<UPCashDumpFileName>();
-            _context.UpCashDumpFileNames.Add(cashDumpFileName);
-            _context.SaveChanges();   
+        var expectedDateString = (DateTime.Now.Date - TimeSpan.FromDays(4)).ToString("dd/MM/yyyy");
+        Assert.Equal(expectedDateString, reportItem["Date"]);
 
-            var cashDump = _fixture.Build<UPCashDump>()
-                .Without(x => x.Id)
-                .With(x => x.UpCashDumpFileName, cashDumpFileName)
-                .With(x => x.FullText, _fixture.Create<string>())
-                .Create();
-            _context.Add(cashDump);
-            _context.SaveChanges();
+        var expectedIfsTotal = ssminiDict.Values.Sum(x => x.RealValue);
+        Assert.Equal(expectedIfsTotal, decimal.Parse((string) reportItem["IFSTotal"]));
+        Assert.Equal( -cashLoad.AmountPaid, decimal.Parse((string) reportItem["FileTotal"]));
 
-            var cashLoad = _fixture.Build<UPCashLoad>()
-                .Without(x => x.Id)
-                .With(x => x.UpCashDump, cashDump)
-                .Create();
-            _context.UpCashLoads.Add(cashLoad);
-            _context.SaveChanges();
-
-            var reportStartDate = DateTime.Now - TimeSpan.FromDays(1);
-            var reportEndDate = DateTime.Now;
-
-            // Act
-            var result = await testClass.GetCashImportByDateAsync(reportStartDate, reportEndDate).ConfigureAwait(false);
-
-            // Assert
-            Assert.NotNull(result);
-        }
+        foreach (var rentGroup in rentGroups)
+            Assert.Equal(ssminiDict[rentGroup].RealValue, decimal.Parse((string) reportItem[rentGroup]));
     }
 }
