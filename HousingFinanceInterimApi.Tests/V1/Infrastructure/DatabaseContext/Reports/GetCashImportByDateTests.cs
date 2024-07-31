@@ -14,7 +14,6 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
 {
     private readonly HousingFinanceInterimApi.V1.Infrastructure.DatabaseContext _context;
     private readonly Fixture _fixture;
-    private static readonly Faker _faker = new();
 
     public GetCashImportByDateTests(BaseContextTest baseContextTest)
     {
@@ -35,31 +34,6 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
         cleanups.Add(() => ClearTable.ClearTables(_context, tablesToClear));
     }
 
-    // TODO: Combine with LoadCashFileTests.DataGen
-    private static class DataGen
-    {
-        public static string PaymentSource() =>
-            _faker.Random.Word().Replace(" ", "").PadRight(10)[..10].ToUpper();
-
-        public static string AmountPaid() =>
-            _faker.Random.Decimal(0, 1000).ToString().PadLeft(9, '0')[..9];
-
-        public static string PaymentDate() =>
-            _faker.Date.Past().ToString("dd/MM/yyyy");
-
-        public static string TransactionType() =>
-            _faker.Random.AlphaNumeric(3).ToUpper();
-
-        public static string CivicaCode() =>
-            _faker.Random.Number(1, 99).ToString().PadLeft(2, '0');
-
-        public static string FullTextBuild(string rentAccount, string paymentSource, string amountPaid, string paymentDate, string transactionType, string civicaCode) =>
-            $"{rentAccount}{paymentSource}".PadRight(30) + $"{transactionType}+{amountPaid}{paymentDate}{civicaCode}";
-
-        public static string FullText() =>
-            FullTextBuild(TestDataGenerator.RentAccount(), PaymentSource(), AmountPaid(), PaymentDate(), TransactionType(), CivicaCode());
-    }
-
     [Fact]
     public async void ShouldGetCashImportByDate()
     {
@@ -76,7 +50,7 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
         var cashDump = _fixture.Build<UPCashDump>()
             .Without(x => x.Id)
             .With(x => x.UpCashDumpFileName, cashDumpFileName)
-            .With(x => x.FullText, DataGen.FullText())
+            .With(x => x.FullText, CashDumpTestData.FullText())
             .Create();
         _context.Add(cashDump);
         _context.SaveChanges();

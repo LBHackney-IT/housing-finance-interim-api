@@ -21,6 +21,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 
         public LoadCashFileTests(BaseContextTest baseContextTest)
         {
+            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-GB");
             _context = baseContextTest._context;
             _cleanups = baseContextTest._cleanups;
 
@@ -29,50 +30,24 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
                 .Without(x => x.Timestamp)
             );
 
-            var tablesToClear = new List<Type> {
-                typeof(UPCashDumpFileName), typeof(UPCashDump), typeof(UPCashLoad)
-            };
+            var tablesToClear = new List<Type> { typeof(UPCashDumpFileName), typeof(UPCashDump), typeof(UPCashLoad) };
             ClearTable.ClearTables(_context, tablesToClear);
             _cleanups.Add(() => ClearTable.ClearTables(_context, tablesToClear));
         }
 
-        // For data that's specific to this test
-        private static class DataGen
-        {
-            public static string PaymentSource() =>
-                _faker.Random.Word().Replace(" ", "").PadRight(10)[..10].ToUpper();
-
-            public static string AmountPaid() =>
-                _faker.Random.Decimal(0, 1000).ToString().PadLeft(9, '0')[..9];
-
-            public static string PaymentDate() =>
-                _faker.Date.Past().ToString("dd/MM/yyyy");
-
-            public static string TransactionType() =>
-                _faker.Random.AlphaNumeric(3).ToUpper();
-
-            public static string CivicaCode() =>
-                _faker.Random.Number(1, 99).ToString().PadLeft(2, '0');
-
-            public static string FullTextBuild(string rentAccount, string paymentSource, string amountPaid, string paymentDate, string transactionType, string civicaCode) =>
-                $"{rentAccount}{paymentSource}".PadRight(30) + $"{transactionType}+{amountPaid}{paymentDate}{civicaCode}";
-
-            public static string FullText() =>
-                FullTextBuild(TestDataGenerator.RentAccount(), PaymentSource(), AmountPaid(), PaymentDate(), TransactionType(), CivicaCode());
-        }
 
 
         [Fact]
         public async void Given_A_Valid_UPCashDump_Creates_A_Matching_UPCashLoad()
         {
             // Arrange
-            var rentAccount = TestDataGenerator.RentAccount();
-            var paymentSource = DataGen.PaymentSource();
-            var amountPaid = DataGen.AmountPaid();
-            var paymentDate = DataGen.PaymentDate();
-            var transactionType = DataGen.TransactionType();
-            var civicaCode = DataGen.CivicaCode();
-            var fullText = DataGen.FullTextBuild(
+            var rentAccount = TestDataGen.RentAccount();
+            var paymentSource = CashDumpTestData.PaymentSource();
+            var amountPaid = CashDumpTestData.AmountPaid();
+            var paymentDate = CashDumpTestData.PaymentDate();
+            var transactionType = CashDumpTestData.TransactionType();
+            var civicaCode = CashDumpTestData.CivicaCode();
+            var fullText = CashDumpTestData.FullTextBuild(
                 rentAccount, paymentSource, amountPaid, paymentDate, transactionType, civicaCode
             );
 
@@ -120,7 +95,8 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
         [Theory]
         [InlineData(false, true)]
         [InlineData(true, false)]
-        public async void Given_An_Invalid_Cash_Dump__Does_Not_Create_UPCashLoad(bool fileNameIsSuccessful, bool cashDumpNotAlreadyRead)
+        public async void Given_An_Invalid_Cash_Dump__Does_Not_Create_UPCashLoad(bool fileNameIsSuccessful,
+            bool cashDumpNotAlreadyRead)
         {
             // Arrange
             var testClass = new UPCashLoadGateway(_context);
@@ -136,7 +112,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             var cashDump = _fixture.Build<UPCashDump>()
                 .Without(x => x.Id)
                 .With(x => x.UpCashDumpFileName, cashDumpFileName)
-                .With(x => x.FullText, DataGen.FullText())
+                .With(x => x.FullText, CashDumpTestData.FullText())
                 .With(x => x.IsRead, !cashDumpNotAlreadyRead)
                 .Create();
             _context.Add(cashDump);
@@ -175,7 +151,6 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 
             // Assert
             await Assert.ThrowsAsync<InvalidCashFileTextException>(Act).ConfigureAwait(false);
-
         }
     }
 }
