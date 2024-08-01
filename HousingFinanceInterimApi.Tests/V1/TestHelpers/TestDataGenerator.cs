@@ -5,7 +5,7 @@ using Bogus;
 namespace HousingFinanceInterimApi.Tests.V1.TestHelpers;
 
 
-public static class TestDataGen
+public static class TestDataGenerator
 {
     private static readonly Fixture _fixture = new();
     private static readonly Faker _faker = new(locale: "en_GB");
@@ -42,6 +42,6 @@ public static class CashDumpTestData
     public static string FullTextBuild(string rentAccount, string paymentSource, string amountPaid, string paymentDate, string transactionType, string civicaCode) =>
         $"{rentAccount}{paymentSource}".PadRight(30) + $"{transactionType}+{amountPaid}{paymentDate}{civicaCode}";
     public static string FullText() =>
-        FullTextBuild(TestDataGen.RentAccount(), PaymentSource(), AmountPaid(), PaymentDate(), TransactionType(), CivicaCode());
+        FullTextBuild(TestDataGenerator.RentAccount(), PaymentSource(), AmountPaid(), PaymentDate(), TransactionType(), CivicaCode());
 }
 

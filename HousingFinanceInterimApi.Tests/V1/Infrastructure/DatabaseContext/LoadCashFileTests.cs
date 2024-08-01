@@ -41,7 +41,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
         public async void Given_A_Valid_UPCashDump_Creates_A_Matching_UPCashLoad()
         {
             // Arrange
-            var rentAccount = TestDataGen.RentAccount();
+            var rentAccount = TestDataGenerator.RentAccount();
             var paymentSource = CashDumpTestData.PaymentSource();
             var amountPaid = CashDumpTestData.AmountPaid();
             var paymentDate = CashDumpTestData.PaymentDate();
