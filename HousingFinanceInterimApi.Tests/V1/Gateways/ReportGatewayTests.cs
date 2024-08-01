@@ -15,12 +15,12 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
 {
     public class ReportGatewayTests
     {
-        private readonly Mock<DatabaseContext> _mockHFSDatabaseContext;
+        private readonly Mock<IDatabaseContext> _mockHFSDatabaseContext;
         private readonly IReportGateway _classUnderTest;
 
         public ReportGatewayTests()
         {
-            _mockHFSDatabaseContext = new Mock<DatabaseContext>();
+            _mockHFSDatabaseContext = new Mock<IDatabaseContext>();
             _classUnderTest = new ReportGateway(_mockHFSDatabaseContext.Object);
         }
 

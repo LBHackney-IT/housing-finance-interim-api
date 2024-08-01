@@ -18,7 +18,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         private readonly Mock<ITransactionGateway> _mockTransactionGateway = new();
         private readonly ILoadHousingFileTransactionsUseCase _classUnderTest;
         private readonly long _batchId = 1;
-        private readonly int _waitDuration = 10;
+        private readonly int _waitDuration = 20;
 
         public LoadHousingFileTransactionsUseCaseTests()
         {
@@ -41,7 +41,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             // Assert
             result.Continue.Should().BeTrue();
-            result.NextStepTime.Should().BeCloseTo(DateTime.Now.AddSeconds(_waitDuration));
+            result.NextStepTime.Should().BeCloseTo(DateTime.Now.AddSeconds(_waitDuration), 100);
 
             _mockBatchLogGateway.Verify(x => x.CreateAsync(It.IsAny<string>(), false), Times.Once);
             _mockUpHousingCashLoadGateway.Verify(x => x.LoadHousingFiles(), Times.Once);

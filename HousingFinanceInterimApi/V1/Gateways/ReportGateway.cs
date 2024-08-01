@@ -12,9 +12,9 @@ namespace HousingFinanceInterimApi.V1.Gateways
     public class ReportGateway : IReportGateway
     {
 
-        private readonly DatabaseContext _context;
+        private readonly IDatabaseContext _context;
 
-        public ReportGateway(DatabaseContext context)
+        public ReportGateway(IDatabaseContext context)
         {
             _context = context;
         }
