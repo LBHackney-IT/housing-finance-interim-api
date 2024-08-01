@@ -72,7 +72,7 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
 
         foreach (var rentGroup in rentGroups)
         {
-            foreach (var isSuspense in new List<bool> {true, false})
+            foreach (var isSuspense in new List<bool> { true, false })
             {
                 var ssminiPre = _fixture.Build<SSMiniTransaction>()
                     .With(x => x.PostDate, TestDateThisWeek)

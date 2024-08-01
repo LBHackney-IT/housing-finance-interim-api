@@ -28,7 +28,7 @@ public static class TestDataGen
 
 public static class CashDumpTestData
 {
-    private static readonly Faker _faker = new (locale: "en_GB");
+    private static readonly Faker _faker = new(locale: "en_GB");
     public static string PaymentSource() =>
         _faker.Random.Word().Replace(" ", "").PadRight(10)[..10].ToUpper();
     public static string AmountPaid() =>
