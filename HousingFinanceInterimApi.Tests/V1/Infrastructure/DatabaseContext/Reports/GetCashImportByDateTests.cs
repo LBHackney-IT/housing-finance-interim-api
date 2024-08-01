@@ -69,7 +69,7 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
         {
             var ssmini = _fixture.Build<SSMiniTransaction>()
                 .With(x => x.PostDate, DateTime.Now.Date - TimeSpan.FromDays(4))
-                .With(x => x.OriginDesc,  "Cash File")
+                .With(x => x.OriginDesc, "Cash File")
                 .With(x => x.RentGroup, rentGroup[..3])
                 .With(x => x.RealValue, _fixture.Create<decimal>())
                 .Create();
@@ -107,7 +107,7 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
 
         var expectedIfsTotal = ssminiDict.Values.Sum(x => x.RealValue);
         Assert.Equal(expectedIfsTotal, decimal.Parse((string) reportItem["IFSTotal"]));
-        Assert.Equal( -cashLoad.AmountPaid, decimal.Parse((string) reportItem["FileTotal"]));
+        Assert.Equal(-cashLoad.AmountPaid, decimal.Parse((string) reportItem["FileTotal"]));
 
         foreach (var rentGroup in rentGroups)
             Assert.Equal(ssminiDict[rentGroup].RealValue, decimal.Parse((string) reportItem[rentGroup]));
