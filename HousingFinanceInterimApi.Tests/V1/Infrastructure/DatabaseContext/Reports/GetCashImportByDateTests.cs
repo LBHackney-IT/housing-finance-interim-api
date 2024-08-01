@@ -110,7 +110,7 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
         Assert.Single(reportData);
         var reportItem = reportData[0];
 
-        var expectedDateString = (DateTime.Now.Date - TimeSpan.FromDays(4)).ToString("dd/MM/yyyy");
+        var expectedDateString = (TestDateThisWeek).ToString("dd/MM/yyyy");
         Assert.Equal(expectedDateString, reportItem["Date"]);
 
         var expectedIfsTotal = ssminiList.Sum(x => x.RealValue);
