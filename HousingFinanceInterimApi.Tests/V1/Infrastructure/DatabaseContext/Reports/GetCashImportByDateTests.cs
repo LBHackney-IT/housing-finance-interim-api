@@ -77,8 +77,7 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
                 var ssminiPre = _fixture.Build<SSMiniTransaction>()
                     .With(x => x.PostDate, TestDateThisWeek)
                     .With(x => x.OriginDesc, "Cash File")
-                    .With(x => x.RentGroup, rentGroup[..3])
-                    .With(x => x.RealValue, _fixture.Create<decimal>());
+                    .With(x => x.RentGroup, rentGroup[..3]);
                 if (isSuspense)
                     ssminiPre.With(x => x.TagRef, "SSSSSS");
 
@@ -91,7 +90,7 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
 
 
         // Act
-        var reportCashImport = await testClass.GetCashImportByDateAsync(ReportStartDate, ReportEndDate).ConfigureAwait(false);
+        IList<string[]> reportCashImport = await testClass.GetCashImportByDateAsync(ReportStartDate, ReportEndDate).ConfigureAwait(false);
 
         // Assert
         Assert.NotNull(reportCashImport);
