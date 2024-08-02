@@ -33,6 +33,14 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
         cleanups.Add(() => ClearTable.ClearTables(_context, tablesToClear));
     }
 
+    /*
+     * Given a list of cash loads and linked SSMiniTransactions
+     * When GetCashImportByDate is called with a date range
+     * Then it should return a list of cash imports by date
+     *     within the date range
+     *     with the total value of transactions for each rent group
+     *     with summed totals across all rent groups
+     */
     [Fact]
     public async void ShouldGetCashImportByDate()
     {
@@ -49,6 +57,7 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
             DateTime.Now.Date - TimeSpan.FromDays(3)
         };
 
+        var allCashLoads = new List<UPCashLoad>();
         var allSsminis = new List<SSMiniTransaction>();
         var rentGroups = new List<string> { "GPS", "HGF", "HRA", "LMW", "LSC", "TAG", "TAH", "TRA", "ZZZZZZ", "SSSSSS" };
 
@@ -76,6 +85,7 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
                 .Create();
             _context.UpCashLoads.Add(cashLoad);
             _context.SaveChanges();
+            allCashLoads.Add(cashLoad);
 
             foreach (var rentGroup in rentGroups)
                 foreach (var isSuspense in new List<bool> { true, false })
@@ -112,7 +122,7 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
             reportData.Add(rowData);
         }
 
-
+        // One row created per cash load date
         Assert.Equal(testDatesThisWeek.Count, reportData.Count);
         foreach (var reportItem in reportData)
         {
@@ -123,7 +133,12 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
             var expectedIfsTotal = relatedSsminis
                 .Sum(x => x.RealValue);
             Assert.Equal(expectedIfsTotal, decimal.Parse((string) reportItem["IFSTotal"]));
-            Assert.Equal(-allSsminis.Sum(x => x.RealValue), decimal.Parse((string) reportItem["FileTotal"]));
+
+            // File total is set from the related cash load
+            var matchingCashLoads = allCashLoads
+                .Where(x => x.AmountPaid == -decimal.Parse((string) reportItem["FileTotal"]))
+                .ToList();
+            Assert.Single(matchingCashLoads);
 
             // Report should have one col per rent group with the total value of transactions for that group
             foreach (var rentGroup in rentGroups)
@@ -133,20 +148,5 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
                     decimal.Parse((string) reportItem[rentGroup])
                     );
         }
-
-        // var expectedDateString = TestDateThisWeek.ToString("dd/MM/yyyy");
-        // Assert.Equal(expectedDateString, reportItem["Date"]);
-        //
-        // var expectedIfsTotal = ssminiList.Sum(x => x.RealValue);
-        // Assert.Equal(expectedIfsTotal, decimal.Parse((string) reportItem["IFSTotal"]));
-        // Assert.Equal(-cashLoad.AmountPaid, decimal.Parse((string) reportItem["FileTotal"]));
-        //
-        // // Report should have one col per rent group with the total value of transactions for that group
-        // foreach (var rentGroup in rentGroups)
-        //     Assert.Equal(
-        //         ssminiList.Where(x => x.RentGroup == rentGroup[..3] && x.TagRef != "SSSSSS")
-        //             .Sum(x => x.RealValue),
-        //         decimal.Parse((string) reportItem[rentGroup])
-        //         );
     }
 }
