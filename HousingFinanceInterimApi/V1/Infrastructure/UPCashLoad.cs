@@ -9,6 +9,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
     public class UPCashLoad
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
         public string RentAccount { get; set; }
         public string PaymentSource { get; set; }
