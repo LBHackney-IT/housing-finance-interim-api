@@ -46,44 +46,34 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 .Select(x => new
                 {
                     x.Key.Id,
-                    x.Key.FileName,
+                    FileDate = DateTime.ParseExact(x.Key.FileName.Substring(8, 8), "yyyyMMdd", null),
                     Amount = x.Sum(y => y.loadDump.load.AmountPaid)
                 })
-                .ToListAsync().ConfigureAwait(false); // Use ToListAsync
-
-            var cashAmountsDates = cashLoads
-                .Select(x => new
-                {
-                    Date = DateTime.ParseExact(s: x.FileName.Substring(8, 8), format: "yyyyMMdd", provider: null),
-                    x.Amount
-                })
-                .ToList();
-
-            var acceptedOriginDescs = new List<string>
-            {
-                "Cash File",
-                "Cash File (New Tenancy)",
-                "Cash File Suspense Account Reverse",
-                "Cash File Suspense Account Transfer"
-            };
+                .ToListAsync().ConfigureAwait(false);
 
             var cashTransactions = await _context.SSMiniTransactions
-                .Where(x => acceptedOriginDescs.Contains(x.OriginDesc))
+                .Where(x => new List<string>
+                {
+                    "Cash File",
+                    "Cash File (New Tenancy)",
+                    "Cash File Suspense Account Reverse",
+                    "Cash File Suspense Account Transfer"
+                }.Contains(x.OriginDesc))
                 .Where(x => x.PostDate >= startDate && x.PostDate <= endDate)
                 .GroupBy(x => new
                 {
-                    Key = x.TagRef == "SSSSSS" || x.TagRef == "ZZZZZZ" // Suspense accounts
-                        ? x.TagRef.Substring(0, 3)
+                    RentGroup = x.TagRef == "SSSSSS" || x.TagRef == "ZZZZZZ" // Suspense accounts
+                        ? x.TagRef.Substring(0, 3) // i.e. "SSS" or "ZZZ" for suspaccs
                         : x.RentGroup,
                     x.PostDate
                 })
                 .Select(x => new
                 {
-                    RentGroup = x.Key.Key,
+                    x.Key.RentGroup,
                     x.Key.PostDate,
                     RealValue = x.Sum(y => y.RealValue)
                 })
-                .ToListAsync().ConfigureAwait(false); // Use ToListAsync
+                .ToListAsync().ConfigureAwait(false);
 
             var reportOut = new List<string[]>();
 
@@ -94,7 +84,9 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 {
                     Date = x.Key,
                     IFSTotal = x.Sum(y => y.RealValue),
-                    FileTotal = -1 * (cashAmountsDates.FirstOrDefault(y => y.Date == x.Key)?.Amount ?? 0),
+                    FileTotal = -1 * (
+                        cashLoads.FirstOrDefault(y => y.FileDate == x.Key)?.Amount ?? 0
+                        ),
                     GPS = x.FirstOrDefault(y => y.RentGroup == "GPS")?.RealValue ?? 0,
                     HGF = x.FirstOrDefault(y => y.RentGroup == "HGF")?.RealValue ?? 0,
                     HRA = x.FirstOrDefault(y => y.RentGroup == "HRA")?.RealValue ?? 0,
