@@ -42,52 +42,57 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
         var ReportStartDate = DateTime.Now - TimeSpan.FromDays(7);
         var ReportEndDate = DateTime.Now;
 
-        var TestDateThisWeek = DateTime.Now.Date - TimeSpan.FromDays(4); // Within the report date range
+        // Within the report date range
+        var testDatesThisWeek = new List<DateTime>
+        {
+            DateTime.Now.Date - TimeSpan.FromDays(4),
+            DateTime.Now.Date - TimeSpan.FromDays(3)
+        };
 
-        var cashDumpFileNameFileName = $"CashFile{TestDateThisWeek:yyyyMMdd}.dat";
-        var cashDumpFileName = _fixture.Build<UPCashDumpFileName>()
-            .Without(x => x.Id)
-            .With(x => x.FileName, cashDumpFileNameFileName)
-            .Create();
-        _context.UpCashDumpFileNames.Add(cashDumpFileName);
-        _context.SaveChanges();
-
-        var cashDump = _fixture.Build<UPCashDump>()
-            .Without(x => x.Id)
-            .With(x => x.UpCashDumpFileName, cashDumpFileName)
-            .With(x => x.FullText, CashDumpTestData.FullText())
-            .Create();
-        _context.Add(cashDump);
-        _context.SaveChanges();
-
-        var cashLoad = _fixture.Build<UPCashLoad>()
-            .Without(x => x.Id)
-            .With(x => x.UpCashDump, cashDump)
-            .Create();
-        _context.UpCashLoads.Add(cashLoad);
-        _context.SaveChanges();
-
-        var ssminiList = new List<SSMiniTransaction>();
+        var allSsminis = new List<SSMiniTransaction>();
         var rentGroups = new List<string> { "GPS", "HGF", "HRA", "LMW", "LSC", "TAG", "TAH", "TRA", "ZZZZZZ", "SSSSSS" };
 
-        foreach (var rentGroup in rentGroups)
+        foreach (var testDate in testDatesThisWeek)
         {
-            foreach (var isSuspense in new List<bool> { true, false })
-            {
-                var ssminiPre = _fixture.Build<SSMiniTransaction>()
-                    .With(x => x.PostDate, TestDateThisWeek)
-                    .With(x => x.OriginDesc, "Cash File")
-                    .With(x => x.RentGroup, rentGroup[..3]);
-                if (isSuspense)
-                    ssminiPre.With(x => x.TagRef, "SSSSSS");
+            var cashDumpFileNameFileName = $"CashFile{testDate:yyyyMMdd}.dat";
+            var cashDumpFileName = _fixture.Build<UPCashDumpFileName>()
+                .Without(x => x.Id)
+                .With(x => x.FileName, cashDumpFileNameFileName)
+                .Create();
+            _context.UpCashDumpFileNames.Add(cashDumpFileName);
+            _context.SaveChanges();
 
-                var ssmini = ssminiPre.Create();
-                _context.Add(ssmini);
-                ssminiList.Add(ssmini);
-            }
+            var cashDump = _fixture.Build<UPCashDump>()
+                .Without(x => x.Id)
+                .With(x => x.UpCashDumpFileName, cashDumpFileName)
+                .With(x => x.FullText, CashDumpTestData.FullText())
+                .Create();
+            _context.Add(cashDump);
+            _context.SaveChanges();
+
+            var cashLoad = _fixture.Build<UPCashLoad>()
+                .Without(x => x.Id)
+                .With(x => x.UpCashDump, cashDump)
+                .Create();
+            _context.UpCashLoads.Add(cashLoad);
+            _context.SaveChanges();
+
+            foreach (var rentGroup in rentGroups)
+                foreach (var isSuspense in new List<bool> { true, false })
+                {
+                    var ssminiPre = _fixture.Build<SSMiniTransaction>()
+                        .With(x => x.PostDate, testDate)
+                        .With(x => x.OriginDesc, "Cash File")
+                        .With(x => x.RentGroup, rentGroup[..3]);
+                    if (isSuspense)
+                        ssminiPre.With(x => x.TagRef, "SSSSSS");
+
+                    var ssmini = ssminiPre.Create();
+                    _context.Add(ssmini);
+                    allSsminis.Add(ssmini);
+                }
+            _context.SaveChanges();
         }
-        _context.SaveChanges();
-
 
         // Act
         IList<string[]> reportCashImport = await testClass.GetCashImportByDateAsync(ReportStartDate, ReportEndDate).ConfigureAwait(false);
@@ -107,22 +112,41 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
             reportData.Add(rowData);
         }
 
-        Assert.Single(reportData);
-        var reportItem = reportData[0];
 
-        var expectedDateString = TestDateThisWeek.ToString("dd/MM/yyyy");
-        Assert.Equal(expectedDateString, reportItem["Date"]);
+        Assert.Equal(testDatesThisWeek.Count, reportData.Count);
+        foreach (var reportItem in reportData)
+        {
+            var relatedSsminis = allSsminis
+                .Where(x => x.PostDate == DateTime.ParseExact(s: (string) reportItem["Date"], format: "dd/MM/yyyy", null))
+                .ToList();
 
-        var expectedIfsTotal = ssminiList.Sum(x => x.RealValue);
-        Assert.Equal(expectedIfsTotal, decimal.Parse((string) reportItem["IFSTotal"]));
-        Assert.Equal(-cashLoad.AmountPaid, decimal.Parse((string) reportItem["FileTotal"]));
+            var expectedIfsTotal = relatedSsminis
+                .Sum(x => x.RealValue);
+            Assert.Equal(expectedIfsTotal, decimal.Parse((string) reportItem["IFSTotal"]));
+            Assert.Equal(-allSsminis.Sum(x => x.RealValue), decimal.Parse((string) reportItem["FileTotal"]));
 
-        // Report should have one col per rent group with the total value of transactions for that group
-        foreach (var rentGroup in rentGroups)
-            Assert.Equal(
-                ssminiList.Where(x => x.RentGroup == rentGroup[..3] && x.TagRef != "SSSSSS")
-                    .Sum(x => x.RealValue),
-                decimal.Parse((string) reportItem[rentGroup])
-                );
+            // Report should have one col per rent group with the total value of transactions for that group
+            foreach (var rentGroup in rentGroups)
+                Assert.Equal(
+                    relatedSsminis.Where(x => x.RentGroup == rentGroup[..3] && x.TagRef != "SSSSSS")
+                        .Sum(x => x.RealValue),
+                    decimal.Parse((string) reportItem[rentGroup])
+                    );
+        }
+
+        // var expectedDateString = TestDateThisWeek.ToString("dd/MM/yyyy");
+        // Assert.Equal(expectedDateString, reportItem["Date"]);
+        //
+        // var expectedIfsTotal = ssminiList.Sum(x => x.RealValue);
+        // Assert.Equal(expectedIfsTotal, decimal.Parse((string) reportItem["IFSTotal"]));
+        // Assert.Equal(-cashLoad.AmountPaid, decimal.Parse((string) reportItem["FileTotal"]));
+        //
+        // // Report should have one col per rent group with the total value of transactions for that group
+        // foreach (var rentGroup in rentGroups)
+        //     Assert.Equal(
+        //         ssminiList.Where(x => x.RentGroup == rentGroup[..3] && x.TagRef != "SSSSSS")
+        //             .Sum(x => x.RealValue),
+        //         decimal.Parse((string) reportItem[rentGroup])
+        //         );
     }
 }
