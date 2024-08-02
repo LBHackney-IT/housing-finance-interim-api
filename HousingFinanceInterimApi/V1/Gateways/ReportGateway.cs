@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Domain.Reports;
+using Microsoft.EntityFrameworkCore;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -28,7 +29,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
         public async Task<IList<string[]>> GetCashImportByDateAsync(DateTime startDate, DateTime endDate)
         {
-            var cashLoads = _context.UpCashLoads
+            var cashLoads = await _context.UpCashLoads
                 .Join(
                     _context.UpCashDumps,
                     load => load.UPCashDumpId,
@@ -48,7 +49,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     x.Key.FileName,
                     Amount = x.Sum(y => y.loadDump.load.AmountPaid)
                 })
-                .ToList();
+                .ToListAsync().ConfigureAwait(false); // Use ToListAsync
 
             var cashAmountsDates = cashLoads
                 .Select(x => new
@@ -66,7 +67,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 "Cash File Suspense Account Transfer"
             };
 
-            var cashTransactions = _context.SSMiniTransactions
+            var cashTransactions = await _context.SSMiniTransactions
                 .Where(x => acceptedOriginDescs.Contains(x.OriginDesc))
                 .Where(x => x.PostDate >= startDate && x.PostDate <= endDate)
                 .GroupBy(x => new
@@ -82,8 +83,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     x.Key.PostDate,
                     RealValue = x.Sum(y => y.RealValue)
                 })
-                .ToList();
-
+                .ToListAsync().ConfigureAwait(false); // Use ToListAsync
 
             var reportOut = new List<string[]>();
 
@@ -94,7 +94,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 {
                     Date = x.Key,
                     IFSTotal = x.Sum(y => y.RealValue),
-                    FileTotal = -1 * cashAmountsDates.FirstOrDefault(y => y.Date == x.Key)?.Amount ?? 0,
+                    FileTotal = -1 * (cashAmountsDates.FirstOrDefault(y => y.Date == x.Key)?.Amount ?? 0),
                     GPS = x.FirstOrDefault(y => y.RentGroup == "GPS")?.RealValue ?? 0,
                     HGF = x.FirstOrDefault(y => y.RentGroup == "HGF")?.RealValue ?? 0,
                     HRA = x.FirstOrDefault(y => y.RentGroup == "HRA")?.RealValue ?? 0,
@@ -109,11 +109,13 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 .OrderBy(x => x.Date)
                 .Select(x => x.ToRow())
                 .ToList();
+
             reportOut.Add(headerRow);
             reportOut.AddRange(results);
 
             return reportOut;
         }
+
 
         public async Task<IList<string[]>> GetChargesByYearAndRentGroupAsync(int year, string rentGroup)
         {
