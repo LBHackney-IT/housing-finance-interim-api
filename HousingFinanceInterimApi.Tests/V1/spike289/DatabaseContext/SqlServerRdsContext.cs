@@ -6,7 +6,6 @@ namespace HousingFinanceInterimApi.Tests.V1.spike289.DatabaseContext
     {
         public SqlServerRdsContext()
         {
-                
         }
 
         public override bool IsOk => throw new System.NotImplementedException();

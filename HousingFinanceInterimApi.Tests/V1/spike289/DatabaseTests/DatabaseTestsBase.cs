@@ -1,4 +1,5 @@
 using HousingFinanceInterimApi.Tests.V1.spike289.DatabaseContext;
+using HousingFinanceInterimApi.Tests.V1.spike289v2.DatabaseContext;
 
 namespace HousingFinanceInterimApi.Tests.V1.spike289.DatabaseTests
 {

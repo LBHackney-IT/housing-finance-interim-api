@@ -7,7 +7,7 @@ namespace HousingFinanceInterimApi.Tests.V1.spike289.DatabaseTests
     public class Gateway01TestBase : DatabaseTestsBase
     {
         private readonly BaseContextClass _context;
-        internal string _connectionString;
+        protected string _connectionString;
 
         public Gateway01TestBase(BaseContextClass context) : base(context)
         {

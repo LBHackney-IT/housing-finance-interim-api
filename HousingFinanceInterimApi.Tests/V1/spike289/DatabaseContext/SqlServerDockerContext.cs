@@ -6,7 +6,6 @@ namespace HousingFinanceInterimApi.Tests.V1.spike289.DatabaseContext
     {
         public SqlServerDockerContext()
         {
-            
         }
 
         public override bool IsOk => 1 == 1;
