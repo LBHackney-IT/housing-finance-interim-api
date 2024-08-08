@@ -29,7 +29,10 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
         public async Task<IList<string[]>> GetCashImportByDateAsync(DateTime startDate, DateTime endDate)
         {
-            var cashLoads = await _context.UpCashLoads
+            var reportOut = new List<string[]>();
+            var headerRow = typeof(CashImportReport).GetProperties().Select(x => x.Name).ToArray();
+
+            var cashLoadAmountsByDate = await _context.UpCashLoads
                 .Join(
                     _context.UpCashDumps,
                     load => load.UPCashDumpId,
@@ -67,36 +70,29 @@ namespace HousingFinanceInterimApi.V1.Gateways
                         : x.RentGroup,
                     x.PostDate
                 })
-                .Select(x => new
-                {
-                    x.Key.RentGroup,
-                    x.Key.PostDate,
-                    RealValue = x.Sum(y => y.RealValue)
-                })
+                .Select(x => new { x.Key.RentGroup, x.Key.PostDate, RealValue = x.Sum(y => y.RealValue) })
                 .ToListAsync().ConfigureAwait(false);
 
-            var reportOut = new List<string[]>();
-
-            var headerRow = typeof(CashImportReport).GetProperties().Select(x => x.Name).ToArray();
-            var results = cashTransactions
+                var results = cashTransactions
                 .GroupBy(x => x.PostDate)
                 .Select(x => new CashImportReport
                 {
                     Date = x.Key,
                     IFSTotal = x.Sum(y => y.RealValue),
-                    FileTotal = -1 * (
-                        cashLoads.FirstOrDefault(y => y.FileDate == x.Key)?.Amount ?? 0
-                        ),
-                    GPS = x.FirstOrDefault(y => y.RentGroup == "GPS")?.RealValue ?? 0,
-                    HGF = x.FirstOrDefault(y => y.RentGroup == "HGF")?.RealValue ?? 0,
-                    HRA = x.FirstOrDefault(y => y.RentGroup == "HRA")?.RealValue ?? 0,
-                    LMW = x.FirstOrDefault(y => y.RentGroup == "LMW")?.RealValue ?? 0,
-                    LSC = x.FirstOrDefault(y => y.RentGroup == "LSC")?.RealValue ?? 0,
-                    TAG = x.FirstOrDefault(y => y.RentGroup == "TAG")?.RealValue ?? 0,
-                    TAH = x.FirstOrDefault(y => y.RentGroup == "TAH")?.RealValue ?? 0,
-                    TRA = x.FirstOrDefault(y => y.RentGroup == "TRA")?.RealValue ?? 0,
-                    ZZZZZZ = x.FirstOrDefault(y => y.RentGroup == "ZZZ")?.RealValue ?? 0,
-                    SSSSSS = x.FirstOrDefault(y => y.RentGroup == "SSS")?.RealValue ?? 0
+                    FileTotal = -1 * cashLoadAmountsByDate
+                        .Where(y => y.FileDate == x.Key)
+                        .Select(y => y.Amount)
+                        .FirstOrDefault(),
+                    GPS = x.Where(y => y.RentGroup == "GPS").Select(y => y.RealValue).FirstOrDefault(),
+                    HGF = x.Where(y => y.RentGroup == "HGF").Select(y => y.RealValue).FirstOrDefault(),
+                    HRA = x.Where(y => y.RentGroup == "HRA").Select(y => y.RealValue).FirstOrDefault(),
+                    LMW = x.Where(y => y.RentGroup == "LMW").Select(y => y.RealValue).FirstOrDefault(),
+                    LSC = x.Where(y => y.RentGroup == "LSC").Select(y => y.RealValue).FirstOrDefault(),
+                    TAG = x.Where(y => y.RentGroup == "TAG").Select(y => y.RealValue).FirstOrDefault(),
+                    TAH = x.Where(y => y.RentGroup == "TAH").Select(y => y.RealValue).FirstOrDefault(),
+                    TRA = x.Where(y => y.RentGroup == "TRA").Select(y => y.RealValue).FirstOrDefault(),
+                    ZZZZZZ = x.Where(y => y.RentGroup == "ZZZ").Select(y => y.RealValue).FirstOrDefault(),
+                    SSSSSS = x.Where(y => y.RentGroup == "SSS").Select(y => y.RealValue).FirstOrDefault()
                 })
                 .OrderBy(x => x.Date)
                 .Select(x => x.ToRow())
