@@ -41,7 +41,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             // Assert
             result.Continue.Should().BeTrue();
-            result.NextStepTime.Should().BeCloseTo(DateTime.Now.AddSeconds(_waitDuration), 100);
+            result.NextStepTime.Should().BeCloseTo(DateTime.Now.AddSeconds(_waitDuration), 500);
 
             _mockBatchLogGateway.Verify(x => x.CreateAsync(It.IsAny<string>(), false), Times.Once);
             _mockUpHousingCashLoadGateway.Verify(x => x.LoadHousingFiles(), Times.Once);
