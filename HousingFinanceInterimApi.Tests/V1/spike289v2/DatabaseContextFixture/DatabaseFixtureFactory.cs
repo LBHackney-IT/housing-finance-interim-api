@@ -33,7 +33,7 @@ namespace HousingFinanceInterimApi.Tests.V1.spike289v2.DatabaseContext
             {
                 // Postgres RDS
                 case ConstantsGen.POSTGRESRDS:
-                    connectionString = "Server=127.0.0.1;Port=2222;Database=sow2b;User Id=housingadmin;Password=cWbwSSjZsXg3dyhR5hSn;";
+                    connectionString = "";
                     dbContextFixture = new PostgresRdsContextFixture(connectionString);
                     break;
 
@@ -54,7 +54,7 @@ namespace HousingFinanceInterimApi.Tests.V1.spike289v2.DatabaseContext
                     break;
 
                 default:
-                    connectionString = "Server=127.0.0.1;Port=5432;Database=sow2b;User Id=postgres;Password=password123!;";
+                    connectionString = "";
                     dbContextFixture = new PostgresRdsContextFixture(connectionString);
                     break;
             }
