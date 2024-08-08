@@ -50,8 +50,10 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<AdjustmentAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<MAProperty>().HasKey(x => x.PropRef);
             modelBuilder.Entity<UHProperty>().HasKey(x => x.PropRef);
+
+            // SSMiniTransaction has no primary key and no strict rules for uniqueness, so we need to match the data rows
             modelBuilder.Entity<SSMiniTransaction>()
-                .HasKey(ss => new { ss.PropRef, ss.TagRef, ss.Origin, ss.PostDate });
+                .HasKey(ss => new { ss.PropRef, ss.TagRef, ss.RentGroup, ss.PostYear, ss.PostPrdno, ss.TransType, ss.RealValue, ss.PostDate, ss.OriginDesc });
         }
 
         /// <summary>

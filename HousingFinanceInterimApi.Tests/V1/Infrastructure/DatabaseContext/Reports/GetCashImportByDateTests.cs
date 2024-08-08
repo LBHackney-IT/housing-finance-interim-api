@@ -41,6 +41,7 @@ public class GetCashImportByDateTests : IClassFixture<BaseContextTest>
      *     with the total value of transactions for each rent group
      *     with summed totals across all rent groups
      */
+
     [Fact]
     public async void ShouldGetCashImportByDate()
     {
