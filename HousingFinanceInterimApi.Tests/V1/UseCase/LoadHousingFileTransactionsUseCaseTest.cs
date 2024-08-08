@@ -18,7 +18,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         private readonly Mock<ITransactionGateway> _mockTransactionGateway = new();
         private readonly ILoadHousingFileTransactionsUseCase _classUnderTest;
         private readonly long _batchId = 1;
-        private readonly int _waitDuration = 20;
+        private readonly int _waitDuration = 10;
 
         public LoadHousingFileTransactionsUseCaseTests()
         {
