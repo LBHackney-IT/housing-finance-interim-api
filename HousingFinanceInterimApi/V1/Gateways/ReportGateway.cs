@@ -73,30 +73,30 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 .Select(x => new { x.Key.RentGroup, x.Key.PostDate, RealValue = x.Sum(y => y.RealValue) })
                 .ToListAsync().ConfigureAwait(false);
 
-                var results = cashTransactions
-                .GroupBy(x => x.PostDate)
-                .Select(x => new CashImportReport
-                {
-                    Date = x.Key,
-                    IFSTotal = x.Sum(y => y.RealValue),
-                    FileTotal = -1 * cashLoadAmountsByDate
-                        .Where(y => y.FileDate == x.Key)
-                        .Select(y => y.Amount)
-                        .FirstOrDefault(),
-                    GPS = x.Where(y => y.RentGroup == "GPS").Select(y => y.RealValue).FirstOrDefault(),
-                    HGF = x.Where(y => y.RentGroup == "HGF").Select(y => y.RealValue).FirstOrDefault(),
-                    HRA = x.Where(y => y.RentGroup == "HRA").Select(y => y.RealValue).FirstOrDefault(),
-                    LMW = x.Where(y => y.RentGroup == "LMW").Select(y => y.RealValue).FirstOrDefault(),
-                    LSC = x.Where(y => y.RentGroup == "LSC").Select(y => y.RealValue).FirstOrDefault(),
-                    TAG = x.Where(y => y.RentGroup == "TAG").Select(y => y.RealValue).FirstOrDefault(),
-                    TAH = x.Where(y => y.RentGroup == "TAH").Select(y => y.RealValue).FirstOrDefault(),
-                    TRA = x.Where(y => y.RentGroup == "TRA").Select(y => y.RealValue).FirstOrDefault(),
-                    ZZZZZZ = x.Where(y => y.RentGroup == "ZZZ").Select(y => y.RealValue).FirstOrDefault(),
-                    SSSSSS = x.Where(y => y.RentGroup == "SSS").Select(y => y.RealValue).FirstOrDefault()
-                })
-                .OrderBy(x => x.Date)
-                .Select(x => x.ToRow())
-                .ToList();
+            var results = cashTransactions
+            .GroupBy(x => x.PostDate)
+            .Select(x => new CashImportReport
+            {
+                Date = x.Key,
+                IFSTotal = x.Sum(y => y.RealValue),
+                FileTotal = -1 * cashLoadAmountsByDate
+                    .Where(y => y.FileDate == x.Key)
+                    .Select(y => y.Amount)
+                    .FirstOrDefault(),
+                GPS = x.Where(y => y.RentGroup == "GPS").Select(y => y.RealValue).FirstOrDefault(),
+                HGF = x.Where(y => y.RentGroup == "HGF").Select(y => y.RealValue).FirstOrDefault(),
+                HRA = x.Where(y => y.RentGroup == "HRA").Select(y => y.RealValue).FirstOrDefault(),
+                LMW = x.Where(y => y.RentGroup == "LMW").Select(y => y.RealValue).FirstOrDefault(),
+                LSC = x.Where(y => y.RentGroup == "LSC").Select(y => y.RealValue).FirstOrDefault(),
+                TAG = x.Where(y => y.RentGroup == "TAG").Select(y => y.RealValue).FirstOrDefault(),
+                TAH = x.Where(y => y.RentGroup == "TAH").Select(y => y.RealValue).FirstOrDefault(),
+                TRA = x.Where(y => y.RentGroup == "TRA").Select(y => y.RealValue).FirstOrDefault(),
+                ZZZZZZ = x.Where(y => y.RentGroup == "ZZZ").Select(y => y.RealValue).FirstOrDefault(),
+                SSSSSS = x.Where(y => y.RentGroup == "SSS").Select(y => y.RealValue).FirstOrDefault()
+            })
+            .OrderBy(x => x.Date)
+            .Select(x => x.ToRow())
+            .ToList();
 
             reportOut.Add(headerRow);
             reportOut.AddRange(results);
