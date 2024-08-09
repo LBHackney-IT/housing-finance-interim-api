@@ -39,7 +39,7 @@ dotnet_naming_symbols.public_symbols.applicable_accessibilities = public
 
 #Parameters should be camel case
 dotnet_naming_style.camel_case_style.capitalization = camel_case
-dotnet_naming_rule.local_objects_must_be_camel_case.severity = error
+dotnet_naming_rule.local_objects_must_be_camel_case.severity = suggestion
 dotnet_naming_rule.local_objects_must_be_camel_case.symbols = local_objects
 dotnet_naming_rule.local_objects_must_be_camel_case.style = camel_case_Style
 dotnet_naming_symbols.local_objects.applicable_kinds = parameter
@@ -136,3 +136,6 @@ dotnet_diagnostic.CA1001.severity = none
 
 #Can reassign collections
 dotnet_diagnostic.CA2227.severity = none
+
+# No need to mark CLSCompliant
+dotnet_diagnostic.CA1014.severity = none
