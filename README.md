@@ -87,7 +87,6 @@ You can also configure your IDE of choice to run the `HousingFinanceInterimApi` 
 
 
 ## Testing
-
 ### Run the tests
 
 ```sh
