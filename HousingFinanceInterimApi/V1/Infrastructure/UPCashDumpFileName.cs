@@ -9,7 +9,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
     /// <summary>
     /// The UP Cash dump file name entity.
     /// </summary>
-    [Table("UPCashDumpFileName")]
+    [Table("upcashdumpfilename")]
     public class UPCashDumpFileName
     {
 
@@ -24,17 +24,20 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// Gets or sets the name of the file.
         /// </summary>
         [Required]
+        [Column("filename")]
         public string FileName { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this instance is success.
         /// </summary>
+        [Column("issuccess")]
         public bool IsSuccess { get; set; }
 
         /// <summary>
         /// Gets or sets the time stamp.
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("timestamp")]
         public DateTimeOffset Timestamp { get; set; }
 
         /// <summary>

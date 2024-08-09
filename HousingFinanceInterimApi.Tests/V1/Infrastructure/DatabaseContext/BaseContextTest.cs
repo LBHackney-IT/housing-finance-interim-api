@@ -36,7 +36,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
         {
             // TODO: Implement a way to switch between SQL Server and Postgres
             var Server = "127.0.0.1"; // TODO: Should fetch from env var when it has Docker support
-            var connectionString = $"Server={Server};Database=sow2b;User Id=sa;Password=password123!;";
+            var connectionString = Environment.GetEnvironmentVariable("MSSQL_CONNECTION_STRING"); //$"Server={Server};Database=sow2b;User Id=sa;Password=password123!;";
 
             var options = new DbContextOptionsBuilder<HousingFinanceInterimApi.V1.Infrastructure.DatabaseContext>()
                 .UseSqlServer(connectionString)
