@@ -22,7 +22,7 @@ namespace HousingFinanceInterimApi.V1.Factories
         public static UPCashFileNameDomain ToDomain(UPCashDumpFileName fileName)
             => new UPCashFileNameDomain
             {
-                Id = fileName.Id,
+                Id = fileName.Id.Value,
                 FileName = fileName.FileName,
                 IsSuccess = fileName.IsSuccess,
                 Timestamp = fileName.Timestamp

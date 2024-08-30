@@ -9,13 +9,9 @@ namespace HousingFinanceInterimApi.Tests.V1.DatabaseContextFixtures
 {
     public class DatabaseFixtureFactory
     {
-        private readonly Faker _faker = new Faker();
-        private readonly Fixture _fixture = new Fixture();
-        private readonly List<Action> _cleanups = new List<Action>();
-
-        //DatabaseFixtureFactory()
-        //{
-        //}
+        private readonly Faker _faker = new();
+        private readonly Fixture _fixture = new();
+        private readonly List<Action> _cleanups = new();
 
         public Faker Faker => _faker;
 

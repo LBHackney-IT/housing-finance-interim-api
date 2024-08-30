@@ -18,7 +18,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// </summary>
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; }
+        [Column("id")]
+        public long? Id { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the file.

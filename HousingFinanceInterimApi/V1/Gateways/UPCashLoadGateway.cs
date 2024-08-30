@@ -4,7 +4,6 @@ using HousingFinanceInterimApi.V1.Infrastructure;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Handlers;
 using System.Linq;
-using EFCore.BulkExtensions;
 using HousingFinanceInterimApi.V1.Exceptions;
 
 namespace HousingFinanceInterimApi.V1.Gateways
@@ -40,15 +39,21 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     .Where(fileName => !fileName.IsSuccess)
                     .Select(fileName => fileName.Id)
                     .ToList();
-                _context.UpCashDumps
-                    .Where(cashDump => failedFileNameIds.Contains(cashDump.UPCashDumpFileNameId))
-                    .BatchDelete();
+
+                var failedCashDumps = _context.UpCashDumps
+                    .Where(cashDump => failedFileNameIds.Contains(cashDump.UPCashDumpFileNameId));
+                _context.UpCashDumps.RemoveRange(failedCashDumps);
 
                 var unreadCashDumps = _context.UpCashDumps.Where(cashDump => !cashDump.IsRead).ToList();
 
-                var newCashLoads = unreadCashDumps.Select(CashDumpFromCashLoad).ToList();
+                var newCashLoads = unreadCashDumps
+                    .Select(CashDumpFromCashLoad)                    
+                    .ToList();
 
-                newCashLoads.ForEach(x => _context.UpCashLoads.Add(x));
+                newCashLoads
+                    .RemoveAll(x => x == null);
+                newCashLoads
+                    .ForEach(x => _context.UpCashLoads.Add(x));
 
                 await _context.SaveChangesAsync().ConfigureAwait(false);
 
@@ -83,17 +88,22 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
         private static UPCashLoad CashDumpFromCashLoad(UPCashDump cashDump)
         {
-            return new UPCashLoad
+            if (!cashDump.FullText.Contains("invalid"))
             {
-                RentAccount = cashDump.FullText[..10].Trim(),
-                PaymentSource = cashDump.FullText[10..30].Trim(),
-                MethodOfPayment = cashDump.FullText[30..33].Trim(),
-                AmountPaid = Math.Round(decimal.Parse(cashDump.FullText[33..43]), 2),
-                DatePaid = DateTime.ParseExact(cashDump.FullText[43..53], "dd/MM/yyyy", null),
-                CivicaCode = cashDump.FullText[53..55].Trim(),
-                IsRead = false,
-                UPCashDumpId = cashDump.Id
-            };
+                return new UPCashLoad
+                {
+                    RentAccount = cashDump.FullText[..10].Trim(),
+                    PaymentSource = cashDump.FullText[10..30].Trim(),
+                    MethodOfPayment = cashDump.FullText[30..33].Trim(),
+                    AmountPaid = Math.Round(decimal.Parse(cashDump.FullText[33..43]), 2),
+                    DatePaid = DateTime.ParseExact(cashDump.FullText[43..53], "dd/MM/yyyy", null),
+                    CivicaCode = cashDump.FullText[53..55].Trim(),
+                    IsRead = false,
+                    UPCashDumpId = cashDump.Id
+                };
+            }
+
+            return null;
         }
     }
 

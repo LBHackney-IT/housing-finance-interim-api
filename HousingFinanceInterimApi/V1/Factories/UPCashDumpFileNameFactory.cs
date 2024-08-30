@@ -14,7 +14,7 @@ namespace HousingFinanceInterimApi.V1.Factories
 
             return new UPCashDumpFileNameDomain
             {
-                Id = cashDumpFileName.Id,
+                Id = cashDumpFileName.Id.Value,
                 FileName = cashDumpFileName.FileName,
                 IsSuccess = cashDumpFileName.IsSuccess,
                 Timestamp = cashDumpFileName.Timestamp
