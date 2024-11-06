@@ -4,6 +4,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
 {
     public class UpdateHfsUseCase : IUpdateHfsUseCase
     {
-
+       
     }
 }
