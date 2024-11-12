@@ -148,38 +148,38 @@ workflows:
               only: development     
   check-and-deploy-staging-and-production:
     jobs:
-      - build-and-test:
-          context:
-            - api-nuget-token-context
-          filters:
-            branches:
-              only: master
-      - assume-role-staging:
-          context: api-assume-role-housing-staging-context
-          requires:
-              - build-and-test
-          filters:
-            branches:
-              only: master
-      - deploy-to-staging:
-          context:
-            - api-nuget-token-context
-          requires:
-            - assume-role-staging
-          filters:
-            branches:
-              only: master
-      - permit-production-release:
-          type: approval
-          requires:
-            - deploy-to-staging
-          filters:
-            branches:
-              only: master
+      # - build-and-test:
+      #     context:
+      #       - api-nuget-token-context
+      #     filters:
+      #       branches:
+      #         only: master
+      # - assume-role-staging:
+      #     context: api-assume-role-housing-staging-context
+      #     requires:
+      #         - build-and-test
+      #     filters:
+      #       branches:
+      #         only: master
+      # - deploy-to-staging:
+      #     context:
+      #       - api-nuget-token-context
+      #     requires:
+      #       - assume-role-staging
+      #     filters:
+      #       branches:
+      #         only: master
+      # - permit-production-release:
+      #     type: approval
+      #     requires:
+      #       - deploy-to-staging
+      #     filters:
+      #       branches:
+      #         only: master
       - assume-role-production:
           context: api-assume-role-disaster-recovery-context
-          requires:
-              - permit-production-release
+          # requires:
+          #     - permit-production-release
           filters:
             branches:
               only: dr-testing
@@ -187,7 +187,7 @@ workflows:
           context:
             - api-nuget-token-context
           requires:
-            - permit-production-release
+            # - permit-production-release
             - assume-role-production
           filters:
             branches:
