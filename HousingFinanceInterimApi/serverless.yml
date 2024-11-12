@@ -903,10 +903,10 @@ custom:
         - subnet-0ea0020a44b98a2ca
     production:
       securityGroupIds:
-        - sg-02a377899622e884c
+        - sg-0ab779577c593e475
       subnetIds:
-        - subnet-0beb266003a56ca82
-        - subnet-06a697d86a9b6ed01
+        - subnet-0b3d84f1090ed1b2f
+        - subnet-0fe9914b2697c0c53
 
 plugins:
   - serverless-step-functions
