@@ -108,6 +108,11 @@ jobs:
     steps:
       - assume-role-and-persist-workspace:
           aws-account: $AWS_ACCOUNT_PRODUCTION
+  assume-role-disaster-recovery:
+    executor: docker-python
+    steps:
+      - assume-role-and-persist-workspace:
+          aws-account: $AWS_ACCOUNT_DISASTER_RECOVERY
   deploy-to-development:
     executor: docker-dotnet
     steps:
