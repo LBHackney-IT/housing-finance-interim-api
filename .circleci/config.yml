@@ -177,12 +177,12 @@ workflows:
             branches:
               only: master
       - assume-role-production:
-          context: api-assume-role-housing-production-context
+          context: api-assume-role-disaster-recovery-context
           requires:
               - permit-production-release
           filters:
             branches:
-              only: master
+              only: dr-testing
       - deploy-to-production:
           context:
             - api-nuget-token-context
@@ -191,4 +191,4 @@ workflows:
             - assume-role-production
           filters:
             branches:
-              only: master
+              only: dr-testing
