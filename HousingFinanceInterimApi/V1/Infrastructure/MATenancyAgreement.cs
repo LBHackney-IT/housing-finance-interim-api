@@ -41,34 +41,34 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public string RentGrpRef { get; set; }
 
         [Column("rent")]
-        public int? Rent { get; set; }
+        public decimal? Rent { get; set; }
 
         [Column("service")]
-        public int? Service { get; set; }
+        public decimal? Service { get; set; }
 
         [Column("other_charge")]
-        public int? OtherCharge { get; set; }
+        public decimal? OtherCharge { get; set; }
 
         [Column("tenancy_rent")]
-        public int? TenancyRent { get; set; }
+        public decimal? TenancyRent { get; set; }
 
         [Column("tenancy_service")]
-        public int? TenancyService { get; set; }
+        public decimal? TenancyService { get; set; }
 
         [Column("tenancy_other")]
-        public int? TenancyOtherCharge { get; set; }
+        public decimal? TenancyOtherCharge { get; set; }
 
         [Column("cur_bal")]
-        public int? CurrentBalance { get; set; }
+        public decimal? CurrentBalance { get; set; }
 
         [Column("cur_nr_bal")]
-        public int? CurrentNrBalance { get; set; }
+        public decimal? CurrentNrBalance { get; set; }
 
         [Column("occ_status")]
         public string OccStatus { get; set; }
 
         [Column("tenagree_sid")]
-        public string TenagreeSid { get; set; }
+        public int TenagreeSid { get; set; }
 
         [Column("u_saff_rentacc")]
         public string USaffRentAcc { get; set; }
