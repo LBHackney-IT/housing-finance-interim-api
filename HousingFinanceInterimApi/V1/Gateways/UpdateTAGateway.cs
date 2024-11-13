@@ -26,16 +26,20 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 uhTenancyAgreement.Eot = request.TenureEndDate;
                 maTenancyAgreement.Eot = request.TenureEndDate;
 
-                if (request.TenureEndDate is not null)
-                {
-                    uhTenancyAgreement.Terminated = true;
-                    uhTenancyAgreement.Present = false;
-                }
-                else
-                {
-                    uhTenancyAgreement.Terminated = false;
-                    uhTenancyAgreement.Present = true;
-                }
+                //if (request.TenureEndDate is not null)
+                //{
+                //    uhTenancyAgreement.Terminated = true;
+                //    uhTenancyAgreement.Present = false;
+                //    maTenancyAgreement.Terminated = true;
+                //    maTenancyAgreement.Present = false;
+                //}
+                //else
+                //{
+                //    uhTenancyAgreement.Terminated = false;
+                //    uhTenancyAgreement.Present = true;
+                //    maTenancyAgreement.Terminated = false;
+                //    maTenancyAgreement.Present = true;
+                //}
                 await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (System.Exception ex)
