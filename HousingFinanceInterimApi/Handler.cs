@@ -43,7 +43,6 @@ namespace HousingFinanceInterimApi
         private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
         private readonly IGenerateReportUseCase _generateReportUseCase;
         private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
-        private readonly IUpdateHfsUseCase _updateHfsUseCase;
 
         private const string CashFileLabel = "CashFile";
 
