@@ -61,10 +61,6 @@ functions:
           path: /swagger/{proxy+}
           method: GET
           private: false
-  update-hfs:
-    name: ${self:service}-${self:provider.stage}-check-cash-files
-    description: "Update HFS DB, this will be a event that will be triggered everytime TenureInformationApi is modified"
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::UpdateHfs  
   loadTenancyAgreement:
     name: ${self:service}-${self:provider.stage}-load-tenagree
     description: "The scheduler to update and add new tenancy agreements. Run at 12:00 AM"
