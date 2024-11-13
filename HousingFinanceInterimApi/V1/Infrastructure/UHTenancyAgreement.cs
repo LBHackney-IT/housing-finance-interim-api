@@ -7,94 +7,94 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
     [Table("UHTenancyAgreement")]
     public class UHTenancyAgreement
     {
-        [Column("TagRef")]
+        [Column("tag_ref")]
         public string TagRef { get; set; }
 
-        [Column("PropRef")]
+        [Column("prop_ref")]
         public string PropRef { get; set; }
 
-        [Column("HouseRef")]
+        [Column("house_ref")]
         public string HouseRef { get; set; }
 
-        [Column("TagDesc")]
+        [Column("tag_desc")]
         public string TagDesc { get; set; }
 
-        [Column("Cot")]
+        [Column("cot")]
         public DateTime? Cot { get; set; }
 
-        [Column("Eot")]
+        [Column("eot")]
         public DateTime? Eot { get; set; }
 
-        [Column("Tenure")]
+        [Column("tenure")]
         public string Tenure { get; set; }
 
-        [Column("PrdCode")]
+        [Column("prd_code")]
         public string PrdCode { get; set; }
 
-        [Column("Present")]
+        [Column("present")]
         public bool Present { get; set; }
 
-        [Column("Terminated")]
+        [Column("terminated")]
         public bool Terminated { get; set; }
 
-        [Column("RentGrpRef")]
+        [Column("rentgrp_ref")]
         public string RentGrpRef { get; set; }
 
-        [Column("Rent")]
+        [Column("rent")]
         public int? Rent { get; set; }
 
-        [Column("Service")]
+        [Column("service")]
         public int? Service { get; set; }
 
-        [Column("OtherCharge")]
+        [Column("other_charge")]
         public int? OtherCharge { get; set; }
 
-        [Column("TenancyRent")]
+        [Column("tenancy_rent")]
         public int? TenancyRent { get; set; }
 
-        [Column("TenancyService")]
+        [Column("tenancy_service")]
         public int? TenancyService { get; set; }
 
-        [Column("TenancyOther")]
+        [Column("tenancy_other")]
         public int? TenancyOtherCharge { get; set; }
 
-        [Column("CurrentBalance")]
+        [Column("cur_bal")]
         public int? CurrentBalance { get; set; }
 
-        [Column("CurrentNrBalance")]
+        [Column("cur_nr_bal")]
         public int? CurrentNrBalance { get; set; }
 
-        [Column("OccStatus")]
+        [Column("occ_status")]
         public string OccStatus { get; set; }
 
-        [Column("TenagreeSid")]
+        [Column("tenagree_sid")]
         public string TenagreeSid { get; set; }
 
-        [Column("USaffRentAcc")]
+        [Column("u_saff_rentacc")]
         public string USaffRentAcc { get; set; }
 
-        [Column("HighAction")]
+        [Column("high_action")]
         public string HighAction { get; set; }
 
-        [Column("UNoticeServiced")]
+        [Column("u_notice_served")]
         public DateTime? UNoticeServiced { get; set; }
 
-        [Column("CourtDate")]
+        [Column("courtdate")]
         public DateTime? CourtDate { get; set; }
 
-        [Column("UCourtOutcome")]
+        [Column("u_court_outcome")]
         public string UCourtOutcome { get; set; }
 
-        [Column("EvictDate")]
+        [Column("evictdate")]
         public DateTime? EvictDate { get; set; }
 
-        [Column("AgrType")]
+        [Column("agr_type")]
         public string AgrType { get; set; }
 
-        [Column("RechTagRef")]
+        [Column("rech_tag_ref")]
         public string RechTagRef { get; set; }
 
-        [Column("MasterTagRef")]
+        [Column("master_tag_ref")]
         public string MasterTagRef { get; set; }
     }
 }
