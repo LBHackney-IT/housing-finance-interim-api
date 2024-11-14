@@ -15,12 +15,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             _context = context;
         }
-        public async Task UpdateTADetails(UpdateTAQuery query, UpdateTARequest request)
-        {
-            await UpdateTADetailsTable(query, request).ConfigureAwait(false);
-        }
 
-        public async Task UpdateTADetailsTable(UpdateTAQuery query, UpdateTARequest request)
+        public async Task UpdateTADetails(UpdateTAQuery query, UpdateTARequest request)
         {
             try
             {
@@ -31,21 +27,20 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 {
                     uhTenancyAgreement.Eot = request.TenureEndDate;
                     maTenancyAgreement.Eot = request.TenureEndDate;
-                }
-
-                if (request.TenureEndDate is not null)
-                {
-                    uhTenancyAgreement.Terminated = true;
-                    uhTenancyAgreement.Present = false;
-                    maTenancyAgreement.Terminated = true;
-                    maTenancyAgreement.Present = false;
-                }
-                else
-                {
-                    uhTenancyAgreement.Terminated = false;
-                    uhTenancyAgreement.Present = true;
-                    maTenancyAgreement.Terminated = false;
-                    maTenancyAgreement.Present = true;
+                    if (request.TenureEndDate is not null)
+                    {
+                        uhTenancyAgreement.Terminated = true;
+                        uhTenancyAgreement.Present = false;
+                        maTenancyAgreement.Terminated = true;
+                        maTenancyAgreement.Present = false;
+                    }
+                    else
+                    {
+                        uhTenancyAgreement.Terminated = false;
+                        uhTenancyAgreement.Present = true;
+                        maTenancyAgreement.Terminated = false;
+                        maTenancyAgreement.Present = true;
+                    }
                 }
                 await _context.SaveChangesAsync().ConfigureAwait(false);
             }

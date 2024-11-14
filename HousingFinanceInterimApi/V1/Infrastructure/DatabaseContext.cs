@@ -189,12 +189,6 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
                 .ConfigureAwait(false);
         }
 
-        public async Task UpdateTADetails(UpdateTAQuery query, UpdateTARequest request)
-        {
-            await PerformInterpolatedTransaction($"usp_UpdateTADetails {query.PropertyReference}, {request.TenureEndDate}")
-                .ConfigureAwait(false);
-        }
-
         /// <summary>
         /// Gets the tenancy details.
         /// </summary>
