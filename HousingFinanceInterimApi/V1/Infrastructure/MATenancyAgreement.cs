@@ -90,11 +90,5 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         [Column("agr_type")]
         public string AgrType { get; set; }
-
-        //[Column("rech_tag_ref")]
-        //public string RechTagRef { get; set; }
-
-        //[Column("master_tag_ref")]
-        //public string MasterTagRef { get; set; }
     }
 }
