@@ -40,8 +40,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<ReportCashSuspenseAccount>().HasNoKey().ToView(null);
             modelBuilder.Entity<ReportCashImport>().HasNoKey().ToView(null);
             modelBuilder.Entity<ReportAccountBalance>().HasNoKey().ToView(null);
-            modelBuilder.Entity<MATenancyAgreement>().HasNoKey().ToView(null);
-            modelBuilder.Entity<UHTenancyAgreement>().HasNoKey().ToView(null);
+            modelBuilder.Entity<MATenancyAgreement>().HasKey(x => x.PropRef);
+            modelBuilder.Entity<UHTenancyAgreement>().HasKey(x => x.PropRef);
             modelBuilder.Entity<ChargesAux>().Property(x => x.TimeStamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<DirectDebitAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<ActionDiaryAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
