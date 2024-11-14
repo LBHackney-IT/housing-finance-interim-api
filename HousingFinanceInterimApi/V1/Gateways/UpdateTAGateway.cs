@@ -23,8 +23,11 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 var uhTenancyAgreement = _context.UHTenancyAgreement.SingleOrDefault(p => p.PropRef == query.PropertyReference);
                 var maTenancyAgreement = _context.MATenancyAgreement.SingleOrDefault(p => p.PropRef == query.PropertyReference);
 
-                uhTenancyAgreement.Eot = request.TenureEndDate;
-                maTenancyAgreement.Eot = request.TenureEndDate;
+                if(uhTenancyAgreement is not null && maTenancyAgreement is not null)
+                {
+                    uhTenancyAgreement.Eot = request.TenureEndDate;
+                    maTenancyAgreement.Eot = request.TenureEndDate;
+                }
 
                 if (request.TenureEndDate is not null)
                 {
