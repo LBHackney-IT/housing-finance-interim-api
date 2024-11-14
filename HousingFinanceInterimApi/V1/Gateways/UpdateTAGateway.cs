@@ -15,15 +15,19 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             _context = context;
         }
-
         public async Task UpdateTADetails(UpdateTAQuery query, UpdateTARequest request)
+        {
+            await UpdateTADetailsTable(query, request).ConfigureAwait(false);
+        }
+
+        public async Task UpdateTADetailsTable(UpdateTAQuery query, UpdateTARequest request)
         {
             try
             {
                 var uhTenancyAgreement = _context.UHTenancyAgreement.SingleOrDefault(p => p.PropRef == query.PropertyReference);
                 var maTenancyAgreement = _context.MATenancyAgreement.SingleOrDefault(p => p.PropRef == query.PropertyReference);
 
-                if(uhTenancyAgreement is not null && maTenancyAgreement is not null)
+                if (uhTenancyAgreement is not null && maTenancyAgreement is not null)
                 {
                     uhTenancyAgreement.Eot = request.TenureEndDate;
                     maTenancyAgreement.Eot = request.TenureEndDate;
