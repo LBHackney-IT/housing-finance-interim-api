@@ -33,7 +33,7 @@ package:
 
 functions:
   interimFinanceSystem:
-    name: ${self:service}-${self:provider.stage}
+    name: dr-${self:service}-${self:provider.stage}
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.LambdaEntryPoint::FunctionHandlerAsync
     role: lambdaExecutionRole
     events:
