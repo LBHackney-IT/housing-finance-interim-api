@@ -69,7 +69,7 @@ commands:
           command: |
             cd ./HousingFinanceInterimApi/
             npm i serverless-associate-waf
-            sls deploy --stage <<parameters.stage>> --conceal
+            sls deploy --stage <<parameters.stage>>
 
 jobs:
   check-code-formatting:
