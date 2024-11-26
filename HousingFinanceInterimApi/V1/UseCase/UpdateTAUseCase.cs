@@ -30,6 +30,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
             }
             await _gateway.UpdateTADetails(tagRef, request).ConfigureAwait(false);
         }
-            
+
     }
 }
