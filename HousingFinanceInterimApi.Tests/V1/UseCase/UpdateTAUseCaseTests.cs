@@ -24,15 +24,15 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             _mockGateway = new Mock<IUpdateTAGateway>();
             _classUnderTest = new UpdateTAUseCase(_mockGateway.Object);
         }
-        
+
         [Fact]
         public async Task DateInPast()
         {
             var endDate = DateTime.UtcNow.AddDays(-1);
             var request = _fixture.Build<UpdateTARequest>()
                                   .With(x => x.TenureEndDate, endDate)
-                                  .Without(x=> x.IsPresent)
-                                  .Without(x=> x.IsTerminated)
+                                  .Without(x => x.IsPresent)
+                                  .Without(x => x.IsTerminated)
                                   .Create();
             _mockGateway.Setup(x => x.UpdateTADetails("01234/02", request));
 

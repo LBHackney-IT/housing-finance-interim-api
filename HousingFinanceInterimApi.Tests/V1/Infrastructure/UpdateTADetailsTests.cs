@@ -79,28 +79,28 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure
             var newUHTenancyAgr = _context.UHTenancyAgreement.SingleOrDefault(p => p.TenancyAgreementRef == tagRef);
             Assert.NotNull(newUHTenancyAgr);
             Assert.Equal(newUHTenancyAgr.EndOfTenure, request.TenureEndDate);
-            Assert.Equal(newUHTenancyAgr.IsPresent, false);
-            Assert.Equal(newUHTenancyAgr.IsTerminated, true);
+            Assert.Equal(false, newUHTenancyAgr.IsPresent);
+            Assert.Equal(true, newUHTenancyAgr.IsTerminated);
 
             var newMATenancyAgr = _context.MATenancyAgreement.SingleOrDefault(p => p.TenancyAgreementRef == tagRef);
             Assert.NotNull(newMATenancyAgr);
             Assert.Equal(newMATenancyAgr.EndOfTenure, request.TenureEndDate);
-            Assert.Equal(newMATenancyAgr.IsPresent, false);
-            Assert.Equal(newMATenancyAgr.IsTerminated, true);
+            Assert.Equal(false, newMATenancyAgr.IsPresent);
+            Assert.Equal(true, newMATenancyAgr.IsTerminated);
 
 
             //data should be the same as before
             var noChangeUHT = _context.UHTenancyAgreement.SingleOrDefault(p => p.TenancyAgreementRef == othertagRef);
             Assert.NotNull(noChangeUHT);
             noChangeUHT.EndOfTenure.Should().BeNull();
-            Assert.Equal(noChangeUHT.IsPresent, true);
-            Assert.Equal(noChangeUHT.IsTerminated, false);
+            Assert.Equal(true, noChangeUHT.IsPresent);
+            Assert.Equal(false, noChangeUHT.IsTerminated);
 
             var noChangeMAT = _context.MATenancyAgreement.SingleOrDefault(p => p.TenancyAgreementRef == othertagRef);
             Assert.NotNull(noChangeMAT);
             noChangeMAT.EndOfTenure.Should().BeNull();
-            Assert.Equal(noChangeMAT.IsPresent, true);
-            Assert.Equal(noChangeMAT.IsTerminated, false);
+            Assert.Equal(true, noChangeMAT.IsPresent);
+            Assert.Equal(false, noChangeMAT.IsTerminated);
 
         }
     }

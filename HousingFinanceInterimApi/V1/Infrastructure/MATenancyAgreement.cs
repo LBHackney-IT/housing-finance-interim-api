@@ -30,7 +30,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         [Column("prd_code")]
         public string PrdCode { get; set; }
-            
+
         [Column("present")]
         public bool IsPresent { get; set; }
 

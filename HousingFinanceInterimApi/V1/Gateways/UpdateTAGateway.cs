@@ -28,7 +28,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 {
                     uhTenancyAgreement.EndOfTenure = request.TenureEndDate;
                     maTenancyAgreement.EndOfTenure = request.TenureEndDate;
-                    if (request.TenureEndDate is not null && request.TenureEndDate.Value !> DateTime.Now)
+                    if (request.TenureEndDate is not null && request.TenureEndDate.Value! > DateTime.Now)
                     {
                         uhTenancyAgreement.IsTerminated = true;
                         uhTenancyAgreement.IsPresent = false;
@@ -49,6 +49,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
             {
                 LoggingHandler.LogError(ex.Message);
                 LoggingHandler.LogError(ex.StackTrace);
+                LoggingHandler.LogError($"Unable to upload tag_ref {tagRef} with this end date {request.TenureEndDate} as requested");
                 throw;
             }
         }
