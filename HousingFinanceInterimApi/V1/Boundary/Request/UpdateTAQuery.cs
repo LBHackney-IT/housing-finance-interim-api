@@ -4,7 +4,9 @@ namespace HousingFinanceInterimApi.V1.Boundary.Request
 {
     public class UpdateTAQuery
     {
-        [FromRoute(Name = "propertyReference")]
-        public string PropertyReference { get; set; }
+        [FromRoute(Name = "tenancyRef")]
+        public string TenancyAgreementRef { get; set; }
+
+
     }
 }

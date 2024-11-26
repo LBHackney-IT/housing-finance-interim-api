@@ -9,11 +9,11 @@ namespace HousingFinanceInterimApi.V1.Controllers
     [Route("api/v1/tenancy-agreement")]
     [ApiController]
     [ApiVersion("1.0")]
-    public class UpdateTAController : ControllerBase
+    public class TenancyAgreementController : ControllerBase
     {
         private readonly IUpdateTAGateway _gateway;
 
-        public UpdateTAController(IUpdateTAGateway gateway)
+        public TenancyAgreementController(IUpdateTAGateway gateway)
         {
             _gateway = gateway;
         }
@@ -21,10 +21,9 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPatch]
-        [Route("{propertyReference}")]
-        public async Task<IActionResult> UpdateTA([FromRoute] UpdateTAQuery query, [FromBody] UpdateTARequest request)
+        public async Task<IActionResult> DynamoDbStreamTrigger([FromRoute] string tagRef, [FromBody] UpdateTARequest request)
         {
-            await _gateway.UpdateTADetails(query, request).ConfigureAwait(false);
+            await _gateway.UpdateTADetails(tagRef, request).ConfigureAwait(false);
 
             return NoContent();
         }

@@ -5,6 +5,6 @@ namespace HousingFinanceInterimApi.V1.Gateways.Interface
 {
     public interface IUpdateTAGateway
     {
-        Task UpdateTADetails(UpdateTAQuery query, UpdateTARequest request);
+        Task UpdateTADetails(string tagRef, UpdateTARequest request);
     }
 }
