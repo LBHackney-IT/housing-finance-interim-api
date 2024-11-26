@@ -171,6 +171,7 @@ namespace HousingFinanceInterimApi
         private static void RegisterUseCases(IServiceCollection services)
         {
             services.AddScoped<IGetBatchLogErrorUseCase, GetBatchLogErrorUseCase>();
+            services.AddScoped<IUpdateTAUseCase, UpdateTAUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -9,10 +9,10 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
     public class UHTenancyAgreement
     {
         [Column("tag_ref")]
-        public string TagRef { get; set; }
+        public string TenancyAgreementRef { get; set; }
 
         [Column("prop_ref")]
-        public string PropRef { get; set; }
+        public string PropertyRef { get; set; }
 
         [Column("house_ref")]
         public string HouseRef { get; set; }
@@ -21,25 +21,25 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public string TagDesc { get; set; }
 
         [Column("cot")]
-        public DateTime? Cot { get; set; }
+        public DateTime? StartOfTenure { get; set; }
 
         [Column("eot")]
-        public DateTime? Eot { get; set; }
+        public DateTime? EndOfTenure { get; set; }
 
         [Column("tenure")]
-        public string Tenure { get; set; }
+        public string TenureType { get; set; }
 
         [Column("prd_code")]
         public string PrdCode { get; set; }
 
         [Column("present")]
-        public bool Present { get; set; }
+        public bool IsPresent { get; set; }
 
         [Column("terminated")]
-        public bool Terminated { get; set; }
+        public bool IsTerminated { get; set; }
 
         [Column("rentgrp_ref")]
-        public string RentGrpRef { get; set; }
+        public string RentGroupRef { get; set; }
 
         [Column("rent")]
         public decimal? Rent { get; set; }
@@ -54,7 +54,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public decimal? TenancyRent { get; set; }
 
         [Column("tenancy_service")]
-        public decimal? TenancyService { get; set; }
+        public decimal? TenancyServiceCharge { get; set; }
 
         [Column("tenancy_other")]
         public decimal? TenancyOtherCharge { get; set; }
@@ -69,22 +69,22 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public string OccStatus { get; set; }
 
         [Column("tenagree_sid")]
-        public int TenagreeSid { get; set; }
+        public int TenancyAgreementNumberSid { get; set; }
 
         [Column("u_saff_rentacc")]
-        public string USaffRentAcc { get; set; }
+        public string RentAccountNumber { get; set; }
 
         [Column("high_action")]
         public string HighAction { get; set; }
 
         [Column("u_notice_served")]
-        public DateTime? UNoticeServiced { get; set; }
+        public DateTime? NoticeServiced { get; set; }
 
         [Column("courtdate")]
         public DateTime? CourtDate { get; set; }
 
         [Column("u_court_outcome")]
-        public string UCourtOutcome { get; set; }
+        public string CourtOutcome { get; set; }
 
         [Column("evictdate")]
         public DateTime? EvictDate { get; set; }
