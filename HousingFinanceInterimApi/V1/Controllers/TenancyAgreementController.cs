@@ -1,5 +1,6 @@
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
+using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -11,11 +12,11 @@ namespace HousingFinanceInterimApi.V1.Controllers
     [ApiVersion("1.0")]
     public class TenancyAgreementController : ControllerBase
     {
-        private readonly IUpdateTAGateway _gateway;
+        private readonly IUpdateTAUseCase _useCase;
 
-        public TenancyAgreementController(IUpdateTAGateway gateway)
+        public TenancyAgreementController(IUpdateTAUseCase useCase)
         {
-            _gateway = gateway;
+            _useCase = useCase;
         }
 
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -23,7 +24,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [HttpPatch]
         public async Task<IActionResult> DynamoDbStreamTrigger([FromRoute] string tagRef, [FromBody] UpdateTARequest request)
         {
-            await _gateway.UpdateTADetails(tagRef, request).ConfigureAwait(false);
+            await _useCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
 
             return NoContent();
         }

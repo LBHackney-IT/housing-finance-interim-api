@@ -1,4 +1,5 @@
 using HousingFinanceInterimApi.V1.Boundary.Request;
+using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.Handlers;
 using HousingFinanceInterimApi.V1.Infrastructure;
@@ -17,7 +18,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
             _context = context;
         }
 
-        public async Task UpdateTADetails(string tagRef, UpdateTARequest request)
+        public async Task UpdateTADetails(string tagRef, UpdateTADomain request)
         {
             try
             {
@@ -28,20 +29,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 {
                     uhTenancyAgreement.EndOfTenure = request.TenureEndDate;
                     maTenancyAgreement.EndOfTenure = request.TenureEndDate;
-                    if (request.TenureEndDate is not null && request.TenureEndDate.Value! > DateTime.Now)
-                    {
-                        uhTenancyAgreement.IsTerminated = true;
-                        uhTenancyAgreement.IsPresent = false;
-                        maTenancyAgreement.IsTerminated = true;
-                        maTenancyAgreement.IsPresent = false;
-                    }
-                    else
-                    {
-                        uhTenancyAgreement.IsTerminated = false;
-                        uhTenancyAgreement.IsPresent = true;
-                        maTenancyAgreement.IsTerminated = false;
-                        maTenancyAgreement.IsPresent = true;
-                    }
                 }
                 await _context.SaveChangesAsync().ConfigureAwait(false);
             }
