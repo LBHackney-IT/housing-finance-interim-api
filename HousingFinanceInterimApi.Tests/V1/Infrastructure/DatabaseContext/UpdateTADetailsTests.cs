@@ -7,10 +7,9 @@ using System.Linq;
 using System;
 using Xunit;
 using FluentAssertions;
-using HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext;
 using HousingFinanceInterimApi.V1.Factories;
 
-namespace HousingFinanceInterimApi.Tests.V1.Infrastructure
+namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 {
     public class UpdateTADetailsTests : DatabaseTests
     {
