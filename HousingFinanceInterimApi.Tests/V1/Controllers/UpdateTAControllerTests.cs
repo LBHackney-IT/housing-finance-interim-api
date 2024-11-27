@@ -3,6 +3,7 @@ using FluentAssertions;
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Controllers;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
+using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Threading.Tasks;
@@ -14,14 +15,14 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
     {
         private readonly TenancyAgreementController _classUnderTest;
 
-        private readonly Mock<IUpdateTAGateway> _gateway;
+        private readonly Mock<IUpdateTAUseCase> _useCase;
         private readonly Fixture _fixture = new Fixture();
 
         public TenancyAgreementControllerTests()
         {
-            _gateway = new Mock<IUpdateTAGateway>();
+            _useCase = new Mock<IUpdateTAUseCase>();
 
-            _classUnderTest = new TenancyAgreementController(_gateway.Object);
+            _classUnderTest = new TenancyAgreementController(_useCase.Object);
         }
 
         [Fact]
@@ -36,8 +37,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            _gateway
-                .Verify(x => x.UpdateTADetails(query, request), Times.Once);
+            _useCase.Verify(x => x.ExecuteAsync(query, request), Times.Once);
 
             response.Should().BeEquivalentTo(new NoContentResult());
         }
