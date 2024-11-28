@@ -48,11 +48,11 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
                 .Create();
             var anotherUHTRow = _fixture.Build<UHTenancyAgreement>()
                 .With(table => table.TenancyAgreementRef, othertagRef)
-                .Without(table => table.EndOfTenure)
+                .Without(table => table.EndOfTenancy)
                 .Create();
             var anotherMATRow = _fixture.Build<MATenancyAgreement>()
                 .With(table => table.TenancyAgreementRef, othertagRef)
-                .Without(table => table.EndOfTenure)
+                .Without(table => table.EndOfTenancy)
                 .Create();
 
             _context.UHTenancyAgreement.Add(newUHTARow);
@@ -78,13 +78,13 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 
             var newUHTenancyAgr = _context.UHTenancyAgreement.SingleOrDefault(p => p.TenancyAgreementRef == tagRef);
             Assert.NotNull(newUHTenancyAgr);
-            Assert.Equal(newUHTenancyAgr.EndOfTenure, request.TenureEndDate);
+            Assert.Equal(newUHTenancyAgr.EndOfTenancy, request.TenureEndDate);
             newUHTenancyAgr.IsPresent.Should().BeFalse();
             newUHTenancyAgr.IsTerminated.Should().BeTrue();
 
             var newMATenancyAgr = _context.MATenancyAgreement.SingleOrDefault(p => p.TenancyAgreementRef == tagRef);
             Assert.NotNull(newMATenancyAgr);
-            Assert.Equal(newMATenancyAgr.EndOfTenure, request.TenureEndDate);
+            Assert.Equal(newMATenancyAgr.EndOfTenancy, request.TenureEndDate);
             newMATenancyAgr.IsPresent.Should().BeFalse();
             newMATenancyAgr.IsTerminated.Should().BeTrue();
 
@@ -92,13 +92,13 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
             //data should be the same as before
             var noChangeUHT = _context.UHTenancyAgreement.SingleOrDefault(p => p.TenancyAgreementRef == othertagRef);
             Assert.NotNull(noChangeUHT);
-            noChangeUHT.EndOfTenure.Should().BeNull();
+            noChangeUHT.EndOfTenancy.Should().BeNull();
             noChangeUHT.IsPresent.Should().BeTrue();
             noChangeUHT.IsTerminated.Should().BeFalse();
 
             var noChangeMAT = _context.MATenancyAgreement.SingleOrDefault(p => p.TenancyAgreementRef == othertagRef);
             Assert.NotNull(noChangeMAT);
-            noChangeMAT.EndOfTenure.Should().BeNull();
+            noChangeMAT.EndOfTenancy.Should().BeNull();
             noChangeUHT.IsPresent.Should().BeTrue();
             noChangeUHT.IsTerminated.Should().BeFalse();
 
