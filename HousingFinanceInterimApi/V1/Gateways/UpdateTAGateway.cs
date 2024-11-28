@@ -27,8 +27,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
                 if (uhTenancyAgreement is not null && maTenancyAgreement is not null)
                 {
-                    uhTenancyAgreement.EndOfTenure = request.TenureEndDate;
-                    maTenancyAgreement.EndOfTenure = request.TenureEndDate;
+                    uhTenancyAgreement.EndOfTenancy = request.TenureEndDate;
+                    maTenancyAgreement.EndOfTenancy = request.TenureEndDate;
                 }
                 await _context.SaveChangesAsync().ConfigureAwait(false);
             }

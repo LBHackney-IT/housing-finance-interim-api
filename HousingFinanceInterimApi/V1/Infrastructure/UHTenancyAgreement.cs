@@ -21,10 +21,10 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public string TagDesc { get; set; }
 
         [Column("cot")]
-        public DateTime? StartOfTenure { get; set; }
+        public DateTime? StartOfTenancy { get; set; }
 
         [Column("eot")]
-        public DateTime? EndOfTenure { get; set; }
+        public DateTime? EndOfTenancy { get; set; }
 
         [Column("tenure")]
         public string TenureType { get; set; }
