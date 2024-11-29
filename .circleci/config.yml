@@ -38,7 +38,7 @@ commands:
           root: *workspace_root
           paths:
             - .aws
-  deploy-lambda:
+  destroy-lambda:
     description: "Deploys API via Serverless"
     parameters:
       stage:
@@ -65,11 +65,11 @@ commands:
             chmod +x ./build.sh
             ./build.sh      
       - run:
-          name: Deploy lambda
+          name: Destroy lambda
           command: |
             cd ./HousingFinanceInterimApi/
             npm i serverless-associate-waf
-            sls deploy --stage <<parameters.stage>>
+            sls remove --stage <<parameters.stage>>
 
 jobs:
   check-code-formatting:
@@ -116,22 +116,22 @@ jobs:
   deploy-to-development:
     executor: docker-dotnet
     steps:
-      - deploy-lambda:
+      - destroy-lambda:
           stage: "development"
   deploy-to-staging:
     executor: docker-dotnet
     steps:
-      - deploy-lambda:
+      - destroy-lambda:
           stage: "staging"
   deploy-to-production:
     executor: docker-dotnet
     steps:
-      - deploy-lambda:
+      - destroy-lambda:
           stage: "production"
   deploy-to-disaster-recovery:
     executor: docker-dotnet
     steps:
-      - deploy-lambda:
+      - destroy-lambda:
           stage: "production"
 
 workflows:
