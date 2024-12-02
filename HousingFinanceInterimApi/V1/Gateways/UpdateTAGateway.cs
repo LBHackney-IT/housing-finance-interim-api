@@ -22,19 +22,15 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             try
             {
-                var uhTenancyAgreement = _context.UHTenancyAgreement.FirstOrDefault(p => p.TenancyAgreementRef == tagRef);
+                var uhTenancyAgreement = _context.UHTenancyAgreement.SingleOrDefault(p => p.TenancyAgreementRef == tagRef);
                 var maTenancyAgreement = _context.MATenancyAgreement.SingleOrDefault(p => p.TenancyAgreementRef == tagRef);
 
-                LoggingHandler.LogInfo($"HELLO {uhTenancyAgreement}");
-                if (uhTenancyAgreement is not null)
+
+                if (uhTenancyAgreement is not null && maTenancyAgreement is not null)
                 {
                     LoggingHandler.LogInfo($"uhTA eot value is {uhTenancyAgreement.EndOfTenancy}");
                     uhTenancyAgreement.EndOfTenancy = request.TenureEndDate;
                     LoggingHandler.LogInfo($"uhTA eot value has been changed to {uhTenancyAgreement.EndOfTenancy}");
-                }
-
-                if (maTenancyAgreement is not null)
-                {
                     LoggingHandler.LogInfo($"maTA eot value is {maTenancyAgreement.EndOfTenancy}");
                     maTenancyAgreement.EndOfTenancy = request.TenureEndDate;
                     LoggingHandler.LogInfo($"maTA eot value has been changed to {maTenancyAgreement.EndOfTenancy}");
