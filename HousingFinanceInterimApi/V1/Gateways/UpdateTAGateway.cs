@@ -26,12 +26,19 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 var maTenancyAgreement = _context.MATenancyAgreement.SingleOrDefault(p => p.TenancyAgreementRef == tagRef);
 
                 LoggingHandler.LogInfo($"HELLO {uhTenancyAgreement}");
-                if (uhTenancyAgreement is not null && maTenancyAgreement is not null)
+                if (uhTenancyAgreement is not null)
                 {
                     LoggingHandler.LogInfo($"uhTA eot value is {uhTenancyAgreement.EndOfTenancy}");
                     uhTenancyAgreement.EndOfTenancy = request.TenureEndDate;
                     maTenancyAgreement.EndOfTenancy = request.TenureEndDate;
                     LoggingHandler.LogInfo($"uhTA eot value has been changed to {uhTenancyAgreement.EndOfTenancy}");
+                }
+
+                if (maTenancyAgreement is not null)
+                {
+                    LoggingHandler.LogInfo($"maTA eot value is {maTenancyAgreement.EndOfTenancy}");
+                    maTenancyAgreement.EndOfTenancy = request.TenureEndDate;
+                    LoggingHandler.LogInfo($"maTA eot value has been changed to {maTenancyAgreement.EndOfTenancy}");
                 }
 
                 await _context.SaveChangesAsync().ConfigureAwait(false);
