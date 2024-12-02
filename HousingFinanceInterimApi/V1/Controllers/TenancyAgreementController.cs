@@ -22,7 +22,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPatch]
-        public async Task<IActionResult> DynamoDbStreamTrigger([FromRoute] string tagRef, [FromBody] UpdateTARequest request)
+        public async Task<IActionResult> DynamoDbStreamTrigger([FromQuery] string tagRef, [FromBody] UpdateTARequest request)
         {
             await _useCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
 
