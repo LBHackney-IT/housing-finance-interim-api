@@ -571,6 +571,10 @@ resources:
                     - "iam:ListStreams"
                     - "iam:GetRecords"  
                     - "iam:GetShardIterator"
+                    - "dynamodb:DescribeStream" 
+                    - "dynamodb:ListStreams"
+                    - "dynamodb:GetRecords"
+                    - "dynamodb:GetShardIterator"
                   Resource: "*"
     LoadTenancyAgreementLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
