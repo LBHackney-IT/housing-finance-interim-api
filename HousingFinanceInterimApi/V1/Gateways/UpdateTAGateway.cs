@@ -30,9 +30,13 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 {
                     LoggingHandler.LogInfo($"uhTA eot value is {uhTenancyAgreement.EndOfTenancy}");
                     uhTenancyAgreement.EndOfTenancy = request.TenureEndDate;
+                    uhTenancyAgreement.IsPresented = request.IsPresent;
+                    uhTenancyAgreement.IsTerminated = request.IsTerminated;
                     LoggingHandler.LogInfo($"uhTA eot value has been changed to {uhTenancyAgreement.EndOfTenancy}");
                     LoggingHandler.LogInfo($"maTA eot value is {maTenancyAgreement.EndOfTenancy}");
                     maTenancyAgreement.EndOfTenancy = request.TenureEndDate;
+                    maTenancyAgreement.IsPresented = request.IsPresent;
+                    maTenancyAgreement.IsTerminated = request.IsTerminated;
                     LoggingHandler.LogInfo($"maTA eot value has been changed to {maTenancyAgreement.EndOfTenancy}");
                 }
 
