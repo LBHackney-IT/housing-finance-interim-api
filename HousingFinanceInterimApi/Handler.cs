@@ -14,6 +14,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Boundary.Response;
+using Amazon.DynamoDBv2.DataModel;
+using Amazon.Lambda.DynamoDBEvents;
+using HousingFinanceInterimApi.V1.Handlers;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -43,6 +46,8 @@ namespace HousingFinanceInterimApi
         private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
         private readonly IGenerateReportUseCase _generateReportUseCase;
         private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
+        private readonly IUpdateTAUseCase _updateTAUseCase;
+
 
         private const string CashFileLabel = "CashFile";
 
@@ -88,6 +93,7 @@ namespace HousingFinanceInterimApi
             IReportGateway reportGateway = new ReportGateway(context);
             IBatchReportGateway batchReportGateway = new BatchReportGateway(context);
             ISuspenseAccountsGateway suspenseAccountsGateway = new SuspenseAccountsGateway(context);
+            IUpdateTAGateway updateTAGateway = new UpdateTAGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _checkChargesBatchYearsUseCase = new CheckChargesBatchYearsUseCase(chargesBatchYearsGateway);
@@ -127,6 +133,19 @@ namespace HousingFinanceInterimApi
                 reportGateway, transactionGateway, googleFileSettingGateway, googleClientService);
             _moveHousingBenefitFileUseCase = new MoveHousingBenefitFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService);
+            _updateTAUseCase = new UpdateTAUseCase(updateTAGateway);
+        }
+
+        public static void DynamodbStream(DynamoDBEvent dynamoDBEvent)
+        {
+            foreach (var record in dynamoDBEvent.Records)
+            {
+                var oldItem = record.Dynamodb.OldImage;
+                LoggingHandler.LogInfo($"OldImage is {oldItem}");
+                var newItem = record.Dynamodb.NewImage;
+                LoggingHandler.LogInfo($"NewImage is {newItem}");
+            }
+           // await _updateTAUseCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()
