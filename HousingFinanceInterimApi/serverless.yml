@@ -571,6 +571,7 @@ resources:
                     - "iam:ListStreams"
                     - "iam:GetRecords"  
                     - "iam:GetShardIterator"
+                  Resource: "*"
     LoadTenancyAgreementLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
