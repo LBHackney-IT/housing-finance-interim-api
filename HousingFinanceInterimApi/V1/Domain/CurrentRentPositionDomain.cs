@@ -281,21 +281,21 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets or sets the week50 payment.
         /// </summary>
-        [JsonProperty("Week50Payment")]
+        [JsonProperty(nameof(Week50Payment))]
         [JsonConverter(typeof(NullPoundCurrencyConverter))]
         public decimal? Week50Payment { get; set; }
 
         /// <summary>
         /// Gets or sets the week51 payment.
         /// </summary>
-        [JsonProperty("Week51Payment")]
+        [JsonProperty(nameof(Week51Payment))]
         [JsonConverter(typeof(NullPoundCurrencyConverter))]
         public decimal? Week51Payment { get; set; }
 
         /// <summary>
         /// Gets or sets the week52 payment.
         /// </summary>
-        [JsonProperty("Week52Payment")]
+        [JsonProperty(nameof(Week52Payment))]
         [JsonConverter(typeof(NullPoundCurrencyConverter))]
         public decimal? Week52Payment { get; set; }
 
@@ -316,7 +316,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets or sets the tenant.
         /// </summary>
-        [JsonProperty("Tenant")]
+        [JsonProperty(nameof(Tenant))]
         public string Tenant { get; set; }
 
         /// <summary>
@@ -365,7 +365,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets or sets the mobile.
         /// </summary>
-        [JsonProperty("Mobile")]
+        [JsonProperty(nameof(Mobile))]
         public string Mobile { get; set; }
 
         /// <summary>

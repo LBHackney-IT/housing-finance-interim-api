@@ -31,13 +31,13 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets or sets the patch.
         /// </summary>
-        [JsonProperty("Patch")]
+        [JsonProperty(nameof(Patch))]
         public string Patch { get; set; }
 
         /// <summary>
         /// Gets or sets the uprn.
         /// </summary>
-        [JsonProperty("UPRN")]
+        [JsonProperty(nameof(UPRN))]
         public string UPRN { get; set; }
 
         /// <summary>
@@ -49,13 +49,13 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets or sets the comment.
         /// </summary>
-        [JsonProperty("Comment")]
+        [JsonProperty(nameof(Comment))]
         public string Comment { get; set; }
 
         /// <summary>
         /// Gets or sets the comment2.
         /// </summary>
-        [JsonProperty("Comment2")]
+        [JsonProperty(nameof(Comment2))]
         public string Comment2 { get; set; }
 
         /// <summary>
@@ -79,37 +79,37 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets or sets the bedrooms.
         /// </summary>
-        [JsonProperty("Bedrooms")]
+        [JsonProperty(nameof(Bedrooms))]
         public int Bedrooms { get; set; }
 
         /// <summary>
         /// Gets or sets the type.
         /// </summary>
-        [JsonProperty("Type")]
+        [JsonProperty(nameof(Type))]
         public string Type { get; set; }
 
         /// <summary>
         /// Gets or sets the tenure.
         /// </summary>
-        [JsonProperty("Tenure")]
+        [JsonProperty(nameof(Tenure))]
         public string Tenure { get; set; }
 
         /// <summary>
         /// Gets or sets the title.
         /// </summary>
-        [JsonProperty("Title")]
+        [JsonProperty(nameof(Title))]
         public string Title { get; set; }
 
         /// <summary>
         /// Gets or sets the forename.
         /// </summary>
-        [JsonProperty("Forename")]
+        [JsonProperty(nameof(Forename))]
         public string Forename { get; set; }
 
         /// <summary>
         /// Gets or sets the surname.
         /// </summary>
-        [JsonProperty("Surname")]
+        [JsonProperty(nameof(Surname))]
         public string Surname { get; set; }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets or sets the formula.
         /// </summary>
-        [JsonProperty("Formula")]
+        [JsonProperty(nameof(Formula))]
         [JsonConverter(typeof(DecimalOrNull))]
         public decimal? Formula { get; set; }
 
@@ -190,7 +190,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets or sets the actual.
         /// </summary>
-        [JsonProperty("Actual")]
+        [JsonProperty(nameof(Actual))]
         public decimal? Actual { get; set; }
 
         /// <summary>
@@ -250,13 +250,13 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets or sets the concierge.
         /// </summary>
-        [JsonProperty("Concierge")]
+        [JsonProperty(nameof(Concierge))]
         public decimal? Concierge { get; set; }
 
         /// <summary>
         /// Gets or sets the heating.
         /// </summary>
-        [JsonProperty("Heating")]
+        [JsonProperty(nameof(Heating))]
         [JsonConverter(typeof(DecimalOrNull))]
         public decimal? Heating { get; set; }
 

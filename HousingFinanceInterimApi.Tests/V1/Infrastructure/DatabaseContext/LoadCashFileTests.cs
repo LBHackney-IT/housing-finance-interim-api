@@ -16,7 +16,6 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
     {
         private readonly HousingFinanceInterimApi.V1.Infrastructure.DatabaseContext _context;
         private static readonly Fixture _fixture = new();
-        private static readonly Faker _faker = new();
         private readonly List<Action> _cleanups;
 
         public LoadCashFileTests(BaseContextTest baseContextTest)
