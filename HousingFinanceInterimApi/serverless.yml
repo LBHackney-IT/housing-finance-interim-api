@@ -61,6 +61,11 @@ functions:
           path: /swagger/{proxy+}
           method: GET
           private: false
+  dynamodbStream:
+    name: ${self:service}-${self:provider.stage}-dynamodb-stream
+    description: Uhdate MATenancyAgreement and UHTenancyAgreement everytime tenure dynamoDB table is updated
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::DynamodbStream
+    role: lambdaExecutionRole
   loadTenancyAgreement:
     name: ${self:service}-${self:provider.stage}-load-tenagree
     description: "The scheduler to update and add new tenancy agreements. Run at 12:00 AM"
