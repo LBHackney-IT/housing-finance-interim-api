@@ -561,6 +561,16 @@ resources:
                   Action:
                     - "lambda:InvokeFunction"
                   Resource: "*"
+          - PolicyName: dynamo-stream
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - "iam:DescribeStream"
+                    - "iam:ListStreams"
+                    - "iam:GetRecords"  
+                    - "iam:GetShardIterator"
     LoadTenancyAgreementLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
