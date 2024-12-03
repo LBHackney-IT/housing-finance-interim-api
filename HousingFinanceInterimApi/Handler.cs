@@ -15,7 +15,6 @@ using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Handlers;
-using Hackney.Shared.Tenure.Domain;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using Amazon.DynamoDBv2.DataModel;
