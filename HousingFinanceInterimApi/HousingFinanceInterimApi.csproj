@@ -23,6 +23,7 @@
     <PackageReference Include="Hackney.Core.Authorization" Version="1.78.0" />
     <PackageReference Include="Hackney.Core.Http" Version="1.70.0" />
     <PackageReference Include="Hackney.Core.JWT" Version="1.72.0" />
+    <PackageReference Include="Hackney.Shared.Tenure" Version="0.31.0" />
     <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.HealthChecks" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="4.1.1" />
