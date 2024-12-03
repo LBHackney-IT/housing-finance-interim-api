@@ -14,9 +14,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Boundary.Response;
+using HousingFinanceInterimApi.V1.Handlers;
+using Hackney.Shared.Tenure.Domain;
+using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.DynamoDBv2.Model;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.Lambda.DynamoDBEvents;
-using HousingFinanceInterimApi.V1.Handlers;
+using System.Text.Json;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -47,7 +51,7 @@ namespace HousingFinanceInterimApi
         private readonly IGenerateReportUseCase _generateReportUseCase;
         private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
         private readonly IUpdateTAUseCase _updateTAUseCase;
-
+        private readonly DynamoDBContext _context;
 
         private const string CashFileLabel = "CashFile";
 
@@ -134,18 +138,26 @@ namespace HousingFinanceInterimApi
             _moveHousingBenefitFileUseCase = new MoveHousingBenefitFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService);
             _updateTAUseCase = new UpdateTAUseCase(updateTAGateway);
+            
         }
 
-        public static void DynamodbStream(DynamoDBEvent dynamoDBEvent)
+        public void DynamodbStream(DynamoDBEvent dynamoDBEvent)
         {
             foreach (var record in dynamoDBEvent.Records)
             {
                 var oldItem = record.Dynamodb.OldImage;
-                LoggingHandler.LogInfo($"OldImage is {oldItem}");
+                LoggingHandler.LogInfo($"OldImage is {JsonSerializer.Serialize(oldItem)}");
                 var newItem = record.Dynamodb.NewImage;
-                LoggingHandler.LogInfo($"NewImage is {newItem}");
+                LoggingHandler.LogInfo($"NewImage is {JsonSerializer.Serialize(newItem)}");
+
             }
-           // await _updateTAUseCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
+            // await _updateTAUseCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
+        }
+
+        private T GetObject<T>(Dictionary<string, AttributeValue> image)
+        {
+            var document = Document.FromAttributeMap(image);
+            return _context.FromDocument<T>(document);
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()

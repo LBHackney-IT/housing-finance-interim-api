@@ -101,7 +101,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            await endpointCall.Should().ThrowAsync<ArgumentException>().WithMessage(message);
+            await endpointCall.Should().ThrowAsync<ArgumentException>().WithMessage(message).ConfigureAwait(false);
         }
 
         [Fact]
@@ -213,7 +213,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            await endpointCall.Should().ThrowAsync<ConnectionAbortedException>().WithMessage(message);
+            await endpointCall.Should().ThrowAsync<ConnectionAbortedException>().WithMessage(message).ConfigureAwait(false);
         }
         #endregion
 
@@ -289,7 +289,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            await endpointCall.Should().ThrowAsync<TimeoutException>().WithMessage(message);
+            await endpointCall.Should().ThrowAsync<TimeoutException>().WithMessage(message).ConfigureAwait(false);
         }
 
         [Fact]
@@ -401,7 +401,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            await endpointCall.Should().ThrowAsync<ConnectionAbortedException>().WithMessage(message);
+            await endpointCall.Should().ThrowAsync<ConnectionAbortedException>().WithMessage(message).ConfigureAwait(false);
         }
         #endregion
 
@@ -478,7 +478,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            await endpointCall.Should().ThrowAsync<TimeoutException>().WithMessage(message);
+            await endpointCall.Should().ThrowAsync<TimeoutException>().WithMessage(message).ConfigureAwait(false);
         }
 
         [Fact]
@@ -613,7 +613,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            await endpointCall.Should().ThrowAsync<ConnectionAbortedException>().WithMessage(message);
+            await endpointCall.Should().ThrowAsync<ConnectionAbortedException>().WithMessage(message).ConfigureAwait(false);
         }
         #endregion
 
@@ -688,7 +688,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            await endpointCall.Should().ThrowAsync<TimeoutException>().WithMessage(message);
+            await endpointCall.Should().ThrowAsync<TimeoutException>().WithMessage(message).ConfigureAwait(false);
         }
 
         [Fact]
@@ -844,7 +844,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            await endpointCall.Should().ThrowAsync<ConnectionAbortedException>().WithMessage(message);
+            await endpointCall.Should().ThrowAsync<ConnectionAbortedException>().WithMessage(message).ConfigureAwait(false);
         }
         #endregion
 
@@ -919,7 +919,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            await endpointCall.Should().ThrowAsync<TimeoutException>().WithMessage(message);
+            await endpointCall.Should().ThrowAsync<TimeoutException>().WithMessage(message).ConfigureAwait(false);
         }
 
         [Fact]
@@ -1031,7 +1031,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            await endpointCall.Should().ThrowAsync<ConnectionAbortedException>().WithMessage(message);
+            await endpointCall.Should().ThrowAsync<ConnectionAbortedException>().WithMessage(message).ConfigureAwait(false);
         }
         #endregion
 
@@ -1106,7 +1106,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            await endpointCall.Should().ThrowAsync<OutOfMemoryException>().WithMessage(message);
+            await endpointCall.Should().ThrowAsync<OutOfMemoryException>().WithMessage(message).ConfigureAwait(false);
         }
 
         [Fact]
@@ -1218,7 +1218,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            await endpointCall.Should().ThrowAsync<ArgumentException>().WithMessage(message);
+            await endpointCall.Should().ThrowAsync<ArgumentException>().WithMessage(message).ConfigureAwait(false);
         }
         #endregion
 
@@ -1292,7 +1292,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            await endpointCall.Should().ThrowAsync<NullReferenceException>().WithMessage(message);
+            await endpointCall.Should().ThrowAsync<NullReferenceException>().WithMessage(message).ConfigureAwait(false);
         }
 
         [Fact]
@@ -1404,7 +1404,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
                 .ConfigureAwait(false);
 
             // Assert
-            await endpointCall.Should().ThrowAsync<DataException>().WithMessage(message);
+            await endpointCall.Should().ThrowAsync<DataException>().WithMessage(message).ConfigureAwait(false);
         }
         #endregion
     }

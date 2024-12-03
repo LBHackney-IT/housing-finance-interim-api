@@ -20,8 +20,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IBatchLogErrorGateway _batchLogErrorGateway;
         private readonly IGoogleFileSettingGateway _googleFileSettingGateway;
         private readonly IGoogleClientService _googleClientService;
-
-        private readonly Regex _academyFilePattern = new Regex(@"[0-9]{8}");
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
 
         private readonly string _academyFileFolderLabel = "AcademyFileFolder";
@@ -88,7 +86,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                             Files = await _googleClientService.GetFilesInDriveAsync(setting.GoogleIdentifier).ConfigureAwait(false)
                         })
                         .ToList()
-                    );
+                    ).ConfigureAwait(false);
 
                 var copyInstructions = destinationFolderWithFiles
                     .SelectMany(destinationFolder => validRenamedAcademyFiles
@@ -111,7 +109,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     );
 
                 // Ensure that an academy file is copied in this invocation
-                if (copyInstructions.Count() == 0)
+                if (!copyInstructions.Any())
                 {
                     var academyFolderIds = string.Join(", ", academyFoldersSettings.Select(setting => setting.GoogleIdentifier));
                     var errorMessage =
@@ -139,19 +137,19 @@ namespace HousingFinanceInterimApi.V1.UseCase
             catch (GoogleApiException ex)
             {
                 LoggingHandler.LogError(ex.Message);
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message);
+                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message).ConfigureAwait(false);
                 throw;
             }
             catch (SIO.FileNotFoundException ex)
             {
                 LoggingHandler.LogError(ex.Message);
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message);
+                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message).ConfigureAwait(false);
                 throw;
             }
             catch (Exception ex)
             {
                 LoggingHandler.LogError(ex.Message);
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message);
+                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message).ConfigureAwait(false);
                 throw;
             }
         }
@@ -171,7 +169,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             }
         }
 
-        private List<FileCopyObject> FilterAcademyFileToCopy(List<File> academyFiles)
+        private static List<FileCopyObject> FilterAcademyFileToCopy(List<File> academyFiles)
         {
             // From the files in the Academy folder, select ones created in last week and rename them.
             // If multiple files in valid week, select the first one only.

@@ -18,7 +18,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         [JsonConverter(typeof(DateTimeFormat))]
         public DateTime Date { get; set; }
 
-        [JsonProperty("Amount")]
+        [JsonProperty(nameof(Amount))]
         public decimal Amount { get; set; }
 
         [JsonProperty("New Payment Ref")]
