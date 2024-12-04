@@ -21,6 +21,7 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.Lambda.DynamoDBEvents;
 using Hackney.Shared.Tenure.Domain;
 using Newtonsoft.Json;
+using HousingFinanceInterimApi.V1.Helpers;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -145,23 +146,25 @@ namespace HousingFinanceInterimApi
         {
             foreach (var record in dynamoDBEvent.Records)
             {
-                var oldItem = record.Dynamodb.OldImage;
-                var serializeOldItem = JsonConvert.SerializeObject(oldItem, Formatting.Indented);
-                var deserializeOldItem = JsonConvert.DeserializeObject(serializeOldItem); 
-                LoggingHandler.LogInfo($"OldImage is {deserializeOldItem}");
-                var newItem = record.Dynamodb.NewImage;
-                var serializeNewItem = JsonConvert.SerializeObject(newItem, Formatting.Indented);
-                var deserializeNewItem = JsonConvert.DeserializeObject(serializeNewItem);
-                LoggingHandler.LogInfo($"NewImage is {deserializeNewItem}");
-
+                var oldItem = Convert(record.Dynamodb.OldImage);
+                var newItem = Convert(record.Dynamodb.NewImage);
+               
+                LoggingHandler.LogInfo($"old image looks like:  {oldItem}");
+                LoggingHandler.LogInfo($"new image looks like:  {newItem}");
             }
             // await _updateTAUseCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
         }
 
-        private T GetObject<T>(Dictionary<string, AttributeValue> image)
+        private TenureInformation Convert(Dictionary<string, DynamoDBEvent.AttributeValue> item)
         {
-            var document = Document.FromAttributeMap(image);
-            return _context.FromDocument<T>(document);
+            // Convert the event to a JSON string
+            var json = item.ToJson();
+
+            // Which you can convert to the mid-level document model
+            var document = Document.FromJson(json);
+
+            // And then to the high-level object model using an IDynamoDBContext
+            return _context.FromDocument<TenureInformation>(document);
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()
