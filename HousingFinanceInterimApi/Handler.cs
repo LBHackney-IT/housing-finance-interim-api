@@ -22,6 +22,7 @@ using Amazon.Lambda.DynamoDBEvents;
 using Hackney.Shared.Tenure.Domain;
 using Newtonsoft.Json;
 using HousingFinanceInterimApi.V1.Helpers;
+using System.Linq;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -144,29 +145,24 @@ namespace HousingFinanceInterimApi
 
         public void DynamodbStream(DynamoDBEvent dynamoDBEvent)
         {
+            var request = new UpdateTARequest();
             foreach (var record in dynamoDBEvent.Records)
             {
-                var oldItem = Convert(record.Dynamodb.OldImage);
-                var newItem = Convert(record.Dynamodb.NewImage);
-               
+                var oldItem = record.Dynamodb.OldImage.ToJson();
                 LoggingHandler.LogInfo($"old image looks like:  {oldItem}");
+                var newItem = record.Dynamodb.NewImage.ToJson();
+                var tenure = JsonConvert.DeserializeObject<TenureInformation>(newItem);
+                request.TenureEndDate = tenure.EndOfTenureDate;
+                var tagRef = tenure.LegacyReferences.FirstOrDefault().ToString();
                 LoggingHandler.LogInfo($"new image looks like:  {newItem}");
+                LoggingHandler.LogInfo($"tenure looks like:  {tenure}");
+                LoggingHandler.LogInfo($"tagRef looks like:  {tagRef}");
+
             }
             // await _updateTAUseCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
         }
 
-        private TenureInformation Convert(Dictionary<string, DynamoDBEvent.AttributeValue> item)
-        {
-            // Convert the event to a JSON string
-            var json = item.ToJson();
-            LoggingHandler.LogInfo($"json looks like:  {json}");
-            // Which you can convert to the mid-level document model
-            var document = Document.FromJson(json);
-            LoggingHandler.LogInfo($"document looks like: {document}");
-
-            // And then to the high-level object model using an IDynamoDBContext
-            return _context.FromDocument<TenureInformation>(document);
-        }
+       
 
         public async Task<StepResponse> LoadTenancyAgreement()
         {
