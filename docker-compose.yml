@@ -1,5 +1,3 @@
-version: "3.2"
-
 services:
   housing-finance-interim-api:
     image: housing-finance-interim-api
