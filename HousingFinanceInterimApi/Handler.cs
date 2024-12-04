@@ -140,7 +140,7 @@ namespace HousingFinanceInterimApi
             _moveHousingBenefitFileUseCase = new MoveHousingBenefitFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService);
             _updateTAUseCase = new UpdateTAUseCase(updateTAGateway);
-            
+
         }
 
         public async Task DynamodbStream(DynamoDBEvent dynamoDBEvent)
