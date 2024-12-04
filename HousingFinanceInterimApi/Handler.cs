@@ -153,11 +153,10 @@ namespace HousingFinanceInterimApi
                 var newItem = record.Dynamodb.NewImage.ToJson();
                 var tenure = JsonConvert.DeserializeObject<TenureInformation>(newItem);
                 request.TenureEndDate = tenure.EndOfTenureDate;
-                var tagRef = tenure.LegacyReferences.FirstOrDefault().ToString();
                 LoggingHandler.LogInfo($"new image looks like:  {newItem}");
                 LoggingHandler.LogInfo($"End date is:  {tenure.EndOfTenureDate}");
-
-                LoggingHandler.LogInfo($"tenure looks like:  {tenure}");
+                var legacyRef = tenure.LegacyReferences.ToList();
+                var tagRef = legacyRef.Find(x => x.Name == "uh_tag_ref").Value;
                 LoggingHandler.LogInfo($"tagRef looks like:  {tagRef}");
                 await _updateTAUseCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
             }
