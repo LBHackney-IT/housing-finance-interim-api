@@ -19,7 +19,8 @@ using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.Lambda.DynamoDBEvents;
-using System.Text.Json;
+using Hackney.Shared.Tenure.Domain;
+using Newtonsoft.Json;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -145,9 +146,13 @@ namespace HousingFinanceInterimApi
             foreach (var record in dynamoDBEvent.Records)
             {
                 var oldItem = record.Dynamodb.OldImage;
-                LoggingHandler.LogInfo($"OldImage is {JsonSerializer.Serialize(oldItem)}");
+                var serializeOldItem = JsonConvert.SerializeObject(oldItem, Formatting.Indented);
+                var deserializeOldItem = JsonConvert.DeserializeObject(serializeOldItem); 
+                LoggingHandler.LogInfo($"OldImage is {deserializeOldItem}");
                 var newItem = record.Dynamodb.NewImage;
-                LoggingHandler.LogInfo($"NewImage is {JsonSerializer.Serialize(newItem)}");
+                var serializeNewItem = JsonConvert.SerializeObject(newItem, Formatting.Indented);
+                var deserializeNewItem = JsonConvert.DeserializeObject(serializeNewItem);
+                LoggingHandler.LogInfo($"NewImage is {deserializeNewItem}");
 
             }
             // await _updateTAUseCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
