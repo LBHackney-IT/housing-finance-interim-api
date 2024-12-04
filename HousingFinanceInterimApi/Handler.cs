@@ -143,7 +143,7 @@ namespace HousingFinanceInterimApi
             
         }
 
-        public void DynamodbStream(DynamoDBEvent dynamoDBEvent)
+        public async Task DynamodbStream(DynamoDBEvent dynamoDBEvent)
         {
             var request = new UpdateTARequest();
             foreach (var record in dynamoDBEvent.Records)
@@ -155,15 +155,13 @@ namespace HousingFinanceInterimApi
                 request.TenureEndDate = tenure.EndOfTenureDate;
                 var tagRef = tenure.LegacyReferences.FirstOrDefault().ToString();
                 LoggingHandler.LogInfo($"new image looks like:  {newItem}");
+                LoggingHandler.LogInfo($"End date is:  {tenure.EndOfTenureDate}");
+
                 LoggingHandler.LogInfo($"tenure looks like:  {tenure}");
                 LoggingHandler.LogInfo($"tagRef looks like:  {tagRef}");
-
+                await _updateTAUseCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
             }
-            // await _updateTAUseCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
         }
-
-       
-
         public async Task<StepResponse> LoadTenancyAgreement()
         {
             return await _loadTenancyAgreementUseCase.ExecuteAsync().ConfigureAwait(false);
