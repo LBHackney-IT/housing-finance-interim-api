@@ -159,9 +159,10 @@ namespace HousingFinanceInterimApi
         {
             // Convert the event to a JSON string
             var json = item.ToJson();
-
+            LoggingHandler.LogInfo($"json looks like:  {json}");
             // Which you can convert to the mid-level document model
             var document = Document.FromJson(json);
+            LoggingHandler.LogInfo($"document looks like: {document}");
 
             // And then to the high-level object model using an IDynamoDBContext
             return _context.FromDocument<TenureInformation>(document);
