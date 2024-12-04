@@ -52,7 +52,7 @@ namespace HousingFinanceInterimApi
         private readonly IGenerateReportUseCase _generateReportUseCase;
         private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
         private readonly IUpdateTAUseCase _updateTAUseCase;
-        private readonly DynamoDBContext _context;
+        private readonly IDynamoDBContext _context;
 
         private const string CashFileLabel = "CashFile";
 
