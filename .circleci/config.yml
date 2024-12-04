@@ -1,8 +1,8 @@
 version: 2.1
 
 orbs:
-  aws-ecr: circleci/aws-ecr@3.0.0
-  aws-cli: circleci/aws-cli@0.1.9
+  aws-ecr: circleci/aws-ecr@9.3.7
+  aws-cli: circleci/aws-cli@5.1.1
   aws_assume_role: lbh-hackit/aws_assume_role@0.1.0
 
 executors:
@@ -56,14 +56,14 @@ commands:
           name: Install serverless CLI
           command: npm i -g serverless@^4
       - run:
-          name: Install step function plugin          
+          name: Install step function plugin
           command: npm i serverless-step-functions
       - run:
           name: Build lambda
           command: |
             cd ./HousingFinanceInterimApi/
             chmod +x ./build.sh
-            ./build.sh      
+            ./build.sh
       - run:
           name: Deploy lambda
           command: |
@@ -127,7 +127,7 @@ jobs:
 workflows:
   check-and-deploy-development:
     jobs:
-      - check-code-formatting        
+      - check-code-formatting
       - build-and-test:
           context:
             - api-nuget-token-context
@@ -143,10 +143,10 @@ workflows:
             - api-nuget-token-context
             - "Serverless Framework"
           requires:
-            - assume-role-development  
+            - assume-role-development
           filters:
             branches:
-              only: development     
+              only: development
   check-and-deploy-staging-and-production:
     jobs:
       - build-and-test:
