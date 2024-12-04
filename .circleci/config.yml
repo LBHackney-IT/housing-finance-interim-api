@@ -54,7 +54,7 @@ commands:
             apt-get update && apt-get install -y nodejs
       - run:
           name: Install serverless CLI
-          command: npm i -g serverless@^3
+          command: npm i -g serverless@^4
       - run:
           name: Install step function plugin          
           command: npm i serverless-step-functions
@@ -141,6 +141,7 @@ workflows:
       - deploy-to-development:
           context:
             - api-nuget-token-context
+            - "Serverless Framework"
           requires:
             - assume-role-development  
           filters:
@@ -164,6 +165,7 @@ workflows:
       - deploy-to-staging:
           context:
             - api-nuget-token-context
+            - "Serverless Framework"
           requires:
             - assume-role-staging
           filters:
@@ -186,6 +188,7 @@ workflows:
       - deploy-to-production:
           context:
             - api-nuget-token-context
+            - "Serverless Framework"
           requires:
             - permit-production-release
             - assume-role-production
