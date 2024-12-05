@@ -572,10 +572,10 @@ resources:
               Statement:
                 - Effect: Allow
                   Action:
-                    - "iam:DescribeStream"
-                    - "iam:ListStreams"
-                    - "iam:GetRecords"  
-                    - "iam:GetShardIterator"
+                    - "dynamodb:DescribeStream"
+                    - "dynamodb:ListStreams"
+                    - "dynamodb:GetRecords"  
+                    - "dynamodb:GetShardIterator"
                   Resource:
                     - 'Fn::Join':
                         - ':'
