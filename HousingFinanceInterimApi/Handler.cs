@@ -148,16 +148,25 @@ namespace HousingFinanceInterimApi
             var request = new UpdateTARequest();
             foreach (var record in dynamoDBEvent.Records)
             {
+                //get old record and log it 
                 var oldItem = record.Dynamodb.OldImage.ToJson();
                 LoggingHandler.LogInfo($"old image looks like:  {oldItem}");
+
+                //get new record and log it
                 var newItem = record.Dynamodb.NewImage.ToJson();
-                var tenure = JsonConvert.DeserializeObject<TenureInformation>(newItem);
-                request.TenureEndDate = tenure.EndOfTenureDate;
                 LoggingHandler.LogInfo($"new image looks like:  {newItem}");
-                LoggingHandler.LogInfo($"End date is:  {tenure.EndOfTenureDate}");
+
+                //convert new record to tenureinformation object 
+                var tenure = JsonConvert.DeserializeObject<TenureInformation>(newItem);
+
+                //set request object and tag ref
+                request.TenureEndDate = tenure.EndOfTenureDate;
                 var legacyRef = tenure.LegacyReferences.ToList();
                 var tagRef = legacyRef.Find(x => x.Name == "uh_tag_ref").Value;
+                LoggingHandler.LogInfo($"End date is:  {tenure.EndOfTenureDate}");
                 LoggingHandler.LogInfo($"tagRef is:  {tagRef}");
+
+                //call usecase based on values set above
                 await _updateTAUseCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
             }
         }
