@@ -13,9 +13,8 @@ namespace HousingFinanceInterimApi.V1.Factories
             if (request == null) return null;
             bool isTerminated;
             bool isPresent;
-            var convertToString = request.TenureEndDate.ToString();
-            LoggingHandler.LogInfo($"Date string value is {convertToString}");
-            if (request.TenureEndDate == null || request.TenureEndDate > DateTime.UtcNow || convertToString == "01/01/1900 12:00:00 AM" || convertToString == "01/01/1900 00:00:00")
+            var defaultDate = new DateTime(1900, 01, 01, 0, 0, 0);
+            if (request.TenureEndDate == null || request.TenureEndDate > DateTime.UtcNow || request.TenureEndDate == defaultDate)
             {
                 return new UpdateTADomain
                 {
