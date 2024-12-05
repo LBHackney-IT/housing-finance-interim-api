@@ -76,9 +76,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         [Fact]
         public async Task DateIsDefaultValue()
         {
-            var endDateFuture = "1900-01-01T00:00:00.0000000Z";
+            var endDate = "1900-01-01T00:00:00.0000000Z";
             var request = _fixture.Build<UpdateTARequest>()
-                                  .With(x => x.TenureEndDate, DateTime.Parse(endDateFuture))
+                                  .With(x => x.TenureEndDate, DateTime.Parse(endDate))
                                   .Create();
             var domain = request.ToDomain();
             _mockGateway.Setup(x => x.UpdateTADetails("01234/02", domain));
