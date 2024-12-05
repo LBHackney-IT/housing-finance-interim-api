@@ -86,7 +86,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                             Files = await _googleClientService.GetFilesInDriveAsync(setting.GoogleIdentifier).ConfigureAwait(false)
                         })
                         .ToList()
-                    ).ConfigureAwait(false);
+                    );
 
                 var copyInstructions = destinationFolderWithFiles
                     .SelectMany(destinationFolder => validRenamedAcademyFiles
@@ -109,7 +109,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     );
 
                 // Ensure that an academy file is copied in this invocation
-                if (!copyInstructions.Any())
+                if (copyInstructions.Count() == 0)
                 {
                     var academyFolderIds = string.Join(", ", academyFoldersSettings.Select(setting => setting.GoogleIdentifier));
                     var errorMessage =
@@ -137,19 +137,19 @@ namespace HousingFinanceInterimApi.V1.UseCase
             catch (GoogleApiException ex)
             {
                 LoggingHandler.LogError(ex.Message);
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message).ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message);
                 throw;
             }
             catch (SIO.FileNotFoundException ex)
             {
                 LoggingHandler.LogError(ex.Message);
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message).ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message);
                 throw;
             }
             catch (Exception ex)
             {
                 LoggingHandler.LogError(ex.Message);
-                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message).ConfigureAwait(false);
+                await _batchLogErrorGateway.CreateAsync(batch.Id, "ERROR", ex.Message);
                 throw;
             }
         }
@@ -169,7 +169,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             }
         }
 
-        private static List<FileCopyObject> FilterAcademyFileToCopy(List<File> academyFiles)
+        private List<FileCopyObject> FilterAcademyFileToCopy(List<File> academyFiles)
         {
             // From the files in the Academy folder, select ones created in last week and rename them.
             // If multiple files in valid week, select the first one only.

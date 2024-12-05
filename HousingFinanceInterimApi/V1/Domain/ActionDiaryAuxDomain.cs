@@ -17,17 +17,17 @@ namespace HousingFinanceInterimApi.V1.Domain
         [JsonProperty("Action Code (Don't need fill)")]
         public string ActionCode { get; set; }
 
-        [JsonProperty(nameof(Action))]
+        [JsonProperty("Action")]
         public string Action { get; set; }
 
         [JsonProperty("Action Date")]
         [JsonConverter(typeof(DateTimeFormat))]
         public DateTime? ActionDate { get; set; }
-
-        [JsonProperty(nameof(Username))]
+            
+        [JsonProperty("Username")]
         public string Username { get; set; }
 
-        [JsonProperty(nameof(Balance))]
+        [JsonProperty("Balance")]
         [JsonConverter(typeof(DecimalOrNull))]
         public decimal? Balance { get; set; }
 

@@ -80,7 +80,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets the concierge.
         /// </summary>
-        [JsonProperty(nameof(Concierge))]
+        [JsonProperty("Concierge")]
         public decimal? Concierge { get; set; }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets the heating.
         /// </summary>
-        [JsonProperty(nameof(Heating))]
+        [JsonProperty("Heating")]
         public decimal? Heating { get; set; }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         // <summary>
         /// Gets the Interest.
         /// </summary>
-        [JsonProperty(nameof(Interest))]
+        [JsonProperty("Interest")]
         public decimal? Interest { get; set; }
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets the Storage
         /// </summary>
-        [JsonProperty(nameof(Storage))]
+        [JsonProperty("Storage")]
         public decimal? Storage { get; set; }
 
         /// <summary>

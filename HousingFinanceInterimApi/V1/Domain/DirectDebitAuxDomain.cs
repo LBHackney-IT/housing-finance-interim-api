@@ -11,11 +11,11 @@ namespace HousingFinanceInterimApi.V1.Domain
         [JsonProperty("Rent Account")]
         public string RentAccount { get; set; }
 
-        [JsonProperty(nameof(Date))]
+        [JsonProperty("Date")]
         [JsonConverter(typeof(DateTimeFormat))]
         public DateTime Date { get; set; }
 
-        [JsonProperty(nameof(Amount))]
+        [JsonProperty("Amount")]
         public decimal Amount { get; set; }
 
         public DateTimeOffset Timestamp { get; set; }

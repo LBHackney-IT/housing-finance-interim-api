@@ -157,7 +157,7 @@ namespace HousingFinanceInterimApi
                 LoggingHandler.LogInfo($"End date is:  {tenure.EndOfTenureDate}");
                 var legacyRef = tenure.LegacyReferences.ToList();
                 var tagRef = legacyRef.Find(x => x.Name == "uh_tag_ref").Value;
-                LoggingHandler.LogInfo($"tagRef looks like:  {tagRef}");
+                LoggingHandler.LogInfo($"tagRef is:  {tagRef}");
                 await _updateTAUseCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
             }
         }
