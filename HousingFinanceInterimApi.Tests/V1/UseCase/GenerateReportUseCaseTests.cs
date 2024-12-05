@@ -1621,7 +1621,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             // act
             Func<Task> generateAReportCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
-            await generateAReportCall.Should().NotThrowAsync().ConfigureAwait(false);
+            await generateAReportCall.Should().NotThrowAsync();
 
             // assert
             _mockBatchReportGateway.Verify(

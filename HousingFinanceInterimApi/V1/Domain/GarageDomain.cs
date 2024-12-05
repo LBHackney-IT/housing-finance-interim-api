@@ -32,19 +32,19 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets or sets the patch.
         /// </summary>
-        [JsonProperty(nameof(Patch))]
+        [JsonProperty("Patch")]
         public string Patch { get; set; }
 
         /// <summary>
         /// Gets or sets the fund.
         /// </summary>
-        [JsonProperty(nameof(Fund))]
+        [JsonProperty("Fund")]
         public string Fund { get; set; }
 
         /// <summary>
         /// Gets or sets the status.
         /// </summary>
-        [JsonProperty(nameof(Status))]
+        [JsonProperty("Status")]
         public string Status { get; set; }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets or sets the name.
         /// </summary>
-        [JsonProperty(nameof(Name))]
+        [JsonProperty("Name")]
         public string Name { get; set; }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets or sets the VAT.
         /// </summary>
-        [JsonProperty(nameof(VAT))]
+        [JsonProperty("VAT")]
         [JsonConverter(typeof(NullPoundCurrencyConverter))]
         public decimal? VAT { get; set; }
 

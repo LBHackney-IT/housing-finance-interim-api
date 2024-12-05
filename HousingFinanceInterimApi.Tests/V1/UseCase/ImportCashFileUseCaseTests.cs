@@ -25,6 +25,8 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         private readonly Mock<IGoogleClientService> _googleClientService = new Mock<IGoogleClientService>();
         private readonly Mock<IUPCashDumpFileNameGateway> _upCashDumpFileNameGateway = new Mock<IUPCashDumpFileNameGateway>();
         private readonly Mock<IUPCashDumpGateway> _upCashDumpGateway = new Mock<IUPCashDumpGateway>();
+        private readonly Mock<ILogger<ImportCashFileUseCase>> _logger = new Mock<ILogger<ImportCashFileUseCase>>();
+
         private static Fixture _fixture = new Fixture();
 
         private readonly string _googleIdentifier = "abc123";

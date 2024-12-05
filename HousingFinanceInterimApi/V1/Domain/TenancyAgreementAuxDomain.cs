@@ -11,7 +11,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         [JsonProperty("Payment Ref")]
         public string PaymentRef { get; set; }
 
-        [JsonProperty(nameof(Tenure))]
+        [JsonProperty("Tenure")]
         public string Tenure { get; set; }
 
         [JsonProperty("Start Date")]
@@ -28,7 +28,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         [JsonProperty("Short Address")]
         public string ShortAddress { get; set; }
 
-        [JsonProperty(nameof(Address))]
+        [JsonProperty("Address")]
         public string Address { get; set; }
 
         [JsonProperty("Post Code")]
@@ -37,13 +37,13 @@ namespace HousingFinanceInterimApi.V1.Domain
         [JsonProperty("Num Bedrooms")]
         public int? NumBedrooms { get; set; }
 
-        [JsonProperty(nameof(Title))]
+        [JsonProperty("Title")]
         public string Title { get; set; }
 
-        [JsonProperty(nameof(Forename))]
+        [JsonProperty("Forename")]
         public string Forename { get; set; }
 
-        [JsonProperty(nameof(Surname))]
+        [JsonProperty("Surname")]
         public string Surname { get; set; }
 
         [JsonProperty("Date Of Birth")]
