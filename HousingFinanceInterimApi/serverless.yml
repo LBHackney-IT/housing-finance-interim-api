@@ -576,7 +576,13 @@ resources:
                     - "iam:ListStreams"
                     - "iam:GetRecords"  
                     - "iam:GetShardIterator"
-                  Resource: "*"
+                  Resource:
+                    - 'Fn::Join':
+                        - ':'
+                        - - 'arn:aws:dynamodb'
+                          - Ref: 'AWS::Region'
+                          - Ref: 'AWS::AccountId'
+                          - 'table/TenureInformation/stream/*'
     LoadTenancyAgreementLambdaAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
