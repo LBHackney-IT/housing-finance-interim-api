@@ -25,6 +25,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly string _bucketName = Environment.GetEnvironmentVariable("S3_BUCKET_NAME");
         private readonly string _prefix = Environment.GetEnvironmentVariable("S3_OBJECT_PREFIX");
 
+        private readonly List<string> _listExcludedFileStartWith = new List<string>(new string[] { "OK_", "NOK_" });
+
         public CheckExistFileUseCase(IGoogleFileSettingGateway googleFileSettingGateway, IGoogleClientService googleClientService)
         {
             _googleFileSettingGateway = googleFileSettingGateway;

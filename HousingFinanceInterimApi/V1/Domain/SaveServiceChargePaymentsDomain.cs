@@ -38,13 +38,13 @@ namespace HousingFinanceInterimApi.V1.Domain
         /// <summary>
         /// Gets or sets the tenancy.
         /// </summary>
-        [JsonProperty(nameof(Tenancy))]
+        [JsonProperty("Tenancy")]
         public string Tenancy { get; set; }
 
         /// <summary>
         /// Gets or sets the tenant.
         /// </summary>
-        [JsonProperty(nameof(Tenant))]
+        [JsonProperty("Tenant")]
         public string Tenant { get; set; }
 
         /// <summary>

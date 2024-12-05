@@ -17,7 +17,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         [JsonProperty("Transaction Type")]
         public string TransactionType { get; set; }
 
-        [JsonProperty(nameof(Amount))]
+        [JsonProperty("Amount")]
         public decimal Amount { get; set; }
 
         [JsonProperty("Adjustment Date")]

@@ -302,7 +302,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var expectedErrorMsg =
                 "Expected 1 file to copy from the Academy Folder(s) " +
                 "* directories, but found none.";
-            await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(expectedErrorMsg).ConfigureAwait(false);
+            await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(expectedErrorMsg);
         }
 
         // If No academy folders are found...
@@ -322,7 +322,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(expectedErrorMessage).ConfigureAwait(false);
+            await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(expectedErrorMessage);
 
             _mockBatchLogGateway.Verify(g => g.SetToSuccessAsync(It.IsAny<long>()), Times.Never);
         }
@@ -344,7 +344,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(expectedErrorMessage).ConfigureAwait(false);
+            await useCaseCall.Should().ThrowAsync<Exception>().WithMessage(expectedErrorMessage);
 
             _mockBatchLogGateway.Verify(g => g.SetToSuccessAsync(It.IsAny<long>()), Times.Never);
         }
@@ -366,7 +366,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            await useCaseCall.Should().ThrowAsync<SIO.FileNotFoundException>().WithMessage(expectedErrorMessage).ConfigureAwait(false);
+            await useCaseCall.Should().ThrowAsync<SIO.FileNotFoundException>().WithMessage(expectedErrorMessage);
 
             _mockBatchLogGateway.Verify(g => g.SetToSuccessAsync(It.IsAny<long>()), Times.Never);
         }
@@ -522,7 +522,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            await useCaseCall.Should().ThrowAsync<GoogleApiException>().WithMessage(folderNotFoundException.Message).ConfigureAwait(false);
+            await useCaseCall.Should().ThrowAsync<GoogleApiException>().WithMessage(folderNotFoundException.Message);
 
             _mockBatchLogErrorGateway.Verify(g =>
                 g.CreateAsync(
@@ -561,7 +561,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            await useCaseCall.Should().ThrowAsync<GoogleApiException>().WithMessage(fileNotFoundException.Message).ConfigureAwait(false);
+            await useCaseCall.Should().ThrowAsync<GoogleApiException>().WithMessage(fileNotFoundException.Message);
 
             _mockBatchLogErrorGateway.Verify(g =>
                 g.CreateAsync(
@@ -593,7 +593,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            await useCaseCall.Should().ThrowAsync<GoogleApiException>().WithMessage(copyingIsForbiddenException.Message).ConfigureAwait(false);
+            await useCaseCall.Should().ThrowAsync<GoogleApiException>().WithMessage(copyingIsForbiddenException.Message);
 
             _mockBatchLogErrorGateway.Verify(g =>
                 g.CreateAsync(
@@ -627,7 +627,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            await useCaseCall.Should().ThrowAsync<TimeoutException>().WithMessage(expectedMessage).ConfigureAwait(false);
+            await useCaseCall.Should().ThrowAsync<TimeoutException>().WithMessage(expectedMessage);
 
             _mockBatchLogErrorGateway.Verify(g =>
                 g.CreateAsync(
