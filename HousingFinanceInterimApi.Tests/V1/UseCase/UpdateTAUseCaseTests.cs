@@ -76,7 +76,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         [Fact]
         public async Task DateIsDefaultValue()
         {
-            var endDateFuture = "1900-01-01 00:00:00.000";
+            var endDateFuture = "1900-01-01T00:00:00.0000000Z";
             var request = _fixture.Build<UpdateTARequest>()
                                   .With(x => x.TenureEndDate, DateTime.Parse(endDateFuture))
                                   .Create();
