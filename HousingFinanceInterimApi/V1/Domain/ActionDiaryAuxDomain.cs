@@ -23,7 +23,7 @@ namespace HousingFinanceInterimApi.V1.Domain
         [JsonProperty("Action Date")]
         [JsonConverter(typeof(DateTimeFormat))]
         public DateTime? ActionDate { get; set; }
-            
+
         [JsonProperty("Username")]
         public string Username { get; set; }
 
