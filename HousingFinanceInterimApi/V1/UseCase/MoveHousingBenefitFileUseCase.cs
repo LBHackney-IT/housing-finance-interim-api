@@ -20,6 +20,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IBatchLogErrorGateway _batchLogErrorGateway;
         private readonly IGoogleFileSettingGateway _googleFileSettingGateway;
         private readonly IGoogleClientService _googleClientService;
+
+        private readonly Regex _academyFilePattern = new Regex(@"[0-9]{8}");
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
 
         private readonly string _academyFileFolderLabel = "AcademyFileFolder";

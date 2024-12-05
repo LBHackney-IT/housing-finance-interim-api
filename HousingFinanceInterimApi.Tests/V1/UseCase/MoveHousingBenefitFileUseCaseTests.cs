@@ -627,7 +627,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             Func<Task> useCaseCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            await useCaseCall.Should().ThrowAsync<TimeoutException>().WithMessage(expectedMessage);
+            await useCaseCall.Should().ThrowAsync<TimeoutException>().WithMessage(expectedMessage).ConfigureAwait(false);
 
             _mockBatchLogErrorGateway.Verify(g =>
                 g.CreateAsync(

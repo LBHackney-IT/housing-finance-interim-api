@@ -21,7 +21,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly string _chargesBatchYears = Environment.GetEnvironmentVariable("CHARGES_BATCH_YEARS");
 
         private const string ChargesLabel = "Charges";
-            
+ 
         public CheckChargesBatchYearsUseCase(
             IChargesBatchYearsGateway chargesBatchYearsGateway)
         {
