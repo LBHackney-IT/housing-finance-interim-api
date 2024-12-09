@@ -2,7 +2,7 @@ service: housing-finance-interim-api
 provider:
   name: aws
   timeout: 300
-  runtime: dotnet6
+  runtime: dotnet8
   vpc: ${self:custom.vpc.${opt:stage}}
   stage: ${opt:stage}
   region: eu-west-2
@@ -28,7 +28,7 @@ provider:
     HOUSING_FINANCE_ALLOWED_GROUPS: ${ssm:/housing-finance/${self:provider.stage}/housing-finance-allowed-groups}
 
 package:
-  artifact: ./bin/release/net6.0/housing-finance-interim-api.zip
+  artifact: ./bin/release/net8.0/housing-finance-interim-api.zip
 
 functions:
   interimFinanceSystem:
@@ -68,11 +68,11 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadTenancyAgreement
     role: lambdaExecutionRole
     events:
-        - schedule: cron(0 0 * * ? *)   
+        - schedule: cron(0 0 * * ? *)
   checkCashFiles:
     name: ${self:service}-${self:provider.stage}-check-cash-files
     description: "The scheduler to check if exists cash files. "
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckCashFiles  
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckCashFiles
   importCashFile:
     name: ${self:service}-${self:provider.stage}-cash-file
     description: "The scheduler to import cash files from Google drives."
@@ -88,7 +88,7 @@ functions:
   checkHousingFiles:
     name: ${self:service}-${self:provider.stage}-check-housing-files
     description: "The scheduler to check if exists housing benefit files. "
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckHousingBenefitFiles  
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckHousingBenefitFiles
   importHousingFile:
     name: ${self:service}-${self:provider.stage}-housing-file
     description: "The scheduler to import housing files from Google drives."
@@ -114,7 +114,7 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshOperatingBalance
     role: lambdaExecutionRole
     events:
-        - schedule: cron(45 6 * * ? *)    
+        - schedule: cron(45 6 * * ? *)
   refreshManageArrearsTables:
     name: ${self:service}-${self:provider.stage}-refresh-ma-cur-bal
     description: "The scheduler to refresh manage arrears balance based on current balance table."
@@ -142,13 +142,13 @@ functions:
   checkChargesBatchYears:
     name: ${self:service}-${self:provider.stage}-check-years
     description: "The scheduler to check pending year to process charges. "
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckChargesBatchYears  
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckChargesBatchYears
   importCharges:
     name: ${self:service}-${self:provider.stage}-charges
     description: "The scheduler to import charges from Google Spreadshet."
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadCharges
-    role: lambdaExecutionRole  
+    role: lambdaExecutionRole
   importChargesHistory:
     name: ${self:service}-${self:provider.stage}-charges-hist
     description: "The scheduler to import charges history."
@@ -212,7 +212,7 @@ functions:
     description: "The scheduler to generate google drive reports."
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::GenerateReport
-    role: lambdaExecutionRole 
+    role: lambdaExecutionRole
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:
@@ -222,7 +222,7 @@ stepFunctions:
       definition:
         Comment: "Cash files process step function deployed via serverless. Run at 02:00 AM"
         StartAt: ImportCashFile
-        States:          
+        States:
           ImportCashFile:
             Type: Task
             Resource:
@@ -256,10 +256,10 @@ stepFunctions:
         Team: HousingFinance
     hfstepfunchousingfile:
       name: HFHousingFileStateMachine
-      events:        
+      events:
         - schedule: cron(0 6 ? * MON *)
       definition:
-        Comment: "Housing files process step function deployed via serverless. Run at 06:00 AM only Monday"        
+        Comment: "Housing files process step function deployed via serverless. Run at 06:00 AM only Monday"
         StartAt: CheckHousingFiles
         States:
           CheckHousingFiles:
@@ -276,7 +276,7 @@ stepFunctions:
           Wait_1:
               Type: Wait
               TimestampPath: $.NextStepTime
-              Next: ImportHousingFile  
+              Next: ImportHousingFile
           ImportHousingFile:
             Type: Task
             Resource:
@@ -315,7 +315,7 @@ stepFunctions:
       definition:
         Comment: "Direct debit process step function deployed via serverless. Run at 02:30 AM"
         StartAt: ImportDirectDebit
-        States:          
+        States:
           ImportDirectDebit:
             Type: Task
             Resource:
@@ -326,7 +326,7 @@ stepFunctions:
                 IntervalSeconds: 30
                 MaxAttempts: 3
                 BackoffRate: 2
-            Next: Wait_1         
+            Next: Wait_1
           Wait_1:
               Type: Wait
               TimestampPath: $.NextStepTime
@@ -398,7 +398,7 @@ stepFunctions:
     #             IntervalSeconds: 30
     #             MaxAttempts: 3
     #             BackoffRate: 2
-    #         Next: Wait_1          
+    #         Next: Wait_1
     #       Wait_1:
     #           Type: Wait
     #           TimestampPath: $.NextStepTime
@@ -417,7 +417,7 @@ stepFunctions:
     #       Wait_2:
     #           Type: Wait
     #           TimestampPath: $.NextStepTime
-    #           Next: ImportChargesTransactions          
+    #           Next: ImportChargesTransactions
     #       ImportChargesTransactions:
     #         Type: Task
     #         Resource:
@@ -441,7 +441,7 @@ stepFunctions:
       definition:
         Comment: "Current balance process step function deployed via serverless. Run at 06:10 AM"
         StartAt: RefreshCurrentBalance
-        States:          
+        States:
           RefreshCurrentBalance:
             Type: Task
             Resource:
@@ -504,7 +504,7 @@ stepFunctions:
           Wait_0:
               Type: Wait
               TimestampPath: $.NextStepTime
-              Next: GenerateReport          
+              Next: GenerateReport
           EndStep:
             Type: Succeed
       dependsOn: lambdaExecutionRole
@@ -620,7 +620,7 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         TreatMissingData: notBreaching
-        AlarmActions: 
+        AlarmActions:
           - 'Fn::Join':
             - ':'
             - - 'arn:aws:sns'
@@ -643,7 +643,7 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         TreatMissingData: notBreaching
-        AlarmActions: 
+        AlarmActions:
           - 'Fn::Join':
             - ':'
             - - 'arn:aws:sns'
@@ -666,7 +666,7 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         TreatMissingData: notBreaching
-        AlarmActions: 
+        AlarmActions:
           - 'Fn::Join':
             - ':'
             - - 'arn:aws:sns'
@@ -689,7 +689,7 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         TreatMissingData: notBreaching
-        AlarmActions: 
+        AlarmActions:
           - 'Fn::Join':
             - ':'
             - - 'arn:aws:sns'
@@ -735,7 +735,7 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         TreatMissingData: notBreaching
-        AlarmActions: 
+        AlarmActions:
           - 'Fn::Join':
             - ':'
             - - 'arn:aws:sns'
@@ -744,7 +744,7 @@ resources:
               - 'housing-finance-alarms'
         Dimensions:
           - Name: FunctionName
-            Value: ${self:service}-${self:provider.stage}-cash-file-trans        
+            Value: ${self:service}-${self:provider.stage}-cash-file-trans
     ImportDirectDebitAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
@@ -758,7 +758,7 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         TreatMissingData: notBreaching
-        AlarmActions: 
+        AlarmActions:
           - 'Fn::Join':
             - ':'
             - - 'arn:aws:sns'
@@ -781,7 +781,7 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         TreatMissingData: notBreaching
-        AlarmActions: 
+        AlarmActions:
           - 'Fn::Join':
             - ':'
             - - 'arn:aws:sns'
@@ -804,7 +804,7 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         TreatMissingData: notBreaching
-        AlarmActions: 
+        AlarmActions:
           - 'Fn::Join':
             - ':'
             - - 'arn:aws:sns'
@@ -827,7 +827,7 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         TreatMissingData: notBreaching
-        AlarmActions: 
+        AlarmActions:
           - 'Fn::Join':
             - ':'
             - - 'arn:aws:sns'
@@ -850,7 +850,7 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         TreatMissingData: notBreaching
-        AlarmActions: 
+        AlarmActions:
           - 'Fn::Join':
             - ':'
             - - 'arn:aws:sns'
@@ -873,7 +873,7 @@ resources:
         EvaluationPeriods: 1
         Period: 60
         TreatMissingData: notBreaching
-        AlarmActions: 
+        AlarmActions:
           - 'Fn::Join':
             - ':'
             - - 'arn:aws:sns'
