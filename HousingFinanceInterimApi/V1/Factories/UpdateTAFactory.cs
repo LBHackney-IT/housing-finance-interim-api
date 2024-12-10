@@ -1,8 +1,6 @@
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Domain;
-using HousingFinanceInterimApi.V1.Handlers;
 using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace HousingFinanceInterimApi.V1.Factories
 {
@@ -11,8 +9,6 @@ namespace HousingFinanceInterimApi.V1.Factories
         public static UpdateTADomain ToDomain(this UpdateTARequest request)
         {
             if (request == null) return null;
-            bool isTerminated;
-            bool isPresent;
             var defaultDate = new DateTime(1900, 01, 01, 0, 0, 0);
             if (request.TenureEndDate == null || request.TenureEndDate > DateTime.UtcNow || request.TenureEndDate == defaultDate)
             {
