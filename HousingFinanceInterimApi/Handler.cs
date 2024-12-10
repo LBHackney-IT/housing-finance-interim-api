@@ -127,10 +127,8 @@ namespace HousingFinanceInterimApi
                 reportGateway, transactionGateway, googleFileSettingGateway, googleClientService);
             _moveHousingBenefitFileUseCase = new MoveHousingBenefitFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService);
-
         }
 
-       
         public async Task<StepResponse> LoadTenancyAgreement()
         {
             return await _loadTenancyAgreementUseCase.ExecuteAsync().ConfigureAwait(false);
