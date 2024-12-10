@@ -20,6 +20,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task ExecuteAsync(string tagRef, UpdateTARequest request)
         {
+            LoggingHandler.LogInfo($"eot value is {request.TenureEndDate}, tagRef is {tagRef}");
             var domain = request.ToDomain();
             LoggingHandler.LogInfo($"eot value is {domain.TenureEndDate}, present:{domain.IsPresent}, terminated:{domain.IsTerminated}");
             await _gateway.UpdateTADetails(tagRef, domain).ConfigureAwait(false);

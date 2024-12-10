@@ -2,7 +2,6 @@ using AutoFixture;
 using FluentAssertions;
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Controllers;
-using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
