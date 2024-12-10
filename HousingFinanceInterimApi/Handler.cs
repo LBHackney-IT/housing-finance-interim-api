@@ -14,15 +14,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Boundary.Response;
-using HousingFinanceInterimApi.V1.Handlers;
-using Amazon.DynamoDBv2.DocumentModel;
-using Amazon.DynamoDBv2.Model;
-using Amazon.DynamoDBv2.DataModel;
-using Amazon.Lambda.DynamoDBEvents;
-using Hackney.Shared.Tenure.Domain;
-using Newtonsoft.Json;
-using HousingFinanceInterimApi.V1.Helpers;
-using System.Linq;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -52,8 +43,6 @@ namespace HousingFinanceInterimApi
         private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
         private readonly IGenerateReportUseCase _generateReportUseCase;
         private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
-        private readonly IUpdateTAUseCase _updateTAUseCase;
-        private readonly IDynamoDBContext _context;
 
         private const string CashFileLabel = "CashFile";
 
@@ -99,7 +88,6 @@ namespace HousingFinanceInterimApi
             IReportGateway reportGateway = new ReportGateway(context);
             IBatchReportGateway batchReportGateway = new BatchReportGateway(context);
             ISuspenseAccountsGateway suspenseAccountsGateway = new SuspenseAccountsGateway(context);
-            IUpdateTAGateway updateTAGateway = new UpdateTAGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _checkChargesBatchYearsUseCase = new CheckChargesBatchYearsUseCase(chargesBatchYearsGateway);
@@ -139,37 +127,10 @@ namespace HousingFinanceInterimApi
                 reportGateway, transactionGateway, googleFileSettingGateway, googleClientService);
             _moveHousingBenefitFileUseCase = new MoveHousingBenefitFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService);
-            _updateTAUseCase = new UpdateTAUseCase(updateTAGateway);
 
         }
 
-        public async Task DynamodbStream(DynamoDBEvent dynamoDBEvent)
-        {
-            var request = new UpdateTARequest();
-            foreach (var record in dynamoDBEvent.Records)
-            {
-                //get old record and log it 
-                var oldItem = record.Dynamodb.OldImage.ToJson();
-                LoggingHandler.LogInfo($"old image looks like:  {oldItem}");
-
-                //get new record and log it
-                var newItem = record.Dynamodb.NewImage.ToJson();
-                LoggingHandler.LogInfo($"new image looks like:  {newItem}");
-
-                //convert new record to tenureinformation object 
-                var tenure = JsonConvert.DeserializeObject<TenureInformation>(newItem);
-
-                //set request object and tag ref
-                request.TenureEndDate = tenure.EndOfTenureDate;
-                var legacyRef = tenure.LegacyReferences.ToList();
-                var tagRef = legacyRef.Find(x => x.Name == "uh_tag_ref").Value;
-                LoggingHandler.LogInfo($"End date is:  {tenure.EndOfTenureDate}");
-                LoggingHandler.LogInfo($"tagRef is:  {tagRef}");
-
-                //call usecase based on values set above
-                await _updateTAUseCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
-            }
-        }
+       
         public async Task<StepResponse> LoadTenancyAgreement()
         {
             return await _loadTenancyAgreementUseCase.ExecuteAsync().ConfigureAwait(false);
