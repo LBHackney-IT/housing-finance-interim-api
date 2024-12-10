@@ -60,7 +60,7 @@ functions:
       - http:
           path: /swagger/{proxy+}
           method: GET
-          private: false  
+          private: false
   loadTenancyAgreement:
     name: ${self:service}-${self:provider.stage}-load-tenagree
     description: "The scheduler to update and add new tenancy agreements. Run at 12:00 AM"
