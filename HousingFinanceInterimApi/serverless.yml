@@ -63,7 +63,7 @@ functions:
           private: false
   dynamodbStream:
     name: ${self:service}-${self:provider.stage}-dynamodb-stream
-    description: Uhdate MATenancyAgreement and UHTenancyAgreement everytime tenure dynamoDB table is updated
+    description: Update MATenancyAgreement and UHTenancyAgreement everytime tenure dynamoDB table is updated
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::DynamodbStream
     role: lambdaExecutionRole
   loadTenancyAgreement:
