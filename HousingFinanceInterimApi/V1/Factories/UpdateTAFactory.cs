@@ -10,7 +10,7 @@ namespace HousingFinanceInterimApi.V1.Factories
         {
             if (request == null) return null;
             var defaultDate = new DateTime(1900, 01, 01, 0, 0, 0);
-            if (request.TenureEndDate == null || request.TenureEndDate > DateTime.UtcNow || request.TenureEndDate == defaultDate)
+            if (request.TenureEndDate == null || request.TenureEndDate > DateTime.UtcNow || request.TenureEndDate == defaultDate.Date)
             {
                 return new UpdateTADomain
                 {
