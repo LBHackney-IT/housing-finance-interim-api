@@ -40,6 +40,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
             modelBuilder.Entity<ReportCashSuspenseAccount>().HasNoKey().ToView(null);
             modelBuilder.Entity<ReportCashImport>().HasNoKey().ToView(null);
             modelBuilder.Entity<ReportAccountBalance>().HasNoKey().ToView(null);
+            modelBuilder.Entity<MATenancyAgreement>().HasKey(x => x.TenancyAgreementRef);
+            modelBuilder.Entity<UHTenancyAgreement>().HasKey(x => x.TenancyAgreementRef);
             modelBuilder.Entity<ChargesAux>().Property(x => x.TimeStamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<DirectDebitAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<ActionDiaryAux>().Property(x => x.Timestamp).HasDefaultValueSql("GETDATE()");
@@ -134,6 +136,10 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<ReportCashImport> ReportCashImports { get; set; }
         public DbSet<BatchReport> BatchReports { get; set; }
         public DbSet<ReportAccountBalance> ReportAccountBalances { get; set; }
+
+        public DbSet<UHTenancyAgreement> UHTenancyAgreement { get; set; }
+
+        public DbSet<MATenancyAgreement> MATenancyAgreement { get; set; }
 
         /// <summary>
         /// Gets the operating balances.
