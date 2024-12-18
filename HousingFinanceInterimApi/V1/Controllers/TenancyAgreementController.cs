@@ -23,7 +23,7 @@ namespace HousingFinanceInterimApi.V1.Controllers
         [HttpPatch]
         public async Task<IActionResult> DynamoDbStreamTrigger([FromQuery] string tagRef, [FromBody] UpdateTARequest request)
         {
-            if (tagRef == null) return NotFound();
+            if (tagRef == null) return BadRequest("No tagRef query parameter provided");
             await _useCase.ExecuteAsync(tagRef, request).ConfigureAwait(false);
 
             return NoContent();
