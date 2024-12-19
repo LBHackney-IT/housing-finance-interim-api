@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "serverless-associate-waf": "^1.2.1",
+    "serverless-step-functions": "^3.21.1"
+  }
+}
