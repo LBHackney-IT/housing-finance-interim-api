@@ -52,9 +52,6 @@ commands:
       - node/install-packages:
           app-dir: HousingFinanceInterimApi
       - run:
-          name: Install step function plugin
-          command: npm i serverless-step-functions
-      - run:
           name: Build lambda
           command: |
             cd ./HousingFinanceInterimApi/
@@ -64,8 +61,7 @@ commands:
           name: Deploy lambda
           command: |
             cd ./HousingFinanceInterimApi/
-            npm i serverless-associate-waf
-            sls deploy --stage <<parameters.stage>> --conceal
+            npx --yes serverless deploy --stage <<parameters.stage>> --conceal
 
 jobs:
   check-code-formatting:
