@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
-    [Table("MAProperty")]
+    [Table("maproperty")]
     public class MAProperty
     {
         [Column("prop_ref")]
