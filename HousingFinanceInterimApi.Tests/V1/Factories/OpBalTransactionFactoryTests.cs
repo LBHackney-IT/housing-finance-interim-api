@@ -137,8 +137,8 @@ namespace HousingFinanceInterimApi.Tests.V1.Factories
             mappedDomain.MajorWorksRevenue.Should().Be(dbEntity.MajorWorksRevenue);
             mappedDomain.ParkingPermits.Should().Be(dbEntity.ParkingPermits);
             mappedDomain.ParkingAnnualChg.Should().Be(dbEntity.ParkingAnnualChg);
-            mappedDomain.RPreliminaries.Should().Be(dbEntity.RPreliminaries);
-            mappedDomain.RProvisionalSums.Should().Be(dbEntity.RProvisionalSums);
+            mappedDomain.StaffCosts.Should().Be(dbEntity.StaffCosts);
+            mappedDomain.CCTVMonitoring.Should().Be(dbEntity.CCTVMonitoring);
             mappedDomain.RContingencySums.Should().Be(dbEntity.RContingencySums);
             mappedDomain.RProfessionalFees.Should().Be(dbEntity.RProfessionalFees);
             mappedDomain.RAdministrationFee.Should().Be(dbEntity.RAdministrationFee);

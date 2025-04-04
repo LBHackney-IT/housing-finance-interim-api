@@ -46,8 +46,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public decimal MajorWorksRevenue { get; set; }
         public decimal ParkingPermits { get; set; }
         public decimal ParkingAnnualChg { get; set; }
-        public decimal RPreliminaries { get; set; }
-        public decimal RProvisionalSums { get; set; }
+        public decimal StaffCosts { get; set; }
+        public decimal CCTVMonitoring { get; set; }
         public decimal RContingencySums { get; set; }
         public decimal RProfessionalFees { get; set; }
         public decimal RAdministrationFee { get; set; }
