@@ -1,17 +1,18 @@
 using AutoFixture;
+using Bogus;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 
 namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "This is a test class")]
     public class DbConnectionException : Exception { public DbConnectionException(string message) : base(message) { } }
 
     public class BaseContextTest : IDisposable
     {
         internal readonly HousingFinanceInterimApi.V1.Infrastructure.DatabaseContext _context;
         internal readonly Fixture _fixture;
+        internal readonly Faker _faker;
         internal List<Action> _cleanups;
         private bool _disposed;
 
@@ -19,6 +20,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
         {
             _context = CreateDbContext();
             _fixture = new Fixture();
+            _faker = new Faker();
             _cleanups = new List<Action>();
         }
 
@@ -32,12 +34,12 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 
         private static HousingFinanceInterimApi.V1.Infrastructure.DatabaseContext CreateDbContext()
         {
-            var connectionStringEnvVar = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-            if (string.IsNullOrEmpty(connectionStringEnvVar))
-                throw new DbConnectionException("CONNECTION_STRING env var is not set");
+            // TODO: Implement a way to switch between SQL Server and Postgres
+            var Server = "127.0.0.1"; // TODO: Should fetch from env var when it has Docker support
+            var connectionString = $"Server={Server};Database=sow2b;User Id=sa;Password=password123!;";
 
             var options = new DbContextOptionsBuilder<HousingFinanceInterimApi.V1.Infrastructure.DatabaseContext>()
-                .UseSqlServer(connectionStringEnvVar)
+                .UseSqlServer(connectionString)
                 .Options;
 
             var context = new HousingFinanceInterimApi.V1.Infrastructure.DatabaseContext(options);
@@ -63,7 +65,10 @@ namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
                 try
                 {
                     foreach (var cleanup in _cleanups)
+                    {
                         cleanup();
+                        _context.SaveChanges();
+                    }
                     transaction.Commit();
                 }
                 catch (Exception)
