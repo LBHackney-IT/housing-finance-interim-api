@@ -8,7 +8,6 @@ Housing Finance API will be used to serve data for the interim housing finance s
 - xUnit as a test framework.
 
 ## Development
-
 ### Requirements
 
 1. [Docker][docker-download]
