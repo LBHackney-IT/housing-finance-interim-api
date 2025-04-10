@@ -10,7 +10,6 @@ using Xunit;
 
 namespace HousingFinanceInterimApi.Tests.V1.Infrastructure.DatabaseContext
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "This is a test class")]
     public class AssetDetailsTests : IClassFixture<BaseContextTest>
     {
         private readonly HousingFinanceInterimApi.V1.Infrastructure.DatabaseContext _context;

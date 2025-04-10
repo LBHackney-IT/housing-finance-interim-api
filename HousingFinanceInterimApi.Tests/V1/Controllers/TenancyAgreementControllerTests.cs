@@ -40,5 +40,20 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
 
             response.Should().BeEquivalentTo(new NoContentResult());
         }
+
+        [Fact]
+        public async Task ReturnBadRequestWhenNoTagRef()
+        {
+            // Arrange
+            var request = _fixture.Create<UpdateTARequest>();
+
+            // Act
+            var response = await _classUnderTest.DynamoDbStreamTrigger(null, request)
+                .ConfigureAwait(false);
+
+            // Assert
+
+            response.Should().BeEquivalentTo(new BadRequestObjectResult("No tagRef query parameter provided"));
+        }
     }
 }

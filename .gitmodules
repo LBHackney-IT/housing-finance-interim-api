@@ -1,0 +1,3 @@
+[submodule "HFSDatabaseObjects"]
+	path = HFSDatabaseObjects
+	url = https://github.com/LBHackney-IT/HFSDatabaseObjects

@@ -12,7 +12,6 @@ using Moq;
 using Xunit;
 using HousingFinanceInterimApi.V1.Domain.ArgumentWrappers;
 using HousingFinanceInterimApi.V1.Helpers;
-using FluentAssertions.Common;
 using System.Text;
 
 namespace HousingFinanceInterimApi.Tests.V1.UseCase
@@ -24,7 +23,8 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         private readonly Mock<ITransactionGateway> _mockTransactionGateway;
         private readonly Mock<IGoogleFileSettingGateway> _mockGoogleFileSettingGateway;
         private readonly Mock<IGoogleClientService> _mockGoogleClientService;
-        private readonly int _waitDuration = 30;
+        private readonly int _waitDuration = 1000; // ms
+        private readonly int _retryInterval = 200; // ms
         private readonly IGenerateReportUseCase _classUnderTest;
 
         public GenerateReportUseCaseTests()
@@ -42,7 +42,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                     _mockReportGateway.Object,
                     _mockTransactionGateway.Object,
                     _mockGoogleFileSettingGateway.Object,
-                    _mockGoogleClientService.Object
+                    _mockGoogleClientService.Object,
+                    _waitDuration,
+                    _retryInterval
                 );
         }
 
@@ -168,7 +170,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             Func<Task> generateReportCall = async () => await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            await generateReportCall.Should().ThrowAsync<ArgumentException>().WithMessage(message);
+            await generateReportCall.Should().ThrowAsync<ArgumentException>().WithMessage(message).ConfigureAwait(false);
         }
         #endregion
 
@@ -1441,9 +1443,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             _mockGoogleFileSettingGateway.Setup(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel))).ReturnsAsync(googleFileSettingsFound);
 
             var spreadSheetData = new List<string[]>() {
-                new string [] { "header 1", "header 2", "header 3" },
-                new string [] { "00088255", "LMW", "251.23" }
-            };
+                        new string [] { "header 1", "header 2", "header 3" },
+                        new string [] { "00088255", "LMW", "251.23" }
+                    };
 
             _mockReportGateway
                 .Setup(g => g.GetItemisedTransactionsByYearAndTransactionTypeAsync(
@@ -1642,7 +1644,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public async Task GenerateReportUCAttemptsToRetrieveTheUploadedItemisedTransactionsCSVFileIdIn1SecondPeriodsSoLongItHasntSpent30SecondsDoingIt()
+        public async Task GenerateReportUCAttemptsToRetrieveTheUploadedItemisedTransactionsCSVFileIdEveryRetryIntervalUntilTheWaitDuration()
         {
             // arrange
             var requestedReportLabel = "ReportItemisedTransactions";
@@ -1684,19 +1686,16 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 ))
                 .ReturnsAsync(true);
 
-            var uploadedCSVFile = RandomGen.Create<GD.File>();
-            int expectedNumberOfFileRetrievalAttempts = 30; //RandomGen.WholeNumber(1, 30);
-            int csvUploadDelaySeconds = expectedNumberOfFileRetrievalAttempts;
-            var uploadedCSVBecomesAvailableAtTime = DateTime.Now.AddSeconds(csvUploadDelaySeconds);
-            GD.File fileReturnedFromGDrive = null;
+            var uploadedCSVFileRepresentation = RandomGen.Create<GD.File>();
+            int expectedNumberOfFileRetrievalAttempts = _waitDuration / _retryInterval;
+            var uploadedCSVBecomesAvailableAtTime = DateTime.Now.AddSeconds(3);
 
             _mockGoogleClientService
                 .Setup(g => g.GetFileByNameInDriveAsync(
                     It.IsAny<string>(),
                     It.IsAny<string>()
                 ))
-                .Callback(() => fileReturnedFromGDrive = DateTime.Now < uploadedCSVBecomesAvailableAtTime ? null : uploadedCSVFile)
-                .ReturnsAsync(fileReturnedFromGDrive);
+                .ReturnsAsync(() => DateTime.Now < uploadedCSVBecomesAvailableAtTime ? null : uploadedCSVFileRepresentation);
 
             // act
             var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
@@ -1716,7 +1715,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public async Task GenerateReportUCStopsItsAttemptsToRetrieveTheUploadedItemisedTransactionsCSVFileIdAfterSpending30SecondsDoingIt()
+        public async Task GenerateReportUCStopsItsAttemptsToRetrieveTheUploadedItemisedTransactionsCSVFileIdAfterReachingTheWaitDuration()
         {
             // arrange
             var requestedReportLabel = "ReportItemisedTransactions";
@@ -1759,7 +1758,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(true);
 
             var uploadedCSVFile = RandomGen.Create<GD.File>();
-            int cutOffForNumberOfAttempts = 30;
+            int cutOffForNumberOfAttempts = _waitDuration / _retryInterval;
             DateTime? firstAttempt = null;
             DateTime lastAttempt = DateTime.MinValue;
             GD.File fileReturnedFromGDrive = null;
@@ -1780,9 +1779,10 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            var secondsSpentInWaitForTheFile = (int) (lastAttempt - firstAttempt.Value).TotalSeconds + 1;
+            Assert.True(firstAttempt.HasValue);
+            var secondsSpentInWaitForTheFile = (lastAttempt - firstAttempt).Value.TotalSeconds + (_retryInterval / 1000.0);
 
-            secondsSpentInWaitForTheFile.Should().Be(cutOffForNumberOfAttempts);
+            Math.Round(secondsSpentInWaitForTheFile, 2).Should().Be(_waitDuration / 1000.0);
 
             _mockGoogleClientService.Verify(
                 g => g.GetFileByNameInDriveAsync(
@@ -1955,9 +1955,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             _mockGoogleFileSettingGateway.Setup(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel))).ReturnsAsync(googleFileSettingsFound);
 
             var spreadSheetData = new List<string[]>() {
-                new string [] { "header 1", "header 2", "header 3" },
-                new string [] { "0000112", "TRA", "0.01" }
-            };
+                        new string [] { "header 1", "header 2", "header 3" },
+                        new string [] { "0000112", "TRA", "0.01" }
+                    };
 
             _mockReportGateway
                 .Setup(g => g.GetCashSuspenseAccountByYearAsync(
@@ -2236,9 +2236,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             _mockGoogleFileSettingGateway.Setup(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel))).ReturnsAsync(googleFileSettingsFound);
 
             var spreadSheetData = new List<string[]>() {
-                new string [] { "header 1", "header 2", "header 3" },
-                new string [] { "0000223", "LSC", "3.01" }
-            };
+                        new string [] { "header 1", "header 2", "header 3" },
+                        new string [] { "0000223", "LSC", "3.01" }
+                    };
 
             _mockReportGateway
                 .Setup(g => g.GetCashImportByDateAsync(
@@ -2515,9 +2515,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             _mockGoogleFileSettingGateway.Setup(g => g.GetSettingsByLabel(It.Is<string>(l => l == requestedReportLabel))).ReturnsAsync(googleFileSettingsFound);
 
             var spreadSheetData = new List<string[]>() {
-                new string [] { "header 1", "header 2", "header 3" },
-                new string [] { "0001133", "LMW", "123.12" }
-            };
+                        new string [] { "header 1", "header 2", "header 3" },
+                        new string [] { "0001133", "LMW", "123.12" }
+                    };
 
             _mockReportGateway
                 .Setup(g => g.GetHousingBenefitAcademyByYearAsync(
@@ -2972,7 +2972,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public async Task GenerateReportUCAttemptsToRetrieveTheUploadedOperatingBalancesByRentAccountCSVFileIdIn1SecondPeriodsSoLongItHasntSpent30SecondsDoingIt()
+        public async Task GenerateReportUCAttemptsToRetrieveTheUploadedOperatingBalancesByRentAccountCSVFileIdEveryRetryIntervalUntilTheWaitDuration()
         {
             // arrange
             var requestedReportLabel = "ReportOperatingBalancesByRentAccount";
@@ -3004,18 +3004,15 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(opBalTransactions);
 
             var uploadedCSVFileRepresentation = RandomGen.Create<GD.File>();
-            int expectedNumberOfFileRetrievalAttempts = 30;
-            int csvUploadDelaySeconds = expectedNumberOfFileRetrievalAttempts;
-            var uploadedCSVBecomesAvailableAtTime = DateTime.Now.AddSeconds(csvUploadDelaySeconds);
-            GD.File fileReturnedFromGDrive = null;
+            int expectedNumberOfFileRetrievalAttempts = _waitDuration / _retryInterval;
+            var uploadedCSVBecomesAvailableAtTime = DateTime.Now.AddSeconds(4);
 
             _mockGoogleClientService
                 .Setup(g => g.GetFileByNameInDriveAsync(
                     It.IsAny<string>(),
                     It.IsAny<string>()
                 ))
-                .Callback(() => fileReturnedFromGDrive = DateTime.Now < uploadedCSVBecomesAvailableAtTime ? null : uploadedCSVFileRepresentation)
-                .ReturnsAsync(fileReturnedFromGDrive);
+                .ReturnsAsync(() => DateTime.Now < uploadedCSVBecomesAvailableAtTime ? null : uploadedCSVFileRepresentation);
 
             // act
             var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
@@ -3037,7 +3034,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public async Task GenerateReportUCStopsItsAttemptsToRetrieveTheUploadedOperatingBalancesByRentAccountCSVFileIdAfterSpending30SecondsDoingIt()
+        public async Task GenerateReportUCStopsItsAttemptsToRetrieveTheUploadedOperatingBalancesByRentAccountCSVFileIdAfterReachingTheWaitDuration()
         {
             // arrange
             var requestedReportLabel = "ReportOperatingBalancesByRentAccount";
@@ -3069,7 +3066,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(opBalTransactions);
 
             var uploadedCSVFile = RandomGen.Create<GD.File>();
-            int cutOffForNumberOfAttempts = 30;
+            int cutOffForNumberOfAttempts = _waitDuration / _retryInterval;
             DateTime? firstAttempt = null;
             DateTime lastAttempt = DateTime.MinValue;
             GD.File fileReturnedFromGDrive = null;
@@ -3090,9 +3087,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            var secondsSpentInWaitForTheFile = (int) (lastAttempt - firstAttempt.Value).TotalSeconds + 1;
+            var secondsSpentInWaitForTheFile = (lastAttempt - firstAttempt).Value.TotalSeconds + (_retryInterval / 1000.0);
 
-            secondsSpentInWaitForTheFile.Should().Be(cutOffForNumberOfAttempts);
+            Math.Round(secondsSpentInWaitForTheFile, 2).Should().Be(_waitDuration / 1000.0);
 
             _mockGoogleClientService.Verify(
                 g => g.GetFileByNameInDriveAsync(
