@@ -62,15 +62,25 @@ commands:
           command: |
             pwd
             cat /root/project/HousingFinanceInterimApi/timeout-cw.js
-      # - run:
-      #     name: try dryrun
-      #     command: |
-      #       npx --yes serverless package --stage <<parameters.stage>> --verbose
       - run:
-          name: Deploy lambda
+          name: try dryrun
           command: |
-            cd ./HousingFinanceInterimApi/
-            npx --yes serverless deploy --stage <<parameters.stage>> --debug
+            npm install -g serverless
+
+            # 1. Print full resolved YAML
+            serverless print
+
+            # 2. See just the generated alarms
+            serverless print --path custom.cwAlarms
+
+            # 3. Output CloudFormation template
+            serverless package && cat .serverless/cloudformation-template-update-stack.json
+            # npx --yes serverless package --stage <<parameters.stage>> --verbose
+      # - run:
+      #     name: Deploy lambda
+      #     command: |
+      #       cd ./HousingFinanceInterimApi/
+      #       npx --yes serverless deploy --stage <<parameters.stage>> --debug
 
 jobs:
   check-code-formatting:
