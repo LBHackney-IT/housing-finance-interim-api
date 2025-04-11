@@ -58,15 +58,15 @@ commands:
             chmod +x ./build.sh
             ./build.sh
       - run:
-          name: Deploy lambda
-          command: |
-            cd ./HousingFinanceInterimApi/
-            npx --yes serverless deploy --stage <<parameters.stage>> --debug
-      - run:
           name: debug
           command: |
             pwd
             cat /root/project/HousingFinanceInterimApi/alarm-config.js
+      - run:
+          name: Deploy lambda
+          command: |
+            cd ./HousingFinanceInterimApi/
+            npx --yes serverless deploy --stage <<parameters.stage>> --debug
 
 jobs:
   check-code-formatting:
