@@ -1,17 +1,20 @@
-// alarm-config.js
+// timeout-cw.js
 module.exports = (serverless) => {
-    const { service, provider } = serverless.service;
-    const stage = provider.stage;
-    const accountId = provider.environment.AWS_ACCOUNT_ID;
-    
+    // Validate serverless context exists
+    if (!serverless || !serverless.service) {
+      throw new Error('Serverless context not available');
+    }
+  
+    const { service } = serverless.service;
+    const { stage, region } = serverless.service.provider;
     const resources = {};
   
     Object.entries(serverless.service.functions).forEach(([funcKey, funcConfig]) => {
       const funcName = funcConfig.name || `${service}-${stage}-${funcKey}`;
-      const logicalIdPrefix = `${funcKey.replace(/-/g, '')}`;
+      const logicalId = `${funcKey.replace(/[^a-zA-Z0-9]/g, '')}TimeoutAlarm`;
   
-      // Metric Filter Resource
-      resources[`${logicalIdPrefix}TimeoutMetricFilter`] = {
+      // Metric Filter
+      resources[`${logicalId}MetricFilter`] = {
         Type: 'AWS::Logs::MetricFilter',
         Properties: {
           LogGroupName: `/aws/lambda/${funcName}`,
@@ -25,16 +28,16 @@ module.exports = (serverless) => {
         }
       };
   
-      // Alarm Resource
-      resources[`${logicalIdPrefix}TimeoutAlarm`] = {
+      // CloudWatch Alarm
+      resources[logicalId] = {
         Type: 'AWS::CloudWatch::Alarm',
         Properties: {
           AlarmName: `${funcName}-timeout-alarm`,
-          AlarmDescription: `Timeout detected in ${funcName}`,
+          AlarmDescription: `Timeout detected in ${funcName} (${region})`,
           MetricName: `TimeoutCount-${funcKey}`,
           Namespace: `${service}-Timeouts`,
           Statistic: 'Sum',
-          Period: 900,
+          Period: 300,
           EvaluationPeriods: 1,
           Threshold: 0,
           ComparisonOperator: 'GreaterThanThreshold',
@@ -45,4 +48,4 @@ module.exports = (serverless) => {
     });
   
     return resources;
-  };
+};

@@ -835,9 +835,10 @@ resources:
                 Condition:
                   StringEquals:
                     AWS:SourceOwner: !Ref AWS::AccountId
-  - Resources: ${file(./timeout-cw.js)}
+  - Resources: ${self:custom.alarms}
 
 custom:
+  alarms: ${file(./timeout-cw.js)}
   authorizerArns:
     development: arn:aws:lambda:eu-west-2:859159924354:function:api-auth-verify-token-new-development-apiauthverifytokennew
     staging:     arn:aws:lambda:eu-west-2:715003523189:function:api-auth-verify-token-new-staging-apiauthverifytokennew
