@@ -117,43 +117,15 @@ jobs:
           stage: "production"
 
 workflows:
-  check-and-deploy-development:
+  deploy-staging:
     jobs:
-      - check-code-formatting
-      - build-and-test:
-          context:
-            - api-nuget-token-context
-      - assume-role-development:
-          context: api-assume-role-housing-development-context
-          requires:
-            - build-and-test
-          filters:
-            branches:
-              only: development
-      - deploy-to-development:
-          context:
-            - api-nuget-token-context
-            - "Serverless Framework"
-          requires:
-            - assume-role-development
-          filters:
-            branches:
-              only: development
-  check-and-deploy-staging-and-production:
-    jobs:
-      - build-and-test:
-          context:
-            - api-nuget-token-context
-          filters:
-            branches:
-              only: master
       - assume-role-staging:
           context: api-assume-role-housing-staging-context
           requires:
               - build-and-test
           filters:
             branches:
-              only: master
+              only: b-a-test
       - deploy-to-staging:
           context:
             - api-nuget-token-context
@@ -162,28 +134,4 @@ workflows:
             - assume-role-staging
           filters:
             branches:
-              only: master
-      - permit-production-release:
-          type: approval
-          requires:
-            - deploy-to-staging
-          filters:
-            branches:
-              only: master
-      - assume-role-production:
-          context: api-assume-role-housing-production-context
-          requires:
-              - permit-production-release
-          filters:
-            branches:
-              only: master
-      - deploy-to-production:
-          context:
-            - api-nuget-token-context
-            - "Serverless Framework"
-          requires:
-            - permit-production-release
-            - assume-role-production
-          filters:
-            branches:
-              only: master
+              only: b-a-test
