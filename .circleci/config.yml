@@ -70,13 +70,13 @@ commands:
             cd ./HousingFinanceInterimApi/ 
 
             # 1. Print full resolved YAML
-            serverless print
+            serverless print --stage <<parameters.stage>>
 
             # 2. See just the generated alarms
-            serverless print --path custom.cwAlarms
+            serverless print --stage <<parameters.stage>> --path custom.cwAlarms
 
             # 3. Output CloudFormation template
-            serverless package && cat .serverless/cloudformation-template-update-stack.json
+            serverless package --stage <<parameters.stage>> && cat .serverless/cloudformation-template-update-stack.json
             # npx --yes serverless package --stage <<parameters.stage>> --verbose
       # - run:
       #     name: Deploy lambda
