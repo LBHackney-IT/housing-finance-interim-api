@@ -62,6 +62,11 @@ commands:
           command: |
             cd ./HousingFinanceInterimApi/
             npx --yes serverless deploy --stage <<parameters.stage>> --debug
+      - run:
+          name: debug
+          command: |
+            pwd
+            cat /root/project/HousingFinanceInterimApi/alarm-config.js
 
 jobs:
   check-code-formatting:
