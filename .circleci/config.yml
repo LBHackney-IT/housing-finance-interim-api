@@ -73,7 +73,7 @@ commands:
             serverless print --stage <<parameters.stage>>
 
             # 2. See just the generated alarms
-            serverless print --stage <<parameters.stage>> --path custom.cwAlarms
+            serverless print --stage <<parameters.stage>> --path custom.alarms
 
             # 3. Output CloudFormation template
             serverless package --stage <<parameters.stage>> && cat .serverless/cloudformation-template-update-stack.json
