@@ -61,7 +61,7 @@ commands:
           name: Deploy lambda
           command: |
             cd ./HousingFinanceInterimApi/
-            npx --yes serverless deploy --stage <<parameters.stage>> --conceal
+            npx --yes serverless deploy --stage <<parameters.stage>> --debug
 
 jobs:
   check-code-formatting:
