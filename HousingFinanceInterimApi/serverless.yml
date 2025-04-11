@@ -441,7 +441,7 @@ stepFunctions:
       tags:
         Team: HousingFinance
 resources:
-  Resources:
+  - Resources:
     lambdaExecutionRole:
       Type: AWS::IAM::Role
       Properties:
@@ -835,10 +835,7 @@ resources:
                 Condition:
                   StringEquals:
                     AWS:SourceOwner: !Ref AWS::AccountId
-
-      # Generated timeout alarms:
-      ${self:custom.timeoutAlarmConfig}
-
+  - Resources: ${self:custom.timeoutAlarmConfig}
 
 custom:
   authorizerArns:
