@@ -66,6 +66,8 @@ commands:
           name: try dryrun
           command: |
             npm install -g serverless
+            # 0.
+            cd ./HousingFinanceInterimApi/ 
 
             # 1. Print full resolved YAML
             serverless print
