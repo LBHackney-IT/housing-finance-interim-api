@@ -62,15 +62,15 @@ commands:
           command: |
             pwd
             cat /root/project/HousingFinanceInterimApi/timeout-cw.js
-      - run:
-          name: try dryrun
-          command: |
-            npx --yes serverless package --stage <<parameters.stage>> --verbose
       # - run:
-      #     name: Deploy lambda
+      #     name: try dryrun
       #     command: |
-      #       cd ./HousingFinanceInterimApi/
-      #       npx --yes serverless deploy --stage <<parameters.stage>> --debug
+      #       npx --yes serverless package --stage <<parameters.stage>> --verbose
+      - run:
+          name: Deploy lambda
+          command: |
+            cd ./HousingFinanceInterimApi/
+            npx --yes serverless deploy --stage <<parameters.stage>> --debug
 
 jobs:
   check-code-formatting:
