@@ -835,7 +835,7 @@ resources:
                 Condition:
                   StringEquals:
                     AWS:SourceOwner: !Ref AWS::AccountId
-  - Resources: ${file(./alarm-config.js)}
+  - Resources: ${file(./timeout-cw.js)}
 
 custom:
   authorizerArns:

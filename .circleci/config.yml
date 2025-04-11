@@ -61,7 +61,7 @@ commands:
           name: debug
           command: |
             pwd
-            cat /root/project/HousingFinanceInterimApi/alarm-config.js
+            cat /root/project/HousingFinanceInterimApi/timeout-cw.js
       - run:
           name: Deploy lambda
           command: |
