@@ -78,11 +78,11 @@ commands:
             # 3. Output CloudFormation template
             serverless package --stage <<parameters.stage>> && cat .serverless/cloudformation-template-update-stack.json
             # npx --yes serverless package --stage <<parameters.stage>> --verbose
-      # - run:
-      #     name: Deploy lambda
-      #     command: |
-      #       cd ./HousingFinanceInterimApi/
-      #       npx --yes serverless deploy --stage <<parameters.stage>> --debug
+      - run:
+          name: Deploy lambda
+          command: |
+            cd ./HousingFinanceInterimApi/
+            npx --yes serverless deploy --stage <<parameters.stage>> --debug
 
 jobs:
   check-code-formatting:
