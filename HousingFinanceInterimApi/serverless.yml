@@ -14,6 +14,14 @@ provider:
         throttle:
           burstLimit: 200
           rateLimit: 100
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - sns:Publish
+          Resource:
+            - !Ref LambdaTimeoutAlarmTopic
   environment:
     CONNECTION_STRING: Data Source=${ssm:/housing-finance/${self:provider.stage}/db-host},${ssm:/housing-finance/${self:provider.stage}/db-port};Initial Catalog=${ssm:/housing-finance/${self:provider.stage}/db-database};Integrated Security=False;User Id=${ssm:/housing-finance/${self:provider.stage}/db-username};Password=${ssm:/housing-finance/${self:provider.stage}/db-password};Encrypt=False;TrustServerCertificate=False;MultipleActiveResultSets=True;
     GOOGLE_API_KEY: ${ssm:/housing-finance/${self:provider.stage}/google-application-credentials-json}
@@ -883,6 +891,31 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-refresh-ma-cur-bal
+      
+      LambdaTimeoutAlarmTopic:
+        Type: AWS::SNS::Topic
+        Properties:
+          TopicName: ${self:service}-${sls:stage}-hfs-timeout-alarms
+          DisplayName: "HFS Timeout Topic"
+      LambdaTimeoutAlarmTopicPolicy:
+        Type: AWS::SNS::TopicPolicy
+        Properties:
+          Topics:
+            - !Ref LambdaTimeoutAlarmTopic
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Principal:
+                  Service: cloudwatch.amazonaws.com
+                Action: sns:Publish
+                Resource: !Ref LambdaTimeoutAlarmTopic
+                Condition:
+                  StringEquals:
+                    AWS:SourceOwner: !Ref AWS::AccountId
+
+      ${file(./cw-timeout-alarm.yml):generateAlarms(self:custom.lambdaTimeoutAlarms)}
+
 
 custom:
   authorizerArns:
@@ -892,6 +925,9 @@ custom:
   associateWaf:
     name: Platform_APIs_Web_ACL
     version: V2
+  lambdaTimeoutAlarms:
+    - functionName: ${self:functions.loadTenancyAgreement.name}
+    - functionName: ${self:functions.generateRentPosition.name}
   vpc:
     development:
       securityGroupIds:
