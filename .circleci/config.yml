@@ -87,10 +87,10 @@ jobs:
       - setup_remote_docker
       - run:
           name: build
-          command: docker-compose build housing-finance-interim-api-test
+          command: docker compose build housing-finance-interim-api-test
       - run:
           name: Run tests
-          command: docker-compose run housing-finance-interim-api-test
+          command: docker compose run housing-finance-interim-api-test
   assume-role-development:
     executor: docker-python
     steps:
