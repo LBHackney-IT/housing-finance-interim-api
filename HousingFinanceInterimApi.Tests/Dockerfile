@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0
+FROM mcr.microsoft.com/dotnet/sdk:8.0.300
 
 # disable microsoft telematry
 ENV DOTNET_CLI_TELEMETRY_OPTOUT='true'
@@ -23,4 +23,4 @@ COPY . .
 
 RUN dotnet build ./HousingFinanceInterimApi.Tests/HousingFinanceInterimApi.Tests.csproj
 
-CMD dotnet test
+CMD dotnet test 
