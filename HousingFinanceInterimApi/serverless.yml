@@ -2,7 +2,7 @@ service: housing-finance-interim-api
 provider:
   name: aws
   timeout: 300
-  runtime: dotnet6
+  runtime: dotnet8
   vpc: ${self:custom.vpc.${opt:stage}}
   stage: ${opt:stage}
   region: eu-west-2
@@ -28,7 +28,7 @@ provider:
     HOUSING_FINANCE_ALLOWED_GROUPS: ${ssm:/housing-finance/${self:provider.stage}/housing-finance-allowed-groups}
 
 package:
-  artifact: ./bin/release/net6.0/housing-finance-interim-api.zip
+  artifact: ./bin/release/net8.0/housing-finance-interim-api.zip
 
 functions:
   interimFinanceSystem:
