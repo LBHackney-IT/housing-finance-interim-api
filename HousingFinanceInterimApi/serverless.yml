@@ -40,7 +40,7 @@ functions:
           path: /{proxy+}
           method: ANY
           authorizer:
-            arn: ${ssm:/api-authenticator/${self:provider.stage}/arn}
+            arn: arn: ${self:custom.authorizerArns.${opt:stage}}
             type: request
             resultTtlInSeconds: 0
             identitySource: method.request.header.Authorization
