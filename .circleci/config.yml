@@ -136,6 +136,7 @@ workflows:
       - deploy-to-development:
           context:
             - api-nuget-token-context
+            - "Serverless Framework"
           requires:
             - assume-role-development  
           filters:
@@ -159,6 +160,7 @@ workflows:
       - deploy-to-staging:
           context:
             - api-nuget-token-context
+            - "Serverless Framework"
           requires:
             - assume-role-staging
           filters:
@@ -181,6 +183,7 @@ workflows:
       - deploy-to-production:
           context:
             - api-nuget-token-context
+            - "Serverless Framework"
           requires:
             - permit-production-release
             - assume-role-production
