@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   aws_assume_role: lbh-hackit/aws_assume_role@0.1.0
+  node: circleci/node@6.3.0
 
 executors:
   docker-python:
@@ -45,14 +46,10 @@ commands:
       - *attach_workspace
       - checkout
       - setup_remote_docker
-      - run:
-          name: Install Node.js
-          command: |
-            curl -sL https://deb.nodesource.com/setup_18.x | bash -
-            apt-get update && apt-get install -y nodejs
+      - node/install
       - run:
           name: Install serverless CLI
-          command: npm i -g serverless@^3
+          command: npm i -g serverless
       - run:
           name: Install step function plugin          
           command: npm i serverless-step-functions
@@ -139,6 +136,7 @@ workflows:
       - deploy-to-development:
           context:
             - api-nuget-token-context
+            - "Serverless Framework"
           requires:
             - assume-role-development  
           filters:
@@ -162,6 +160,7 @@ workflows:
       - deploy-to-staging:
           context:
             - api-nuget-token-context
+            - "Serverless Framework"
           requires:
             - assume-role-staging
           filters:
@@ -184,6 +183,7 @@ workflows:
       - deploy-to-production:
           context:
             - api-nuget-token-context
+            - "Serverless Framework"
           requires:
             - permit-production-release
             - assume-role-production
