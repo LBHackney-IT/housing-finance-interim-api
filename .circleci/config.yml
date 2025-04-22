@@ -46,11 +46,7 @@ commands:
       - *attach_workspace
       - checkout
       - setup_remote_docker
-      - run:
-          name: Install Node.js
-          command: |
-            curl -sL https://deb.nodesource.com/setup_18.x | bash -
-            apt-get update && apt-get install -y nodejs
+      - node/install
       - run:
           name: Install serverless CLI
           command: npm i -g serverless@^3
