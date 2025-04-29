@@ -33,8 +33,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
                         {
                             LogGroupName = logGroupName,
                             Timestamp = parsedTimestamp,
-                            //TODO:: Add contains for the correct string to determine success or failure
-                            IsSuccess = message != null && message.Contains("success", StringComparison.OrdinalIgnoreCase)
+                            IsSuccess = message is not null
+                                        && message.Contains("ERROR", StringComparison.OrdinalIgnoreCase) is not true
                         };
 
                         // Add the single row to the database

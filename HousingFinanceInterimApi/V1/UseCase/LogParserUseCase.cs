@@ -15,26 +15,30 @@ namespace HousingFinanceInterimApi.V1.UseCase
     {
         private readonly IAmazonCloudWatchLogs _cloudWatchLogsClient;
         private readonly ILogParserGateway _logParserGateway;
-        private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
+        private readonly IList<string> _logGroups;
+        private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION") ?? "100";
 
-        public LogParserUseCase(ILogParserGateway logParserGateway)
+        public LogParserUseCase(
+            ILogParserGateway logParserGateway,
+            IAmazonCloudWatchLogs cloudWatchLogsClient,
+            IList<string> logGroups)
         {
-            _cloudWatchLogsClient = new AmazonCloudWatchLogsClient();
+            _cloudWatchLogsClient = cloudWatchLogsClient;
             _logParserGateway = logParserGateway;
+            _logGroups = logGroups ?? throw new ArgumentNullException(nameof(logGroups));
         }
 
         public async Task<StepResponse> ExecuteAsync()
         {
+            if (!_logGroups.Any())
+            {
+                throw new ArgumentException("Log groups cannot be null or empty", nameof(_logGroups));
+            }
+
             try
             {
-                // TODO:: Define all the log groups to query
-                var logGroups = new List<string> {
-                        "/aws/lambda/Function1",
-                        "/aws/lambda/Function2"
-                    };
-
                 // Process log groups in parallel
-                var tasks = logGroups.Select(async logGroup =>
+                var tasks = _logGroups.Select(async logGroup =>
                 {
                     try
                     {
@@ -49,11 +53,11 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         // Log the failure in the database
                         var failedQueryResult = new List<List<ResultField>>
                         {
-                                new List<ResultField>
-                                {
-                                    new ResultField { Field = "Error", Value = ex.Message },
-                                    new ResultField { Field = "LogGroupName", Value = logGroup }
-                                }
+                            new List<ResultField>
+                            {
+                                new ResultField { Field = "Error", Value = ex.Message },
+                                new ResultField { Field = "LogGroupName", Value = logGroup }
+                            }
                         };
 
                         try
@@ -84,12 +88,12 @@ namespace HousingFinanceInterimApi.V1.UseCase
             }
         }
 
-        private async Task<List<List<ResultField>>> QueryCloudWatchLogs(string logGroupName)
+        public async Task<List<List<ResultField>>> QueryCloudWatchLogs(string logGroupName)
         {
             //TODO: Fix query with the correct syntax
             var query = @"
                     fields @timestamp, @message
-                    | filter @message like /success|failure/
+                    | filter @message like /ERROR/
                     | sort @timestamp desc
                     | limit 100";
 
@@ -112,7 +116,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             GetQueryResultsResponse queryResultsResponse;
             do
             {
-                await Task.Delay(2000).ConfigureAwait(false); // Wait for 2 seconds before polling
+                await Task.Delay(1000).ConfigureAwait(false); // Wait for 2 seconds before polling
                 queryResultsResponse = await _cloudWatchLogsClient.GetQueryResultsAsync(getQueryResultsRequest).ConfigureAwait(false);
                 if (queryResultsResponse.Status != QueryStatus.Failed)
                 {

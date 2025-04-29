@@ -26,6 +26,7 @@ provider:
     S3_BUCKET_NAME: ${ssm:/housing-finance/${self:provider.stage}/s3-bucket-name}
     S3_OBJECT_PREFIX: ${ssm:/housing-finance/${self:provider.stage}/s3-object-prefix}
     HOUSING_FINANCE_ALLOWED_GROUPS: ${ssm:/housing-finance/${self:provider.stage}/housing-finance-allowed-groups}
+    ENVIRONMENT_NAME: ${self:provider.stage}
 
 package:
   artifact: ./bin/release/net8.0/housing-finance-interim-api.zip
