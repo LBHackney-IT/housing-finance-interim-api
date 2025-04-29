@@ -213,7 +213,15 @@ functions:
     description: "The scheduler to generate google drive reports."
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::GenerateReport
-    role: lambdaExecutionRole 
+    role: lambdaExecutionRole
+  ParseNightlyProcessLogs:
+    name: ${self:service}-${self:provider.stage}-parse-logs
+    description: "The scheduler to parse the nightly process logs for any errors. Run at 07:00 AM"
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ParseNightlyProcessLogs
+    role: lambdaExecutionRole
+    events:
+        - schedule: cron(0 7 * * ? *)
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:

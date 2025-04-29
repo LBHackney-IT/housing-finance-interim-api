@@ -274,7 +274,7 @@ namespace HousingFinanceInterimApi
             return await _generateReportUseCase.ExecuteAsync().ConfigureAwait(false);
         }
 
-        public async Task<StepResponse> ParseLogs()
+        public async Task<StepResponse> ParseNightlyProcessLogs()
         {
             return await _logParserUseCase.ExecuteAsync().ConfigureAwait(false);
         }

@@ -87,9 +87,10 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             try
             {
+                // TODO:: Dev-Testing with RequestId for now - revert to "ERROR" later
                 var query = @"
                         fields @timestamp, @message
-                        | filter @message like /ERROR/
+                        | filter @message like /RequestId/
                         | sort @timestamp desc
                         | limit 100";
 
