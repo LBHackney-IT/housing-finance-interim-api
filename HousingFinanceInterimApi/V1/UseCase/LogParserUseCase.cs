@@ -114,11 +114,12 @@ namespace HousingFinanceInterimApi.V1.UseCase
             {
                 await Task.Delay(2000).ConfigureAwait(false); // Wait for 2 seconds before polling
                 queryResultsResponse = await _cloudWatchLogsClient.GetQueryResultsAsync(getQueryResultsRequest).ConfigureAwait(false);
-                if (queryResultsResponse.Status == QueryStatus.Failed)
+                if (queryResultsResponse.Status != QueryStatus.Failed)
                 {
-                    throw new Exception($"Query failed: {queryResultsResponse.Status}");
+                    continue;
                 }
-            } while (queryResultsResponse.Status == QueryStatus.Running);
+                throw new Exception($"Cloudwatch Insights Query failed. Status: {queryResultsResponse.Status}");
+            } while (queryResultsResponse.Status == QueryStatus.Running || queryResultsResponse.Status == QueryStatus.Scheduled);
 
             return queryResultsResponse.Results;
         }
