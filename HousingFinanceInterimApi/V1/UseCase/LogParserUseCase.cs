@@ -4,6 +4,7 @@ using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Gateway.Interfaces;
 using HousingFinanceInterimApi.V1.Handlers;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,31 +49,25 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         // Evaluate results and update the database
                         await _logParserGateway.UpdateDatabaseWithResults(logGroup, queryResults).ConfigureAwait(false);
                     }
+                    catch (AmazonCloudWatchLogsException awsEx)
+                    {
+                        // Handle AWS-specific errors
+                        LoggingHandler.LogError($"AWS error for log group {logGroup}: {awsEx.Message}");
+
+                        await LogFailureToDatabase(logGroup, awsEx.Message).ConfigureAwait(false);
+                    }
+                    catch (DbUpdateException dbEx)
+                    {
+                        // Handle database-specific errors
+                        LoggingHandler.LogError($"Database update error for log group {logGroup}: {dbEx.Message}");
+                        throw; 
+                    }
                     catch (Exception ex)
                     {
-                        // Log the failure in the database
-                        var failedQueryResult = new List<List<ResultField>>
-                        {
-                            new List<ResultField>
-                            {
-                                new ResultField { Field = "Error", Value = ex.Message },
-                                new ResultField { Field = "LogGroupName", Value = logGroup }
-                            }
-                        };
+                        // Handle other unexpected errors
+                        LoggingHandler.LogError($"Unexpected error for log group {logGroup}: {ex.Message}");
 
-                        try
-                        {
-                            // Log the failure in the database
-                            await _logParserGateway.UpdateDatabaseWithResults(logGroup, failedQueryResult).ConfigureAwait(false);
-                        }
-                        catch (Exception dbEx)
-                        {
-                            // Log database errors to the logging system
-                            LoggingHandler.LogError($"Failed to log query failure to database: {dbEx.Message}");
-                        }
-
-                        // Log the error to the logging system
-                        LoggingHandler.LogError($"Query failed for log group {logGroup}: {ex.Message}");
+                        await LogFailureToDatabase(logGroup, ex.Message).ConfigureAwait(false);
                     }
                 });
 
@@ -90,42 +85,74 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<List<List<ResultField>>> QueryCloudWatchLogs(string logGroupName)
         {
-            //TODO: Fix query with the correct syntax
-            var query = @"
-                    fields @timestamp, @message
-                    | filter @message like /ERROR/
-                    | sort @timestamp desc
-                    | limit 100";
-
-            var startQueryRequest = new StartQueryRequest
+            try
             {
-                LogGroupName = logGroupName,
-                StartTime = new DateTimeOffset(DateTime.UtcNow.AddDays(-1)).ToUnixTimeMilliseconds(),
-                EndTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds(),
-                QueryString = query
-            };
+                var query = @"
+                        fields @timestamp, @message
+                        | filter @message like /ERROR/
+                        | sort @timestamp desc
+                        | limit 100";
 
-            var startQueryResponse = await _cloudWatchLogsClient.StartQueryAsync(startQueryRequest).ConfigureAwait(false);
-
-            // Wait for the query to complete
-            var getQueryResultsRequest = new GetQueryResultsRequest
-            {
-                QueryId = startQueryResponse.QueryId
-            };
-
-            GetQueryResultsResponse queryResultsResponse;
-            do
-            {
-                await Task.Delay(1000).ConfigureAwait(false); // Wait for 2 seconds before polling
-                queryResultsResponse = await _cloudWatchLogsClient.GetQueryResultsAsync(getQueryResultsRequest).ConfigureAwait(false);
-                if (queryResultsResponse.Status != QueryStatus.Failed)
+                var startQueryRequest = new StartQueryRequest
                 {
-                    continue;
-                }
-                throw new Exception($"Cloudwatch Insights Query failed. Status: {queryResultsResponse.Status}");
-            } while (queryResultsResponse.Status == QueryStatus.Running || queryResultsResponse.Status == QueryStatus.Scheduled);
+                    LogGroupName = logGroupName,
+                    StartTime = new DateTimeOffset(DateTime.UtcNow.AddDays(-1)).ToUnixTimeMilliseconds(),
+                    EndTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds(),
+                    QueryString = query
+                };
 
-            return queryResultsResponse.Results;
+                var startQueryResponse = await _cloudWatchLogsClient.StartQueryAsync(startQueryRequest).ConfigureAwait(false);
+
+                // Wait for the query to complete
+                var getQueryResultsRequest = new GetQueryResultsRequest
+                {
+                    QueryId = startQueryResponse.QueryId
+                };
+
+                GetQueryResultsResponse queryResultsResponse;
+                do
+                {
+                    await Task.Delay(1000).ConfigureAwait(false); // Wait for 1 second before polling
+                    queryResultsResponse = await _cloudWatchLogsClient.GetQueryResultsAsync(getQueryResultsRequest).ConfigureAwait(false);
+
+                    if (queryResultsResponse.Status == QueryStatus.Failed)
+                    {
+                        throw new AmazonCloudWatchLogsException($"CloudWatch Insights Query failed. Status: {queryResultsResponse.Status}");
+                    }
+                } while (queryResultsResponse.Status == QueryStatus.Running || queryResultsResponse.Status == QueryStatus.Scheduled);
+
+                return queryResultsResponse.Results;
+            }
+            catch (AmazonCloudWatchLogsException awsEx)
+            {
+                LoggingHandler.LogError($"AWS CloudWatch Logs error for log group {logGroupName}: {awsEx.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                LoggingHandler.LogError($"Unexpected error while querying CloudWatch Logs for log group {logGroupName}: {ex.Message}");
+                throw;
+            }
+        }
+        private async Task LogFailureToDatabase(string logGroup, string errorMessage)
+        {
+            var failedQueryResult = new List<List<ResultField>>
+            {
+                new List<ResultField>
+                {
+                    new ResultField { Field = "Error", Value = errorMessage },
+                    new ResultField { Field = "LogGroupName", Value = logGroup }
+                }
+            };
+
+            try
+            {
+                await _logParserGateway.UpdateDatabaseWithResults(logGroup, failedQueryResult).ConfigureAwait(false);
+            }
+            catch (Exception dbEx)
+            {
+                LoggingHandler.LogError($"Failed to log query failure to database for log group {logGroup}: {dbEx.Message}");
+            }
         }
     }
 }
