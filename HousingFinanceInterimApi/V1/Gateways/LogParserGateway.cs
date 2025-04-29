@@ -87,7 +87,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 if (logEntry != null)
                 {
                     // Add the log entry to the list and save
-                    var processLogResults = new List<NightlyProcessLog> { logEntry }; 
+                    var processLogResults = new List<NightlyProcessLog> { logEntry };
                     await _context.NightlyProcessLogs.AddRangeAsync(processLogResults).ConfigureAwait(false);
                     await _context.SaveChangesAsync().ConfigureAwait(false);
                 }
