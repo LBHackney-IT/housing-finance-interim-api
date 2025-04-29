@@ -5,7 +5,6 @@ using HousingFinanceInterimApi.V1.Handlers;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using HousingFinanceInterimApi.V1.Domain;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -29,7 +28,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
                     if (DateTime.TryParse(timestamp, out var parsedTimestamp))
                     {
-                        var processLogResult = new ProcessLog
+                        var processLogResult = new NightlyProcessLog
                         {
                             LogGroupName = logGroupName,
                             Timestamp = parsedTimestamp,
@@ -38,7 +37,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                         };
 
                         // Add the single row to the database
-                        await _context.ProcessLogs.AddAsync(processLogResult).ConfigureAwait(false);
+                        await _context.NightlyProcessLogs.AddAsync(processLogResult).ConfigureAwait(false);
                         await _context.SaveChangesAsync().ConfigureAwait(false);
                     }
                 }

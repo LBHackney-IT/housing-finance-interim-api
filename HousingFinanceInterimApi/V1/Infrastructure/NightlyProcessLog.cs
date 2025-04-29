@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
-    [Table("ProcessLog")]
-    public class ProcessLog
+    [Table("NightlyProcessLog")]
+    public class NightlyProcessLog
     {
         [Key]
         public long Id { get; set; }
