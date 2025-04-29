@@ -60,7 +60,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     {
                         // Handle database-specific errors
                         LoggingHandler.LogError($"Database update error for log group {logGroup}: {dbEx.Message}");
-                        throw; 
+                        throw;
                     }
                     catch (Exception ex)
                     {
