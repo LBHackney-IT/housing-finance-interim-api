@@ -12,9 +12,9 @@ namespace HousingFinanceInterimApi.V1.Gateways
 {
     public class LogParserGateway : ILogParserGateway
     {
-        private readonly DatabaseContext _context;
+        private readonly IDatabaseContext _context;
 
-        public LogParserGateway(DatabaseContext context)
+        public LogParserGateway(IDatabaseContext context)
         {
             _context = context;
         }
@@ -27,14 +27,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 throw new ArgumentNullException(nameof(logGroupName), "Log group name cannot be null or empty.");
             }
 
-            if (queryResults == null || !queryResults.Any())
+            if (queryResults is null || queryResults.Count == 0)
             {
                 throw new ArgumentNullException(nameof(queryResults), "Query results cannot be null or empty.");
             }
 
             try
             {
-                var processLogResults = new List<NightlyProcessLog>();
+                NightlyProcessLog logEntry = null;
 
                 foreach (var result in queryResults)
                 {
@@ -45,15 +45,31 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
                         if (DateTime.TryParse(timestamp, out var parsedTimestamp))
                         {
-                            var processLogResult = new NightlyProcessLog
-                            {
-                                LogGroupName = logGroupName,
-                                Timestamp = parsedTimestamp,
-                                IsSuccess = message is not null
-                                            && message.Contains("ERROR", StringComparison.OrdinalIgnoreCase) is not true
-                            };
+                            var isSuccess = message is not null
+                                            && !message.Contains("error", StringComparison.OrdinalIgnoreCase);
 
-                            processLogResults.Add(processLogResult);
+                            // If a failure is found, immediately create the log entry and stop processing
+                            if (!isSuccess)
+                            {
+                                logEntry = new NightlyProcessLog
+                                {
+                                    LogGroupName = logGroupName,
+                                    Timestamp = parsedTimestamp,
+                                    IsSuccess = false
+                                };
+                                break; // Stop processing further results
+                            }
+
+                            // If no failure is found, prepare a success entry (but don't add it yet)
+                            if (logEntry == null)
+                            {
+                                logEntry = new NightlyProcessLog
+                                {
+                                    LogGroupName = logGroupName,
+                                    Timestamp = parsedTimestamp,
+                                    IsSuccess = true
+                                };
+                            }
                         }
                         else
                         {
@@ -67,9 +83,11 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     }
                 }
 
-                // Batch insert all results into the database
-                if (processLogResults.Any())
+                // Add the log entry to the database if one was created
+                if (logEntry != null)
                 {
+                    // Add the log entry to the list and save
+                    var processLogResults = new List<NightlyProcessLog> { logEntry }; 
                     await _context.NightlyProcessLogs.AddRangeAsync(processLogResults).ConfigureAwait(false);
                     await _context.SaveChangesAsync().ConfigureAwait(false);
                 }

@@ -1,0 +1,221 @@
+using Amazon.CloudWatchLogs.Model;
+using HousingFinanceInterimApi.V1.Gateways;
+using HousingFinanceInterimApi.V1.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using Moq;
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace HousingFinanceInterimApi.Tests.V1.Gateways
+{
+    public class LogParserGatewayTests
+    {
+        private readonly Mock<IDatabaseContext> _mockContext;
+        private readonly Mock<DbSet<NightlyProcessLog>> _mockDbSet;
+        private readonly LogParserGateway _gateway;
+
+        public LogParserGatewayTests()
+        {
+            _mockContext = new Mock<IDatabaseContext>();
+            _mockDbSet = new Mock<DbSet<NightlyProcessLog>>();
+
+            // Setup DbSet in the mock context
+            _mockContext.Setup(c => c.NightlyProcessLogs).Returns(_mockDbSet.Object);
+
+            // Initialize the gateway with the mocked context
+            _gateway = new LogParserGateway(_mockContext.Object);
+        }
+
+        [Fact]
+        public async Task UpdateDatabaseWithResults_ShouldSaveToDatabase_WhenValidInput()
+        {
+            // Arrange
+            var logGroupName = "/aws/lambda/log-group-function1";
+            var queryResults = new List<List<ResultField>>
+            {
+                new List<ResultField>
+                {
+                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
+                    new ResultField { Field = "@message", Value = "Test log message" }
+                }
+            };
+
+            // Act
+            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults).ConfigureAwait(false);
+
+            // Assert
+            _mockDbSet.Verify(db => db.AddRangeAsync(It.IsAny<IEnumerable<NightlyProcessLog>>(), default), Times.Once);
+            _mockContext.Verify(c => c.SaveChangesAsync(default), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateDatabaseWithResults_ShouldThrowArgumentNullException_WhenLogGroupNameIsNull()
+        {
+            // Arrange
+            string logGroupName = null;
+            var queryResults = new List<List<ResultField>>();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _gateway.UpdateDatabaseWithResults(logGroupName, queryResults)).ConfigureAwait(false);
+            _mockContext.Verify(c => c.SaveChangesAsync(default), Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateDatabaseWithResults_ShouldThrowsArgumentNullException_WhenEmptyQueryResults()
+        {
+            // Arrange
+            var logGroupName = "/aws/lambda/log-group-function1";
+            List<List<ResultField>> queryResults = null;
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _gateway.UpdateDatabaseWithResults(logGroupName, queryResults)).ConfigureAwait(false);
+            _mockContext.Verify(c => c.SaveChangesAsync(default), Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateDatabaseWithResults_ShouldLogErrorAndThrows_WhenDbUpdateException()
+        {
+            // Arrange
+            var logGroupName = "/aws/lambda/log-group-function1";
+            var queryResults = new List<List<ResultField>>
+            {
+                new List<ResultField>
+                {
+                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
+                    new ResultField { Field = "@message", Value = "Test log message" }
+                }
+            };
+
+            _mockContext.Setup(c => c.SaveChangesAsync(default))
+                .ThrowsAsync(new DbUpdateException("Database update failed"));
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<DbUpdateException>(() => _gateway.UpdateDatabaseWithResults(logGroupName, queryResults)).ConfigureAwait(false);
+
+            Assert.Equal("Database update failed", exception.Message);
+        }
+
+        [Fact]
+        public async Task UpdateDatabaseWithResults_ShouldLogErrorAndSkipsResult_WhenInvalidTimestamp()
+        {
+            // Arrange
+            var logGroupName = "/aws/lambda/log-group-function1";
+            var queryResults = new List<List<ResultField>>
+            {
+                new List<ResultField>
+                {
+                    new ResultField { Field = "@timestamp", Value = "invalid-timestamp" },
+                    new ResultField { Field = "@message", Value = "Test log message" }
+                }
+            };
+
+            // Act
+            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults).ConfigureAwait(false);
+
+            // Assert
+            _mockDbSet.Verify(db => db.AddRangeAsync(It.IsAny<IEnumerable<NightlyProcessLog>>(), default), Times.Never);
+            _mockContext.Verify(c => c.SaveChangesAsync(default), Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateDatabaseWithResults_ShouldAddSuccess_WhenNoFailuresExist()
+        {
+            // Arrange
+            var logGroupName = "/aws/lambda/log-group-function1";
+            var queryResults = new List<List<ResultField>>
+            {
+                new List<ResultField>
+                {
+                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
+                    new ResultField { Field = "@message", Value = "Test log message" }
+                },
+                new List<ResultField>
+                {
+                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
+                    new ResultField { Field = "@message", Value = "Another log message" }
+                }
+            };
+
+            // Act
+            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults).ConfigureAwait(false);
+
+            // Assert
+            _mockDbSet.Verify(db => db.AddRangeAsync(It.Is<IEnumerable<NightlyProcessLog>>(logs =>
+                     logs.Any(log => log.LogGroupName == logGroupName && log.IsSuccess == true)), default), Times.Once);
+            _mockContext.Verify(c => c.SaveChangesAsync(default), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateDatabaseWithResults_ShouldAddFailure_WhenFailureExists()
+        {
+            // Arrange
+            var logGroupName = "/aws/lambda/log-group-function1";
+            var queryResults = new List<List<ResultField>>
+            {
+                new List<ResultField>
+                {
+                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
+                    new ResultField { Field = "@message", Value = "Test log message" }
+                },
+                new List<ResultField>
+                {
+                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
+                    new ResultField { Field = "@message", Value = "Error occurred" }
+                }
+            };
+
+            // Act
+            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults).ConfigureAwait(false);
+
+            // Assert
+            _mockDbSet.Verify(db => db.AddRangeAsync(It.Is<IEnumerable<NightlyProcessLog>>(logs =>
+                logs.Any(log => log.LogGroupName == logGroupName && log.IsSuccess == false)), default), Times.Once);
+            _mockContext.Verify(c => c.SaveChangesAsync(default), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateDatabaseWithResults_ShouldStopProcessingOnFirstFailure()
+        {
+            // Arrange
+            var logGroupName = "/aws/lambda/log-group-function1";
+            var queryResults = new List<List<ResultField>>
+            {
+                new List<ResultField>
+                {
+                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
+                    new ResultField { Field = "@message", Value = "Error occurred" }
+                },
+                new List<ResultField>
+                {
+                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
+                    new ResultField { Field = "@message", Value = "Another log message" }
+                }
+            };
+
+            // Act
+            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults).ConfigureAwait(false);
+
+            // Assert
+            _mockDbSet.Verify(db => db.AddRangeAsync(It.Is<IEnumerable<NightlyProcessLog>>(logs =>
+                 logs.Any(log => log.LogGroupName == logGroupName && log.IsSuccess == false)), default), Times.Once);
+            _mockContext.Verify(c => c.SaveChangesAsync(default), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateDatabaseWithResults_ShouldNotAddLog_WhenQueryResultsAreEmpty()
+        {
+            // Arrange
+            var logGroupName = "/aws/lambda/log-group-function1";
+            var queryResults = new List<List<ResultField>>();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _gateway.UpdateDatabaseWithResults(logGroupName, queryResults)).ConfigureAwait(false);
+
+            _mockDbSet.Verify(db => db.AddRangeAsync(It.IsAny<IEnumerable<NightlyProcessLog>>(), default), Times.Never);
+            _mockContext.Verify(c => c.SaveChangesAsync(default), Times.Never);
+        }
+    }
+}

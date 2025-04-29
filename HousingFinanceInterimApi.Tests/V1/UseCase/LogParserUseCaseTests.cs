@@ -21,14 +21,13 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         {
             _mockLogParserGateway = new Mock<ILogParserGateway>();
             _mockCloudWatchLogsClient = new Mock<IAmazonCloudWatchLogs>();
-            //_logParserUseCase = new LogParserUseCase(_mockLogParserGateway.Object, _mockCloudWatchLogsClient.Object);
         }
 
         [Fact]
         public async Task QueryCloudWatchLogs_Should_Return_Results_For_Successful_Query()
         {
             // Arrange
-            var logGroups = new List<string> { "/aws/lambda/Function1" };
+            var logGroups = new List<string> { "/aws/lambda/log-group-function1" };
             _logParserUseCase = new LogParserUseCase(_mockLogParserGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
 
             var queryResults = new List<List<ResultField>> { new List<ResultField> { new ResultField { Field = "Test", Value = "Value" } } };
@@ -53,7 +52,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public async Task QueryCloudWatchLogs_Should_Throw_Exception_For_Failed_Query()
         {
             // Arrange
-            var logGroups = new List<string> { "/aws/lambda/Function1" };
+            var logGroups = new List<string> { "/aws/lambda/log-group-function1" };
             _logParserUseCase = new LogParserUseCase(_mockLogParserGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
 
             _mockCloudWatchLogsClient
@@ -75,7 +74,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public async Task ExecuteAsync_Should_Process_LogGroups_InParallel()
         {
             // Arrange
-            var logGroups = new List<string> { "/aws/lambda/Function1", "/aws/lambda/Function2" };
+            var logGroups = new List<string> { "/aws/lambda/log-group-function1", "/aws/lambda/log-group-function2" };
             _logParserUseCase = new LogParserUseCase(_mockLogParserGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
 
             var queryResults = new List<List<ResultField>> { new List<ResultField> { new ResultField { Field = "Test", Value = "Value" } } };
@@ -107,10 +106,13 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public async Task ExecuteAsync_Should_Log_Any_Errors_And_Continues_Processing()
         {
             // Arrange
-            var logGroups = new List<string> { "/aws/lambda/Function1", "/aws/lambda/Function2" };
+            var logGroups = new List<string> { "/aws/lambda/log-group-function1", "/aws/lambda/log-group-function2" };
             _logParserUseCase = new LogParserUseCase(_mockLogParserGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
 
-            var queryResults = new List<List<ResultField>> { new List<ResultField> { new ResultField { Field = "Test", Value = "Value" } } };
+            var queryResults = new List<List<ResultField>> { new List<ResultField> {
+                    new ResultField { Field = "Test", Value = "Value" }
+                }
+            };
 
             _mockLogParserGateway
                 .Setup(x => x.UpdateDatabaseWithResults(It.IsAny<string>(), It.IsAny<List<List<ResultField>>>()))
