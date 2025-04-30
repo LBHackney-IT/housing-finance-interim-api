@@ -7,9 +7,23 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
+using System.Text.RegularExpressions;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
+    /// <summary>
+    /// Gateway for parsing logs from AWS CloudWatch Logs Insights and updating the database with the results.
+    /// </summary>
+    /// <remarks>
+    /// This gateway interacts with the database to log the results of queries executed against AWS CloudWatch Logs Insights.
+    /// It processes log groups, extracts relevant information, and updates the database with success or failure entries.
+    /// If there are any returned messages containing "error" it will save the Log Group name, the timestamp and the
+    /// IsSuccess as False (failed) once, and move on to the next LogGroup Name.
+    /// If no messages are returned by CW this signifies that there were no errors and the Log Group Name is saved with the
+    /// isSuccess flag as True (succeeded).
+    /// This is done to ensure that the Log Group status is saved once per call.
+    /// </remarks>
     public class LogParserGateway : ILogParserGateway
     {
         private readonly IDatabaseContext _context;

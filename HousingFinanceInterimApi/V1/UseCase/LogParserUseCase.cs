@@ -12,6 +12,15 @@ using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
+
+    /// <summary>
+    /// Use case for parsing logs from AWS CloudWatch Logs Insights and updating the database with the results.
+    /// </summary>
+    /// <remarks>
+    /// This use case processes a list of log groups, queries CloudWatch Logs Insights for each log group,
+    /// and updates the database with the query results. It handles errors during the querying and database update
+    /// processes, logging failures to the database when necessary.
+    /// </remarks>
     public class LogParserUseCase : ILogParserUseCase
     {
         private readonly IAmazonCloudWatchLogs _cloudWatchLogsClient;
