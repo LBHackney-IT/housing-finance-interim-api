@@ -82,7 +82,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
                 if (DateTime.TryParse(timestamp, out var parsedTimestamp))
                 {
-                    var isSuccess = message is not null && !message.Contains("error", StringComparison.OrdinalIgnoreCase);
+                    // TODO:: Dev-Testing with RequestId for now - revert to "ERROR" later
+                    var isSuccess = message is not null && !message.Contains("requestid", StringComparison.OrdinalIgnoreCase);
 
                     return new NightlyProcessLog
                     {
