@@ -85,7 +85,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResults_ShouldLogErrorAndThrows_WhenDbUpdateException()
+        public async Task UpdateDatabaseWithResults_ShouldLogAndThrow_WhenDbUpdateException()
         {
             // Arrange
             var logGroupName = "/aws/lambda/log-group-function1";
@@ -130,7 +130,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResults_ShouldAddFailure_WhenFailureExists()
+        public async Task UpdateDatabaseWithResults_ShouldAddFailure_WhenErrorExists()
         {
             // Arrange
             var logGroupName = "/aws/lambda/log-group-function1";
@@ -157,7 +157,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResults_ShouldStopProcessingOnFirstFailure()
+        public async Task UpdateDatabaseWithResults_ShouldStopProcessingOnFirstError()
         {
             // Arrange
             var logGroupName = "/aws/lambda/log-group-function1";
