@@ -14,6 +14,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Boundary.Response;
+using HousingFinanceInterimApi.V1.Gateway.Interfaces;
+using Amazon.CloudWatchLogs;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -43,6 +45,7 @@ namespace HousingFinanceInterimApi
         private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
         private readonly IGenerateReportUseCase _generateReportUseCase;
         private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
+        private readonly ILogParserUseCase _logParserUseCase;
 
         private const string CashFileLabel = "CashFile";
 
@@ -51,6 +54,7 @@ namespace HousingFinanceInterimApi
             DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
             optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
             DatabaseContext context = new DatabaseContext(optionsBuilder.Options);
+            var environmentName = Environment.GetEnvironmentVariable("ENVIRONMENT_NAME") ?? "production";
 
             var options = Options.Create(new GoogleClientServiceOptions
             {
@@ -88,6 +92,7 @@ namespace HousingFinanceInterimApi
             IReportGateway reportGateway = new ReportGateway(context);
             IBatchReportGateway batchReportGateway = new BatchReportGateway(context);
             ISuspenseAccountsGateway suspenseAccountsGateway = new SuspenseAccountsGateway(context);
+            ILogParserGateway logParserGateway = new LogParserGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _checkChargesBatchYearsUseCase = new CheckChargesBatchYearsUseCase(chargesBatchYearsGateway);
@@ -127,6 +132,26 @@ namespace HousingFinanceInterimApi
                 reportGateway, transactionGateway, googleFileSettingGateway, googleClientService);
             _moveHousingBenefitFileUseCase = new MoveHousingBenefitFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService);
+
+            var logGroups = new List<string> {
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-load-tenagree",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-cash-file-trans",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-check-cash-files",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-direct-debit",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-direct-debit-trans",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-direct-debit-trans-dem",
+                $"hfs-nightly-jobs-charges-ingest-ecs-task-logs",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-cash-file",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-adjustments-trans",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-action-diary",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-susp-cash",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-susp-hb",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-housing-file",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-housing-file-trans",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-refresh-cur-bal",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-refresh-op-bal",
+            };
+            _logParserUseCase = new LogParserUseCase(logParserGateway, new AmazonCloudWatchLogsClient(), logGroups);
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()
@@ -247,6 +272,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> GenerateReport()
         {
             return await _generateReportUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> ParseNightlyProcessLogs()
+        {
+            return await _logParserUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 }
