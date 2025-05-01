@@ -130,6 +130,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public DbSet<ReportCashImport> ReportCashImports { get; set; }
         public DbSet<BatchReport> BatchReports { get; set; }
         public DbSet<ReportAccountBalance> ReportAccountBalances { get; set; }
+        public DbSet<NightlyProcessLog> NightlyProcessLogs { get; set; }
 
         /// <summary>
         /// Gets the operating balances.

@@ -26,6 +26,7 @@ provider:
     S3_BUCKET_NAME: ${ssm:/housing-finance/${self:provider.stage}/s3-bucket-name}
     S3_OBJECT_PREFIX: ${ssm:/housing-finance/${self:provider.stage}/s3-object-prefix}
     HOUSING_FINANCE_ALLOWED_GROUPS: ${ssm:/housing-finance/${self:provider.stage}/housing-finance-allowed-groups}
+    ENVIRONMENT_NAME: ${self:provider.stage}
 
 package:
   artifact: ./bin/release/net8.0/housing-finance-interim-api.zip
@@ -212,7 +213,15 @@ functions:
     description: "The scheduler to generate google drive reports."
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::GenerateReport
-    role: lambdaExecutionRole 
+    role: lambdaExecutionRole
+  parseNightlyProcessLogs:
+    name: ${self:service}-${self:provider.stage}-parse-logs
+    description: "The scheduler to parse the nightly process logs for any errors. Run at 07:30 AM"
+    timeout: 900
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ParseNightlyProcessLogs
+    role: lambdaExecutionRole
+    events:
+        - schedule: cron(30 7 * * ? *)
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:

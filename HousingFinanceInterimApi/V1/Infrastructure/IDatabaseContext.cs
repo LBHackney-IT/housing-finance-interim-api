@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Boundary.Request;
+using Microsoft.EntityFrameworkCore;
 
 namespace HousingFinanceInterimApi.V1.Infrastructure
 {
@@ -63,5 +65,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         Task<List<string[]>> GetItemisedTransactionsByYearAndTransactionTypeAsync(int year, string transactionType);
         Task<List<string[]>> GetHousingBenefitAcademyByYear(int year);
         Task<IList<string[]>> GetReportAccountBalance(DateTime reportDate, string rentGroup);
+
+        DbSet<NightlyProcessLog> NightlyProcessLogs { get; }
+
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }
