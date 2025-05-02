@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
-
     /// <summary>
     /// Use case for parsing logs from AWS CloudWatch Logs Insights and updating the database with the results.
     /// </summary>
@@ -47,41 +46,29 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             try
             {
-                // Process log groups in parallel
-                var tasks = _logGroups.Select(async logGroup =>
+                foreach (var logGroup in _logGroups)
                 {
                     try
                     {
-                        // Query CloudWatch Logs Insights
                         var queryResults = await QueryCloudWatchLogs(logGroup).ConfigureAwait(false);
-
-                        // Evaluate results and update the database
                         await _logParserGateway.UpdateDatabaseWithResults(logGroup, queryResults).ConfigureAwait(false);
                     }
                     catch (AmazonCloudWatchLogsException awsEx)
                     {
-                        // Handle AWS-specific errors
                         LoggingHandler.LogError($"AWS error for log group {logGroup}: {awsEx.Message}");
-
                         await LogFailureToDatabase(logGroup, awsEx.Message).ConfigureAwait(false);
                     }
                     catch (DbUpdateException dbEx)
                     {
-                        // Handle database-specific errors
                         LoggingHandler.LogError($"Database update error for log group {logGroup}: {dbEx.Message}");
                         throw;
                     }
                     catch (Exception ex)
                     {
-                        // Handle other unexpected errors
                         LoggingHandler.LogError($"Unexpected error for log group {logGroup}: {ex.Message}");
-
                         await LogFailureToDatabase(logGroup, ex.Message).ConfigureAwait(false);
                     }
-                });
-
-                // Wait for all tasks to complete
-                await Task.WhenAll(tasks).ConfigureAwait(false);
+                }
 
                 return new StepResponse() { Continue = true, NextStepTime = DateTime.Now.AddSeconds(int.Parse(_waitDuration)) };
             }
@@ -144,6 +131,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 throw;
             }
         }
+
         private async Task LogFailureToDatabase(string logGroup, string errorMessage)
         {
             var failedQueryResult = new List<List<ResultField>>
@@ -162,6 +150,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             catch (Exception dbEx)
             {
                 LoggingHandler.LogError($"Failed to log query failure to database for log group {logGroup}: {dbEx.Message}");
+                throw;
             }
         }
     }
