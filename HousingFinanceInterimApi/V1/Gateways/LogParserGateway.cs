@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using System.Text.RegularExpressions;
 
 namespace HousingFinanceInterimApi.V1.Gateways
 {
@@ -44,14 +42,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
             // Handle null or empty queryResults
             if (queryResults is null)
             {
-                // No CloudWatch logs exist for the log group in the last 24 hours
+                // Case 3: No logs exist for the log group in the last 24 hours
                 await LogResultAsync(logGroupName, null, null).ConfigureAwait(false);
                 return;
             }
 
-            if (!queryResults.Any())
+            if (queryResults.Count == 0)
             {
-                // No results returned from AWS CloudWatch, meaning no errors were found
+                // Case 2: Logs exist, but no match for the keyword
                 await LogResultAsync(logGroupName, DateTime.UtcNow, true).ConfigureAwait(false);
                 return;
             }

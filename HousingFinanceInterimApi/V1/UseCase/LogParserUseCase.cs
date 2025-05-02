@@ -79,46 +79,63 @@ namespace HousingFinanceInterimApi.V1.UseCase
             }
         }
 
+        /// <summary>
+        /// Case 1: Results exist for the keyword - return the results list
+        /// Case 2: Logs exist, but no match for the keyword - return an empty list
+        /// Case 3: No logs exist for the log group in the last 24 hours - return null
+        /// </summary>
+        /// <param name="logGroupName"></param>
+        /// <returns></returns>
         public async Task<List<List<ResultField>>> QueryCloudWatchLogs(string logGroupName)
         {
             try
             {
+                // First query: Check for the keyword
                 // TODO:: Dev-Testing with RequestId for now - revert to "ERROR" later
-                var query = @"
-                        fields @timestamp, @message
-                        | filter @message like /RequestId/
-                        | sort @timestamp desc
-                        | limit 100";
+                var keywordQuery = @"
+                fields @timestamp, @message
+                | filter @message like /RequestId/
+                | sort @timestamp desc
+                | limit 100";
 
                 var startQueryRequest = new StartQueryRequest
                 {
                     LogGroupName = logGroupName,
                     StartTime = new DateTimeOffset(DateTime.UtcNow.AddDays(-1)).ToUnixTimeMilliseconds(),
                     EndTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds(),
-                    QueryString = query
+                    QueryString = keywordQuery
                 };
 
                 var startQueryResponse = await _cloudWatchLogsClient.StartQueryAsync(startQueryRequest).ConfigureAwait(false);
 
                 // Wait for the query to complete
-                var getQueryResultsRequest = new GetQueryResultsRequest
+                var queryResults = await GetQueryResultsAsync(startQueryResponse.QueryId).ConfigureAwait(false);
+
+                if (queryResults.Any())
                 {
-                    QueryId = startQueryResponse.QueryId
-                };
+                    // Case 1: Results found for the keyword
+                    return queryResults;
+                }
 
-                GetQueryResultsResponse queryResultsResponse;
-                do
+                // Baseline query: Check if logs exist at all
+                var baselineQuery = @"
+                fields @timestamp
+                | sort @timestamp desc
+                | limit 1";
+
+                startQueryRequest.QueryString = baselineQuery;
+                startQueryResponse = await _cloudWatchLogsClient.StartQueryAsync(startQueryRequest).ConfigureAwait(false);
+
+                var baselineResults = await GetQueryResultsAsync(startQueryResponse.QueryId).ConfigureAwait(false);
+
+                if (baselineResults.Count == 0)
                 {
-                    await Task.Delay(1000).ConfigureAwait(false); // Wait for 1 second before polling
-                    queryResultsResponse = await _cloudWatchLogsClient.GetQueryResultsAsync(getQueryResultsRequest).ConfigureAwait(false);
+                    // Case 3: No logs exist for the log group in the last 24 hours
+                    return null;
+                }
 
-                    if (queryResultsResponse.Status == QueryStatus.Failed)
-                    {
-                        throw new AmazonCloudWatchLogsException($"CloudWatch Insights Query failed. Status: {queryResultsResponse.Status}");
-                    }
-                } while (queryResultsResponse.Status == QueryStatus.Running || queryResultsResponse.Status == QueryStatus.Scheduled);
-
-                return queryResultsResponse.Results;
+                // Case 2: Logs exist, but no match for the keyword
+                return new List<List<ResultField>>();
             }
             catch (AmazonCloudWatchLogsException awsEx)
             {
@@ -130,6 +147,23 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 LoggingHandler.LogError($"Unexpected error while querying CloudWatch Logs for log group {logGroupName}: {ex.Message}");
                 throw;
             }
+        }
+
+        private async Task<List<List<ResultField>>> GetQueryResultsAsync(string queryId)
+        {
+            GetQueryResultsResponse queryResultsResponse;
+            do
+            {
+                await Task.Delay(1000).ConfigureAwait(false); // Wait for 1 second before polling
+                queryResultsResponse = await _cloudWatchLogsClient.GetQueryResultsAsync(new GetQueryResultsRequest { QueryId = queryId }).ConfigureAwait(false);
+
+                if (queryResultsResponse.Status == QueryStatus.Failed)
+                {
+                    throw new AmazonCloudWatchLogsException($"CloudWatch Insights Query failed. Status: {queryResultsResponse.Status}");
+                }
+            } while (queryResultsResponse.Status == QueryStatus.Running || queryResultsResponse.Status == QueryStatus.Scheduled);
+
+            return queryResultsResponse.Results;
         }
 
         private async Task LogFailureToDatabase(string logGroup, string errorMessage)
