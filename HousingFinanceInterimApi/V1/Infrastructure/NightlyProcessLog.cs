@@ -13,8 +13,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         [Required]
         public string LogGroupName { get; set; }
 
-        public DateTime Timestamp { get; set; }
+        public DateTime? Timestamp { get; set; }
 
-        public bool IsSuccess { get; set; }
+        public bool? IsSuccess { get; set; }
     }
 }
