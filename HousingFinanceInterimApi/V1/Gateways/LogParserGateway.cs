@@ -42,8 +42,16 @@ namespace HousingFinanceInterimApi.V1.Gateways
             }
 
             // Handle null or empty queryResults
-            if (queryResults is null || !queryResults.Any())
+            if (queryResults is null)
             {
+                // No CloudWatch logs exist for the log group in the last 24 hours
+                await LogResultAsync(logGroupName, null, null).ConfigureAwait(false);
+                return;
+            }
+
+            if (!queryResults.Any())
+            {
+                // No results returned from AWS CloudWatch, meaning no errors were found
                 await LogResultAsync(logGroupName, DateTime.UtcNow, true).ConfigureAwait(false);
                 return;
             }
@@ -54,15 +62,15 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 {
                     var logEntry = ProcessResult(logGroupName, result);
 
-                    // If a failure is found, log it and stop processing further results
-                    if (logEntry != null && !logEntry.IsSuccess)
+                    // If a keyword is found, log it and stop processing further results
+                    if (logEntry != null && logEntry.IsSuccess.HasValue && !logEntry.IsSuccess.Value)
                     {
                         await LogResultAsync(logEntry).ConfigureAwait(false);
                         return;
                     }
                 }
 
-                // If no failures were found, log a success entry
+                // If no keywords were found, log a success entry
                 await LogResultAsync(logGroupName, DateTime.UtcNow, true).ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -82,7 +90,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
                 if (DateTime.TryParse(timestamp, out var parsedTimestamp))
                 {
-                    // TODO:: Dev-Testing with RequestId for now - revert to "ERROR" later
+                    // Check if the message contains the keyword
+                    //TODO:: Dev-Testing with RequestId for now - revert to "ERROR" later
                     var isSuccess = message is not null && !message.Contains("requestid", StringComparison.OrdinalIgnoreCase);
 
                     return new NightlyProcessLog
@@ -94,7 +103,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 }
                 else
                 {
-                    LoggingHandler.LogError($"Invalid timestamp format in log group '{logGroupName}'. Result: {string.Join(", ", result.Select(r => $"{r.Field}: {r.Value}"))}");
+                    LoggingHandler.LogError($"Invalid timestamp format in log group '{logGroupName}'. Result: {timestamp}");
                 }
             }
             catch (Exception ex)
@@ -106,7 +115,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
             return null;
         }
 
-        private async Task LogResultAsync(string logGroupName, DateTime timestamp, bool isSuccess)
+        private async Task LogResultAsync(string logGroupName, DateTime? timestamp, bool? isSuccess)
         {
             var logEntry = new NightlyProcessLog
             {

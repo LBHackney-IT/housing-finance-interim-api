@@ -71,7 +71,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         }
 
         [Fact]
-        public async Task ExecuteAsync_Should_Process_LogGroups_InParallel()
+        public async Task ExecuteAsync_Should_Process_LogGroups_InSequence()
         {
             // Arrange
             var logGroups = new List<string> { "/aws/lambda/log-group-function1", "/aws/lambda/log-group-function2" };
