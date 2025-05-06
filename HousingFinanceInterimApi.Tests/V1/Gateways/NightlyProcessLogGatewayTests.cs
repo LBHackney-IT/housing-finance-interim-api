@@ -193,7 +193,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
                 new List<ResultField>
                 {
                     new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
-                    new ResultField { Field = "@message", Value = "RequestId: 12345" }
+                    new ResultField { Field = "@message", Value = "Error occurred" }
                 }
             };
 
