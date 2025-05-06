@@ -165,11 +165,13 @@ namespace HousingFinanceInterimApi
             services.AddScoped<IReportGateway, ReportGateway>();
             services.AddScoped<IBatchReportGateway, BatchReportGateway>();
             services.AddScoped<IAssetGateway, AssetGateway>();
+            services.AddScoped<INightlyProcessLogGateway, NightlyProcessLogGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
         {
             services.AddScoped<IGetBatchLogErrorUseCase, GetBatchLogErrorUseCase>();
+            services.AddScoped<INightlyProcessLogUseCase, NightlyProcessLogUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -182,5 +182,63 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             _mockDbSet.Verify(db => db.AddAsync(It.IsAny<NightlyProcessLog>(), default), Times.Once);
             _mockContext.Verify(c => c.SaveChangesAsync(default), Times.Once);
         }
+
+        [Fact]
+        public async Task UpdateDatabaseWithResults_Case1_ResultsExistForKeyword()
+        {
+            // Arrange
+            var logGroupName = "test-log-group";
+            var queryResults = new List<List<ResultField>>
+            {
+                new List<ResultField>
+                {
+                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
+                    new ResultField { Field = "@message", Value = "RequestId: 12345" }
+                }
+            };
+
+            // Act
+            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults);
+
+            // Assert
+            _mockContext.Verify(x => x.NightlyProcessLogs.AddAsync(It.Is<NightlyProcessLog>(log =>
+                log.LogGroupName == logGroupName &&
+                log.IsSuccess == false), default), Times.Once);
+            _mockContext.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateDatabaseWithResults_Case2_LogsExistButNoMatchForKeyword()
+        {
+            // Arrange
+            var logGroupName = "test-log-group";
+            var queryResults = new List<List<ResultField>>();
+
+            // Act
+            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults);
+
+            // Assert
+            _mockContext.Verify(x => x.NightlyProcessLogs.AddAsync(It.Is<NightlyProcessLog>(log =>
+                log.LogGroupName == logGroupName &&
+                log.IsSuccess == true), default), Times.Once);
+            _mockContext.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateDatabaseWithResults_Case3_NoLogsExistForLogGroup()
+        {
+            // Arrange
+            var logGroupName = "test-log-group";
+            List<List<ResultField>> queryResults = null;
+
+            // Act
+            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults);
+
+            // Assert
+            _mockContext.Verify(x => x.NightlyProcessLogs.AddAsync(It.Is<NightlyProcessLog>(log =>
+                log.LogGroupName == logGroupName &&
+                log.IsSuccess == null), default), Times.Once);
+            _mockContext.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        }
     }
 }

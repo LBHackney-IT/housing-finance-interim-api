@@ -215,7 +215,7 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::GenerateReport
     role: lambdaExecutionRole
   parseNightlyProcessLogs:
-    name: ${self:service}-${self:provider.stage}-parse-logs
+    name: ${self:service}-${self:provider.stage}-query-nightly-logs
     description: "The scheduler to parse the nightly process logs for any errors. Run at 07:30 AM"
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ParseNightlyProcessLogs

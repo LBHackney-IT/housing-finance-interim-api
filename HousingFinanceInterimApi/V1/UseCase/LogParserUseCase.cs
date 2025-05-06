@@ -41,7 +41,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             if (!_logGroups.Any())
             {
-                throw new ArgumentException("Log groups cannot be null or empty", nameof(_logGroups));
+                throw new ArgumentException("Log groups cannot be null or empty", "logGroups");
             }
 
             try
@@ -63,10 +63,15 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         LoggingHandler.LogError($"Database update error for log group {logGroup}: {dbEx.Message}");
                         throw;
                     }
+                    catch (System.InvalidOperationException invalidOpEx)
+                    {
+                        LoggingHandler.LogError($"Invalid operation for log group {logGroup}: {invalidOpEx.Message}");
+                        await LogFailureToDatabase(logGroup, invalidOpEx.Message).ConfigureAwait(false);
+                    }
                     catch (Exception ex)
                     {
                         LoggingHandler.LogError($"Unexpected error for log group {logGroup}: {ex.Message}");
-                        await LogFailureToDatabase(logGroup, ex.Message).ConfigureAwait(false);
+                        throw;
                     }
                 }
 
@@ -111,7 +116,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 // Wait for the query to complete
                 var queryResults = await GetQueryResultsAsync(startQueryResponse.QueryId).ConfigureAwait(false);
 
-                if (queryResults.Any())
+                if (queryResults.Count != 0)
                 {
                     // Case 1: Results found for the keyword
                     return queryResults;

@@ -96,7 +96,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     {
                         LogGroupName = logGroupName,
                         Timestamp = parsedTimestamp,
-                        IsSuccess = isSuccess
+                        IsSuccess = isSuccess,
+                        DateCreated = DateTime.UtcNow
                     };
                 }
                 else
@@ -119,7 +120,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
             {
                 LogGroupName = logGroupName,
                 Timestamp = timestamp,
-                IsSuccess = isSuccess
+                IsSuccess = isSuccess,
+                DateCreated = DateTime.UtcNow
             };
 
             await LogResultAsync(logEntry).ConfigureAwait(false);
