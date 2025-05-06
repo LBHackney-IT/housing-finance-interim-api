@@ -98,10 +98,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
             try
             {
                 // First query: Check for the keyword
-                // TODO:: Dev-Testing with RequestId for now - revert to "ERROR" later
                 var keywordQuery = @"
                 fields @timestamp, @message
-                | filter @message like /RequestId/
+                | filter @message like /error/
                 | sort @timestamp desc
                 | limit 100";
 

@@ -89,8 +89,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 if (DateTime.TryParse(timestamp, out var parsedTimestamp))
                 {
                     // Check if the message contains the keyword
-                    //TODO:: Dev-Testing with RequestId for now - revert to "ERROR" later
-                    var isSuccess = message is not null && !message.Contains("requestid", StringComparison.OrdinalIgnoreCase);
+                    var isSuccess = message is not null && !message.Contains("error", StringComparison.OrdinalIgnoreCase);
 
                     return new NightlyProcessLog
                     {
