@@ -29,9 +29,10 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
         {
             // Arrange
             var createdDate = DateTime.UtcNow;
+            var emptyLogs = new List<NightlyProcessLogResponse>();
             _nightlyProcessLogUseCaseMock
                 .Setup(x => x.ExecuteAsync(createdDate))
-                .ReturnsAsync(new List<NightlyProcessLogResponse>());
+                .ReturnsAsync(emptyLogs);
 
             // Act
             var response = await _classUnderTest.GetNightlyProcessLogs(createdDate).ConfigureAwait(false);
@@ -74,7 +75,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Controllers
             Func<Task> act = async () => await _classUnderTest.GetNightlyProcessLogs(createdDate).ConfigureAwait(false);
 
             // Assert
-            await act.Should().ThrowAsync<Exception>().WithMessage("Test exception");
+            await act.Should().ThrowAsync<Exception>().WithMessage("Test exception").ConfigureAwait(false);
         }
     }
 }
