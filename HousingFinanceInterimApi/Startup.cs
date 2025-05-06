@@ -22,6 +22,7 @@ using dotenv.net;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using Hackney.Core.JWT;
+using HousingFinanceInterimApi.V1.Gateway.Interfaces;
 
 namespace HousingFinanceInterimApi
 {

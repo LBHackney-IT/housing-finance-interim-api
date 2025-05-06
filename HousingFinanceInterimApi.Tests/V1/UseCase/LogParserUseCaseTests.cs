@@ -11,15 +11,15 @@ using Xunit;
 
 namespace HousingFinanceInterimApi.Tests.V1.UseCase
 {
-    public class LogParserUseCaseTests
+    public class NightlyProcessLogUseCaseTests
     {
         private readonly Mock<IAmazonCloudWatchLogs> _mockCloudWatchLogsClient;
-        private readonly Mock<ILogParserGateway> _mockLogParserGateway;
-        private LogParserUseCase _logParserUseCase;
+        private readonly Mock<INightlyProcessLogGateway> _mockGateway;
+        private NightlyProcessLogUseCase _nightlyProcessLogUseCase;
 
-        public LogParserUseCaseTests()
+        public NightlyProcessLogUseCaseTests()
         {
-            _mockLogParserGateway = new Mock<ILogParserGateway>();
+            _mockGateway = new Mock<INightlyProcessLogGateway>();
             _mockCloudWatchLogsClient = new Mock<IAmazonCloudWatchLogs>();
         }
 
@@ -28,7 +28,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         {
             // Arrange
             var logGroups = new List<string> { "/aws/lambda/log-group-function1" };
-            _logParserUseCase = new LogParserUseCase(_mockLogParserGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
+            _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(_mockGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
 
             var queryResults = new List<List<ResultField>> { new List<ResultField> { new ResultField { Field = "Test", Value = "Value" } } };
 
@@ -41,7 +41,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(new GetQueryResultsResponse { Status = QueryStatus.Complete, Results = queryResults });
 
             // Act
-            var results = await _logParserUseCase.QueryCloudWatchLogs(logGroups[0]).ConfigureAwait(false);
+            var results = await _nightlyProcessLogUseCase.QueryCloudWatchLogs(logGroups[0]).ConfigureAwait(false);
 
             // Assert
             results.Should().NotBeNull();
@@ -53,7 +53,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         {
             // Arrange
             var logGroups = new List<string> { "/aws/lambda/log-group-function1" };
-            _logParserUseCase = new LogParserUseCase(_mockLogParserGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
+            _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(_mockGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
 
             _mockCloudWatchLogsClient
                 .Setup(x => x.StartQueryAsync(It.IsAny<StartQueryRequest>(), default))
@@ -64,7 +64,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(new GetQueryResultsResponse { Status = QueryStatus.Failed });
 
             // Act
-            Func<Task> act = async () => await _logParserUseCase.QueryCloudWatchLogs(logGroups[0]).ConfigureAwait(false);
+            Func<Task> act = async () => await _nightlyProcessLogUseCase.QueryCloudWatchLogs(logGroups[0]).ConfigureAwait(false);
 
             // Assert
             await act.Should().ThrowAsync<Exception>().WithMessage("Cloudwatch Insights Query failed. Status: Failed").ConfigureAwait(false);
@@ -75,11 +75,11 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         {
             // Arrange
             var logGroups = new List<string> { "/aws/lambda/log-group-function1", "/aws/lambda/log-group-function2" };
-            _logParserUseCase = new LogParserUseCase(_mockLogParserGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
+            _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(_mockGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
 
             var queryResults = new List<List<ResultField>> { new List<ResultField> { new ResultField { Field = "Test", Value = "Value" } } };
 
-            _mockLogParserGateway
+            _mockGateway
                 .Setup(x => x.UpdateDatabaseWithResults(It.IsAny<string>(), It.IsAny<List<List<ResultField>>>()))
                 .Returns(Task.CompletedTask);
 
@@ -92,12 +92,12 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(new GetQueryResultsResponse { Status = QueryStatus.Complete, Results = queryResults });
 
             // Act
-            var response = await _logParserUseCase.ExecuteAsync().ConfigureAwait(false);
+            var response = await _nightlyProcessLogUseCase.ExecuteAsync().ConfigureAwait(false);
 
             // Assert
             response.Should().NotBeNull();
             response.Continue.Should().BeTrue();
-            _mockLogParserGateway.Verify(
+            _mockGateway.Verify(
                 x => x.UpdateDatabaseWithResults(It.IsAny<string>(), queryResults),
                 Times.Exactly(logGroups.Count));
         }
@@ -107,14 +107,14 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         {
             // Arrange
             var logGroups = new List<string> { "/aws/lambda/log-group-function1", "/aws/lambda/log-group-function2" };
-            _logParserUseCase = new LogParserUseCase(_mockLogParserGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
+            _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(_mockGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
 
             var queryResults = new List<List<ResultField>> { new List<ResultField> {
                     new ResultField { Field = "Test", Value = "Value" }
                 }
             };
 
-            _mockLogParserGateway
+            _mockGateway
                 .Setup(x => x.UpdateDatabaseWithResults(It.IsAny<string>(), It.IsAny<List<List<ResultField>>>()))
                 .Returns(Task.CompletedTask);
 
@@ -128,15 +128,15 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(new GetQueryResultsResponse { Status = QueryStatus.Complete, Results = queryResults });
 
             // Act
-            var response = await _logParserUseCase.ExecuteAsync().ConfigureAwait(false);
+            var response = await _nightlyProcessLogUseCase.ExecuteAsync().ConfigureAwait(false);
 
             // Assert
             response.Should().NotBeNull();
             response.Continue.Should().BeTrue();
-            _mockLogParserGateway.Verify(
+            _mockGateway.Verify(
                 x => x.UpdateDatabaseWithResults(It.IsAny<string>(), queryResults),
                 Times.Once);
-            _mockLogParserGateway.Verify(
+            _mockGateway.Verify(
                 x => x.UpdateDatabaseWithResults(It.IsAny<string>(), It.Is<List<List<ResultField>>>(r => r[0][0].Field == "Error")),
                 Times.Once);
         }

@@ -10,13 +10,13 @@ using Xunit;
 
 namespace HousingFinanceInterimApi.Tests.V1.Gateways
 {
-    public class LogParserGatewayTests
+    public class NightlyProcessLogGatewayTests
     {
         private readonly Mock<IDatabaseContext> _mockContext;
         private readonly Mock<DbSet<NightlyProcessLog>> _mockDbSet;
-        private readonly LogParserGateway _gateway;
+        private readonly NightlyProcessLogGateway _gateway;
 
-        public LogParserGatewayTests()
+        public NightlyProcessLogGatewayTests()
         {
             _mockContext = new Mock<IDatabaseContext>();
             _mockDbSet = new Mock<DbSet<NightlyProcessLog>>();
@@ -25,7 +25,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             _mockContext.Setup(c => c.NightlyProcessLogs).Returns(_mockDbSet.Object);
 
             // Initialize the gateway with the mocked context
-            _gateway = new LogParserGateway(_mockContext.Object);
+            _gateway = new NightlyProcessLogGateway(_mockContext.Object);
         }
 
         [Fact]

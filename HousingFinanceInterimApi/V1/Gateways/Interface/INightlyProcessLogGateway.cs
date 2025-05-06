@@ -1,12 +1,15 @@
-using HousingFinanceInterimApi.V1.Infrastructure;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System;
+using Amazon.CloudWatchLogs.Model;
+using HousingFinanceInterimApi.V1.Infrastructure;
 
-namespace HousingFinanceInterimApi.V1.Gateways.Interface
+namespace HousingFinanceInterimApi.V1.Gateway.Interfaces
 {
     public interface INightlyProcessLogGateway
     {
+        Task UpdateDatabaseWithResults(string logGroupName, List<List<ResultField>> queryResults);
+
         Task<IList<NightlyProcessLog>> GetByDateCreatedAsync(DateTime createdDate);
     }
 }
