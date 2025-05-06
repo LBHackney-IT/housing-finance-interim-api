@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CloudWatchLogs;
 using Amazon.CloudWatchLogs.Model;
 using FluentAssertions;
 using HousingFinanceInterimApi.V1.Gateway.Interfaces;
+using HousingFinanceInterimApi.V1.Infrastructure;
 using HousingFinanceInterimApi.V1.UseCase;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
@@ -106,7 +109,10 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public async Task ExecuteAsync_Should_Log_Any_Errors_And_Continues_Processing()
         {
             // Arrange
-            var logGroups = new List<string> { "/aws/lambda/log-group-function1", "/aws/lambda/log-group-function2" };
+            var logGroups = new List<string> {
+                "/aws/lambda/log-group-function1",
+                "/aws/lambda/log-group-function2"
+            };
             _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(_mockGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
 
             var queryResults = new List<List<ResultField>> { new List<ResultField> {
@@ -140,5 +146,104 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 x => x.UpdateDatabaseWithResults(It.IsAny<string>(), It.Is<List<List<ResultField>>>(r => r[0][0].Field == "Error")),
                 Times.Once);
         }
+
+
+        [Fact]
+        public async Task ExecuteAsync_ShouldThrowArgumentException_WhenCreatedDateIsDefault()
+        {
+            // Arrange
+            var createdDate = default(DateTime);
+            var logGroups = new List<string> { "/aws/lambda/log-group-function1" };
+            _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(_mockGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => _nightlyProcessLogUseCase.ExecuteAsync(createdDate)).ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_ShouldReturnEmptyList_WhenNoLogsFound()
+        {
+            // Arrange
+            var createdDate = DateTime.UtcNow;
+            var logGroups = new List<string> { "/aws/lambda/log-group-function1" };
+            _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(_mockGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
+
+            _mockGateway
+                .Setup(x => x.GetByDateCreatedAsync(createdDate))
+                .ReturnsAsync(new List<NightlyProcessLog>());
+
+            // Act
+            var result = await _nightlyProcessLogUseCase.ExecuteAsync(createdDate).ConfigureAwait(false);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Should().BeEmpty();
+        }
+
+
+        [Fact]
+        public async Task ExecuteAsync_ShouldReturnLogs_WhenLogsExistForGivenDate()
+        {
+            // Arrange
+            var createdDate = DateTime.UtcNow.Date;
+            var logGroups = new List<string> { "/aws/lambda/log-group-function1" };
+            var logs = new List<NightlyProcessLog>
+            {
+                new NightlyProcessLog
+                {
+                    Id = 1,
+                    LogGroupName = "TestLogGroup",
+                    Timestamp = DateTime.UtcNow,
+                    IsSuccess = true,
+                    DateCreated = createdDate
+                }
+            };
+
+            _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(_mockGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
+
+            _mockGateway
+                .Setup(x => x.GetByDateCreatedAsync(createdDate))
+                .ReturnsAsync(logs);
+
+            // Act
+            var result = await _nightlyProcessLogUseCase.ExecuteAsync(createdDate).ConfigureAwait(false);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result);
+            Assert.Equal("TestLogGroup", result.First().LogGroupName);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_ShouldThrowInvalidOperationException_WhenDbUpdateExceptionOccurs()
+        {
+            // Arrange
+            var createdDate = DateTime.UtcNow;
+            var logGroups = new List<string> { "/aws/lambda/log-group-function1" };
+            _mockGateway
+                .Setup(x => x.GetByDateCreatedAsync(createdDate))
+                .Throws(new DbUpdateException("Database error"));
+            _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(_mockGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<System.InvalidOperationException>(() => _nightlyProcessLogUseCase.ExecuteAsync(createdDate)).ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_ShouldThrowApplicationException_WhenUnexpectedExceptionOccurs()
+        {
+            // Arrange
+            var createdDate = DateTime.UtcNow;
+            var logGroups = new List<string> { "/aws/lambda/log-group-function1" };
+            _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(_mockGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
+
+            _mockGateway
+                .Setup(x => x.GetByDateCreatedAsync(createdDate))
+                .Throws(new Exception("Unexpected error"));
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ApplicationException>(() => _nightlyProcessLogUseCase.ExecuteAsync(createdDate)).ConfigureAwait(false);
+        }
+
     }
 }

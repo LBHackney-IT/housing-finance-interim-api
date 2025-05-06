@@ -73,7 +73,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     catch (Exception ex)
                     {
                         LoggingHandler.LogError($"Unexpected error for log group {logGroup}: {ex.Message}");
-                        throw;
+                        await LogFailureToDatabase(logGroup, ex.Message).ConfigureAwait(false);
                     }
                 }
 
@@ -199,16 +199,42 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
         public async Task<IList<NightlyProcessLogResponse>> ExecuteAsync(DateTime createdDate)
         {
-            var logs = await _nightlyprocessLogGateway.GetByDateCreatedAsync(createdDate).ConfigureAwait(false);
-            return logs.Select(log => new NightlyProcessLogResponse
+            if (createdDate == default)
             {
-                Id = log.Id,
-                LogGroupName = log.LogGroupName,
-                Timestamp = log.Timestamp,
-                IsSuccess = log.IsSuccess,
-                DateCreated = log.DateCreated
-            }).ToList();
+                throw new ArgumentException("The createdDate parameter cannot be the default value.", nameof(createdDate));
+            }
+
+            try
+            {
+                var logs = await _nightlyprocessLogGateway.GetByDateCreatedAsync(createdDate).ConfigureAwait(false);
+
+                if (logs == null)
+                {
+                    LoggingHandler.LogWarning($"No logs found for the provided date: {createdDate:yyyy-MM-dd}");
+                    return new List<NightlyProcessLogResponse>();
+                }
+
+                return logs.Select(log => new NightlyProcessLogResponse
+                {
+                    Id = log.Id,
+                    LogGroupName = log.LogGroupName,
+                    Timestamp = log.Timestamp,
+                    IsSuccess = log.IsSuccess,
+                    DateCreated = log.DateCreated
+                }).ToList();
+            }
+            catch (DbUpdateException dbEx)
+            {
+                LoggingHandler.LogError($"Database error while retrieving logs for date {createdDate:yyyy-MM-dd}: {dbEx.Message}");
+                throw new System.InvalidOperationException("An error occurred while accessing the database.", dbEx);
+            }
+            catch (Exception ex)
+            {
+                LoggingHandler.LogError($"Unexpected error while retrieving logs for date {createdDate:yyyy-MM-dd}: {ex.Message}");
+                throw new ApplicationException("An unexpected error occurred while processing the request.", ex);
+            }
         }
+
 
         #endregion
     }

@@ -144,11 +144,26 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
         public async Task<IList<NightlyProcessLog>> GetByDateCreatedAsync(DateTime createdDate)
         {
-            return await _context.NightlyProcessLogs
-                .Where(log => log.DateCreated.Date == createdDate.Date)
-                .OrderByDescending(log => log.DateCreated)
-                .ToListAsync()
-                .ConfigureAwait(false);
+            try
+            {
+                return await _context.NightlyProcessLogs
+                    .Where(log => log.DateCreated.Date == createdDate.Date)
+                    .OrderByDescending(log => log.DateCreated)
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+            }
+            catch (DbUpdateException dbEx)
+            {
+                LoggingHandler.LogError($"Database query error for date '{createdDate.Date}': {dbEx.Message}");
+                LoggingHandler.LogError(dbEx.StackTrace);
+                throw; 
+            }
+            catch (Exception ex)
+            {
+                LoggingHandler.LogError($"Unexpected error in GetByDateCreatedAsync for date '{createdDate.Date}': {ex.Message}");
+                LoggingHandler.LogError(ex.StackTrace);
+                throw; 
+            }
         }
     }
 }
