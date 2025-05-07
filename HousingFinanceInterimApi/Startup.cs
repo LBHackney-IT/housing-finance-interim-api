@@ -23,6 +23,7 @@ using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using Hackney.Core.JWT;
 using HousingFinanceInterimApi.V1.Gateway.Interfaces;
+using Amazon.CloudWatchLogs;
 
 namespace HousingFinanceInterimApi
 {
@@ -137,6 +138,9 @@ namespace HousingFinanceInterimApi
             services.AddTokenFactory();
 
             services.AddScoped<IGoogleClientServiceFactory, GoogleClientServiceFactory>();
+
+            // Register IAmazonCloudWatchLogs
+            services.AddAWSService<IAmazonCloudWatchLogs>();
         }
 
         private static void ConfigureDbContext(IServiceCollection services)
