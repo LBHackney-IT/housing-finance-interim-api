@@ -22,11 +22,11 @@ namespace HousingFinanceInterimApi.V1.Gateways
     /// isSuccess flag as True (succeeded).
     /// This is done to ensure that the Log Group status is saved once per call.
     /// </remarks>
-    public class LogParserGateway : ILogParserGateway
+    public class NightlyProcessLogGateway : INightlyProcessLogGateway
     {
         private readonly IDatabaseContext _context;
 
-        public LogParserGateway(IDatabaseContext context)
+        public NightlyProcessLogGateway(IDatabaseContext context)
         {
             _context = context;
         }
@@ -89,14 +89,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 if (DateTime.TryParse(timestamp, out var parsedTimestamp))
                 {
                     // Check if the message contains the keyword
-                    //TODO:: Dev-Testing with RequestId for now - revert to "ERROR" later
-                    var isSuccess = message is not null && !message.Contains("requestid", StringComparison.OrdinalIgnoreCase);
+                    var isSuccess = message is not null && !message.Contains("error", StringComparison.OrdinalIgnoreCase);
 
                     return new NightlyProcessLog
                     {
                         LogGroupName = logGroupName,
                         Timestamp = parsedTimestamp,
-                        IsSuccess = isSuccess
+                        IsSuccess = isSuccess,
+                        DateCreated = DateTime.UtcNow
                     };
                 }
                 else
@@ -119,7 +119,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
             {
                 LogGroupName = logGroupName,
                 Timestamp = timestamp,
-                IsSuccess = isSuccess
+                IsSuccess = isSuccess,
+                DateCreated = DateTime.UtcNow
             };
 
             await LogResultAsync(logEntry).ConfigureAwait(false);
@@ -136,6 +137,30 @@ namespace HousingFinanceInterimApi.V1.Gateways
             {
                 LoggingHandler.LogError($"Database update error for log group '{logEntry.LogGroupName}': {dbEx.Message}");
                 LoggingHandler.LogError(dbEx.StackTrace);
+                throw;
+            }
+        }
+
+        public async Task<IList<NightlyProcessLog>> GetByDateCreatedAsync(DateTime createdDate)
+        {
+            try
+            {
+                return await _context.NightlyProcessLogs
+                    .Where(log => log.DateCreated.Date == createdDate.Date)
+                    .OrderByDescending(log => log.DateCreated)
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+            }
+            catch (DbUpdateException dbEx)
+            {
+                LoggingHandler.LogError($"Database query error for date '{createdDate.Date}': {dbEx.Message}");
+                LoggingHandler.LogError(dbEx.StackTrace);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                LoggingHandler.LogError($"Unexpected error in GetByDateCreatedAsync for date '{createdDate.Date}': {ex.Message}");
+                LoggingHandler.LogError(ex.StackTrace);
                 throw;
             }
         }

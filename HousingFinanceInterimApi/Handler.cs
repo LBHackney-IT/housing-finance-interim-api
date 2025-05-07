@@ -46,7 +46,7 @@ namespace HousingFinanceInterimApi
         private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
         private readonly IGenerateReportUseCase _generateReportUseCase;
         private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
-        private readonly ILogParserUseCase _logParserUseCase;
+        private readonly INightlyProcessLogUseCase _nightlyProcessLogUseCase;
 
         private const string CashFileLabel = "CashFile";
 
@@ -93,7 +93,7 @@ namespace HousingFinanceInterimApi
             IReportGateway reportGateway = new ReportGateway(context);
             IBatchReportGateway batchReportGateway = new BatchReportGateway(context);
             ISuspenseAccountsGateway suspenseAccountsGateway = new SuspenseAccountsGateway(context);
-            ILogParserGateway logParserGateway = new LogParserGateway(context);
+            INightlyProcessLogGateway nightlyProcessLogGateway = new NightlyProcessLogGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _checkChargesBatchYearsUseCase = new CheckChargesBatchYearsUseCase(chargesBatchYearsGateway);
@@ -133,7 +133,7 @@ namespace HousingFinanceInterimApi
                 reportGateway, transactionGateway, googleFileSettingGateway, googleClientService);
             _moveHousingBenefitFileUseCase = new MoveHousingBenefitFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService);
-            _logParserUseCase = new LogParserUseCase(logParserGateway, new AmazonCloudWatchLogsClient(), logGroups);
+            _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(nightlyProcessLogGateway, new AmazonCloudWatchLogsClient(), logGroups);
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()
@@ -258,7 +258,7 @@ namespace HousingFinanceInterimApi
 
         public async Task<StepResponse> ParseNightlyProcessLogs()
         {
-            return await _logParserUseCase.ExecuteAsync().ConfigureAwait(false);
+            return await _nightlyProcessLogUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 }

@@ -1,22 +1,13 @@
 using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace HousingFinanceInterimApi.V1.Infrastructure
+namespace HousingFinanceInterimApi.V1.Domain
 {
-    [Table("NightlyProcessLog")]
-    public class NightlyProcessLog
+    public class NightlyProcessLogResponse
     {
-        [Key]
         public long Id { get; set; }
-
-        [Required]
         public string LogGroupName { get; set; }
-
         public DateTime? Timestamp { get; set; }
-
         public bool? IsSuccess { get; set; }
-
         public DateTime DateCreated { get; set; }
     }
 }

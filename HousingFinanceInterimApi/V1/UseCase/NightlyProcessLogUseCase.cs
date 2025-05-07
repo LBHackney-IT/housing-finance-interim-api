@@ -1,8 +1,10 @@
 using Amazon.CloudWatchLogs;
 using Amazon.CloudWatchLogs.Model;
 using HousingFinanceInterimApi.V1.Boundary.Response;
+using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Gateway.Interfaces;
 using HousingFinanceInterimApi.V1.Handlers;
+using HousingFinanceInterimApi.V1.Infrastructure;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -20,20 +22,20 @@ namespace HousingFinanceInterimApi.V1.UseCase
     /// and updates the database with the query results. It handles errors during the querying and database update
     /// processes, logging failures to the database when necessary.
     /// </remarks>
-    public class LogParserUseCase : ILogParserUseCase
+    public class NightlyProcessLogUseCase : INightlyProcessLogUseCase
     {
+        private readonly INightlyProcessLogGateway _nightlyprocessLogGateway;
         private readonly IAmazonCloudWatchLogs _cloudWatchLogsClient;
-        private readonly ILogParserGateway _logParserGateway;
         private readonly IList<string> _logGroups;
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION") ?? "100";
 
-        public LogParserUseCase(
-            ILogParserGateway logParserGateway,
+        public NightlyProcessLogUseCase(
+            INightlyProcessLogGateway nightlyprocessLogGateway,
             IAmazonCloudWatchLogs cloudWatchLogsClient,
             IList<string> logGroups)
         {
+            _nightlyprocessLogGateway = nightlyprocessLogGateway;
             _cloudWatchLogsClient = cloudWatchLogsClient;
-            _logParserGateway = logParserGateway;
             _logGroups = logGroups ?? throw new ArgumentNullException(nameof(logGroups));
         }
 
@@ -41,7 +43,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             if (!_logGroups.Any())
             {
-                throw new ArgumentException("Log groups cannot be null or empty", nameof(_logGroups));
+                throw new ArgumentException("Log groups cannot be null or empty", "logGroups");
             }
 
             try
@@ -51,7 +53,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     try
                     {
                         var queryResults = await QueryCloudWatchLogs(logGroup).ConfigureAwait(false);
-                        await _logParserGateway.UpdateDatabaseWithResults(logGroup, queryResults).ConfigureAwait(false);
+                        await _nightlyprocessLogGateway.UpdateDatabaseWithResults(logGroup, queryResults).ConfigureAwait(false);
                     }
                     catch (AmazonCloudWatchLogsException awsEx)
                     {
@@ -62,6 +64,11 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     {
                         LoggingHandler.LogError($"Database update error for log group {logGroup}: {dbEx.Message}");
                         throw;
+                    }
+                    catch (System.InvalidOperationException invalidOpEx)
+                    {
+                        LoggingHandler.LogError($"Invalid operation for log group {logGroup}: {invalidOpEx.Message}");
+                        await LogFailureToDatabase(logGroup, invalidOpEx.Message).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
@@ -91,10 +98,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
             try
             {
                 // First query: Check for the keyword
-                // TODO:: Dev-Testing with RequestId for now - revert to "ERROR" later
                 var keywordQuery = @"
                 fields @timestamp, @message
-                | filter @message like /RequestId/
+                | filter @message like /error/
                 | sort @timestamp desc
                 | limit 100";
 
@@ -111,7 +117,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 // Wait for the query to complete
                 var queryResults = await GetQueryResultsAsync(startQueryResponse.QueryId).ConfigureAwait(false);
 
-                if (queryResults.Any())
+                if (queryResults.Count != 0)
                 {
                     // Case 1: Results found for the keyword
                     return queryResults;
@@ -179,7 +185,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             try
             {
-                await _logParserGateway.UpdateDatabaseWithResults(logGroup, failedQueryResult).ConfigureAwait(false);
+                await _nightlyprocessLogGateway.UpdateDatabaseWithResults(logGroup, failedQueryResult).ConfigureAwait(false);
             }
             catch (Exception dbEx)
             {
@@ -187,5 +193,48 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 throw;
             }
         }
+
+        #region Controller
+
+        public async Task<IList<NightlyProcessLogResponse>> ExecuteAsync(DateTime createdDate)
+        {
+            if (createdDate == default)
+            {
+                throw new ArgumentException("The createdDate parameter cannot be the default value.", nameof(createdDate));
+            }
+
+            try
+            {
+                var logs = await _nightlyprocessLogGateway.GetByDateCreatedAsync(createdDate).ConfigureAwait(false);
+
+                if (logs == null)
+                {
+                    LoggingHandler.LogWarning($"No logs found for the provided date: {createdDate:yyyy-MM-dd}");
+                    return new List<NightlyProcessLogResponse>();
+                }
+
+                return logs.Select(log => new NightlyProcessLogResponse
+                {
+                    Id = log.Id,
+                    LogGroupName = log.LogGroupName,
+                    Timestamp = log.Timestamp,
+                    IsSuccess = log.IsSuccess,
+                    DateCreated = log.DateCreated
+                }).ToList();
+            }
+            catch (DbUpdateException dbEx)
+            {
+                LoggingHandler.LogError($"Database error while retrieving logs for date {createdDate:yyyy-MM-dd}: {dbEx.Message}");
+                throw new System.InvalidOperationException("An error occurred while accessing the database.", dbEx);
+            }
+            catch (Exception ex)
+            {
+                LoggingHandler.LogError($"Unexpected error while retrieving logs for date {createdDate:yyyy-MM-dd}: {ex.Message}");
+                throw new ApplicationException("An unexpected error occurred while processing the request.", ex);
+            }
+        }
+
+
+        #endregion
     }
 }
