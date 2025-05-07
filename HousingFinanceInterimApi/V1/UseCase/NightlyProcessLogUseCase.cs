@@ -43,7 +43,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             if (!_logGroups.Any())
             {
-                throw new ArgumentException("Log groups cannot be null or empty", "logGroups");
+                throw new ArgumentException("Log groups cannot be null or empty", nameof(_logGroups));
             }
 
             try
@@ -70,7 +70,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         LoggingHandler.LogError($"Invalid operation for log group {logGroup}: {invalidOpEx.Message}");
                         await LogFailureToDatabase(logGroup, invalidOpEx.Message).ConfigureAwait(false);
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (ex is AmazonCloudWatchLogsException || ex is DbUpdateException || ex is System.InvalidOperationException)
                     {
                         // Catch any other unexpected exceptions
                         LoggingHandler.LogError($"Unexpected error for log group {logGroup}: {ex.Message}");
