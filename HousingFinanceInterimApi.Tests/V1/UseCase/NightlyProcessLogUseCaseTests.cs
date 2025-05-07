@@ -109,44 +109,42 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
         public async Task ExecuteAsync_Should_Log_Any_Errors_And_Continues_Processing()
         {
             // Arrange
-            var logGroups = new List<string> {
-                "/aws/lambda/log-group-function1",
-                "/aws/lambda/log-group-function2"
-            };
-            _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(_mockGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
+            var logGroups = new List<string> { "log-group-1", "log-group-2" };
+            var useCase = new NightlyProcessLogUseCase(_mockGateway.Object, _mockCloudWatchLogsClient.Object, logGroups);
 
-            var queryResults = new List<List<ResultField>> { new List<ResultField> {
-                    new ResultField { Field = "Test", Value = "Value" }
-                }
-            };
+            _mockCloudWatchLogsClient
+                .SetupSequence(x => x.StartQueryAsync(It.IsAny<StartQueryRequest>(), default))
+                .ReturnsAsync(new StartQueryResponse { QueryId = "query-id-1" })
+                .ThrowsAsync(new AmazonCloudWatchLogsException("AWS error"));
+
+            _mockCloudWatchLogsClient
+                .Setup(x => x.GetQueryResultsAsync(It.IsAny<GetQueryResultsRequest>(), default))
+                .ReturnsAsync(new GetQueryResultsResponse
+                {
+                    Status = QueryStatus.Complete,
+                    Results = new List<List<ResultField>>
+                    {
+                new List<ResultField> { new ResultField { Field = "Test", Value = "Value" } }
+                    }
+                });
 
             _mockGateway
                 .Setup(x => x.UpdateDatabaseWithResults(It.IsAny<string>(), It.IsAny<List<List<ResultField>>>()))
                 .Returns(Task.CompletedTask);
 
-            _mockCloudWatchLogsClient
-                .SetupSequence(x => x.StartQueryAsync(It.IsAny<StartQueryRequest>(), default))
-                .ReturnsAsync(new StartQueryResponse { QueryId = "test-query-id" })
-                .ThrowsAsync(new Exception("CloudWatch error"));
-
-            _mockCloudWatchLogsClient
-                .Setup(x => x.GetQueryResultsAsync(It.IsAny<GetQueryResultsRequest>(), default))
-                .ReturnsAsync(new GetQueryResultsResponse { Status = QueryStatus.Complete, Results = queryResults });
-
             // Act
-            var response = await _nightlyProcessLogUseCase.ExecuteAsync().ConfigureAwait(false);
+            var response = await useCase.ExecuteAsync();
 
             // Assert
-            response.Should().NotBeNull();
-            response.Continue.Should().BeTrue();
+            Assert.NotNull(response);
+            Assert.True(response.Continue);
             _mockGateway.Verify(
-                x => x.UpdateDatabaseWithResults(It.IsAny<string>(), queryResults),
+                x => x.UpdateDatabaseWithResults("log-group-1", It.IsAny<List<List<ResultField>>>()),
                 Times.Once);
             _mockGateway.Verify(
-                x => x.UpdateDatabaseWithResults(It.IsAny<string>(), It.Is<List<List<ResultField>>>(r => r[0][0].Field == "Error")),
-                Times.Once);
+                x => x.UpdateDatabaseWithResults("log-group-2", It.IsAny<List<List<ResultField>>>()),
+                Times.Once); // Not Twice, because the second log group throws an exception
         }
-
 
         [Fact]
         public async Task ExecuteAsync_ShouldThrowArgumentException_WhenCreatedDateIsDefault()

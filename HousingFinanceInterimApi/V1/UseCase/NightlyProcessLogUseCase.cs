@@ -72,6 +72,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     }
                     catch (Exception ex)
                     {
+                        // Catch any other unexpected exceptions
                         LoggingHandler.LogError($"Unexpected error for log group {logGroup}: {ex.Message}");
                         await LogFailureToDatabase(logGroup, ex.Message).ConfigureAwait(false);
                     }
