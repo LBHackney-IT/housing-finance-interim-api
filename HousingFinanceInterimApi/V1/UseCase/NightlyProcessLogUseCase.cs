@@ -70,7 +70,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                         LoggingHandler.LogError($"Invalid operation for log group {logGroup}: {invalidOpEx.Message}");
                         await LogFailureToDatabase(logGroup, invalidOpEx.Message).ConfigureAwait(false);
                     }
-                    catch (Exception ex) when (ex is AmazonCloudWatchLogsException || ex is DbUpdateException || ex is System.InvalidOperationException)
+                    catch (Exception ex)
                     {
                         // Catch any other unexpected exceptions
                         LoggingHandler.LogError($"Unexpected error for log group {logGroup}: {ex.Message}");
@@ -195,7 +195,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             }
         }
 
-        #region Controller
+        #region Controller Methods
 
         public async Task<IList<NightlyProcessLogResponse>> ExecuteAsync(DateTime createdDate)
         {
