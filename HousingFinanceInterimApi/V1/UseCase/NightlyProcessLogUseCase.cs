@@ -4,6 +4,7 @@ using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Gateway.Interfaces;
 using HousingFinanceInterimApi.V1.Handlers;
+using HousingFinanceInterimApi.V1.Helpers;
 using HousingFinanceInterimApi.V1.Infrastructure;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -26,17 +27,19 @@ namespace HousingFinanceInterimApi.V1.UseCase
     {
         private readonly INightlyProcessLogGateway _nightlyprocessLogGateway;
         private readonly IAmazonCloudWatchLogs _cloudWatchLogsClient;
-        private readonly IList<string> _logGroups;
+        private readonly ILogGroupProvider _logGroupProvider;
+        private readonly List<string> _logGroups;
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION") ?? "100";
 
         public NightlyProcessLogUseCase(
             INightlyProcessLogGateway nightlyprocessLogGateway,
             IAmazonCloudWatchLogs cloudWatchLogsClient,
-            IList<string> logGroups)
+            ILogGroupProvider logGroupProvider)
         {
             _nightlyprocessLogGateway = nightlyprocessLogGateway;
             _cloudWatchLogsClient = cloudWatchLogsClient;
-            _logGroups = logGroups ?? throw new ArgumentNullException(nameof(logGroups));
+            _logGroupProvider = logGroupProvider;
+            _logGroups = _logGroupProvider.GetLogGroups(Environment.GetEnvironmentVariable("ENVIRONMENT_NAME"));
         }
 
         public async Task<StepResponse> ExecuteAsync()

@@ -55,7 +55,6 @@ namespace HousingFinanceInterimApi
             DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
             optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
             DatabaseContext context = new DatabaseContext(optionsBuilder.Options);
-            var logGroups = LogGroupUtility.GetLogGroups(Environment.GetEnvironmentVariable("ENVIRONMENT_NAME"));
 
             var options = Options.Create(new GoogleClientServiceOptions
             {
@@ -133,7 +132,7 @@ namespace HousingFinanceInterimApi
                 reportGateway, transactionGateway, googleFileSettingGateway, googleClientService);
             _moveHousingBenefitFileUseCase = new MoveHousingBenefitFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService);
-            _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(nightlyProcessLogGateway, new AmazonCloudWatchLogsClient(), logGroups);
+            _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(nightlyProcessLogGateway, new AmazonCloudWatchLogsClient(), new LogGroupProvider());
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()

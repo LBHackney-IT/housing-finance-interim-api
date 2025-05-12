@@ -24,6 +24,7 @@ using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using Hackney.Core.JWT;
 using HousingFinanceInterimApi.V1.Gateway.Interfaces;
 using Amazon.CloudWatchLogs;
+using HousingFinanceInterimApi.V1.Helpers;
 
 namespace HousingFinanceInterimApi
 {
@@ -176,6 +177,7 @@ namespace HousingFinanceInterimApi
         private static void RegisterUseCases(IServiceCollection services)
         {
             services.AddScoped<IGetBatchLogErrorUseCase, GetBatchLogErrorUseCase>();
+            services.AddSingleton<ILogGroupProvider, LogGroupProvider>();
             services.AddScoped<INightlyProcessLogUseCase, NightlyProcessLogUseCase>();
         }
 
