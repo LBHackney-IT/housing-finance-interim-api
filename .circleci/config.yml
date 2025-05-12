@@ -51,7 +51,7 @@ commands:
           name: Install serverless CLI
           command: npm i -g serverless
       - run:
-          name: Install step function plugin          
+          name: Install step function plugin
           command: npm i serverless-step-functions
       - run:
           name: Build lambda
@@ -61,6 +61,7 @@ commands:
             ./build.sh      
       - run:
           name: Deploy lambda
+          no_output_timeout: 45m
           command: |
             cd ./HousingFinanceInterimApi/
             npm i serverless-associate-waf serverless-prune-plugin
