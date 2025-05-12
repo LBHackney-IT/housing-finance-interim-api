@@ -885,6 +885,10 @@ resources:
             Value: ${self:service}-${self:provider.stage}-refresh-ma-cur-bal
 
 custom:
+  prune:
+    automatic: true
+    number: 10
+    includeLayers: true
   authorizerArns:
     development: arn:aws:lambda:eu-west-2:859159924354:function:api-auth-verify-token-new-development-apiauthverifytokennew
     staging:     arn:aws:lambda:eu-west-2:715003523189:function:api-auth-verify-token-new-staging-apiauthverifytokennew
@@ -915,3 +919,4 @@ custom:
 plugins:
   - serverless-step-functions
   - serverless-associate-waf
+  - serverless-prune-plugin
