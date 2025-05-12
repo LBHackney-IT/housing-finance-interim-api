@@ -40,7 +40,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
             _cloudWatchLogsClient = cloudWatchLogsClient;
             _logGroupProvider = logGroupProvider;
             _logGroups = _logGroupProvider.GetLogGroups(Environment.GetEnvironmentVariable("ENVIRONMENT_NAME"));
-            
         }
 
         public async Task<StepResponse> ExecuteAsync()
