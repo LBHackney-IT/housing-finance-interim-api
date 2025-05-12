@@ -63,7 +63,7 @@ commands:
           name: Deploy lambda
           command: |
             cd ./HousingFinanceInterimApi/
-            npm i serverless-associate-waf
+            npm i serverless-associate-waf serverless-prune-plugin
             sls deploy --stage <<parameters.stage>> --conceal
 
 jobs:
