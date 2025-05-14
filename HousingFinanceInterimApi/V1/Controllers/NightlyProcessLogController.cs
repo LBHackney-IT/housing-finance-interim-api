@@ -21,6 +21,18 @@ namespace HousingFinanceInterimApi.V1.Controllers
             _nightlyProcessLogUseCase = nightlyProcessLogUseCase;
         }
 
+        /// <summary>
+        /// Retrieves the status of the nightly HFS ingest processes for a specific date.
+        /// </summary>
+        /// <param name="createdDate">The date for which to retrieve nightly process logs</param>
+        /// <returns>
+        /// Queries the AWS CloudWatch log groups for the keyword "Error" on specified date and returns results in 3 cases.
+        /// The results are filtered based on the log group names defined in the LogGroupUtility class.
+        /// The returned are based on the following Result Cases:
+        /// Case 1: Results exist for the keyword in the log group - Empty list, IsSuccess is false and Timestamp is not null
+        /// Case 2: Results do not exist for the keyword in the log group - Populated List, IsSuccess is true and Timestamp is not null
+        /// Case 3: No logs exist for the log group in the last 24 hours - Empty list, IsSuccess is null and Timestamp is null
+        /// </returns>
         [ProducesResponseType(typeof(List<NightlyProcessLogResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

@@ -221,7 +221,5 @@ namespace HousingFinanceInterimApi
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
         }
-
     }
-
 }
