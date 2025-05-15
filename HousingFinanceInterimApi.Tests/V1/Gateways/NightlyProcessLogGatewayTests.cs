@@ -51,28 +51,6 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResults_ShouldSaveToDatabaseAsSuccess_WhenValidInputHasNoError()
-        {
-            // Arrange
-            var logGroupName = "/aws/lambda/log-group-function1";
-            var queryResults = new List<List<ResultField>>
-            {
-                new List<ResultField>
-                {
-                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
-                    new ResultField { Field = "@message", Value = "Test log message" }
-                }
-            };
-
-            // Act
-            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults).ConfigureAwait(false);
-
-            // Assert
-            _mockDbSet.Verify(db => db.AddAsync(It.IsAny<NightlyProcessLog>(), default), Times.Once);
-            _mockContext.Verify(c => c.SaveChangesAsync(default), Times.Once);
-        }
-
-        [Fact]
         public async Task UpdateDatabaseWithResults_ShouldThrowArgumentNullException_WhenLogGroupNameIsNull()
         {
             // Arrange
@@ -105,28 +83,6 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             var exception = await Assert.ThrowsAsync<DbUpdateException>(() => _gateway.UpdateDatabaseWithResults(logGroupName, queryResults)).ConfigureAwait(false);
 
             Assert.Equal("Database update failed", exception.Message);
-        }
-
-        [Fact]
-        public async Task UpdateDatabaseWithResults_ShouldLogErrorAndContinue_WhenInvalidTimestamp()
-        {
-            // Arrange
-            var logGroupName = "/aws/lambda/log-group-function1";
-            var queryResults = new List<List<ResultField>>
-            {
-                new List<ResultField>
-                {
-                    new ResultField { Field = "@timestamp", Value = "invalid-timestamp" },
-                    new ResultField { Field = "@message", Value = "Test log message" }
-                }
-            };
-
-            // Act
-            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults).ConfigureAwait(false);
-
-            // Assert
-            _mockDbSet.Verify(db => db.AddAsync(It.IsAny<NightlyProcessLog>(), default), Times.Once);
-            _mockContext.Verify(c => c.SaveChangesAsync(default), Times.Once);
         }
 
         [Fact]

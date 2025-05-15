@@ -67,9 +67,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
                         return;
                     }
                 }
-
-                // If no keywords were found, log a success entry
-                await LogResultAsync(logGroupName, DateTime.UtcNow, true).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
