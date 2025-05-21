@@ -14,6 +14,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Boundary.Request;
 using HousingFinanceInterimApi.V1.Boundary.Response;
+using HousingFinanceInterimApi.V1.Gateway.Interfaces;
+using Amazon.CloudWatchLogs;
+using HousingFinanceInterimApi.V1.Helpers;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -43,6 +46,7 @@ namespace HousingFinanceInterimApi
         private readonly IRefreshOperatingBalanceUseCase _refreshOperatingBalanceUseCase;
         private readonly IGenerateReportUseCase _generateReportUseCase;
         private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
+        private readonly INightlyProcessLogUseCase _nightlyProcessLogUseCase;
 
         private const string CashFileLabel = "CashFile";
 
@@ -88,6 +92,7 @@ namespace HousingFinanceInterimApi
             IReportGateway reportGateway = new ReportGateway(context);
             IBatchReportGateway batchReportGateway = new BatchReportGateway(context);
             ISuspenseAccountsGateway suspenseAccountsGateway = new SuspenseAccountsGateway(context);
+            INightlyProcessLogGateway nightlyProcessLogGateway = new NightlyProcessLogGateway(context);
 
             _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _checkChargesBatchYearsUseCase = new CheckChargesBatchYearsUseCase(chargesBatchYearsGateway);
@@ -127,6 +132,7 @@ namespace HousingFinanceInterimApi
                 reportGateway, transactionGateway, googleFileSettingGateway, googleClientService);
             _moveHousingBenefitFileUseCase = new MoveHousingBenefitFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService);
+            _nightlyProcessLogUseCase = new NightlyProcessLogUseCase(nightlyProcessLogGateway, new AmazonCloudWatchLogsClient(), new LogGroupProvider());
         }
 
         public async Task<StepResponse> LoadTenancyAgreement()
@@ -247,6 +253,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> GenerateReport()
         {
             return await _generateReportUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> ParseNightlyProcessLogs()
+        {
+            return await _nightlyProcessLogUseCase.ExecuteAsync().ConfigureAwait(false);
         }
     }
 }

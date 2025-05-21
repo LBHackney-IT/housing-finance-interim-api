@@ -22,6 +22,9 @@ using dotenv.net;
 using HousingFinanceInterimApi.V1.UseCase;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using Hackney.Core.JWT;
+using HousingFinanceInterimApi.V1.Gateway.Interfaces;
+using Amazon.CloudWatchLogs;
+using HousingFinanceInterimApi.V1.Helpers;
 
 namespace HousingFinanceInterimApi
 {
@@ -136,6 +139,9 @@ namespace HousingFinanceInterimApi
             services.AddTokenFactory();
 
             services.AddScoped<IGoogleClientServiceFactory, GoogleClientServiceFactory>();
+
+            // Register IAmazonCloudWatchLogs
+            services.AddAWSService<IAmazonCloudWatchLogs>();
         }
 
         private static void ConfigureDbContext(IServiceCollection services)
@@ -165,11 +171,14 @@ namespace HousingFinanceInterimApi
             services.AddScoped<IReportGateway, ReportGateway>();
             services.AddScoped<IBatchReportGateway, BatchReportGateway>();
             services.AddScoped<IAssetGateway, AssetGateway>();
+            services.AddScoped<INightlyProcessLogGateway, NightlyProcessLogGateway>();
         }
 
         private static void RegisterUseCases(IServiceCollection services)
         {
             services.AddScoped<IGetBatchLogErrorUseCase, GetBatchLogErrorUseCase>();
+            services.AddSingleton<ILogGroupProvider, LogGroupProvider>();
+            services.AddScoped<INightlyProcessLogUseCase, NightlyProcessLogUseCase>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -212,7 +221,5 @@ namespace HousingFinanceInterimApi
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
         }
-
     }
-
 }
