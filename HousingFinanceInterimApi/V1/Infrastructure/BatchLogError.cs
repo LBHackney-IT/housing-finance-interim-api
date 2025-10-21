@@ -15,7 +15,6 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         [Required]
         public string Type { get; set; }
 
-        [Required]
         public string Message { get; set; }
 
         public long BatchLogId { get; set; }
