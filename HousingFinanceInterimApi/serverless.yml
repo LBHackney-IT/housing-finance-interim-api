@@ -40,12 +40,12 @@ functions:
       - http:
           path: /{proxy+}
           method: ANY
-          authorizer:
-            arn: ${self:custom.authorizerArns.${opt:stage}}
-            type: request
-            resultTtlInSeconds: 0
-            identitySource: method.request.header.Authorization
-            managedExternally: true
+          # authorizer:
+          #   arn: ${self:custom.authorizerArns.${opt:stage}}
+          #   type: request
+          #   resultTtlInSeconds: 0
+          #   identitySource: method.request.header.Authorization
+          #   managedExternally: true
           cors:
             origin: '*'
             headers:
@@ -553,15 +553,15 @@ resources:
                           - Ref: 'AWS::Region'
                           - Ref: 'AWS::AccountId'
                           - 'log-group:/aws/lambda/*:*:*'
-                - Effect: "Allow"
-                  Action:
-                    - "s3:PutObject"
-                    - "s3:GetObject"
-                  Resource:
-                    Fn::Join:
-                      - ""
-                      - - "arn:aws:s3:::"
-                        - "Ref": "ServerlessDeploymentBucket"
+                # - Effect: "Allow"
+                #   Action:
+                #     - "s3:PutObject"
+                #     - "s3:GetObject"
+                #   Resource:
+                #     Fn::Join:
+                #       - ""
+                #       - - "arn:aws:s3:::"
+                #         - "Ref": "ServerlessDeploymentBucket"
           - PolicyName: lambdaInvocation
             PolicyDocument:
               Version: '2012-10-17'
@@ -920,10 +920,10 @@ custom:
         - subnet-0ea0020a44b98a2ca
     production:
       securityGroupIds:
-        - sg-02a377899622e884c
+        - sg-0b7be628d680f9e5f
       subnetIds:
-        - subnet-0beb266003a56ca82
-        - subnet-06a697d86a9b6ed01
+        - subnet-05e595c59b7d6c8df
+        - subnet-0e6bc9b4ac24493cc
 
 plugins:
   - serverless-step-functions
