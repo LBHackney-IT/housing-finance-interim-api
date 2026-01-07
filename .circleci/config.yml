@@ -58,7 +58,7 @@ commands:
           command: |
             cd ./HousingFinanceInterimApi/
             chmod +x ./build.sh
-            ./build.sh      
+            ./build.sh
       - run:
           name: Deploy lambda
           no_output_timeout: 45m
@@ -78,116 +78,32 @@ jobs:
       - run:
           name: Run formatter check
           command: ./dotnet-format-local/dotnet-format --check
-  build-and-test:
-    executor: docker-python
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: build
-          command: docker-compose build housing-finance-interim-api-test
-      - run:
-          name: Run tests
-          command: docker-compose run housing-finance-interim-api-test
-  assume-role-development:
+
+  assume-role-dr:
     executor: docker-python
     steps:
       - assume-role-and-persist-workspace:
-          aws-account: $AWS_ACCOUNT_DEVELOPMENT
-  assume-role-staging:
-    executor: docker-python
-    steps:
-      - assume-role-and-persist-workspace:
-          aws-account: $AWS_ACCOUNT_STAGING
-  assume-role-production:
-    executor: docker-python
-    steps:
-      - assume-role-and-persist-workspace:
-          aws-account: $AWS_ACCOUNT_PRODUCTION
-  deploy-to-development:
-    executor: docker-dotnet
-    steps:
-      - deploy-lambda:
-          stage: "development"
-  deploy-to-staging:
-    executor: docker-dotnet
-    steps:
-      - deploy-lambda:
-          stage: "staging"
-  deploy-to-production:
-    executor: docker-dotnet
-    steps:
-      - deploy-lambda:
-          stage: "production"
+          aws-account: $AWS_ACCOUNT_DISASTER_RECOVERY
+
+    deploy-to-dr:
+      executor: docker-dotnet
+      steps:
+        - deploy-lambda:
+            stage: "production"
 
 workflows:
-  check-and-deploy-development:
+  check-and-dr:
     jobs:
-      - check-code-formatting        
-      - build-and-test:
-          context:
-            - api-nuget-token-context
-      - assume-role-development:
-          context: api-assume-role-housing-development-context
-          requires:
-            - build-and-test
-          filters:
-            branches:
-              only: development
-      - deploy-to-development:
-          context:
-            - api-nuget-token-context
-            - "Serverless Framework"
-          requires:
-            - assume-role-development  
-          filters:
-            branches:
-              only: development     
-  check-and-deploy-staging-and-production:
-    jobs:
-      - build-and-test:
-          context:
-            - api-nuget-token-context
-          filters:
-            branches:
-              only: master
-      - assume-role-staging:
-          context: api-assume-role-housing-staging-context
-          requires:
-              - build-and-test
-          filters:
-            branches:
-              only: master
-      - deploy-to-staging:
-          context:
-            - api-nuget-token-context
-            - "Serverless Framework"
-          requires:
-            - assume-role-staging
-          filters:
-            branches:
-              only: master
-      - permit-production-release:
+      - permit-dr-release:
           type: approval
+      - assume-role-dr:
+          context: api-assume-role-disaster-recovery-context
           requires:
-            - deploy-to-staging
-          filters:
-            branches:
-              only: master
-      - assume-role-production:
-          context: api-assume-role-housing-production-context
-          requires:
-              - permit-production-release
-          filters:
-            branches:
-              only: master
-      - deploy-to-production:
+            - permit-dr-release
+      - deploy-to-dr:
           context:
             - api-nuget-token-context
             - "Serverless Framework"
           requires:
-            - permit-production-release
-            - assume-role-production
-          filters:
-            branches:
-              only: master
+            - permit-dr-release
+            - assume-role-dr
