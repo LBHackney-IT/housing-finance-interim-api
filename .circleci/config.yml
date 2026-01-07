@@ -85,11 +85,11 @@ jobs:
       - assume-role-and-persist-workspace:
           aws-account: $AWS_ACCOUNT_DISASTER_RECOVERY
 
-    deploy-to-dr:
-      executor: docker-dotnet
-      steps:
-        - deploy-lambda:
-            stage: "production"
+  deploy-to-dr:
+    executor: docker-dotnet
+    steps:
+      - deploy-lambda:
+          stage: "production"
 
 workflows:
   check-and-dr:
