@@ -553,15 +553,15 @@ resources:
                           - Ref: 'AWS::Region'
                           - Ref: 'AWS::AccountId'
                           - 'log-group:/aws/lambda/*:*:*'
-                - Effect: "Allow"
-                  Action:
-                    - "s3:PutObject"
-                    - "s3:GetObject"
-                  Resource:
-                    Fn::Join:
-                      - ""
-                      - - "arn:aws:s3:::"
-                        - "Ref": "ServerlessDeploymentBucket"
+                # - Effect: "Allow"
+                #   Action:
+                #     - "s3:PutObject"
+                #     - "s3:GetObject"
+                #   Resource:
+                #     Fn::Join:
+                #       - ""
+                #       - - "arn:aws:s3:::"
+                #         - "Ref": "ServerlessDeploymentBucket"
           - PolicyName: lambdaInvocation
             PolicyDocument:
               Version: '2012-10-17'
