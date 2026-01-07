@@ -94,12 +94,12 @@ jobs:
 workflows:
   check-and-dr:
     jobs:
-      - permit-dr-release:
-          type: approval
+      # - permit-dr-release:
+      #     type: approval
       - assume-role-dr:
           context: api-assume-role-disaster-recovery-context
-          requires:
-            - permit-dr-release
+          # requires:
+          #   - permit-dr-release
       - deploy-to-dr:
           context:
             - api-nuget-token-context
