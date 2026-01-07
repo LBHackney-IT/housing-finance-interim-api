@@ -920,10 +920,10 @@ custom:
         - subnet-0ea0020a44b98a2ca
     production:
       securityGroupIds:
-        - sg-02a377899622e884c
+        - sg-0b7be628d680f9e5f
       subnetIds:
-        - subnet-0beb266003a56ca82
-        - subnet-06a697d86a9b6ed01
+        - subnet-05e595c59b7d6c8df
+        - subnet-0e6bc9b4ac24493cc
 
 plugins:
   - serverless-step-functions
