@@ -65,6 +65,8 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public decimal DMJ { get; set; }
 
         public decimal DMR { get; set; }
+        public decimal DR3 { get; set; }
+        public decimal DR4 { get; set; }
 
         public decimal DR5 { get; set; }
 

@@ -58,6 +58,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     DMC = c.DMC ?? 0,
                     DMJ = c.DMJ ?? 0,
                     DMR = c.DMR ?? 0,
+                    DR3 = c.DR3 ?? 0,
+                    DR4 = c.DR4 ?? 0,
                     DR5 = c.DR5 ?? 0,
                     DRP = c.DRP ?? 0,
                     DRR = c.DRR ?? 0,

@@ -46,7 +46,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             LoggingHandler.LogInfo($"Starting charges import");
 
-            const string sheetRange = "A:AX";
+            const string sheetRange = "A:BB";
 
             var batch = await _batchLogGateway.CreateAsync(ChargesLabel).ConfigureAwait(false);
             var googleFileSettings = await GetGoogleFileSetting(ChargesLabel).ConfigureAwait(false);

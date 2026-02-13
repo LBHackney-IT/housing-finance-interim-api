@@ -86,9 +86,6 @@ namespace HousingFinanceInterimApi.V1.Domain
         [JsonProperty("Major Works Revenue")]
         public decimal? DMR { get; set; }
 
-        [JsonProperty("R Administration Fee")]
-        public decimal? DR5 { get; set; }
-
         [JsonProperty("Rechg Repairs no VAT")]
         public decimal? DRP { get; set; }
 
@@ -159,5 +156,14 @@ namespace HousingFinanceInterimApi.V1.Domain
         public decimal? WON { get; set; }
 
         public DateTimeOffset TimeStamp { get; set; }
+        // Staff Costs	CCTV monitoring	Pest Control	Refuse Collection
+        [JsonProperty("Refuse Collection")]
+        public decimal? DR3 { get; set; }
+
+        [JsonProperty("Pest Control")]
+        public decimal? DR4 { get; set; }
+
+        [JsonProperty("Risk Assessments")]
+        public decimal? DR5 { get; set; }
     }
 }
