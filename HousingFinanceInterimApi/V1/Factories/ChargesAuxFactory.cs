@@ -41,7 +41,6 @@ namespace HousingFinanceInterimApi.V1.Factories
                 DMC = chargesAux.DMC,
                 DMJ = chargesAux.DMJ,
                 DMR = chargesAux.DMR,
-                DR5 = chargesAux.DR5,
                 DRP = chargesAux.DRP,
                 DRR = chargesAux.DRR,
                 DSA = chargesAux.DSA,
@@ -65,6 +64,9 @@ namespace HousingFinanceInterimApi.V1.Factories
                 RTM = chargesAux.RTM,
                 RWA = chargesAux.RWA,
                 WON = chargesAux.WON,
+                DR3 = chargesAux.DR3,
+                DR4 = chargesAux.DR4,
+                DR5 = chargesAux.DR5,
                 TimeStamp = chargesAux.TimeStamp
             };
         }
