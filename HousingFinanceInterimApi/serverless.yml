@@ -899,7 +899,7 @@ custom:
     number: 10
     includeLayers: true
   authorizerArns:
-    development: arn:aws:lambda:eu-west-2:859159924354:function:api-auth-verify-token-new-development-apiauthverifytokennew
+    development: arn:aws:lambda:eu-west-2:859159924354:function:api-gateway-lambda-authorizer
     staging:     arn:aws:lambda:eu-west-2:715003523189:function:api-auth-verify-token-new-staging-apiauthverifytokennew
     production:  arn:aws:lambda:eu-west-2:153306643385:function:api-auth-verify-token-new-production-apiauthverifytokennew
   associateWaf:
