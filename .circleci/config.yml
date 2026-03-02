@@ -81,7 +81,8 @@ jobs:
   build-and-test:
     executor: docker-python
     steps:
-      - checkout
+      - checkout:
+          method: full
       - setup_remote_docker
       - run:
           name: build

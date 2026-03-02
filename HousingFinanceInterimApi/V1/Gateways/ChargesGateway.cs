@@ -58,7 +58,6 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     DMC = c.DMC ?? 0,
                     DMJ = c.DMJ ?? 0,
                     DMR = c.DMR ?? 0,
-                    DR5 = c.DR5 ?? 0,
                     DRP = c.DRP ?? 0,
                     DRR = c.DRR ?? 0,
                     DSA = c.DSA ?? 0,
@@ -82,6 +81,9 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     RTM = c.RTM ?? 0,
                     RWA = c.RWA ?? 0,
                     WON = c.WON ?? 0,
+                    DR3 = c.DR3 ?? 0,
+                    DR4 = c.DR4 ?? 0,
+                    DR5 = c.DR5 ?? 0,
                 }).ToList();
 
                 await _context.BulkInsertAsync(chargesAux, new BulkConfig { BatchSize = _batchSize }).ConfigureAwait(false);

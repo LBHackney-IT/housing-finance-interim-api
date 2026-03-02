@@ -66,8 +66,6 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public decimal DMR { get; set; }
 
-        public decimal DR5 { get; set; }
-
         public decimal DRP { get; set; }
 
         public decimal DRR { get; set; }
@@ -113,6 +111,10 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         public decimal RWA { get; set; }
 
         public decimal WON { get; set; }
+        public decimal DR3 { get; set; }
+        public decimal DR4 { get; set; }
+
+        public decimal DR5 { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTimeOffset TimeStamp { get; set; }
