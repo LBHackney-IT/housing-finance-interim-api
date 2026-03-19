@@ -1,4 +1,5 @@
 using System;
+using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;
