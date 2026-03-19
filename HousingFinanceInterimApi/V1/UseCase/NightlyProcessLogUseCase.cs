@@ -140,8 +140,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     // Case 2: The most recent status is an error.
                     // Return the results as is; the gateway will find and log the error.
                     return queryResults;
-                    }
 
+                    }
                     // Baseline query: Check if logs exist at all
                     var baselineQuery = @"
                     fields @timestamp
