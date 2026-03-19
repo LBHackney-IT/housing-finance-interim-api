@@ -141,27 +141,27 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     // Return the results as is; the gateway will find and log the error.
                     return queryResults;
 
-                    }
-                    // Baseline query: Check if logs exist at all
-                    var baselineQuery = @"
+                }
+                // Baseline query: Check if logs exist at all
+                var baselineQuery = @"
                     fields @timestamp
                     | sort @timestamp desc
                     | limit 1";
 
-                    startQueryRequest.QueryString = baselineQuery;
-                    startQueryResponse = await _cloudWatchLogsClient.StartQueryAsync(startQueryRequest).ConfigureAwait(false);
+                startQueryRequest.QueryString = baselineQuery;
+                startQueryResponse = await _cloudWatchLogsClient.StartQueryAsync(startQueryRequest).ConfigureAwait(false);
 
-                    var baselineResults = await GetQueryResultsAsync(startQueryResponse.QueryId).ConfigureAwait(false);
+                var baselineResults = await GetQueryResultsAsync(startQueryResponse.QueryId).ConfigureAwait(false);
 
-                    if (baselineResults.Count == 0)
-                    {
-                        // Case 3: No logs exist for the log group in the last 24 hours
-                        return null;
-                    }
+                if (baselineResults.Count == 0)
+                {
+                    // Case 3: No logs exist for the log group in the last 24 hours
+                    return null;
+                }
 
-                    // Case 4: Logs exist, but neither an error nor the mandatory success message was found.
-                    // We treat this as a failure because the process did not reach its expected end.
-                    return new List<List<ResultField>>
+                // Case 4: Logs exist, but neither an error nor the mandatory success message was found.
+                // We treat this as a failure because the process did not reach its expected end.
+                return new List<List<ResultField>>
                     {
                         new List<ResultField>
                         {
@@ -169,9 +169,9 @@ namespace HousingFinanceInterimApi.V1.UseCase
                             new ResultField { Field = "@message", Value = $"error: Mandatory success message '{Constants.ProcessCompletedSuccessfullyMessage}' not found." }
                         }
                     };
-                    }
-                    catch (AmazonCloudWatchLogsException awsEx)
-                    {
+            }
+            catch (AmazonCloudWatchLogsException awsEx)
+            {
 
                 LoggingHandler.LogError($"AWS CloudWatch Logs error for log group {logGroupName}: {awsEx.Message}");
                 throw;
