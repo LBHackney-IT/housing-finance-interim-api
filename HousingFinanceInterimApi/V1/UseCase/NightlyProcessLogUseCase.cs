@@ -91,9 +91,11 @@ namespace HousingFinanceInterimApi.V1.UseCase
         }
 
         /// <summary>
-        /// Case 1: Results exist for the keyword - return the results list
-        /// Case 2: Logs exist, but no match for the keyword - return an empty list
-        /// Case 3: No logs exist for the log group in the last 24 hours - return null
+        /// Queries CloudWatch Logs for the most recent status of a process, using a "Most Recent Wins" strategy.
+        /// Case 1: The most recent log entry is the mandatory success message - return an empty list (Success).
+        /// Case 2: The most recent log entry is an error - return the list of errors (Failure).
+        /// Case 3: No logs exist for the log group in the last 24 hours - return null (No Run).
+        /// Case 4: Logs exist but the mandatory success message is missing - return a custom error (Failure).
         /// </summary>
         /// <param name="logGroupName"></param>
         /// <returns></returns>
@@ -101,10 +103,11 @@ namespace HousingFinanceInterimApi.V1.UseCase
         {
             try
             {
-                // First query: Check for the keyword
-                var keywordQuery = @"
+                // First query: Check for the keyword 'error' or the mandatory success message
+                // We sort by timestamp descending to find the LATEST state of the process
+                var keywordQuery = $@"
                 fields @timestamp, @message
-                | filter @message like /error/
+                | filter @message like /error/ or @message like /{Constants.ProcessCompletedSuccessfullyMessage}/
                 | sort @timestamp desc
                 | limit 100";
 
@@ -123,15 +126,27 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
                 if (queryResults.Count != 0)
                 {
-                    // Case 1: Results found for the keyword
-                    return queryResults;
-                }
+                    // The results are sorted by @timestamp desc, so the first one is the most recent
+                    var mostRecentResult = queryResults.First();
+                    var message = mostRecentResult.Find(f => f.Field == "@message")?.Value;
 
+                    // Case 1: The most recent status is success. 
+                    // We return an empty list so the gateway logs this as a Success.
+                    if (message != null && message.Contains(Constants.ProcessCompletedSuccessfullyMessage))
+                    {
+                        return new List<List<ResultField>>();
+                    }
+
+                    // Case 2: The most recent status is an error.
+                    // Return the results as is; the gateway will find and log the error.
+                    return queryResults;
+
+                }
                 // Baseline query: Check if logs exist at all
                 var baselineQuery = @"
-                fields @timestamp
-                | sort @timestamp desc
-                | limit 1";
+                    fields @timestamp
+                    | sort @timestamp desc
+                    | limit 1";
 
                 startQueryRequest.QueryString = baselineQuery;
                 startQueryResponse = await _cloudWatchLogsClient.StartQueryAsync(startQueryRequest).ConfigureAwait(false);
@@ -144,11 +159,20 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     return null;
                 }
 
-                // Case 2: Logs exist, but no match for the keyword
-                return new List<List<ResultField>>();
+                // Case 4: Logs exist, but neither an error nor the mandatory success message was found.
+                // We treat this as a failure because the process did not reach its expected end.
+                return new List<List<ResultField>>
+                    {
+                        new List<ResultField>
+                        {
+                            new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff") },
+                            new ResultField { Field = "@message", Value = $"error: Mandatory success message '{Constants.ProcessCompletedSuccessfullyMessage}' not found." }
+                        }
+                    };
             }
             catch (AmazonCloudWatchLogsException awsEx)
             {
+
                 LoggingHandler.LogError($"AWS CloudWatch Logs error for log group {logGroupName}: {awsEx.Message}");
                 throw;
             }

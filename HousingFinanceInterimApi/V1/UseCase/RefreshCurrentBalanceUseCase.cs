@@ -1,4 +1,5 @@
 using System;
+using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;
@@ -26,6 +27,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 await _currentBalanceGateway.UpdateCurrentBalance().ConfigureAwait(false);
 
                 LoggingHandler.LogInfo($"End refresh current balance");
+                LoggingHandler.LogInfo(Constants.ProcessCompletedSuccessfullyMessage);
                 return new StepResponse()
                 {
                     Continue = true,
