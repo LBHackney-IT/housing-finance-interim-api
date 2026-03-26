@@ -30,7 +30,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResults_ShouldSaveToDatabaseAsFail_WhenValidInputHasError()
+        public async Task UpdateDatabaseWithResultsShouldSaveToDatabaseAsFailWhenValidInputHasError()
         {
             // Arrange
             var logGroupName = "/aws/lambda/log-group-function1";
@@ -52,7 +52,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResults_ShouldThrowArgumentNullException_WhenLogGroupNameIsNull()
+        public async Task UpdateDatabaseWithResultsShouldThrowArgumentNullExceptionWhenLogGroupNameIsNull()
         {
             // Arrange
             string logGroupName = null;
@@ -64,7 +64,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResults_ShouldLogAndThrow_WhenDbUpdateException()
+        public async Task UpdateDatabaseWithResultsShouldLogAndThrowWhenDbUpdateException()
         {
             // Arrange
             var logGroupName = "/aws/lambda/log-group-function1";
@@ -87,7 +87,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResults_ShouldAddFailure_WhenErrorExists()
+        public async Task UpdateDatabaseWithResultsShouldAddFailureWhenErrorExists()
         {
             // Arrange
             var logGroupName = "/aws/lambda/log-group-function1";
@@ -114,7 +114,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResults_ShouldStopProcessingOnFirstError()
+        public async Task UpdateDatabaseWithResultsShouldStopProcessingOnFirstError()
         {
             // Arrange
             var logGroupName = "/aws/lambda/log-group-function1";
@@ -141,7 +141,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResults_Case1_ResultsExistForKeyword()
+        public async Task UpdateDatabaseWithResultsCase1ResultsExistForKeyword()
         {
             // Arrange
             var logGroupName = "test-log-group";
@@ -155,7 +155,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             };
 
             // Act
-            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults);
+            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults).ConfigureAwait(false);
 
             // Assert
             _mockContext.Verify(x => x.NightlyProcessLogs.AddAsync(It.Is<NightlyProcessLog>(log =>
@@ -165,14 +165,14 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResults_Case2_LogsExistButNoMatchForKeyword()
+        public async Task UpdateDatabaseWithResultsCase2LogsExistButNoMatchForKeyword()
         {
             // Arrange
             var logGroupName = "test-log-group";
             var queryResults = new List<List<ResultField>>();
 
             // Act
-            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults);
+            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults).ConfigureAwait(false);
 
             // Assert
             _mockContext.Verify(x => x.NightlyProcessLogs.AddAsync(It.Is<NightlyProcessLog>(log =>
@@ -182,14 +182,14 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResults_Case3_NoLogsExistForLogGroup()
+        public async Task UpdateDatabaseWithResultsCase3NoLogsExistForLogGroup()
         {
             // Arrange
             var logGroupName = "test-log-group";
             List<List<ResultField>> queryResults = null;
 
             // Act
-            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults);
+            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults).ConfigureAwait(false);
 
             // Assert
             _mockContext.Verify(x => x.NightlyProcessLogs.AddAsync(It.Is<NightlyProcessLog>(log =>
@@ -199,7 +199,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResults_Case4_LogsExistButMandatorySuccessMessageMissing()
+        public async Task UpdateDatabaseWithResultsCase4LogsExistButMandatorySuccessMessageMissing()
         {
             // Arrange
             var logGroupName = "test-log-group";
@@ -214,17 +214,17 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             };
 
             // Act
-            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults);
+            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults).ConfigureAwait(false);
 
             // Assert
             _mockContext.Verify(x => x.NightlyProcessLogs.AddAsync(
                 It.Is<NightlyProcessLog>(log =>
                     log.LogGroupName == logGroupName &&
-                    log.IsSuccess == false), 
+                    log.IsSuccess == false),
                 It.IsAny<System.Threading.CancellationToken>()),
                 Times.Once);
         }
-        
+
         [Fact]
         public async Task ProcessingMultipleLogGroupsSavesOneResultPerGroup()
         {
@@ -233,32 +233,32 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             var secondLogGroup = "log-group-2";
 
             var results1 = new List<List<ResultField>> {
-                new List<ResultField> { 
+                new List<ResultField> {
                     new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
-                    new ResultField { Field = "@message", Value = "Error in group 1" } 
+                    new ResultField { Field = "@message", Value = "Error in group 1" }
                 }
             };
 
             var results2 = new List<List<ResultField>> {
-                new List<ResultField> { 
+                new List<ResultField> {
                     new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
-                    new ResultField { Field = "@message", Value = "Error in group 2" } 
+                    new ResultField { Field = "@message", Value = "Error in group 2" }
                 }
             };
 
             // Act
-            await _gateway.UpdateDatabaseWithResults(firstLogGroup, results1);
-            await _gateway.UpdateDatabaseWithResults(secondLogGroup, results2);
+            await _gateway.UpdateDatabaseWithResults(firstLogGroup, results1).ConfigureAwait(false);
+            await _gateway.UpdateDatabaseWithResults(secondLogGroup, results2).ConfigureAwait(false);
 
             // Assert
             _mockContext.Verify(x => x.NightlyProcessLogs.AddAsync(
-                It.Is<NightlyProcessLog>(log => log.LogGroupName == firstLogGroup), 
-                It.IsAny<System.Threading.CancellationToken>()), 
+                It.Is<NightlyProcessLog>(log => log.LogGroupName == firstLogGroup),
+                It.IsAny<System.Threading.CancellationToken>()),
                 Times.Once);
 
             _mockContext.Verify(x => x.NightlyProcessLogs.AddAsync(
-                It.Is<NightlyProcessLog>(log => log.LogGroupName == secondLogGroup), 
-                It.IsAny<System.Threading.CancellationToken>()), 
+                It.Is<NightlyProcessLog>(log => log.LogGroupName == secondLogGroup),
+                It.IsAny<System.Threading.CancellationToken>()),
                 Times.Once);
 
             _mockContext.Verify(x => x.SaveChangesAsync(default), Times.Exactly(2));
