@@ -234,7 +234,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             var sequence = new MockSequence();
 
             var errorResults = new List<List<ResultField>>
-            { 
+            {
                 new List<ResultField>
                 {
                     new ResultField { Field = "@timestamp", Value = today.AddMinutes(-10).ToString("o") },
@@ -244,10 +244,10 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
 
             var successResults = new List<List<ResultField>>();
 
-            NightlyProcessLog lastLogSaved = null; 
+            NightlyProcessLog lastLogSaved = null;
 
             _mockDbSet.Setup(x => x.AddAsync(It.IsAny<NightlyProcessLog>(), It.IsAny<System.Threading.CancellationToken>()))
-                .Callback<NightlyProcessLog, System.Threading.CancellationToken>((log, token) => 
+                .Callback<NightlyProcessLog, System.Threading.CancellationToken>((log, token) =>
                 {
                     lastLogSaved = log;
                 })
@@ -259,9 +259,9 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
 
             // 3. Assert
             Assert.NotNull(lastLogSaved);
-        
+
             Assert.True(lastLogSaved.IsSuccess);
-            
+
             Assert.Equal(logGroupName, lastLogSaved.LogGroupName);
         }
 
@@ -274,7 +274,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             var sequence = new MockSequence();
 
             var errorResults = new List<List<ResultField>>
-            { 
+            {
                 new List<ResultField>
                 {
                     new ResultField { Field = "@timestamp", Value = today.ToString("o") },
@@ -284,10 +284,10 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
 
             var successResults = new List<List<ResultField>>();
 
-            NightlyProcessLog lastLogSaved = null; 
+            NightlyProcessLog lastLogSaved = null;
 
             _mockDbSet.Setup(x => x.AddAsync(It.IsAny<NightlyProcessLog>(), It.IsAny<System.Threading.CancellationToken>()))
-                .Callback<NightlyProcessLog, System.Threading.CancellationToken>((log, token) => 
+                .Callback<NightlyProcessLog, System.Threading.CancellationToken>((log, token) =>
                 {
                     lastLogSaved = log;
                 })
@@ -299,9 +299,9 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
 
             // Assert
             Assert.NotNull(lastLogSaved);
-        
+
             Assert.False(lastLogSaved.IsSuccess);
-            
+
             Assert.Equal(logGroupName, lastLogSaved.LogGroupName);
         }
 
@@ -316,7 +316,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             var finalStates = new Dictionary<string, bool>();
 
             var errorResults = new List<List<ResultField>>
-            { 
+            {
                 new List<ResultField>
                 {
                     new ResultField { Field = "@timestamp", Value = today.ToString("o") },
@@ -335,7 +335,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
                 .Callback<NightlyProcessLog, System.Threading.CancellationToken>((l, t) => finalStates[firstLogGroup] = l.IsSuccess.GetValueOrDefault())
                 .ReturnsAsync((NightlyProcessLog l, System.Threading.CancellationToken c) => null);
 
-            // SCRIPT STEP 3 & 4: Group 2 goes from Error to Success
+            // SCRIPT STEP 3 & 4: Group 2 goes from Success to Error
             _mockDbSet.InSequence(sequence).Setup(x => x.AddAsync(It.Is<NightlyProcessLog>(l => l.LogGroupName == secondLogGroup && l.IsSuccess.GetValueOrDefault() == true), It.IsAny<System.Threading.CancellationToken>()))
                 .Callback<NightlyProcessLog, System.Threading.CancellationToken>((l, t) => finalStates[secondLogGroup] = l.IsSuccess.GetValueOrDefault())
                 .ReturnsAsync((NightlyProcessLog l, System.Threading.CancellationToken c) => null);
