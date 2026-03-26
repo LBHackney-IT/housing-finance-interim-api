@@ -144,9 +144,9 @@ namespace HousingFinanceInterimApi.V1.Gateways
             {
                 return await _context.NightlyProcessLogs
                     .Where(log => log.DateCreated.Date == createdDate.Date)
-                    .OrderByDescending(log => log.DateCreated)
                     .GroupBy(log => log.LogGroupName)
-                    .Select(group => group.FirstOrDefault())
+                    .Select(group => group.             OrderByDescending(log => log.DateCreated)
+                    .FirstOrDefault())
                     .ToListAsync()
                     .ConfigureAwait(false);
             }
