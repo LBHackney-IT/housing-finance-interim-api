@@ -1,6 +1,7 @@
 using Amazon.CloudWatchLogs.Model;
 using HousingFinanceInterimApi.V1.Gateways;
 using HousingFinanceInterimApi.V1.Infrastructure;
+using HousingFinanceInterimApi.V1.Domain;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using System;
@@ -195,6 +196,72 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
                 log.LogGroupName == logGroupName &&
                 log.IsSuccess == null), default), Times.Once);
             _mockContext.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateDatabaseWithResults_Case4_LogsExistButMandatorySuccessMessageMissing()
+        {
+            // Arrange
+            var logGroupName = "test-log-group";
+            var queryResults = new List<List<ResultField>>
+            {
+                new List<ResultField>
+                {
+                    // This matches Case 4 in your Use Case
+                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff") },
+                    new ResultField { Field = "@message", Value = $"error: Mandatory success message '{Constants.ProcessCompletedSuccessfullyMessage}' not found." }
+                }
+            };
+
+            // Act
+            await _gateway.UpdateDatabaseWithResults(logGroupName, queryResults);
+
+            // Assert
+            _mockContext.Verify(x => x.NightlyProcessLogs.AddAsync(
+                It.Is<NightlyProcessLog>(log =>
+                    log.LogGroupName == logGroupName &&
+                    log.IsSuccess == false), 
+                It.IsAny<System.Threading.CancellationToken>()),
+                Times.Once);
+        }
+        
+        [Fact]
+        public async Task ProcessingMultipleLogGroupsSavesOneResultPerGroup()
+        {
+            // Arrange
+            var firstLogGroup = "log-group-1";
+            var secondLogGroup = "log-group-2";
+
+            var results1 = new List<List<ResultField>> {
+                new List<ResultField> { 
+                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
+                    new ResultField { Field = "@message", Value = "Error in group 1" } 
+                }
+            };
+
+            var results2 = new List<List<ResultField>> {
+                new List<ResultField> { 
+                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
+                    new ResultField { Field = "@message", Value = "Error in group 2" } 
+                }
+            };
+
+            // Act
+            await _gateway.UpdateDatabaseWithResults(firstLogGroup, results1);
+            await _gateway.UpdateDatabaseWithResults(secondLogGroup, results2);
+
+            // Assert
+            _mockContext.Verify(x => x.NightlyProcessLogs.AddAsync(
+                It.Is<NightlyProcessLog>(log => log.LogGroupName == firstLogGroup), 
+                It.IsAny<System.Threading.CancellationToken>()), 
+                Times.Once);
+
+            _mockContext.Verify(x => x.NightlyProcessLogs.AddAsync(
+                It.Is<NightlyProcessLog>(log => log.LogGroupName == secondLogGroup), 
+                It.IsAny<System.Threading.CancellationToken>()), 
+                Times.Once);
+
+            _mockContext.Verify(x => x.SaveChangesAsync(default), Times.Exactly(2));
         }
     }
 }
