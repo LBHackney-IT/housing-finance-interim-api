@@ -226,42 +226,136 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task ProcessingMultipleLogGroups_SavesOneResultPerGroup()
+        public async Task UpdateDatabaseWithResults_IgnoresOlderErrors_IfMostRecentIsSuccess()
+        {
+            // Arrange
+            var logGroupName = "test-log-group";
+            var today = DateTime.UtcNow;
+            var sequence = new MockSequence();
+
+            var errorResults = new List<List<ResultField>>
+            { 
+                new List<ResultField>
+                {
+                    new ResultField { Field = "@timestamp", Value = today.AddMinutes(-10).ToString("o") },
+                    new ResultField { Field = "@message", Value = "Initial Critical Error" }
+                }
+            };
+
+            var successResults = new List<List<ResultField>>();
+
+            NightlyProcessLog lastLogSaved = null; 
+
+            _mockDbSet.Setup(x => x.AddAsync(It.IsAny<NightlyProcessLog>(), It.IsAny<System.Threading.CancellationToken>()))
+                .Callback<NightlyProcessLog, System.Threading.CancellationToken>((log, token) => 
+                {
+                    lastLogSaved = log;
+                })
+                .ReturnsAsync((NightlyProcessLog l, System.Threading.CancellationToken c) => null);
+
+            // 2. Act
+            await _gateway.UpdateDatabaseWithResults(logGroupName, errorResults).ConfigureAwait(false);
+            await _gateway.UpdateDatabaseWithResults(logGroupName, successResults).ConfigureAwait(false);
+
+            // 3. Assert
+            Assert.NotNull(lastLogSaved);
+        
+            Assert.True(lastLogSaved.IsSuccess);
+            
+            Assert.Equal(logGroupName, lastLogSaved.LogGroupName);
+        }
+
+        [Fact]
+        public async Task UpdateDatabaseWithResults_SavesError_IfMostRecentIsError()
+        {
+            // Arrange
+            var logGroupName = "test-log-group";
+            var today = DateTime.UtcNow;
+            var sequence = new MockSequence();
+
+            var errorResults = new List<List<ResultField>>
+            { 
+                new List<ResultField>
+                {
+                    new ResultField { Field = "@timestamp", Value = today.ToString("o") },
+                    new ResultField { Field = "@message", Value = "Initial Critical Error" }
+                }
+            };
+
+            var successResults = new List<List<ResultField>>();
+
+            NightlyProcessLog lastLogSaved = null; 
+
+            _mockDbSet.Setup(x => x.AddAsync(It.IsAny<NightlyProcessLog>(), It.IsAny<System.Threading.CancellationToken>()))
+                .Callback<NightlyProcessLog, System.Threading.CancellationToken>((log, token) => 
+                {
+                    lastLogSaved = log;
+                })
+                .ReturnsAsync((NightlyProcessLog l, System.Threading.CancellationToken c) => null);
+
+            // Act
+            await _gateway.UpdateDatabaseWithResults(logGroupName, successResults).ConfigureAwait(false);
+            await _gateway.UpdateDatabaseWithResults(logGroupName, errorResults).ConfigureAwait(false);
+
+            // Assert
+            Assert.NotNull(lastLogSaved);
+        
+            Assert.False(lastLogSaved.IsSuccess);
+            
+            Assert.Equal(logGroupName, lastLogSaved.LogGroupName);
+        }
+
+        [Fact]
+        public async Task ProcessingMultipleLogGroups_SavesMostRecentResultPerGroup()
         {
             // Arrange
             var firstLogGroup = "log-group-1";
             var secondLogGroup = "log-group-2";
+            var today = DateTime.UtcNow;
+            var sequence = new MockSequence();
+            var finalStates = new Dictionary<string, bool>();
 
-            var results1 = new List<List<ResultField>> {
-                new List<ResultField> {
-                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
-                    new ResultField { Field = "@message", Value = "Error in group 1" }
+            var errorResults = new List<List<ResultField>>
+            { 
+                new List<ResultField>
+                {
+                    new ResultField { Field = "@timestamp", Value = today.ToString("o") },
+                    new ResultField { Field = "@message", Value = "Initial Critical Error" }
                 }
             };
 
-            var results2 = new List<List<ResultField>> {
-                new List<ResultField> {
-                    new ResultField { Field = "@timestamp", Value = DateTime.UtcNow.ToString("o") },
-                    new ResultField { Field = "@message", Value = "Error in group 2" }
-                }
-            };
+            var successResults = new List<List<ResultField>>();
+
+            // SCRIPT STEP 1 & 2: Group 1 goes from Error to Success
+            _mockDbSet.InSequence(sequence).Setup(x => x.AddAsync(It.Is<NightlyProcessLog>(l => l.LogGroupName == firstLogGroup && l.IsSuccess.GetValueOrDefault() == false), It.IsAny<System.Threading.CancellationToken>()))
+                .Callback<NightlyProcessLog, System.Threading.CancellationToken>((l, t) => finalStates[firstLogGroup] = l.IsSuccess.GetValueOrDefault())
+                .ReturnsAsync((NightlyProcessLog l, System.Threading.CancellationToken c) => null);
+
+            _mockDbSet.InSequence(sequence).Setup(x => x.AddAsync(It.Is<NightlyProcessLog>(l => l.LogGroupName == firstLogGroup && l.IsSuccess.GetValueOrDefault() == true), It.IsAny<System.Threading.CancellationToken>()))
+                .Callback<NightlyProcessLog, System.Threading.CancellationToken>((l, t) => finalStates[firstLogGroup] = l.IsSuccess.GetValueOrDefault())
+                .ReturnsAsync((NightlyProcessLog l, System.Threading.CancellationToken c) => null);
+
+            // SCRIPT STEP 3 & 4: Group 2 goes from Error to Success
+            _mockDbSet.InSequence(sequence).Setup(x => x.AddAsync(It.Is<NightlyProcessLog>(l => l.LogGroupName == secondLogGroup && l.IsSuccess.GetValueOrDefault() == true), It.IsAny<System.Threading.CancellationToken>()))
+                .Callback<NightlyProcessLog, System.Threading.CancellationToken>((l, t) => finalStates[secondLogGroup] = l.IsSuccess.GetValueOrDefault())
+                .ReturnsAsync((NightlyProcessLog l, System.Threading.CancellationToken c) => null);
+
+            _mockDbSet.InSequence(sequence).Setup(x => x.AddAsync(It.Is<NightlyProcessLog>(l => l.LogGroupName == secondLogGroup && l.IsSuccess.GetValueOrDefault() == false), It.IsAny<System.Threading.CancellationToken>()))
+                .Callback<NightlyProcessLog, System.Threading.CancellationToken>((l, t) => finalStates[secondLogGroup] = l.IsSuccess.GetValueOrDefault())
+                .ReturnsAsync((NightlyProcessLog l, System.Threading.CancellationToken c) => null);
 
             // Act
-            await _gateway.UpdateDatabaseWithResults(firstLogGroup, results1).ConfigureAwait(false);
-            await _gateway.UpdateDatabaseWithResults(secondLogGroup, results2).ConfigureAwait(false);
+            await _gateway.UpdateDatabaseWithResults(firstLogGroup, errorResults).ConfigureAwait(false);
+            await _gateway.UpdateDatabaseWithResults(firstLogGroup, successResults).ConfigureAwait(false);
+
+            await _gateway.UpdateDatabaseWithResults(secondLogGroup, successResults).ConfigureAwait(false);
+            await _gateway.UpdateDatabaseWithResults(secondLogGroup, errorResults).ConfigureAwait(false);
 
             // Assert
-            _mockContext.Verify(x => x.NightlyProcessLogs.AddAsync(
-                It.Is<NightlyProcessLog>(log => log.LogGroupName == firstLogGroup),
-                It.IsAny<System.Threading.CancellationToken>()),
-                Times.Once);
+            _mockDbSet.Verify(x => x.AddAsync(It.IsAny<NightlyProcessLog>(), It.IsAny<System.Threading.CancellationToken>()), Times.Exactly(4));
 
-            _mockContext.Verify(x => x.NightlyProcessLogs.AddAsync(
-                It.Is<NightlyProcessLog>(log => log.LogGroupName == secondLogGroup),
-                It.IsAny<System.Threading.CancellationToken>()),
-                Times.Once);
-
-            _mockContext.Verify(x => x.SaveChangesAsync(default), Times.Exactly(2));
+            Assert.True(finalStates[firstLogGroup]);
+            Assert.False(finalStates[secondLogGroup]);
         }
     }
 }
