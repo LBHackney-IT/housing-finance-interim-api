@@ -30,7 +30,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResultsShouldSaveToDatabaseAsFailWhenValidInputHasError()
+        public async Task UpdateDatabaseWithResults_ShouldSaveToDatabaseAsFail_WhenValidInputHasError()
         {
             // Arrange
             var logGroupName = "/aws/lambda/log-group-function1";
@@ -52,7 +52,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResultsShouldThrowArgumentNullExceptionWhenLogGroupNameIsNull()
+        public async Task UpdateDatabaseWithResults_ShouldThrowArgumentNullException_WhenLogGroupNameIsNull()
         {
             // Arrange
             string logGroupName = null;
@@ -64,7 +64,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResultsShouldLogAndThrowWhenDbUpdateException()
+        public async Task UpdateDatabaseWithResults_ShouldLogAndThrow_WhenDbUpdateException()
         {
             // Arrange
             var logGroupName = "/aws/lambda/log-group-function1";
@@ -87,7 +87,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResultsShouldAddFailureWhenErrorExists()
+        public async Task UpdateDatabaseWithResults_ShouldAddFailure_WhenErrorExists()
         {
             // Arrange
             var logGroupName = "/aws/lambda/log-group-function1";
@@ -114,7 +114,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResultsShouldStopProcessingOnFirstError()
+        public async Task UpdateDatabaseWithResults_ShouldStopProcessingOnFirstError()
         {
             // Arrange
             var logGroupName = "/aws/lambda/log-group-function1";
@@ -141,7 +141,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResultsCase1ResultsExistForKeyword()
+        public async Task UpdateDatabaseWithResults_Case1_ResultsExistForKeyword()
         {
             // Arrange
             var logGroupName = "test-log-group";
@@ -165,7 +165,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResultsCase2LogsExistButNoMatchForKeyword()
+        public async Task UpdateDatabaseWithResults_Case2_LogsExistButNoMatchForKeyword()
         {
             // Arrange
             var logGroupName = "test-log-group";
@@ -182,7 +182,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResultsCase3NoLogsExistForLogGroup()
+        public async Task UpdateDatabaseWithResults_Case3_NoLogsExistForLogGroup()
         {
             // Arrange
             var logGroupName = "test-log-group";
@@ -199,7 +199,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task UpdateDatabaseWithResultsCase4LogsExistButMandatorySuccessMessageMissing()
+        public async Task UpdateDatabaseWithResults_Case4_LogsExistButMandatorySuccessMessageMissing()
         {
             // Arrange
             var logGroupName = "test-log-group";
@@ -226,7 +226,7 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         }
 
         [Fact]
-        public async Task ProcessingMultipleLogGroupsSavesOneResultPerGroup()
+        public async Task ProcessingMultipleLogGroups_SavesOneResultPerGroup()
         {
             // Arrange
             var firstLogGroup = "log-group-1";
