@@ -231,7 +231,6 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             // Arrange
             var logGroupName = "test-log-group";
             var today = DateTime.UtcNow;
-            var sequence = new MockSequence();
 
             var errorResults = new List<List<ResultField>>
             {
@@ -271,7 +270,6 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
             // Arrange
             var logGroupName = "test-log-group";
             var today = DateTime.UtcNow;
-            var sequence = new MockSequence();
 
             var errorResults = new List<List<ResultField>>
             {
