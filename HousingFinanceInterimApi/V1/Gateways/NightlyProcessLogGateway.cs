@@ -146,7 +146,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     .Where(log => log.DateCreated.Date == createdDate.Date)
                     .OrderByDescending(log => log.DateCreated)
                     .GroupBy(log => log.LogGroupName)
-                    .Select(group => group.First())
+                    .Select(group => group.FirstOrDefault())
                     .ToListAsync()
                     .ConfigureAwait(false);
             }
