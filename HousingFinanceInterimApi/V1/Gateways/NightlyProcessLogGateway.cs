@@ -142,15 +142,16 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             try
             {
-                return await _context.NightlyProcessLogs
+                var logs = await _context.NightlyProcessLogs
                     .Where(log => log.DateCreated.Date == createdDate.Date)
                     .OrderByDescending(log => log.DateCreated)
                     .ToListAsync()
-                    // .GroupBy(log => log.LogGroupName)
-                    // .Select(group => group.OrderByDescending(log => log.DateCreated)
-                    // .FirstOrDefault())
-                    // .ToListAsync()
                     .ConfigureAwait(false);
+                
+                return logs
+                    .GroupBy(log => log.LogGroupName)
+                    .Select(group => group.First())
+                    .ToList();
             }
             catch (DbUpdateException dbEx)
             {
