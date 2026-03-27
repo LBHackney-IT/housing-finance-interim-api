@@ -131,7 +131,7 @@ workflows:
       - assume-role-development:
           context: api-assume-role-housing-development-context
           requires:
-            - check-code-formatting
+            - build-and-test
           filters:
             branches:
               only: development
