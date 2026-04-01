@@ -72,7 +72,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
             LoggingHandler.LogInfo($"End cash file import");
-            LoggingHandler.LogInfo(Constants.ProcessCompletedSuccessfullyMessage);
 
             return new StepResponse()
             {
