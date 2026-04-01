@@ -69,7 +69,10 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadTenancyAgreement
     role: lambdaExecutionRole
     events:
-        - schedule: cron(0 0 * * ? *)   
+        - schedule:
+            rate: cron(0 0 * * ? *)
+            timezone: Europe/London
+            method: scheduler
   checkCashFiles:
     name: ${self:service}-${self:provider.stage}-check-cash-files
     description: "The scheduler to check if exists cash files. "
@@ -115,7 +118,10 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshOperatingBalance
     role: lambdaExecutionRole
     events:
-        - schedule: cron(45 6 * * ? *)    
+        - schedule:
+            rate: cron(45 6 * * ? *)
+            timezone: Europe/London
+            method: scheduler
   refreshManageArrearsTables:
     name: ${self:service}-${self:provider.stage}-refresh-ma-cur-bal
     description: "The scheduler to refresh manage arrears balance based on current balance table."
@@ -175,7 +181,10 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadActionDiary
     role: lambdaExecutionRole
     events:
-        - schedule: cron(0 3 * * ? *)
+        - schedule:
+            rate: cron(0 3 * * ? *)
+            timezone: Europe/London
+            method: scheduler
   generateRentPosition:
     name: ${self:service}-${self:provider.stage}-rent-position
     description: "The scheduler to generate rent position csv file. Run at 05:00 AM"
@@ -183,7 +192,10 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::GenerateRentPosition
     role: lambdaExecutionRole
     events:
-        - schedule: cron(0 5 * * ? *)
+        - schedule:
+            rate: cron(15 7 * * ? *)
+            timezone: Europe/London
+            method: scheduler
   importAdjustmentsTransactions:
     name: ${self:service}-${self:provider.stage}-adjustments-trans
     description: "The scheduler to import adjustments transactions from spreadsheet. Runs at 2:45 AM."
@@ -191,7 +203,10 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadAdjustmentsTransactions
     role: lambdaExecutionRole
     events:
-        - schedule: cron(45 2 * * ? *)
+        - schedule:
+            rate: cron(45 2 * * ? *)
+            timezone: Europe/London
+            method: scheduler
   suspenseCash:
     name: ${self:service}-${self:provider.stage}-susp-cash
     description: "The scheduler to load and reverse suspense cash files. Run at 03:05 AM"
@@ -199,7 +214,10 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadSuspenseCashTransactions
     role: lambdaExecutionRole
     events:
-        - schedule: cron(5 3 * * ? *)
+        - schedule:
+            rate: cron(5 3 * * ? *)
+            timezone: Europe/London
+            method: scheduler
   suspenseHousingBenefit:
     name: ${self:service}-${self:provider.stage}-susp-hb
     description: "The scheduler to load and reverse suspense hb files. Run at 03:10 AM"
@@ -207,7 +225,10 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadSuspenseHousingBenefitTransactions
     role: lambdaExecutionRole
     events:
-        - schedule: cron(10 3 * * ? *)
+        - schedule:
+            rate: cron(10 3 * * ? *)
+            timezone: Europe/London
+            method: scheduler
   generateReport:
     name: ${self:service}-${self:provider.stage}-gen-report
     description: "The scheduler to generate google drive reports."
@@ -221,13 +242,19 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ParseNightlyProcessLogs
     role: lambdaExecutionRole
     events:
-        - schedule: cron(30 7 * * ? *)
+        - schedule:
+            rate: cron(30 7 * * ? *)
+            timezone: Europe/London
+            method: scheduler
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:
       name: HFCashFileStateMachine
       events:
-        - schedule: cron(0 2 * * ? *)
+        - schedule:
+            rate: cron(0 2 * * ? *)
+            timezone: Europe/London
+            method: scheduler
       definition:
         Comment: "Cash files process step function deployed via serverless. Run at 02:00 AM"
         StartAt: ImportCashFile
@@ -266,7 +293,10 @@ stepFunctions:
     hfstepfunchousingfile:
       name: HFHousingFileStateMachine
       events:        
-        - schedule: cron(0 6 ? * MON *)
+        - schedule:
+            rate: cron(0 6 ? * MON *)
+            timezone: Europe/London
+            method: scheduler
       definition:
         Comment: "Housing files process step function deployed via serverless. Run at 06:00 AM only Monday"        
         StartAt: CheckHousingFiles
@@ -320,7 +350,10 @@ stepFunctions:
     hfstepfuncdirectdebit:
       name: HFDirectDebitStateMachine
       events:
-        - schedule: cron(30 2 * * ? *)
+        - schedule:
+            rate: cron(30 2 * * ? *)
+            timezone: Europe/London
+            method: scheduler
       definition:
         Comment: "Direct debit process step function deployed via serverless. Run at 02:30 AM"
         StartAt: ImportDirectDebit
@@ -446,7 +479,10 @@ stepFunctions:
     hfstepfunccurentbalance:
       name: HFCurrentBalanceStateMachine
       events:
-        - schedule: cron(10 6 * * ? *)
+        - schedule:
+            rate: cron(10 6 * * ? *)
+            timezone: Europe/London
+            method: scheduler
       definition:
         Comment: "Current balance process step function deployed via serverless. Run at 06:10 AM"
         StartAt: RefreshCurrentBalance
@@ -485,7 +521,10 @@ stepFunctions:
     hfstepfuncreport:
       name: HFReportsStateMachine
       events:
-        - schedule: cron(0/30 * * * ? *)
+        - schedule:
+            rate: cron(0/30 * * * ? *)
+            timezone: Europe/London
+            method: scheduler
       definition:
         Comment: "Reports step function deployed via serverless. Run every 30 min"
         StartAt: GenerateReport
@@ -533,6 +572,7 @@ resources:
               Principal:
                 Service:
                   - lambda.amazonaws.com
+                  - scheduler.amazonaws.com
               Action: sts:AssumeRole
         ManagedPolicyArns:
           - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
