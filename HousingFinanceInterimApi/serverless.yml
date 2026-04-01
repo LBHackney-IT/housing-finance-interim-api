@@ -572,6 +572,7 @@ resources:
               Principal:
                 Service:
                   - lambda.amazonaws.com
+                  - scheduler.amazonaws.com
               Action: sts:AssumeRole
         ManagedPolicyArns:
           - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
