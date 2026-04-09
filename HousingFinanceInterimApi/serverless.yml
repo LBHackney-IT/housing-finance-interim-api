@@ -193,7 +193,7 @@ functions:
     role: lambdaExecutionRole
     events:
         - schedule:
-            rate: cron(0 5 * * ? *)
+            rate: cron(15 7 * * ? *)
             timezone: Europe/London
             method: scheduler
   importAdjustmentsTransactions:
