@@ -424,7 +424,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
 
         public async Task TruncateDirectDebitAuxiliary()
         {
-            var sql = "DELETE FROM DirectDebitAux";
+            var sql = "TRUNCATE TABLE DirectDebitAux";
             await PerformTransaction(sql).ConfigureAwait(false);
         }
 
