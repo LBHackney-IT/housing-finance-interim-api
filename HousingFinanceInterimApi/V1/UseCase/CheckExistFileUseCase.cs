@@ -105,6 +105,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
             }
 
             LoggingHandler.LogInfo($"Exist pending for {label} label: {existFile}");
+            LoggingHandler.LogInfo(Constants.ProcessCompletedSuccessfullyMessage);
             return new StepResponse()
             {
                 Continue = existFile,

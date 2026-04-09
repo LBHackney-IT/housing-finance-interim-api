@@ -1,4 +1,5 @@
 using System;
+using HousingFinanceInterimApi.V1.Domain;
 using HousingFinanceInterimApi.V1.Gateways.Interface;
 using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;
@@ -43,6 +44,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
                 LoggingHandler.LogInfo($"End cash file transactions import");
+                LoggingHandler.LogInfo(Constants.ProcessCompletedSuccessfullyMessage);
                 return new StepResponse()
                 {
                     Continue = true,
