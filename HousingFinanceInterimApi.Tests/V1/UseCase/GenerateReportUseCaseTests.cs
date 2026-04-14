@@ -38,12 +38,15 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             Environment.SetEnvironmentVariable("WAIT_DURATION", _waitDuration.ToString());
 
             _classUnderTest = new GenerateReportUseCase(
-                    _mockBatchReportGateway.Object,
-                    _mockReportGateway.Object,
-                    _mockTransactionGateway.Object,
-                    _mockGoogleFileSettingGateway.Object,
-                    _mockGoogleClientService.Object
-                );
+                _mockBatchReportGateway.Object,
+                _mockReportGateway.Object,
+                _mockTransactionGateway.Object,
+                _mockGoogleFileSettingGateway.Object,
+                _mockGoogleClientService.Object,
+                0,
+                0
+            );
+
         }
 
         #region Shared
