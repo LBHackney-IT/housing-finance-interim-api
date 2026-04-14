@@ -1702,7 +1702,16 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(fileReturnedFromGDrive);
 
             // act
-            var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+            var fastClassUnderTest = new GenerateReportUseCase(
+                _mockBatchReportGateway.Object,
+                _mockReportGateway.Object,
+                _mockTransactionGateway.Object,
+                _mockGoogleFileSettingGateway.Object,
+                _mockGoogleClientService.Object,
+                30, // 30ms sleep total
+                1   // 1ms polling
+            );
+            var stepResponse = await fastClassUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
             _mockGoogleClientService.Verify(
@@ -1763,8 +1772,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             var uploadedCSVFile = RandomGen.Create<GD.File>();
             int cutOffForNumberOfAttempts = 30;
-            DateTime? firstAttempt = null;
-            DateTime lastAttempt = DateTime.MinValue;
+            int attempts = 0;
             GD.File fileReturnedFromGDrive = null;
 
             _mockGoogleClientService
@@ -1774,18 +1782,24 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 ))
                 .Callback(() =>
                 {
-                    firstAttempt ??= DateTime.Now;
-                    lastAttempt = DateTime.Now;
+                    attempts++;
                 })
                 .ReturnsAsync(fileReturnedFromGDrive);
 
             // act
-            var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+            var fastClassUnderTest = new GenerateReportUseCase(
+                _mockBatchReportGateway.Object,
+                _mockReportGateway.Object,
+                _mockTransactionGateway.Object,
+                _mockGoogleFileSettingGateway.Object,
+                _mockGoogleClientService.Object,
+                30, // 30ms sleep total
+                1   // 1ms polling
+            );
+            var stepResponse = await fastClassUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            var secondsSpentInWaitForTheFile = (int) (lastAttempt - firstAttempt.Value).TotalSeconds + 1;
-
-            secondsSpentInWaitForTheFile.Should().Be(cutOffForNumberOfAttempts);
+            attempts.Should().Be(cutOffForNumberOfAttempts);
 
             _mockGoogleClientService.Verify(
                 g => g.GetFileByNameInDriveAsync(
@@ -3021,7 +3035,16 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 .ReturnsAsync(fileReturnedFromGDrive);
 
             // act
-            var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+            var fastClassUnderTest = new GenerateReportUseCase(
+                _mockBatchReportGateway.Object,
+                _mockReportGateway.Object,
+                _mockTransactionGateway.Object,
+                _mockGoogleFileSettingGateway.Object,
+                _mockGoogleClientService.Object,
+                30, // 30ms sleep total
+                1   // 1ms polling
+            );
+            var stepResponse = await fastClassUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
             _mockGoogleClientService.Verify(
@@ -3073,8 +3096,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
 
             var uploadedCSVFile = RandomGen.Create<GD.File>();
             int cutOffForNumberOfAttempts = 30;
-            DateTime? firstAttempt = null;
-            DateTime lastAttempt = DateTime.MinValue;
+            int attempts = 0;
             GD.File fileReturnedFromGDrive = null;
 
             _mockGoogleClientService
@@ -3084,18 +3106,24 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
                 ))
                 .Callback(() =>
                 {
-                    firstAttempt ??= DateTime.Now;
-                    lastAttempt = DateTime.Now;
+                    attempts++;
                 })
                 .ReturnsAsync(fileReturnedFromGDrive);
 
             // act
-            var stepResponse = await _classUnderTest.ExecuteAsync().ConfigureAwait(false);
+            var fastClassUnderTest = new GenerateReportUseCase(
+                _mockBatchReportGateway.Object,
+                _mockReportGateway.Object,
+                _mockTransactionGateway.Object,
+                _mockGoogleFileSettingGateway.Object,
+                _mockGoogleClientService.Object,
+                30, // 30ms sleep total
+                1   // 1ms polling
+            );
+            var stepResponse = await fastClassUnderTest.ExecuteAsync().ConfigureAwait(false);
 
             // assert
-            var secondsSpentInWaitForTheFile = (int) (lastAttempt - firstAttempt.Value).TotalSeconds + 1;
-
-            secondsSpentInWaitForTheFile.Should().Be(cutOffForNumberOfAttempts);
+            attempts.Should().Be(cutOffForNumberOfAttempts);
 
             _mockGoogleClientService.Verify(
                 g => g.GetFileByNameInDriveAsync(
