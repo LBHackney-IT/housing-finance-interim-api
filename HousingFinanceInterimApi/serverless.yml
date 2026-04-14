@@ -909,6 +909,29 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-refresh-cur-bal
+    ImportAdjustmentsTransactionsAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-housing-finance-adjustments-trans-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Import Adjustments Transactions (adjustments-trans) function
+        Namespace: AWS/Lambda
+        MetricName: "Errors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join':
+              - ':'
+              - - 'arn:aws:sns'
+                - Ref: 'AWS::Region'
+                - Ref: 'AWS::AccountId'
+                - 'housing-finance-alarms'
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-adjustments-trans
     RefreshManageArrearsTablesAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
@@ -932,6 +955,121 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-refresh-ma-cur-bal
+    CheckCashFilesLambdaAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-housing-finance-check-cash-files-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Check Cash Files (check-cash-files) function
+        Namespace: AWS/Lambda
+        MetricName: "Errors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join':
+              - ':'
+              - - 'arn:aws:sns'
+                - Ref: 'AWS::Region'
+                - Ref: 'AWS::AccountId'
+                - 'housing-finance-alarms'
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-check-cash-files
+    ImportHousingFileLambdaAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-housing-finance-housing-file-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Import Housing File (housing-file) function
+        Namespace: AWS/Lambda
+        MetricName: "Errors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join':
+              - ':'
+              - - 'arn:aws:sns'
+                - Ref: 'AWS::Region'
+                - Ref: 'AWS::AccountId'
+                - 'housing-finance-alarms'
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-housing-file
+    ImportDirectDebitTransactionsOnDemandAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-housing-finance-direct-debit-trans-dem-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Import Direct Debit Transactions On Demand (direct-debit-trans-dem) function
+        Namespace: AWS/Lambda
+        MetricName: "Errors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join':
+              - ':'
+              - - 'arn:aws:sns'
+                - Ref: 'AWS::Region'
+                - Ref: 'AWS::AccountId'
+                - 'housing-finance-alarms'
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-direct-debit-trans-dem
+    GenerateReportLambdaAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-housing-finance-gen-report-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Generate Report (gen-report) function
+        Namespace: AWS/Lambda
+        MetricName: "Errors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join':
+              - ':'
+              - - 'arn:aws:sns'
+                - Ref: 'AWS::Region'
+                - Ref: 'AWS::AccountId'
+                - 'housing-finance-alarms'
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-gen-report
+    ParseNightlyProcessLogsLambdaAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-housing-finance-query-nightly-logs-lambda-alarm"
+        AlarmDescription: Errors detected in AWS Lambda for Parse Nightly Process Logs (query-nightly-logs) function
+        Namespace: AWS/Lambda
+        MetricName: "Errors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join':
+              - ':'
+              - - 'arn:aws:sns'
+                - Ref: 'AWS::Region'
+                - Ref: 'AWS::AccountId'
+                - 'housing-finance-alarms'
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-query-nightly-logs
 
 custom:
   prune:
