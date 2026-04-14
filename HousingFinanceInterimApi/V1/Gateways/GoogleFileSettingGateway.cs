@@ -30,6 +30,10 @@ namespace HousingFinanceInterimApi.V1.Gateways
             {
                 var googleFileSettings = _context.GoogleFileSettings
                     .Where(item => item.Label.Equals(label)).ToList();
+                foreach (var setting in googleFileSettings)
+                {
+                    LoggingHandler.LogInfo($"Setting Id: {setting.Id}, File Type: {setting.FileType}");
+                }
                 return Task.FromResult(googleFileSettings.ToDomain());
             }
             catch (Exception e)
@@ -41,3 +45,4 @@ namespace HousingFinanceInterimApi.V1.Gateways
         }
     }
 }
+
