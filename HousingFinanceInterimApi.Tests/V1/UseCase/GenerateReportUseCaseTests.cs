@@ -1690,7 +1690,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var uploadedCSVFile = RandomGen.Create<GD.File>();
             int expectedNumberOfFileRetrievalAttempts = 30; //RandomGen.WholeNumber(1, 30);
             int csvUploadDelaySeconds = expectedNumberOfFileRetrievalAttempts;
-            var uploadedCSVBecomesAvailableAtTime = DateTime.Now.AddSeconds(csvUploadDelaySeconds);
+            var uploadedCSVBecomesAvailableAtTime = DateTime.Now.AddMilliseconds(csvUploadDelaySeconds);
             GD.File fileReturnedFromGDrive = null;
 
             _mockGoogleClientService
@@ -3023,7 +3023,7 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
             var uploadedCSVFileRepresentation = RandomGen.Create<GD.File>();
             int expectedNumberOfFileRetrievalAttempts = 30;
             int csvUploadDelaySeconds = expectedNumberOfFileRetrievalAttempts;
-            var uploadedCSVBecomesAvailableAtTime = DateTime.Now.AddSeconds(csvUploadDelaySeconds);
+            var uploadedCSVBecomesAvailableAtTime = DateTime.Now.AddMilliseconds(csvUploadDelaySeconds);
             GD.File fileReturnedFromGDrive = null;
 
             _mockGoogleClientService

@@ -212,8 +212,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             GD.File file = null;
 
-            var waitDurationInSeconds = _sleepDuration / 1000;
-            var cuttoffTime = DateTime.Now.AddSeconds(waitDurationInSeconds);
+            var cutoffTime = DateTime.Now.AddMilliseconds(_sleepDuration);
 
             do
             {
@@ -223,7 +222,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     .GetFileByNameInDriveAsync(opBalsByRentAccFolderGFS.GoogleIdentifier, fileName)
                     .ConfigureAwait(false);
             }
-            while (file is null && DateTime.Now < cuttoffTime);
+            while (file is null && DateTime.Now < cutoffTime);
 
             if (file is null)
             {
@@ -257,8 +256,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             GD.File file = null;
 
-            var waitDurationInSeconds = _sleepDuration / 1000;
-            var cuttoffTime = DateTime.Now.AddSeconds(waitDurationInSeconds);
+            var cutoffTime = DateTime.Now.AddMilliseconds(_sleepDuration);
 
             do
             {
@@ -268,7 +266,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                     .GetFileByNameInDriveAsync(itemisedTransactionFolderGFS.GoogleIdentifier, fileName)
                     .ConfigureAwait(false);
             }
-            while (file is null && DateTime.Now < cuttoffTime);
+            while (file is null && DateTime.Now < cutoffTime);
 
             if (file is null)
             {
