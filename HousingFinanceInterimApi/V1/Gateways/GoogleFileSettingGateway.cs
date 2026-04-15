@@ -32,7 +32,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     .Where(item => item.Label.Equals(label)).ToList();
                 foreach (var setting in googleFileSettings)
                 {
-                    LoggingHandler.LogInfo($"Setting Id: {setting.Id}, File Type: {setting.FileType}");
+                    LoggingHandler.LogInfo($"Google Identifier: {setting.GoogleIdentifier}, File Type: {setting.FileType}");
                 }
                 return Task.FromResult(googleFileSettings.ToDomain());
             }
