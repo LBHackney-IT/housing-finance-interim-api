@@ -26,7 +26,8 @@ namespace HousingFinanceInterimApi.V1.UseCase
         private readonly IGoogleClientService _googleClientService;
 
         private readonly string _waitDuration = Environment.GetEnvironmentVariable("WAIT_DURATION");
-        private readonly int _sleepDuration = 30000;
+        private readonly int _sleepDuration;
+        private readonly int _pollingInterval;
 
         private const string ReportAccountBalanceByDateLabel = "ReportAccountBalanceByDate";
         private const string ReportChargesLabel = "ReportCharges";
@@ -41,13 +42,17 @@ namespace HousingFinanceInterimApi.V1.UseCase
             IReportGateway reportGateway,
             ITransactionGateway transactionGateway,
             IGoogleFileSettingGateway googleFileSettingGateway,
-            IGoogleClientService googleClientService)
+            IGoogleClientService googleClientService,
+            int? sleepDuration = null,
+            int? pollingInterval = null)
         {
             _batchReportGateway = batchReportGateway;
             _reportGateway = reportGateway;
             _transactionGateway = transactionGateway;
             _googleFileSettingGateway = googleFileSettingGateway;
             _googleClientService = googleClientService;
+            _sleepDuration = sleepDuration ?? 30000;
+            _pollingInterval = pollingInterval ?? 1000;
         }
 
         public async Task<StepResponse> ExecuteAsync()
@@ -124,7 +129,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 .UploadCsvFile(reportAccountBalances, fileName, googleFileSetting.GoogleIdentifier)
                 .ConfigureAwait(false);
 
-            System.Threading.Thread.Sleep(_sleepDuration);
+            await Task.Delay(_sleepDuration).ConfigureAwait(false);
 
             var file = await _googleClientService
                 .GetFileByNameInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
@@ -171,7 +176,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 .UploadCsvFile(reportCharges, fileName, googleFileSetting.GoogleIdentifier)
                 .ConfigureAwait(false);
 
-            System.Threading.Thread.Sleep(_sleepDuration);
+            await Task.Delay(_sleepDuration).ConfigureAwait(false);
 
             var file = await _googleClientService
                 .GetFileByNameInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
@@ -207,18 +212,17 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             GD.File file = null;
 
-            var waitDurationInSeconds = _sleepDuration / 1000;
-            var cuttoffTime = DateTime.Now.AddSeconds(waitDurationInSeconds);
+            var cutoffTime = DateTime.Now.AddMilliseconds(_sleepDuration);
 
             do
             {
-                System.Threading.Thread.Sleep(1000);
+                await Task.Delay(_pollingInterval).ConfigureAwait(false);
 
                 file = await _googleClientService
                     .GetFileByNameInDriveAsync(opBalsByRentAccFolderGFS.GoogleIdentifier, fileName)
                     .ConfigureAwait(false);
             }
-            while (file is null && DateTime.Now < cuttoffTime);
+            while (file is null && DateTime.Now < cutoffTime);
 
             if (file is null)
             {
@@ -252,18 +256,17 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             GD.File file = null;
 
-            var waitDurationInSeconds = _sleepDuration / 1000;
-            var cuttoffTime = DateTime.Now.AddSeconds(waitDurationInSeconds);
+            var cutoffTime = DateTime.Now.AddMilliseconds(_sleepDuration);
 
             do
             {
-                System.Threading.Thread.Sleep(1000);
+                await Task.Delay(_pollingInterval).ConfigureAwait(false);
 
                 file = await _googleClientService
                     .GetFileByNameInDriveAsync(itemisedTransactionFolderGFS.GoogleIdentifier, fileName)
                     .ConfigureAwait(false);
             }
-            while (file is null && DateTime.Now < cuttoffTime);
+            while (file is null && DateTime.Now < cutoffTime);
 
             if (file is null)
             {
@@ -299,7 +302,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 .UploadCsvFile(reportSuspenseAccount, fileName, googleFileSetting.GoogleIdentifier)
                 .ConfigureAwait(false);
 
-            System.Threading.Thread.Sleep(_sleepDuration);
+            await Task.Delay(_sleepDuration).ConfigureAwait(false);
 
             var file = await _googleClientService
                 .GetFileByNameInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
@@ -332,7 +335,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 .UploadCsvFile(reportCashImport, fileName, googleFileSetting.GoogleIdentifier)
                 .ConfigureAwait(false);
 
-            System.Threading.Thread.Sleep(_sleepDuration);
+            await Task.Delay(_sleepDuration).ConfigureAwait(false);
 
             var file = await _googleClientService
                 .GetFileByNameInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
@@ -365,7 +368,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 .UploadCsvFile(reportCashImport, fileName, googleFileSetting.GoogleIdentifier)
                 .ConfigureAwait(false);
 
-            System.Threading.Thread.Sleep(_sleepDuration);
+            await Task.Delay(_sleepDuration).ConfigureAwait(false);
 
             var file = await _googleClientService
                 .GetFileByNameInDriveAsync(googleFileSetting.GoogleIdentifier, fileName)
