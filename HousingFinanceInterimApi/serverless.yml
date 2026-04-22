@@ -86,7 +86,7 @@ functions:
   importCashFileTransactions:
     name: ${self:service}-${self:provider.stage}-cash-file-trans
     description: "The scheduler to import cash files transactions from Cash File table."
-    timeout: 600
+    timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadCashFileTransactions
     role: lambdaExecutionRole
   checkHousingFiles:
@@ -102,7 +102,7 @@ functions:
   importHousingFileTransactions:
     name: ${self:service}-${self:provider.stage}-housing-file-trans
     description: "The scheduler to import housing files transactions from Housing File table."
-    timeout: 600
+    timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadHousingBenefitFileTransactions
     role: lambdaExecutionRole
   refreshCurrentBalance:
@@ -131,13 +131,13 @@ functions:
   importDirectDebit:
     name: ${self:service}-${self:provider.stage}-direct-debit
     description: "The scheduler to import direct debit from Google Spreadshet."
-    timeout: 600
+    timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadDirectDebit
     role: lambdaExecutionRole
   importDirectDebitTransactions:
     name: ${self:service}-${self:provider.stage}-direct-debit-trans
     description: "The scheduler to import direct debit transactions from DirectDebit table."
-    timeout: 600
+    timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadDirectDebitTransactions
     role: lambdaExecutionRole
   importDirectDebitTransactionsOnDemand:
@@ -199,7 +199,7 @@ functions:
   importAdjustmentsTransactions:
     name: ${self:service}-${self:provider.stage}-adjustments-trans
     description: "The scheduler to import adjustments transactions from spreadsheet. Runs at 2:45 AM."
-    timeout: 600
+    timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadAdjustmentsTransactions
     role: lambdaExecutionRole
     events:
