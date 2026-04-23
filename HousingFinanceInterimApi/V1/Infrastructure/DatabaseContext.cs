@@ -366,49 +366,49 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         }
 
         public async Task RefreshTenancyAgreementTables(long batchLogId)
-            => await PerformTransaction($"usp_RefreshTenancyAgreement {batchLogId}", 600).ConfigureAwait(false);
+            => await PerformTransaction($"usp_RefreshTenancyAgreement {batchLogId}", 900).ConfigureAwait(false);
 
         public async Task LoadCashFiles()
-            => await PerformTransaction("usp_LoadCashFile", 600).ConfigureAwait(false);
+            => await PerformTransaction("usp_LoadCashFile", 900).ConfigureAwait(false);
 
         public async Task LoadHousingFiles()
-            => await PerformTransaction("usp_LoadHousingFile", 600).ConfigureAwait(false);
+            => await PerformTransaction("usp_LoadHousingFile", 900).ConfigureAwait(false);
 
         public async Task LoadDirectDebit(long batchLogId)
-            => await PerformTransaction($"usp_LoadDirectDebit {batchLogId}", 300).ConfigureAwait(false);
+            => await PerformTransaction($"usp_LoadDirectDebit {batchLogId}", 900).ConfigureAwait(false);
 
         public async Task LoadCharges()
-            => await PerformTransaction($"usp_LoadCharges", 300).ConfigureAwait(false);
+            => await PerformTransaction($"usp_LoadCharges", 900).ConfigureAwait(false);
 
         public async Task LoadActionDiary()
             => await PerformTransaction($"usp_LoadActionDiary", 900).ConfigureAwait(false);
 
         public async Task LoadCashFileTransactions()
-            => await PerformTransaction("usp_LoadTransactionsCashFile", 600).ConfigureAwait(false);
+            => await PerformTransaction("usp_LoadTransactionsCashFile", 900).ConfigureAwait(false);
 
         public async Task LoadChargesTransactions(int @processingYear)
             => await PerformInterpolatedTransaction($"usp_LoadTransactionsCharges {@processingYear}", 900).ConfigureAwait(false);
 
         public async Task LoadHousingFileTransactions()
-            => await PerformTransaction("usp_LoadTransactionsHousingFile", 600).ConfigureAwait(false);
+            => await PerformTransaction("usp_LoadTransactionsHousingFile", 900).ConfigureAwait(false);
 
         public async Task LoadDirectDebitTransactions()
-            => await PerformTransaction($"usp_LoadTransactionsDirectDebit", 600).ConfigureAwait(false);
+            => await PerformTransaction($"usp_LoadTransactionsDirectDebit", 900).ConfigureAwait(false);
 
         public async Task LoadAdjustmentTransactions()
-            => await PerformTransaction("usp_LoadTransactionsAdjustment", 600).ConfigureAwait(false);
+            => await PerformTransaction("usp_LoadTransactionsAdjustment", 900).ConfigureAwait(false);
 
         public async Task LoadDirectDebitHistory(DateTime? processingDate)
-            => await PerformInterpolatedTransaction($"usp_LoadDirectDebitHistory {processingDate:yyyy-MM-dd}", 600).ConfigureAwait(false);
+            => await PerformInterpolatedTransaction($"usp_LoadDirectDebitHistory {processingDate:yyyy-MM-dd}", 900).ConfigureAwait(false);
 
         public async Task LoadCashSuspenseTransactions()
-            => await PerformInterpolatedTransaction($"usp_LoadCashSuspenseTransactions", 600).ConfigureAwait(false);
+            => await PerformInterpolatedTransaction($"usp_LoadCashSuspenseTransactions", 900).ConfigureAwait(false);
 
         public async Task LoadHousingBenefitSuspenseTransactions()
-            => await PerformInterpolatedTransaction($"usp_LoadHousingBenefitSuspenseTransactions", 600).ConfigureAwait(false);
+            => await PerformInterpolatedTransaction($"usp_LoadHousingBenefitSuspenseTransactions", 900).ConfigureAwait(false);
 
         public async Task LoadChargesHistory(int @processingYear)
-            => await PerformInterpolatedTransaction($"usp_LoadChargesHistory {@processingYear}", 600).ConfigureAwait(false);
+            => await PerformInterpolatedTransaction($"usp_LoadChargesHistory {@processingYear}", 900).ConfigureAwait(false);
 
         public async Task CreateCashFileSuspenseAccountTransaction(long id, string newRentAccount)
             => await PerformInterpolatedTransaction($"usp_UpdateCashFileSuspenseAccountResolved {id}, {newRentAccount}").ConfigureAwait(false);
