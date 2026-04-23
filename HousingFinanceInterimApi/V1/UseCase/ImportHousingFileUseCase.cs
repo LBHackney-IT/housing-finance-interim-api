@@ -67,7 +67,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
             await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
             LoggingHandler.LogInfo($"End housing benefit file import");
-            LoggingHandler.LogInfo(Constants.ProcessCompletedSuccessfullyMessage);
             return new StepResponse()
             {
                 Continue = true,

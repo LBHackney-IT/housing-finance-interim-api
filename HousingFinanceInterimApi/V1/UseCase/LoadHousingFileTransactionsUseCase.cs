@@ -4,7 +4,6 @@ using HousingFinanceInterimApi.V1.UseCase.Interfaces;
 using System.Threading.Tasks;
 using HousingFinanceInterimApi.V1.Boundary.Response;
 using HousingFinanceInterimApi.V1.Handlers;
-using HousingFinanceInterimApi.V1.Domain;
 
 namespace HousingFinanceInterimApi.V1.UseCase
 {
@@ -44,7 +43,6 @@ namespace HousingFinanceInterimApi.V1.UseCase
 
                 await _batchLogGateway.SetToSuccessAsync(batch.Id).ConfigureAwait(false);
                 LoggingHandler.LogInfo($"End housing benefit file transactions import");
-                LoggingHandler.LogInfo(Constants.ProcessCompletedSuccessfullyMessage);
                 return new StepResponse()
                 {
                     Continue = true,
