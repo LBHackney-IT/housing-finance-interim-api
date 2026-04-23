@@ -68,6 +68,11 @@ functions:
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadTenancyAgreement
     role: lambdaExecutionRole
+    events:
+        - schedule:
+            rate: cron(0 0 * * ? *)
+            timezone: Europe/London
+            method: scheduler
   checkCashFiles:
     name: ${self:service}-${self:provider.stage}-check-cash-files
     description: "The scheduler to check if exists cash files. "
@@ -112,6 +117,11 @@ functions:
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshOperatingBalance
     role: lambdaExecutionRole
+    events:
+        - schedule:
+            rate: cron(45 6 * * ? *)
+            timezone: Europe/London
+            method: scheduler
   refreshManageArrearsTables:
     name: ${self:service}-${self:provider.stage}-refresh-ma-cur-bal
     description: "The scheduler to refresh manage arrears balance based on current balance table."
@@ -170,30 +180,55 @@ functions:
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadActionDiary
     role: lambdaExecutionRole
+    events:
+        - schedule:
+            rate: cron(0 3 * * ? *)
+            timezone: Europe/London
+            method: scheduler
   generateRentPosition:
     name: ${self:service}-${self:provider.stage}-rent-position
     description: "The scheduler to generate rent position csv file. Run at 05:00 AM"
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::GenerateRentPosition
     role: lambdaExecutionRole
+    events:
+        - schedule:
+            rate: cron(15 7 * * ? *)
+            timezone: Europe/London
+            method: scheduler
   importAdjustmentsTransactions:
     name: ${self:service}-${self:provider.stage}-adjustments-trans
     description: "The scheduler to import adjustments transactions from spreadsheet. Runs at 2:45 AM."
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadAdjustmentsTransactions
     role: lambdaExecutionRole
+    events:
+        - schedule:
+            rate: cron(45 2 * * ? *)
+            timezone: Europe/London
+            method: scheduler
   suspenseCash:
     name: ${self:service}-${self:provider.stage}-susp-cash
     description: "The scheduler to load and reverse suspense cash files. Run at 03:05 AM"
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadSuspenseCashTransactions
     role: lambdaExecutionRole
+    events:
+        - schedule:
+            rate: cron(5 3 * * ? *)
+            timezone: Europe/London
+            method: scheduler
   suspenseHousingBenefit:
     name: ${self:service}-${self:provider.stage}-susp-hb
     description: "The scheduler to load and reverse suspense hb files. Run at 03:10 AM"
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadSuspenseHousingBenefitTransactions
     role: lambdaExecutionRole
+    events:
+        - schedule:
+            rate: cron(10 3 * * ? *)
+            timezone: Europe/London
+            method: scheduler
   generateReport:
     name: ${self:service}-${self:provider.stage}-gen-report
     description: "The scheduler to generate google drive reports."
@@ -206,10 +241,20 @@ functions:
     timeout: 900
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ParseNightlyProcessLogs
     role: lambdaExecutionRole
+    events:
+        - schedule:
+            rate: cron(30 7 * * ? *)
+            timezone: Europe/London
+            method: scheduler
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:
       name: HFCashFileStateMachine
+      events:
+        - schedule:
+            rate: cron(0 2 * * ? *)
+            timezone: Europe/London
+            method: scheduler
       definition:
         Comment: "Cash files process step function deployed via serverless. Run at 02:00 AM"
         StartAt: ImportCashFile
@@ -247,6 +292,11 @@ stepFunctions:
         Team: HousingFinance
     hfstepfunchousingfile:
       name: HFHousingFileStateMachine
+      events:        
+        - schedule:
+            rate: cron(0 6 ? * MON *)
+            timezone: Europe/London
+            method: scheduler
       definition:
         Comment: "Housing files process step function deployed via serverless. Run at 06:00 AM only Monday"        
         StartAt: CheckHousingFiles
@@ -299,6 +349,11 @@ stepFunctions:
         Team: HousingFinance
     hfstepfuncdirectdebit:
       name: HFDirectDebitStateMachine
+      events:
+        - schedule:
+            rate: cron(30 2 * * ? *)
+            timezone: Europe/London
+            method: scheduler
       definition:
         Comment: "Direct debit process step function deployed via serverless. Run at 02:30 AM"
         StartAt: ImportDirectDebit
@@ -343,8 +398,91 @@ stepFunctions:
       dependsOn: lambdaExecutionRole
       tags:
         Team: HousingFinance
+    # hfstepfunccharges:
+    #   name: HFChargesStateMachine
+    #   events:
+    #     - schedule: cron(30 0 * * ? *)
+    #   definition:
+    #     Comment: "Charges process step function deployed via serverless. Run at 12:30 AM"
+    #     StartAt: CheckChargesBatchYears
+    #     States:
+    #       CheckChargesBatchYears:
+    #         Type: Task
+    #         Resource:
+    #           Fn::GetAtt: [ checkChargesBatchYears, Arn ]
+    #         Retry:
+    #           - ErrorEquals:
+    #               - States.All
+    #             IntervalSeconds: 30
+    #             MaxAttempts: 3
+    #             BackoffRate: 2
+    #         Next: Choice_ExistPendingYear
+    #       Choice_ExistPendingYear:
+    #         Type: Choice
+    #         Choices:
+    #           - Variable: $.Continue
+    #             BooleanEquals: true
+    #             Next: Wait_0
+    #           - Variable: $.Continue
+    #             BooleanEquals: false
+    #             Next: EndStep
+    #       Wait_0:
+    #           Type: Wait
+    #           TimestampPath: $.NextStepTime
+    #           Next: ImportCharges
+    #       ImportCharges:
+    #         Type: Task
+    #         Resource:
+    #           Fn::GetAtt: [ importCharges, Arn ]
+    #         Retry:
+    #           - ErrorEquals:
+    #               - States.All
+    #             IntervalSeconds: 30
+    #             MaxAttempts: 3
+    #             BackoffRate: 2
+    #         Next: Wait_1          
+    #       Wait_1:
+    #           Type: Wait
+    #           TimestampPath: $.NextStepTime
+    #           Next: ImportChargesHistory
+    #       ImportChargesHistory:
+    #         Type: Task
+    #         Resource:
+    #           Fn::GetAtt: [ importChargesHistory, Arn ]
+    #         Retry:
+    #           - ErrorEquals:
+    #               - States.All
+    #             IntervalSeconds: 30
+    #             MaxAttempts: 3
+    #             BackoffRate: 2
+    #         Next: Wait_2
+    #       Wait_2:
+    #           Type: Wait
+    #           TimestampPath: $.NextStepTime
+    #           Next: ImportChargesTransactions          
+    #       ImportChargesTransactions:
+    #         Type: Task
+    #         Resource:
+    #           Fn::GetAtt: [ importChargesTransactions, Arn ]
+    #         Retry:
+    #           - ErrorEquals:
+    #               - States.All
+    #             IntervalSeconds: 30
+    #             MaxAttempts: 3
+    #             BackoffRate: 2
+    #         Next: CheckChargesBatchYears
+    #       EndStep:
+    #         Type: Succeed
+    #   dependsOn: lambdaExecutionRole
+    #   tags:
+    #     Team: HousingFinance
     hfstepfunccurentbalance:
       name: HFCurrentBalanceStateMachine
+      events:
+        - schedule:
+            rate: cron(10 6 * * ? *)
+            timezone: Europe/London
+            method: scheduler
       definition:
         Comment: "Current balance process step function deployed via serverless. Run at 06:10 AM"
         StartAt: RefreshCurrentBalance
@@ -382,6 +520,11 @@ stepFunctions:
         Team: HousingFinance
     hfstepfuncreport:
       name: HFReportsStateMachine
+      events:
+        - schedule:
+            rate: cron(0/30 * * * ? *)
+            timezone: Europe/London
+            method: scheduler
       definition:
         Comment: "Reports step function deployed via serverless. Run every 30 min"
         StartAt: GenerateReport
