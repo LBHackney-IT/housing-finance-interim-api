@@ -92,7 +92,8 @@ functions:
   checkHousingFiles:
     name: ${self:service}-${self:provider.stage}-check-housing-files
     description: "The scheduler to check if exists housing benefit files. "
-    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckHousingBenefitFiles  
+    handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::CheckHousingBenefitFiles
+    role: lambdaExecutionRole
   importHousingFile:
     name: ${self:service}-${self:provider.stage}-housing-file
     description: "The scheduler to import housing files from Google drives."
