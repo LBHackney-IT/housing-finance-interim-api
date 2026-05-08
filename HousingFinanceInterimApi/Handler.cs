@@ -24,7 +24,6 @@ namespace HousingFinanceInterimApi
 {
     public class Handler
     {
-        private readonly ICheckExistFileUseCase _checkExistFileUseCase;
         private readonly ICheckChargesBatchYearsUseCase _checkChargesBatchYearsUseCase;
         private readonly IGenerateRentPositionUseCase _generateRentPositionUseCase;
         private readonly IImportCashFileUseCase _importCashFileUseCase;
@@ -47,8 +46,6 @@ namespace HousingFinanceInterimApi
         private readonly IGenerateReportUseCase _generateReportUseCase;
         private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
         private readonly INightlyProcessLogUseCase _nightlyProcessLogUseCase;
-
-        private const string CashFileLabel = "CashFile";
 
         public Handler()
         {
@@ -94,7 +91,6 @@ namespace HousingFinanceInterimApi
             ISuspenseAccountsGateway suspenseAccountsGateway = new SuspenseAccountsGateway(context);
             INightlyProcessLogGateway nightlyProcessLogGateway = new NightlyProcessLogGateway(context);
 
-            _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _checkChargesBatchYearsUseCase = new CheckChargesBatchYearsUseCase(chargesBatchYearsGateway);
             _generateRentPositionUseCase = new GenerateRentPositionUseCase(rentPositionGateway, batchLogGateway,
                 batchLogErrorGateway, googleFileSettingGateway, googleClientService);
@@ -138,11 +134,6 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> LoadTenancyAgreement()
         {
             return await _loadTenancyAgreementUseCase.ExecuteAsync().ConfigureAwait(false);
-        }
-
-        public async Task<StepResponse> CheckCashFiles()
-        {
-            return await _checkExistFileUseCase.ExecuteAsync(CashFileLabel).ConfigureAwait(false);
         }
 
         public async Task<StepResponse> ImportCashFile()
