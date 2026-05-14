@@ -18,6 +18,7 @@ namespace HousingFinanceInterimApi.V1.Helpers
                 $"/aws/lambda/housing-finance-interim-api-{environmentName}-direct-debit-trans-dem",
                 $"/aws/lambda/housing-finance-interim-api-{environmentName}-cash-file",
                 $"/aws/lambda/housing-finance-interim-api-{environmentName}-adjustments-trans",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-check-cash-files",
                 $"/aws/lambda/housing-finance-interim-api-{environmentName}-action-diary",
                 $"/aws/lambda/housing-finance-interim-api-{environmentName}-susp-cash",
                 $"/aws/lambda/housing-finance-interim-api-{environmentName}-susp-hb",
