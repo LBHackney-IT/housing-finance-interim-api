@@ -13,6 +13,7 @@ namespace HousingFinanceInterimApi.V1.Helpers
                 "hfs-nightly-jobs-charges-ingest-ecs-task-logs",
                 $"/aws/lambda/housing-finance-interim-api-{environmentName}-load-tenagree",
                 $"/aws/lambda/housing-finance-interim-api-{environmentName}-cash-file-trans",
+                $"/aws/lambda/housing-finance-interim-api-{environmentName}-check-cash-files",
                 $"/aws/lambda/housing-finance-interim-api-{environmentName}-direct-debit",
                 $"/aws/lambda/housing-finance-interim-api-{environmentName}-direct-debit-trans",
                 $"/aws/lambda/housing-finance-interim-api-{environmentName}-direct-debit-trans-dem",
