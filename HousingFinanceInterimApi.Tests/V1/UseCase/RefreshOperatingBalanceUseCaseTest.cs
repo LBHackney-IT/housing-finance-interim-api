@@ -13,12 +13,9 @@ namespace HousingFinanceInterimApi.Tests.V1.UseCase
     {
         private Mock<IOperatingBalanceGateway> _mockOperatingBalanceGateway;
         private IRefreshOperatingBalanceUseCase _classUnderTest;
-        private readonly double _waitDuration = 30;
 
         public RefreshOperatingBalanceUseCaseTests()
         {
-            Environment.SetEnvironmentVariable("WAIT_DURATION", _waitDuration.ToString());
-
             _mockOperatingBalanceGateway = new Mock<IOperatingBalanceGateway>();
             _classUnderTest = new RefreshOperatingBalanceUseCase(_mockOperatingBalanceGateway.Object);
         }
