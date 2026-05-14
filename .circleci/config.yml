@@ -152,26 +152,26 @@ workflows:
           filters:
             branches:
               only: master
-      - assume-role-staging:
-          context: api-assume-role-housing-staging-context
-          requires:
-              - build-and-test
-          filters:
-            branches:
-              only: master
-      - deploy-to-staging:
-          context:
-            - api-nuget-token-context
-            - "Serverless Framework"
-          requires:
-            - assume-role-staging
-          filters:
-            branches:
-              only: master
+      # - assume-role-staging:
+      #     context: api-assume-role-housing-staging-context
+      #     requires:
+      #         - build-and-test
+      #     filters:
+      #       branches:
+      #         only: master
+      # - deploy-to-staging:
+      #     context:
+      #       - api-nuget-token-context
+      #       - "Serverless Framework"
+      #     requires:
+      #       - assume-role-staging
+      #     filters:
+      #       branches:
+      #         only: master
       - permit-production-release:
           type: approval
           requires:
-            - deploy-to-staging
+            - build-and-test
           filters:
             branches:
               only: master

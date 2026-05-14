@@ -24,6 +24,7 @@ namespace HousingFinanceInterimApi
 {
     public class Handler
     {
+        private readonly ICheckExistFileUseCase _checkExistFileUseCase;
         private readonly ICheckChargesBatchYearsUseCase _checkChargesBatchYearsUseCase;
         private readonly IGenerateRentPositionUseCase _generateRentPositionUseCase;
         private readonly IImportCashFileUseCase _importCashFileUseCase;
@@ -47,6 +48,8 @@ namespace HousingFinanceInterimApi
         private readonly IMoveHousingBenefitFileUseCase _moveHousingBenefitFileUseCase;
         private readonly INightlyProcessLogUseCase _nightlyProcessLogUseCase;
 
+        private const string CashFileLabel = "CashFile";
+    
         public Handler()
         {
             DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
@@ -94,6 +97,7 @@ namespace HousingFinanceInterimApi
             _checkChargesBatchYearsUseCase = new CheckChargesBatchYearsUseCase(chargesBatchYearsGateway);
             _generateRentPositionUseCase = new GenerateRentPositionUseCase(rentPositionGateway, batchLogGateway,
                 batchLogErrorGateway, googleFileSettingGateway, googleClientService);
+            _checkExistFileUseCase = new CheckExistFileUseCase(googleFileSettingGateway, googleClientService);
             _importCashFileUseCase = new ImportCashFileUseCase(batchLogGateway, batchLogErrorGateway,
                 googleFileSettingGateway, googleClientService, upCashDumpFileNameGateway, upCashDumpGateway);
             _importHousingFileUseCase = new ImportHousingFileUseCase(batchLogGateway, batchLogErrorGateway,
@@ -134,6 +138,11 @@ namespace HousingFinanceInterimApi
         public async Task<StepResponse> LoadTenancyAgreement()
         {
             return await _loadTenancyAgreementUseCase.ExecuteAsync().ConfigureAwait(false);
+        }
+
+        public async Task<StepResponse> CheckCashFiles()
+        {
+            return await _checkExistFileUseCase.ExecuteAsync(CashFileLabel).ConfigureAwait(false);
         }
 
         public async Task<StepResponse> ImportCashFile()
