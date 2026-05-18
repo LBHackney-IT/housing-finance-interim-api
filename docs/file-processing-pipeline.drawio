@@ -1,0 +1,275 @@
+<mxfile host="app.diagrams.net" modified="2026-05-18T00:00:00.000Z" agent="Cursor" version="21.0.0">
+  <diagram name="File Processing Pipeline" id="file-processing-pipeline">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ═══ BOUNDARIES (drawn first so they sit behind everything) ═══ -->
+
+        <mxCell id="apiBg" value="housing-finance-interim-api  [Serverless Framework]"
+          style="rounded=1;arcSize=2;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontStyle=1;fontSize=11;verticalAlign=top;spacingTop=6;dashed=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="310" y="160" width="1180" height="910" as="geometry" />
+        </mxCell>
+
+        <mxCell id="terraformBg" value="mtfh-finance-infrastructure  [Terraform]"
+          style="rounded=1;arcSize=4;whiteSpace=wrap;html=1;fillColor=#fffacd;strokeColor=#d6b656;fontStyle=1;fontSize=11;verticalAlign=top;spacingTop=6;dashed=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="50" y="170" width="230" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ EXTERNAL PEOPLE ═══ -->
+
+        <mxCell id="civica" value="&lt;b&gt;Civica Pay&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[External System]&lt;/font&gt;&lt;br&gt;External payment processor"
+          style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;"
+          vertex="1" parent="1">
+          <mxGeometry x="75" y="30" width="180" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="academy" value="&lt;b&gt;Academy System&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[External System]&lt;/font&gt;&lt;br&gt;Deposits weekly HB files into Google Drive"
+          style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;"
+          vertex="1" parent="1">
+          <mxGeometry x="1535" y="30" width="180" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ S3 (inside Terraform boundary) ═══ -->
+
+        <mxCell id="s3" value="&lt;b&gt;S3 Bucket&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[AWS S3]&lt;/font&gt;&lt;br&gt;Receives raw .dat cash files via SFTP (cashfiles/ prefix)"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="75" y="210" width="190" height="75" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ GOOGLE DRIVES (external, both sides) ═══ -->
+
+        <mxCell id="gdriveCash" value="&lt;b&gt;Google Drive&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[External Service]&lt;/font&gt;&lt;br&gt;CashFile folder — handoff: check-cash-files writes, importCashFile reads"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="50" y="390" width="230" height="95" as="geometry" />
+        </mxCell>
+
+        <mxCell id="gdriveAcademy" value="&lt;b&gt;Google Drive&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[External Service]&lt;/font&gt;&lt;br&gt;AcademyFileFolder (HB source files)"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="1520" y="195" width="230" height="85" as="geometry" />
+        </mxCell>
+
+        <mxCell id="gdriveHB" value="&lt;b&gt;Google Drive&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[External Service]&lt;/font&gt;&lt;br&gt;HousingBenefitFile folder — handoff: checkHousingFiles writes, importHousingFile reads"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="1520" y="400" width="230" height="95" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ CASH PIPELINE (left column inside API boundary) ═══ -->
+
+        <mxCell id="checkCash" value="&lt;b&gt;check-cash-files&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[Lambda / C#]&lt;/font&gt;&lt;br&gt;Triggered by S3 ObjectCreated. Deposits CashFileYYYYMMDD.dat into Google Drive, renames S3 object to OK_*."
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#CC7700;fontColor=#ffffff;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="330" y="210" width="215" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cashSFN" value="&lt;b&gt;HFCashFileStateMachine&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[AWS Step Functions]&lt;/font&gt;&lt;br&gt;Daily 02:00 AM. ImportCashFile → Wait → ImportCashFileTransactions"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E87722;strokeColor=#B85500;fontColor=#ffffff;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="590" y="210" width="235" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="importCash" value="&lt;b&gt;importCashFile&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[Lambda / C#]&lt;/font&gt;&lt;br&gt;Validates filename, dedup check, bulk-inserts raw lines to UPCashDump, renames Drive file OK_*/NOK_*."
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#CC7700;fontColor=#ffffff;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="590" y="400" width="235" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cashDb" value="&lt;b&gt;UPCashDump tables&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[SQL Server]&lt;/font&gt;&lt;br&gt;Handoff: importCashFile writes, importCashFileTransactions reads"
+          style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;boundedLbl=1;backgroundOutline=1;size=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="590" y="580" width="235" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cashTrans" value="&lt;b&gt;importCashFileTransactions&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[Lambda / C#]&lt;/font&gt;&lt;br&gt;Reads raw lines from UPCashDump, writes normalised Transaction records."
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#CC7700;fontColor=#ffffff;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="590" y="760" width="235" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ HB PIPELINE (right column inside API boundary) ═══ -->
+
+        <mxCell id="hbSFN" value="&lt;b&gt;HFHousingFileStateMachine&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[AWS Step Functions]&lt;/font&gt;&lt;br&gt;Mondays 06:00 AM. CheckHousingFiles → Wait → ImportHousingFile → Wait → ImportHousingFileTransactions"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E87722;strokeColor=#B85500;fontColor=#ffffff;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="885" y="210" width="235" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="moveHB" value="&lt;b&gt;checkHousingFiles&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[Lambda / C#]&lt;/font&gt;&lt;br&gt;Reads most recent Academy file (last 7 days), copies as HousingBenefitFile{nextMonday}.dat to HB folder."
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#CC7700;fontColor=#ffffff;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="1160" y="210" width="220" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="importHB" value="&lt;b&gt;importHousingFile&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[Lambda / C#]&lt;/font&gt;&lt;br&gt;Dedup check, bulk-inserts raw lines to UPHousingCashDump, renames Drive file OK_*/NOK_*."
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#CC7700;fontColor=#ffffff;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="1160" y="400" width="220" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="hbDb" value="&lt;b&gt;UPHousingCashDump tables&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[SQL Server]&lt;/font&gt;&lt;br&gt;Handoff: importHousingFile writes, importHousingFileTransactions reads"
+          style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;boundedLbl=1;backgroundOutline=1;size=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="1160" y="580" width="220" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="hbTrans" value="&lt;b&gt;importHousingFileTransactions&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[Lambda / C#]&lt;/font&gt;&lt;br&gt;Reads raw lines from UPHousingCashDump, writes normalised Transaction records."
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#CC7700;fontColor=#ffffff;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="1160" y="760" width="220" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ SHARED DB ═══ -->
+
+        <mxCell id="txDb" value="&lt;b&gt;Transaction&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;[SQL Server]&lt;/font&gt;&lt;br&gt;Normalised payment records (shared by both pipelines)"
+          style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;boundedLbl=1;backgroundOutline=1;size=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="842" y="960" width="230" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ EDGES — Cash flow (blue) ═══ -->
+
+        <mxCell id="e1" value="Upload CashFileYYYYMMDD.dat (SFTP)"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1565C0;fontColor=#1565C0;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="civica" target="s3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e2" value="s3:ObjectCreated* notification (Terraform-wired)"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1565C0;fontColor=#1565C0;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="s3" target="checkCash" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e3" value="1. Write: CashFileYYYYMMDD.dat"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1565C0;fontColor=#1565C0;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="checkCash" target="gdriveCash" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e4" value="Rename to OK_* + delete original"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1565C0;fontColor=#1565C0;fontSize=9;labelBackgroundColor=#ffffff;dashed=1;"
+          edge="1" source="checkCash" target="s3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e5" value="Invoke (02:00 AM)"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1565C0;fontColor=#1565C0;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="cashSFN" target="importCash" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e6" value="2. Read: CashFileYYYYMMDD.dat"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1565C0;fontColor=#1565C0;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="gdriveCash" target="importCash" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e7" value="3. Rename to OK_*/NOK_*"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1565C0;fontColor=#1565C0;fontSize=9;labelBackgroundColor=#ffffff;dashed=1;"
+          edge="1" source="importCash" target="gdriveCash" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e8" value="4. Write: raw lines"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1565C0;fontColor=#1565C0;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="importCash" target="cashDb" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e9" value="Invoke (after Wait)"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1565C0;fontColor=#1565C0;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="cashSFN" target="cashTrans" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e10" value="5. Read: raw lines"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1565C0;fontColor=#1565C0;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="cashDb" target="cashTrans" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e11" value="6. Write: Transaction records"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#1565C0;fontColor=#1565C0;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="cashTrans" target="txDb" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ EDGES — Housing benefit flow (green) ═══ -->
+
+        <mxCell id="e12" value="Deposit weekly file"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#2E7D32;fontColor=#2E7D32;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="academy" target="gdriveAcademy" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e13" value="Invoke (06:00 AM Mon)"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#2E7D32;fontColor=#2E7D32;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="hbSFN" target="moveHB" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e14" value="1. Read: most recent Academy file"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#2E7D32;fontColor=#2E7D32;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="gdriveAcademy" target="moveHB" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e15" value="2. Write: HousingBenefitFile{nextMon}.dat"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#2E7D32;fontColor=#2E7D32;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="moveHB" target="gdriveHB" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e16" value="Invoke (after Wait)"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#2E7D32;fontColor=#2E7D32;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="hbSFN" target="importHB" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e17" value="3. Read: HousingBenefitFile{nextMon}.dat"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#2E7D32;fontColor=#2E7D32;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="gdriveHB" target="importHB" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e18" value="4. Rename to OK_*/NOK_*"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#2E7D32;fontColor=#2E7D32;fontSize=9;labelBackgroundColor=#ffffff;dashed=1;"
+          edge="1" source="importHB" target="gdriveHB" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e19" value="5. Write: raw lines"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#2E7D32;fontColor=#2E7D32;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="importHB" target="hbDb" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e20" value="Invoke (after Wait)"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#2E7D32;fontColor=#2E7D32;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="hbSFN" target="hbTrans" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e21" value="6. Read: raw lines"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#2E7D32;fontColor=#2E7D32;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="hbDb" target="hbTrans" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e22" value="7. Write: Transaction records"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#2E7D32;fontColor=#2E7D32;fontSize=9;labelBackgroundColor=#ffffff;"
+          edge="1" source="hbTrans" target="txDb" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
