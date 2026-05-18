@@ -168,6 +168,81 @@ If changes to the database schema are made then the docker image for the databas
 - Test database schemas should match up with production database schema
 - Have integration tests which test from the PostgreSQL database to API Gateway
 
+## Architecture
+
+### File Processing Pipeline
+
+The diagram below shows how cash files and housing benefit files flow through the system (C4 Container view).
+
+```plantuml
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+AddElementTag("lambda", $shape=RoundedBoxShape(), $bgColor="#FF9900", $fontColor="white", $borderColor="#CC7700", $legendText="AWS Lambda")
+AddElementTag("sfn", $bgColor="#E87722", $fontColor="white", $borderColor="#B85500", $legendText="AWS Step Function")
+AddRelTag("cashflow", $textColor="#1565C0", $lineColor="#1565C0", $legendText="Cash file flow")
+AddRelTag("hbflow", $textColor="#2E7D32", $lineColor="#2E7D32", $legendText="Housing benefit flow")
+
+title Housing Finance Interim API — Container View
+
+Person_Ext(civica, "Civica Pay", "External payment processor")
+Person_Ext(academy, "Academy System", "Deposits weekly HB files\ninto Google Drive")
+
+System_Ext(gdriveCash, "Google Drive", "CashFile folder\n(handoff: check-cash-files writes,\nimportCashFile reads)")
+System_Ext(gdriveAcademy, "Google Drive", "AcademyFileFolder\n(HB source files)")
+System_Ext(gdriveHB, "Google Drive", "HousingBenefitFile folder\n(handoff: checkHousingFiles writes,\nimportHousingFile reads)")
+
+System_Boundary(infra, "mtfh-finance-infrastructure  [Terraform]") {
+  Container(s3, "S3 Bucket", "AWS S3", "Receives raw .dat cash files from Civica via SFTP (cashfiles/ prefix)")
+}
+
+System_Boundary(api, "housing-finance-interim-api  [Serverless Framework]") {
+
+  Container(checkCash, "check-cash-files", "Lambda / C#", "Triggered by S3 ObjectCreated. Reformats filename, deposits CashFileYYYYMMDD.dat into Google Drive, renames S3 object to OK_*.", $tags="lambda")
+  Container(cashSFN, "HFCashFileStateMachine", "AWS Step Functions", "Scheduled: daily 02:00 AM.\nImportCashFile → Wait → ImportCashFileTransactions", $tags="sfn")
+  Container(importCash, "importCashFile", "Lambda / C#", "Picks up file from Google Drive. Validates filename, dedup check, bulk-inserts raw lines to UPCashDump, renames Drive file OK_*/NOK_*.", $tags="lambda")
+  Container(cashTrans, "importCashFileTransactions", "Lambda / C#", "Reads raw lines from UPCashDump, writes normalised Transaction records.", $tags="lambda")
+
+  Container(hbSFN, "HFHousingFileStateMachine", "AWS Step Functions", "Scheduled: Mondays 06:00 AM.\nCheckHousingFiles → Wait → ImportHousingFile → Wait → ImportHousingFileTransactions", $tags="sfn")
+  Container(moveHB, "checkHousingFiles", "Lambda / C#", "Reads most recent Academy file (last 7 days), renames to HousingBenefitFile{nextMonday}.dat, copies to HB folder.", $tags="lambda")
+  Container(importHB, "importHousingFile", "Lambda / C#", "Picks up file from Google Drive. Dedup check, bulk-inserts raw lines to UPHousingCashDump, renames Drive file OK_*/NOK_*.", $tags="lambda")
+  Container(hbTrans, "importHousingFileTransactions", "Lambda / C#", "Reads raw lines from UPHousingCashDump, writes normalised Transaction records.", $tags="lambda")
+
+  ContainerDb(cashDb, "UPCashDump tables", "SQL Server", "Handoff: importCashFile writes,\nimportCashFileTransactions reads")
+  ContainerDb(hbDb, "UPHousingCashDump tables", "SQL Server", "Handoff: importHousingFile writes,\nimportHousingFileTransactions reads")
+  ContainerDb(txDb, "Transaction", "SQL Server", "Normalised payment records\n(shared by both pipelines)")
+}
+
+' ── Cash file flow ──────────────────────────────────────────────
+Rel_D(civica, s3, "Upload CashFileYYYYMMDD.dat", "SFTP / cross-account IAM", $tags="cashflow")
+Rel_D(s3, checkCash, "s3:ObjectCreated* notification", "Terraform-wired", $tags="cashflow")
+Rel_D(checkCash, gdriveCash, "1. Write: CashFileYYYYMMDD.dat", "Google Drive API", $tags="cashflow")
+Rel(checkCash, s3, "Rename to OK_* + delete original", "AWS S3 API", $tags="cashflow")
+Rel_D(cashSFN, importCash, "Invoke (02:00 AM)", "Step Functions", $tags="cashflow")
+Rel_Back(importCash, gdriveCash, "2. Read: CashFileYYYYMMDD.dat", "Google Drive API", $tags="cashflow")
+Rel(importCash, gdriveCash, "3. Rename to OK_*/NOK_*", "Google Drive API", $tags="cashflow")
+Rel_D(importCash, cashDb, "4. Write: raw lines", "SQL Server", $tags="cashflow")
+Rel_D(cashSFN, cashTrans, "Invoke (after Wait)", "Step Functions", $tags="cashflow")
+Rel_Back(cashTrans, cashDb, "5. Read: raw lines", "SQL Server", $tags="cashflow")
+Rel_D(cashTrans, txDb, "6. Write: Transaction records", "SQL Server", $tags="cashflow")
+
+' ── Housing benefit flow ────────────────────────────────────────
+Rel_D(academy, gdriveAcademy, "Deposit weekly file", "Google Drive", $tags="hbflow")
+Rel_D(hbSFN, moveHB, "Invoke (06:00 AM Mon)", "Step Functions", $tags="hbflow")
+Rel_Back(moveHB, gdriveAcademy, "1. Read: most recent Academy file", "Google Drive API", $tags="hbflow")
+Rel_D(moveHB, gdriveHB, "2. Write: HousingBenefitFile{nextMon}.dat", "Google Drive API", $tags="hbflow")
+Rel_D(hbSFN, importHB, "Invoke (after Wait)", "Step Functions", $tags="hbflow")
+Rel_Back(importHB, gdriveHB, "3. Read: HousingBenefitFile{nextMon}.dat", "Google Drive API", $tags="hbflow")
+Rel(importHB, gdriveHB, "4. Rename to OK_*/NOK_*", "Google Drive API", $tags="hbflow")
+Rel_D(importHB, hbDb, "5. Write: raw lines", "SQL Server", $tags="hbflow")
+Rel_D(hbSFN, hbTrans, "Invoke (after Wait)", "Step Functions", $tags="hbflow")
+Rel_Back(hbTrans, hbDb, "6. Read: raw lines", "SQL Server", $tags="hbflow")
+Rel_D(hbTrans, txDb, "7. Write: Transaction records", "SQL Server", $tags="hbflow")
+
+SHOW_LEGEND()
+@enduml
+```
+
 ## Data Migrations
 ### A good data migration
 - Record failure logs
