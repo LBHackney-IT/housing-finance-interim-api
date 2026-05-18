@@ -49,7 +49,6 @@ namespace HousingFinanceInterimApi
         private readonly INightlyProcessLogUseCase _nightlyProcessLogUseCase;
 
         private const string CashFileLabel = "CashFile";
-    
         public Handler()
         {
             DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
