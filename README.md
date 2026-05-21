@@ -174,11 +174,8 @@ If changes to the database schema are made then the docker image for the databas
 
 The diagram below shows how cash files and housing benefit files flow through the system (C4 Container view).
 
-![File Processing Pipeline](docs/file-processing-pipeline.svg)
+![File Processing Pipeline](docs/finance-processing-pipeline.svg)
 
-> **Editing the diagram:** the source file is [`docs/file-processing-pipeline.drawio`](docs/file-processing-pipeline.drawio).
-> Open it in [draw.io](https://app.diagrams.net), make your changes, then re-export:
-> **File → Export as → SVG → check "Include a copy of my diagram" → Export** and save over `docs/file-processing-pipeline.svg`.
 
 ## Data Migrations
 ### A good data migration
