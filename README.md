@@ -176,6 +176,7 @@ The diagram below shows how cash files and housing benefit files flow through th
 
 ![File Processing Pipeline](docs/finance-processing-pipeline.svg)
 
+This diagram is editable, in case the process changes in the future.
 
 ## Data Migrations
 ### A good data migration
