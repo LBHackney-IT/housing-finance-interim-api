@@ -16,6 +16,14 @@ using System.IO;
 using System;
 using FluentAssertions;
 using System.Threading;
+using Google.Apis.Sheets.v4.Data;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using Moq.Protected;
+using Newtonsoft.Json;
+using Google.Apis.Http;
+using Google.Apis.Services;
 
 namespace HousingFinanceInterimApi.Tests.V1.Gateways
 {
@@ -35,8 +43,10 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
         public GoogleClientServiceTests()
         {
             _mockLogger = new Mock<ILogger>();
-            _mockDriveService = new Mock<DriveService>();
-            _mockSheetsService = new Mock<SheetsService>();
+
+            // Pass Initializer to satisfy protected constructors
+            _mockDriveService = new Mock<DriveService>(new Google.Apis.Services.BaseClientService.Initializer());
+            _mockSheetsService = new Mock<SheetsService>(new Google.Apis.Services.BaseClientService.Initializer());
             _mockFilesResource = new Mock<FilesResource>(_mockDriveService.Object);
 
             _mockDriveService
@@ -186,6 +196,71 @@ namespace HousingFinanceInterimApi.Tests.V1.Gateways
                 .ConfigureAwait(false);
 
             fileData.Dispose();
+        }
+
+        [Fact]
+        public async Task ReadSheetToEntitiesAsyncShouldTrimSpacesAndSkipMalformedRows()
+        {
+            // Arrange
+            var spreadSheetId = "1234";
+            var sheetName = "Sheet1";
+            var range = "A1:B2";
+
+            IList<IList<object>> values = new List<IList<object>>
+            {
+                new List<object> { "Prop1", "Prop2" },
+                new List<object> { "  Value 1  ", "100" },
+                new List<object> { "Bad Row", "NotANumber" },
+                new List<object> { "Value 3", "200" }
+            };
+
+            var jsonResponse = JsonConvert.SerializeObject(new ValueRange { Values = values });
+
+            var mockHandler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            mockHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(jsonResponse)
+                });
+
+            var mockHttpClientFactory = new Mock<Google.Apis.Http.IHttpClientFactory>();
+            mockHttpClientFactory.Setup(f => f.CreateHttpClient(It.IsAny<CreateHttpClientArgs>()))
+                .Returns(new ConfigurableHttpClient(new ConfigurableMessageHandler(mockHandler.Object)));
+
+            var initializer = new BaseClientService.Initializer
+            {
+                HttpClientFactory = mockHttpClientFactory.Object,
+                ApplicationName = "Test"
+            };
+
+            var sheetsService = new SheetsService(initializer);
+            var driveService = new DriveService(new BaseClientService.Initializer());
+
+            var serviceUnderTest = new GoogleClientService(_mockLogger.Object, driveService, sheetsService);
+
+            // Act
+            var results = await serviceUnderTest.ReadSheetToEntitiesAsync<TestSheetEntity>(spreadSheetId, sheetName, range).ConfigureAwait(false);
+
+            // Assert
+            results.Should().NotBeNull();
+            results.Should().HaveCount(2);
+            results[0].Prop1.Should().Be("Value 1");
+            results[0].Prop2.Should().Be(100);
+            results[1].Prop1.Should().Be("Value 3");
+            results[1].Prop2.Should().Be(200);
+        }
+
+        public class TestSheetEntity
+        {
+            public string Prop1 { get; set; }
+            public int Prop2 { get; set; }
         }
 
         private void ConfigureUploadRequestMock(UploadRequesMockBehaviourOverride overrideAction)
