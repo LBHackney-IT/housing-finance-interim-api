@@ -368,20 +368,20 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     catch (Exception exc)
                     {
                         hasErrors = true;
-                        LoggingHandler.LogWarning($"Skip row: Error parsing row. Message: {exc.Message}");
+                        LoggingHandler.LogWarning($"Skip row: Failure parsing row. Message: {exc.Message}");
                     }
                 }
 
                 if (hasErrors)
                 {
-                    LoggingHandler.LogError("ALARM: Spreadsheet row parsing failed. Some rows were skipped.");
+                    LoggingHandler.LogInfo("ALARM: Spreadsheet row parsing failed. Some rows were skipped.");
                 }
 
                 return entities;
             }
             catch (Exception exc)
             {
-                LoggingHandler.LogInfo($"Error writing values to objects and serializing");
+                LoggingHandler.LogInfo($"Failure writing values to objects and serializing");
                 LoggingHandler.LogInfo(exc.ToString());
 
                 throw;
