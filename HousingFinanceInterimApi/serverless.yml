@@ -1095,9 +1095,9 @@ resources:
               "Keys": ["@log"],
               "Filters": [
                 { "Match": "ALARM: Spreadsheet row parsing failed", "In": ["@message"] }
-              ],
-              "AggregateOn": "Count"
-            }
+              ]
+            },
+            "AggregateOn": "Count"
           }
     SpreadsheetParsingAlarm:
       Type: AWS::CloudWatch::Alarm
