@@ -1092,10 +1092,10 @@ resources:
                 '/aws/lambda/${self:service}-${self:provider.stage}-charges',
                 '/aws/lambda/${self:service}-${self:provider.stage}-direct-debit'
               ) WHERE @message LIKE 'ALARM: Spreadsheet row parsing failed'
+            Period: 300
         Threshold: 0
         ComparisonOperator: GreaterThanThreshold
         EvaluationPeriods: 1
-        Period: 300
         TreatMissingData: notBreaching
         AlarmActions:
           - 'Fn::Join':
