@@ -1073,6 +1073,37 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-query-nightly-logs
+    SpreadsheetParsingAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-spreadsheet-parsing-alarm"
+        AlarmDescription: "Spreadsheet row parsing failed in one of the import processes. Check the alert metadata to see exactly which Log Group failed."
+        Metrics:
+          - Id: "ad1"
+            Label: "SpreadsheetParsingErrors"
+            ReturnData: true
+            Expression: |
+              SELECT COUNT(*) FROM SOURCE(
+                '/aws/lambda/${self:service}-${self:provider.stage}-load-tenagree',
+                '/aws/lambda/${self:service}-${self:provider.stage}-action-diary',
+                '/aws/lambda/${self:service}-${self:provider.stage}-susp-cash',
+                '/aws/lambda/${self:service}-${self:provider.stage}-susp-hb',
+                '/aws/lambda/${self:service}-${self:provider.stage}-adjustments-trans',
+                '/aws/lambda/${self:service}-${self:provider.stage}-charges',
+                '/aws/lambda/${self:service}-${self:provider.stage}-direct-debit'
+              ) WHERE @message LIKE 'ALARM: Spreadsheet row parsing failed'
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 300
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join':
+              - ':'
+              - - 'arn:aws:sns'
+                - Ref: 'AWS::Region'
+                - Ref: 'AWS::AccountId'
+                - 'housing-finance-alarms'
     LambdaSecurityGroup:
       Type: AWS::EC2::SecurityGroup
       Properties:
