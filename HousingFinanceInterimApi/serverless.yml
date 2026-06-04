@@ -1073,81 +1073,30 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-query-nightly-logs
-    SpreadsheetParsingMetricFilterTenancy:
-      Type: AWS::Logs::MetricFilter
-      Properties:
-        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-load-tenagree
-        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
-        MetricTransformations:
-          - MetricValue: "1"
-            MetricNamespace: "HousingFinance"
-            MetricName: "SpreadsheetParsingError"
-    SpreadsheetParsingMetricFilterActionDiary:
-      Type: AWS::Logs::MetricFilter
-      Properties:
-        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-action-diary
-        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
-        MetricTransformations:
-          - MetricValue: "1"
-            MetricNamespace: "HousingFinance"
-            MetricName: "SpreadsheetParsingError"
-    SpreadsheetParsingMetricFilterSuspenseCash:
-      Type: AWS::Logs::MetricFilter
-      Properties:
-        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-susp-cash
-        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
-        MetricTransformations:
-          - MetricValue: "1"
-            MetricNamespace: "HousingFinance"
-            MetricName: "SpreadsheetParsingError"
-    SpreadsheetParsingMetricFilterSuspenseHB:
-      Type: AWS::Logs::MetricFilter
-      Properties:
-        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-susp-hb
-        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
-        MetricTransformations:
-          - MetricValue: "1"
-            MetricNamespace: "HousingFinance"
-            MetricName: "SpreadsheetParsingError"
-    SpreadsheetParsingMetricFilterAdjustments:
-      Type: AWS::Logs::MetricFilter
-      Properties:
-        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-adjustments-trans
-        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
-        MetricTransformations:
-          - MetricValue: "1"
-            MetricNamespace: "HousingFinance"
-            MetricName: "SpreadsheetParsingError"
-    SpreadsheetParsingMetricFilterCharges:
-      Type: AWS::Logs::MetricFilter
-      Properties:
-        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-charges
-        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
-        MetricTransformations:
-          - MetricValue: "1"
-            MetricNamespace: "HousingFinance"
-            MetricName: "SpreadsheetParsingError"
-    SpreadsheetParsingMetricFilterDirectDebit:
-      Type: AWS::Logs::MetricFilter
-      Properties:
-        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-direct-debit
-        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
-        MetricTransformations:
-          - MetricValue: "1"
-            MetricNamespace: "HousingFinance"
-            MetricName: "SpreadsheetParsingError"
     SpreadsheetParsingAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
         AlarmName: "${self:provider.stage}-spreadsheet-parsing-alarm"
-        AlarmDescription: "Spreadsheet row parsing failed in one of the import processes. Some rows were skipped."
-        Namespace: "HousingFinance"
-        MetricName: "SpreadsheetParsingError"
-        Statistic: Sum
-        Period: 300
-        EvaluationPeriods: 1
+        AlarmDescription: "Spreadsheet row parsing failed in one of the import processes. Check the alert metadata to see exactly which Log Group failed."
+        Metrics:
+          - Id: "ad1"
+            Label: "SpreadsheetParsingErrors"
+            ReturnData: true
+            Expression: |
+              SELECT COUNT(*) FROM SOURCE(
+                '/aws/lambda/${self:service}-${self:provider.stage}-load-tenagree',
+                '/aws/lambda/${self:service}-${self:provider.stage}-action-diary',
+                '/aws/lambda/${self:service}-${self:provider.stage}-susp-cash',
+                '/aws/lambda/${self:service}-${self:provider.stage}-susp-hb',
+                '/aws/lambda/${self:service}-${self:provider.stage}-adjustments-trans',
+                '/aws/lambda/${self:service}-${self:provider.stage}-charges',
+                '/aws/lambda/${self:service}-${self:provider.stage}-direct-debit'
+              ) WHERE @message LIKE 'ALARM: Spreadsheet row parsing failed'
         Threshold: 0
         ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 300
+        TreatMissingData: notBreaching
         AlarmActions:
           - 'Fn::Join':
               - ':'
