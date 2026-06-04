@@ -1073,25 +1073,41 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-query-nightly-logs
+    SpreadsheetParsingInsightRule:
+      Type: AWS::CloudWatch::InsightRule
+      Properties:
+        RuleName: "${self:provider.stage}-SpreadsheetParsingRule"
+        RuleState: ENABLED
+        RuleBody: |
+          {
+            "Schema": { "Name": "CloudWatchLogRule", "Version": 1 },
+            "LogGroupNames": [
+              "/aws/lambda/${self:service}-${self:provider.stage}-load-tenagree",
+              "/aws/lambda/${self:service}-${self:provider.stage}-action-diary",
+              "/aws/lambda/${self:service}-${self:provider.stage}-susp-cash",
+              "/aws/lambda/${self:service}-${self:provider.stage}-susp-hb",
+              "/aws/lambda/${self:service}-${self:provider.stage}-adjustments-trans",
+              "/aws/lambda/${self:service}-${self:provider.stage}-charges",
+              "/aws/lambda/${self:service}-${self:provider.stage}-direct-debit"
+            ],
+            "LogFormat": "CLF",
+            "Contribution": {
+              "Keys": ["@log"],
+              "Filters": [
+                { "Match": "ALARM: Spreadsheet row parsing failed", "In": ["@message"] }
+              ]
+            }
+          }
     SpreadsheetParsingAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
         AlarmName: "${self:provider.stage}-spreadsheet-parsing-alarm"
-        AlarmDescription: "Spreadsheet row parsing failed in one of the import processes. Check the alert metadata to see exactly which Log Group failed."
+        AlarmDescription: "Spreadsheet row parsing failed. Check the alert metadata (Top Contributors) to see exactly which Log Group failed."
         Metrics:
           - Id: "ad1"
-            Label: "SpreadsheetParsingErrors"
+            Expression: "INSIGHT_RULE_METRIC(\"${self:provider.stage}-SpreadsheetParsingRule\", \"SampleCount\")"
+            Label: "ParsingErrorsByFunction"
             ReturnData: true
-            Expression: |
-              SELECT COUNT(*) FROM SOURCE(
-                '/aws/lambda/${self:service}-${self:provider.stage}-load-tenagree',
-                '/aws/lambda/${self:service}-${self:provider.stage}-action-diary',
-                '/aws/lambda/${self:service}-${self:provider.stage}-susp-cash',
-                '/aws/lambda/${self:service}-${self:provider.stage}-susp-hb',
-                '/aws/lambda/${self:service}-${self:provider.stage}-adjustments-trans',
-                '/aws/lambda/${self:service}-${self:provider.stage}-charges',
-                '/aws/lambda/${self:service}-${self:provider.stage}-direct-debit'
-              ) WHERE @message LIKE 'ALARM: Spreadsheet row parsing failed'
             Period: 300
         Threshold: 0
         ComparisonOperator: GreaterThanThreshold
