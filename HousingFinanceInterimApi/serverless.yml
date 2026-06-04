@@ -1256,6 +1256,17 @@ resources:
         AlarmActions:
           - 'Fn::Join': [ ':', [ 'arn:aws:sns', Ref: 'AWS::Region', Ref: 'AWS::AccountId', 'housing-finance-alarms' ] ]
 
+    LambdaSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: "Lambda SG for ${self:service} (${self:provider.stage}) - replaces use of the VPC default SG"
+        VpcId: ${self:custom.vpc.${opt:stage}.vpcId}
+        Tags:
+          - Key: Team
+            Value: HousingFinance
+          - Key: Name
+            Value: ${self:service}-${self:provider.stage}-lambda-sg
+
 custom:
   prune:
     automatic: true
