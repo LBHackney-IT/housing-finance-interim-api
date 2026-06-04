@@ -130,20 +130,20 @@ workflows:
             - api-nuget-token-context
       - assume-role-development:
           context: api-assume-role-housing-development-context
-          requires:
-            - build-and-test
-          filters:
-            branches:
-              only: development
+          # requires:
+          #   - build-and-test
+          # filters:
+          #   branches:
+          #     only: development
       - deploy-to-development:
           context:
             - api-nuget-token-context
             - "Serverless Framework"
           requires:
             - assume-role-development  
-          filters:
-            branches:
-              only: development     
+          # filters:
+          #   branches:
+          #     only: development     
   check-and-deploy-staging-and-production:
     jobs:
       - build-and-test:
