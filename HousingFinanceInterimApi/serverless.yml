@@ -1078,7 +1078,7 @@ resources:
       Type: AWS::Logs::MetricFilter
       Properties:
         LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-load-tenagree
-        FilterPattern: "ALARM: Spreadsheet row parsing failed"
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
         MetricTransformations:
           - MetricValue: "1"
             MetricNamespace: "HousingFinance/SpreadsheetErrors"
@@ -1104,7 +1104,7 @@ resources:
       Type: AWS::Logs::MetricFilter
       Properties:
         LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-action-diary
-        FilterPattern: "ALARM: Spreadsheet row parsing failed"
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
         MetricTransformations:
           - MetricValue: "1"
             MetricNamespace: "HousingFinance/SpreadsheetErrors"
@@ -1130,7 +1130,7 @@ resources:
       Type: AWS::Logs::MetricFilter
       Properties:
         LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-susp-cash
-        FilterPattern: "ALARM: Spreadsheet row parsing failed"
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
         MetricTransformations:
           - MetricValue: "1"
             MetricNamespace: "HousingFinance/SpreadsheetErrors"
@@ -1156,7 +1156,7 @@ resources:
       Type: AWS::Logs::MetricFilter
       Properties:
         LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-susp-hb
-        FilterPattern: "ALARM: Spreadsheet row parsing failed"
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
         MetricTransformations:
           - MetricValue: "1"
             MetricNamespace: "HousingFinance/SpreadsheetErrors"
@@ -1182,7 +1182,7 @@ resources:
       Type: AWS::Logs::MetricFilter
       Properties:
         LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-adjustments-trans
-        FilterPattern: "ALARM: Spreadsheet row parsing failed"
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
         MetricTransformations:
           - MetricValue: "1"
             MetricNamespace: "HousingFinance/SpreadsheetErrors"
@@ -1208,7 +1208,7 @@ resources:
       Type: AWS::Logs::MetricFilter
       Properties:
         LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-charges
-        FilterPattern: "ALARM: Spreadsheet row parsing failed"
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
         MetricTransformations:
           - MetricValue: "1"
             MetricNamespace: "HousingFinance/SpreadsheetErrors"
@@ -1234,7 +1234,7 @@ resources:
       Type: AWS::Logs::MetricFilter
       Properties:
         LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-direct-debit
-        FilterPattern: "ALARM: Spreadsheet row parsing failed"
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
         MetricTransformations:
           - MetricValue: "1"
             MetricNamespace: "HousingFinance/SpreadsheetErrors"
