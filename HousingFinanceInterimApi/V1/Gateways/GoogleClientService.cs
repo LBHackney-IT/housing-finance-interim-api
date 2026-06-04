@@ -374,7 +374,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
                 if (hasErrors)
                 {
-                    LoggingHandler.LogInfo("ALARM: Spreadsheet row parsing failed. Some rows were skipped.");
+                    LoggingHandler.LogError("ALARM: Spreadsheet row parsing failed. Some rows were skipped.");
                 }
 
                 return entities;
