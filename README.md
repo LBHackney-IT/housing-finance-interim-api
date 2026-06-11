@@ -168,6 +168,16 @@ If changes to the database schema are made then the docker image for the databas
 - Test database schemas should match up with production database schema
 - Have integration tests which test from the PostgreSQL database to API Gateway
 
+## Architecture
+
+### File Processing Pipeline
+
+The diagram below shows how cash files and housing benefit files flow through the system (C4 Container view).
+
+![File Processing Pipeline](docs/finance-processing-pipeline.svg)
+
+This diagram is editable, in case the process changes in the future.
+
 ## Data Migrations
 ### A good data migration
 - Record failure logs

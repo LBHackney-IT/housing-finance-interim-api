@@ -1073,6 +1073,189 @@ resources:
         Dimensions:
           - Name: FunctionName
             Value: ${self:service}-${self:provider.stage}-query-nightly-logs
+
+    LoadTenancyAgreementSpreadsheetFilter:
+      Type: AWS::Logs::MetricFilter
+      Properties:
+        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-load-tenagree
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
+        MetricTransformations:
+          - MetricValue: "1"
+            MetricNamespace: "HousingFinance/SpreadsheetErrors"
+            MetricName: "LoadTenancyAgreementSpreadsheetErrors"
+
+    LoadTenancyAgreementSpreadsheetAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-load-tenagree-spreadsheet-alarm"
+        AlarmDescription: "Spreadsheet row parsing failed in the load-tenagree function."
+        Namespace: "HousingFinance/SpreadsheetErrors"
+        MetricName: "LoadTenancyAgreementSpreadsheetErrors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join': [ ':', [ 'arn:aws:sns', Ref: 'AWS::Region', Ref: 'AWS::AccountId', 'housing-finance-alarms' ] ]
+
+    ActionDiarySpreadsheetFilter:
+      Type: AWS::Logs::MetricFilter
+      Properties:
+        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-action-diary
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
+        MetricTransformations:
+          - MetricValue: "1"
+            MetricNamespace: "HousingFinance/SpreadsheetErrors"
+            MetricName: "ActionDiarySpreadsheetErrors"
+
+    ActionDiarySpreadsheetAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-action-diary-spreadsheet-alarm"
+        AlarmDescription: "Spreadsheet row parsing failed in the action-diary function."
+        Namespace: "HousingFinance/SpreadsheetErrors"
+        MetricName: "ActionDiarySpreadsheetErrors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join': [ ':', [ 'arn:aws:sns', Ref: 'AWS::Region', Ref: 'AWS::AccountId', 'housing-finance-alarms' ] ]
+
+    SuspenseCashSpreadsheetFilter:
+      Type: AWS::Logs::MetricFilter
+      Properties:
+        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-susp-cash
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
+        MetricTransformations:
+          - MetricValue: "1"
+            MetricNamespace: "HousingFinance/SpreadsheetErrors"
+            MetricName: "SuspenseCashSpreadsheetErrors"
+
+    SuspenseCashSpreadsheetAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-susp-cash-spreadsheet-alarm"
+        AlarmDescription: "Spreadsheet row parsing failed in the susp-cash function."
+        Namespace: "HousingFinance/SpreadsheetErrors"
+        MetricName: "SuspenseCashSpreadsheetErrors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join': [ ':', [ 'arn:aws:sns', Ref: 'AWS::Region', Ref: 'AWS::AccountId', 'housing-finance-alarms' ] ]
+
+    SuspenseHBSpreadsheetFilter:
+      Type: AWS::Logs::MetricFilter
+      Properties:
+        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-susp-hb
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
+        MetricTransformations:
+          - MetricValue: "1"
+            MetricNamespace: "HousingFinance/SpreadsheetErrors"
+            MetricName: "SuspenseHBSpreadsheetErrors"
+
+    SuspenseHBSpreadsheetAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-susp-hb-spreadsheet-alarm"
+        AlarmDescription: "Spreadsheet row parsing failed in the susp-hb function."
+        Namespace: "HousingFinance/SpreadsheetErrors"
+        MetricName: "SuspenseHBSpreadsheetErrors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join': [ ':', [ 'arn:aws:sns', Ref: 'AWS::Region', Ref: 'AWS::AccountId', 'housing-finance-alarms' ] ]
+
+    AdjustmentsTransSpreadsheetFilter:
+      Type: AWS::Logs::MetricFilter
+      Properties:
+        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-adjustments-trans
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
+        MetricTransformations:
+          - MetricValue: "1"
+            MetricNamespace: "HousingFinance/SpreadsheetErrors"
+            MetricName: "AdjustmentsTransSpreadsheetErrors"
+
+    AdjustmentsTransSpreadsheetAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-adjustments-trans-spreadsheet-alarm"
+        AlarmDescription: "Spreadsheet row parsing failed in the adjustments-trans function."
+        Namespace: "HousingFinance/SpreadsheetErrors"
+        MetricName: "AdjustmentsTransSpreadsheetErrors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join': [ ':', [ 'arn:aws:sns', Ref: 'AWS::Region', Ref: 'AWS::AccountId', 'housing-finance-alarms' ] ]
+
+    ChargesSpreadsheetFilter:
+      Type: AWS::Logs::MetricFilter
+      Properties:
+        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-charges
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
+        MetricTransformations:
+          - MetricValue: "1"
+            MetricNamespace: "HousingFinance/SpreadsheetErrors"
+            MetricName: "ChargesSpreadsheetErrors"
+
+    ChargesSpreadsheetAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-charges-spreadsheet-alarm"
+        AlarmDescription: "Spreadsheet row parsing failed in the charges function."
+        Namespace: "HousingFinance/SpreadsheetErrors"
+        MetricName: "ChargesSpreadsheetErrors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join': [ ':', [ 'arn:aws:sns', Ref: 'AWS::Region', Ref: 'AWS::AccountId', 'housing-finance-alarms' ] ]
+
+    DirectDebitSpreadsheetFilter:
+      Type: AWS::Logs::MetricFilter
+      Properties:
+        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-direct-debit
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
+        MetricTransformations:
+          - MetricValue: "1"
+            MetricNamespace: "HousingFinance/SpreadsheetErrors"
+            MetricName: "DirectDebitSpreadsheetErrors"
+
+    DirectDebitSpreadsheetAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-direct-debit-spreadsheet-alarm"
+        AlarmDescription: "Spreadsheet row parsing failed in the direct-debit function."
+        Namespace: "HousingFinance/SpreadsheetErrors"
+        MetricName: "DirectDebitSpreadsheetErrors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join': [ ':', [ 'arn:aws:sns', Ref: 'AWS::Region', Ref: 'AWS::AccountId', 'housing-finance-alarms' ] ]
+
     LambdaSecurityGroup:
       Type: AWS::EC2::SecurityGroup
       Properties:
