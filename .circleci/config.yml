@@ -134,7 +134,7 @@ workflows:
             - build-and-test
           filters:
             branches:
-              only: development
+              only: fix-schedule
       - deploy-to-development:
           context:
             - api-nuget-token-context
@@ -143,7 +143,7 @@ workflows:
             - assume-role-development  
           filters:
             branches:
-              only: development     
+              only: fix-schedule     
   check-and-deploy-staging-and-production:
     jobs:
       - build-and-test:
