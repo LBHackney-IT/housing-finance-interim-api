@@ -1,5 +1,4 @@
 service: housing-finance-interim-api
-frameworkVersion: '4.33.0'
 provider:
   name: aws
   timeout: 300
@@ -72,10 +71,10 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadTenancyAgreement
     role: lambdaExecutionRole
     events:
-        - schedule:
-            rate: cron(0 0 * * ? *)
+        - eventBridge:
+            enabled: true
+            schedule: cron(0 0 * * ? *)
             timezone: Europe/London
-            method: scheduler
   importCashFile:
     name: ${self:service}-${self:provider.stage}-cash-file
     description: "The scheduler to import cash files from Google drives."
@@ -122,10 +121,10 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::RefreshOperatingBalance
     role: lambdaExecutionRole
     events:
-        - schedule:
-            rate: cron(45 6 * * ? *)
+        - eventBridge:
+            enabled: true
+            schedule: cron(45 6 * * ? *)
             timezone: Europe/London
-            method: scheduler
   refreshManageArrearsTables:
     name: ${self:service}-${self:provider.stage}-refresh-ma-cur-bal
     description: "The scheduler to refresh manage arrears balance based on current balance table."
@@ -185,10 +184,10 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadActionDiary
     role: lambdaExecutionRole
     events:
-        - schedule:
-            rate: cron(0 3 * * ? *)
+        - eventBridge:
+            enabled: true
+            schedule: cron(0 3 * * ? *)
             timezone: Europe/London
-            method: scheduler
   generateRentPosition:
     name: ${self:service}-${self:provider.stage}-rent-position
     description: "The scheduler to generate rent position csv file. Run at 05:00 AM"
@@ -196,10 +195,10 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::GenerateRentPosition
     role: lambdaExecutionRole
     events:
-        - schedule:
-            rate: cron(15 7 * * ? *)
+        - eventBridge:
+            enabled: true
+            schedule: cron(15 7 * * ? *)
             timezone: Europe/London
-            method: scheduler
   importAdjustmentsTransactions:
     name: ${self:service}-${self:provider.stage}-adjustments-trans
     description: "The scheduler to import adjustments transactions from spreadsheet. Runs at 2:45 AM."
@@ -207,10 +206,10 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadAdjustmentsTransactions
     role: lambdaExecutionRole
     events:
-        - schedule:
-            rate: cron(45 2 * * ? *)
+        - eventBridge:
+            enabled: true
+            schedule: cron(45 2 * * ? *)
             timezone: Europe/London
-            method: scheduler
   suspenseCash:
     name: ${self:service}-${self:provider.stage}-susp-cash
     description: "The scheduler to load and reverse suspense cash files. Run at 03:05 AM"
@@ -218,10 +217,10 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadSuspenseCashTransactions
     role: lambdaExecutionRole
     events:
-        - schedule:
-            rate: cron(5 3 * * ? *)
+        - eventBridge:
+            enabled: true
+            schedule: cron(5 3 * * ? *)
             timezone: Europe/London
-            method: scheduler
   suspenseHousingBenefit:
     name: ${self:service}-${self:provider.stage}-susp-hb
     description: "The scheduler to load and reverse suspense hb files. Run at 03:10 AM"
@@ -229,10 +228,10 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::LoadSuspenseHousingBenefitTransactions
     role: lambdaExecutionRole
     events:
-        - schedule:
-            rate: cron(10 3 * * ? *)
+        - eventBridge:
+            enabled: true
+            schedule: cron(10 3 * * ? *)
             timezone: Europe/London
-            method: scheduler
   generateReport:
     name: ${self:service}-${self:provider.stage}-gen-report
     description: "The scheduler to generate google drive reports."
@@ -246,19 +245,19 @@ functions:
     handler: HousingFinanceInterimApi::HousingFinanceInterimApi.Handler::ParseNightlyProcessLogs
     role: lambdaExecutionRole
     events:
-        - schedule:
-            rate: cron(30 7 * * ? *)
+        - eventBridge:
+            enabled: true
+            schedule: cron(30 7 * * ? *)
             timezone: Europe/London
-            method: scheduler
 stepFunctions:
   stateMachines:
     hfstepfunccashfile:
       name: HFCashFileStateMachine
       events:
-        - schedule:
-            rate: cron(0 2 * * ? *)
+        - eventBridge:
+            enabled: true
+            schedule: cron(0 2 * * ? *)
             timezone: Europe/London
-            method: scheduler
       definition:
         Comment: "Cash files process step function deployed via serverless. Run at 02:00 AM"
         StartAt: ImportCashFile
@@ -297,10 +296,10 @@ stepFunctions:
     hfstepfunchousingfile:
       name: HFHousingFileStateMachine
       events:        
-        - schedule:
-            rate: cron(0 6 ? * MON *)
+        - eventBridge:
+            enabled: true
+            schedule: cron(0 6 ? * MON *)
             timezone: Europe/London
-            method: scheduler
       definition:
         Comment: "Housing files process step function deployed via serverless. Run at 06:00 AM only Monday"        
         StartAt: CheckHousingFiles
@@ -354,10 +353,10 @@ stepFunctions:
     hfstepfuncdirectdebit:
       name: HFDirectDebitStateMachine
       events:
-        - schedule:
-            rate: cron(30 2 * * ? *)
+        - eventBridge:
+            enabled: true
+            schedule: cron(30 2 * * ? *)
             timezone: Europe/London
-            method: scheduler
       definition:
         Comment: "Direct debit process step function deployed via serverless. Run at 02:30 AM"
         StartAt: ImportDirectDebit
@@ -483,10 +482,10 @@ stepFunctions:
     hfstepfunccurentbalance:
       name: HFCurrentBalanceStateMachine
       events:
-        - schedule:
-            rate: cron(10 6 * * ? *)
+        - eventBridge:
+            enabled: true
+            schedule: cron(10 6 * * ? *)
             timezone: Europe/London
-            method: scheduler
       definition:
         Comment: "Current balance process step function deployed via serverless. Run at 06:10 AM"
         StartAt: RefreshCurrentBalance
@@ -525,10 +524,10 @@ stepFunctions:
     hfstepfuncreport:
       name: HFReportsStateMachine
       events:
-        - schedule:
-            rate: cron(0/30 * * * ? *)
+        - eventBridge:
+            enabled: true
+            schedule: cron(0/30 * * * ? *)
             timezone: Europe/London
-            method: scheduler
       definition:
         Comment: "Reports step function deployed via serverless. Run every 30 min"
         StartAt: GenerateReport
