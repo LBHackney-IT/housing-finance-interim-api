@@ -1,4 +1,5 @@
 service: housing-finance-interim-api
+frameworkVersion: '4.33.0'
 provider:
   name: aws
   timeout: 300
