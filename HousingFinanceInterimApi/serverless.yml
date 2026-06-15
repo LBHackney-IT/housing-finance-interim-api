@@ -254,9 +254,9 @@ stepFunctions:
     hfstepfunccashfile:
       name: HFCashFileStateMachine
       events:
-        - eventBridge:
+        - schedule:
+            rate: cron(0 2 * * ? *)
             enabled: true
-            expression: cron(0 2 * * ? *)
       definition:
         Comment: "Cash files process step function deployed via serverless. Run at 02:00 AM"
         StartAt: ImportCashFile
@@ -295,9 +295,9 @@ stepFunctions:
     hfstepfunchousingfile:
       name: HFHousingFileStateMachine
       events:        
-        - eventBridge:
+        - schedule:
+            rate: cron(0 6 ? * MON *)
             enabled: true
-            expression: cron(0 6 ? * MON *)
       definition:
         Comment: "Housing files process step function deployed via serverless. Run at 06:00 AM only Monday"        
         StartAt: CheckHousingFiles
@@ -351,9 +351,9 @@ stepFunctions:
     hfstepfuncdirectdebit:
       name: HFDirectDebitStateMachine
       events:
-        - eventBridge:
+        - schedule:
+            rate: cron(30 2 * * ? *)
             enabled: true
-            expression: cron(30 2 * * ? *)
       definition:
         Comment: "Direct debit process step function deployed via serverless. Run at 02:30 AM"
         StartAt: ImportDirectDebit
@@ -479,9 +479,9 @@ stepFunctions:
     hfstepfunccurentbalance:
       name: HFCurrentBalanceStateMachine
       events:
-        - eventBridge:
+        - schedule:
+            rate: cron(10 6 * * ? *)
             enabled: true
-            expression: cron(10 6 * * ? *)
       definition:
         Comment: "Current balance process step function deployed via serverless. Run at 06:10 AM"
         StartAt: RefreshCurrentBalance
@@ -520,9 +520,9 @@ stepFunctions:
     hfstepfuncreport:
       name: HFReportsStateMachine
       events:
-        - eventBridge:
+        - schedule:
+            rate: cron(0/30 * * * ? *)
             enabled: true
-            expression: cron(0/30 * * * ? *)
       definition:
         Comment: "Reports step function deployed via serverless. Run every 30 min"
         StartAt: GenerateReport
