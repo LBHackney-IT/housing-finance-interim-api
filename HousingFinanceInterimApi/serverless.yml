@@ -1202,7 +1202,7 @@ resources:
             Value: ${self:service}-${self:provider.stage}-lambda-sg
 
 custom:
-  schedulesEnabled: true
+  schedulesEnabled: false
   prune:
     automatic: true
     number: 10
