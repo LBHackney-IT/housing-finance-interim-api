@@ -1164,6 +1164,32 @@ resources:
         AlarmActions:
           - 'Fn::Join': [ ':', [ 'arn:aws:sns', Ref: 'AWS::Region', Ref: 'AWS::AccountId', 'housing-finance-alarms' ] ]
 
+    ChargesIngestSpreadsheetFilter:
+      Type: AWS::Logs::MetricFilter
+      Properties:
+        LogGroupName: hfs-nightly-jobs-charges-ingest-ecs-task-logs
+        FilterPattern: '"ALARM: Spreadsheet row parsing failed"'
+        MetricTransformations:
+          - MetricValue: "1"
+            MetricNamespace: "HousingFinance/SpreadsheetErrors"
+            MetricName: "ChargesIngestSpreadsheetErrors"
+
+    ChargesIngestSpreadsheetAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: "${self:provider.stage}-charges-ingest-spreadsheet-alarm"
+        AlarmDescription: "Spreadsheet row parsing failed in the HfsChargesContainer Fargate task (hfs-nightly-jobs-charges-ingest)."
+        Namespace: "HousingFinance/SpreadsheetErrors"
+        MetricName: "ChargesIngestSpreadsheetErrors"
+        Statistic: Sum
+        Threshold: 0
+        ComparisonOperator: GreaterThanThreshold
+        EvaluationPeriods: 1
+        Period: 60
+        TreatMissingData: notBreaching
+        AlarmActions:
+          - 'Fn::Join': [ ':', [ 'arn:aws:sns', Ref: 'AWS::Region', Ref: 'AWS::AccountId', 'housing-finance-alarms' ] ]
+
     DirectDebitSpreadsheetFilter:
       Type: AWS::Logs::MetricFilter
       Properties:
