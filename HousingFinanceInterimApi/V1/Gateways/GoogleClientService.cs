@@ -354,11 +354,11 @@ namespace HousingFinanceInterimApi.V1.Gateways
                 var entities = new List<_TEntity>();
                 bool hasErrors = false;
 
-                foreach (var rowObject in rowObjects)
+                for (int i = 0; i < rowObjects.Count; i++)
                 {
                     try
                     {
-                        string convertedJson = JsonConvert.SerializeObject(rowObject);
+                        string convertedJson = JsonConvert.SerializeObject(rowObjects[i]);
                         var entity = JsonConvert.DeserializeObject<_TEntity>(convertedJson);
                         if (entity != null)
                         {
@@ -368,7 +368,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     catch (Exception exc)
                     {
                         hasErrors = true;
-                        LoggingHandler.LogWarning($"Skip row: Failure parsing row. Message: {exc.Message}");
+                        int spreadsheetRowNumber = i + 2; // exclude header
+                        LoggingHandler.LogWarning($"Skip row: Failure parsing row {spreadsheetRowNumber}. Message: {exc.Message}");
                     }
                 }
 
