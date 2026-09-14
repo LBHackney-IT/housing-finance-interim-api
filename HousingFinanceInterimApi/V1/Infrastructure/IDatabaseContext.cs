@@ -11,7 +11,7 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
     {
         Task<IList<OperatingBalance>> GetOperatingBalancesAsync(DateTime? startDate, DateTime? endDate, int startWeek, int startYear, int endWeek, int endYear);
         Task<IList<Payment>> GetPaymentsAsync(string tenancyAgreementRef, string rentAccount, string householdRef, int count, string order);
-        Task UpdateAssetDetails(UpdateAssetDetailsQuery query, UpdateAssetDetailsRequest request);
+        Task UpdateAssetDetails(string propertyReference, string postPreamble, string addressLine1);
         Task<IList<Tenancy>> GetTenanciesAsync(string tenancyAgreementRef, string rentAccount, string householdRef);
         Task<IList<TenancyTransaction>> GetTenancyTransactionsAsync(string tenancyAgreementRef, string rentAccount, string householdRef, int count, string order);
         Task<IList<TenancyTransaction>> GetTenancyTransactionsByDateAsync(string tenancyAgreementRef, string rentAccount, string householdRef, DateTime startDate, DateTime endDate);
