@@ -16,15 +16,8 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
         public async Task UpdateAssetDetails(UpdateAssetDetailsQuery query, UpdateAssetDetailsRequest request)
         {
-            await _context.UpdateAssetDetails(
-                query.PropertyReference,
-                request.PostPreamble,
-                request.AddressLine1,
-                request.AddressLine2,
-                request.AddressLine3,
-                request.AddressLine4,
-                request.PostCode
-            ).ConfigureAwait(false);
+            var fullAddress = $"{request.AddressLine1}, {request.AddressLine2}, {request.AddressLine3}, {request.AddressLine4}";
+            await _context.UpdateAssetDetails(query.PropertyReference, request.PostPreamble, fullAddress).ConfigureAwait(false);
         }
     }
 }

@@ -173,16 +173,9 @@ namespace HousingFinanceInterimApi.V1.Infrastructure
         /// </summary>
         private DbSet<Payment> PaymentsValue { get; set; }
 
-        public async Task UpdateAssetDetails(
-            string propertyReference,
-            string postPreamble,
-            string addressLine1,
-            string addressLine2,
-            string addressLine3,
-            string addressLine4,
-            string postCode)
+        public async Task UpdateAssetDetails(string propertyReference, string postPreamble, string fullAddress)
         {
-            await PerformInterpolatedTransaction($"usp_UpdateAssetDetails {propertyReference}, {postPreamble}, {addressLine1}, {addressLine2}, {addressLine3}, {addressLine4}, {postCode}")
+            await PerformInterpolatedTransaction($"usp_UpdateAssetDetails {propertyReference}, {postPreamble}, {fullAddress}")
                 .ConfigureAwait(false);
         }
 
