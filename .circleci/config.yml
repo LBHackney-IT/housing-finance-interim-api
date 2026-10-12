@@ -103,7 +103,7 @@ workflows:
             - build-and-test
           filters:
             branches:
-              only: development
+              only: dummy-authorization-bump-test
       - deploy-to-development:
           context:
             - api-nuget-token-context
@@ -112,4 +112,4 @@ workflows:
             - assume-role-development  
           filters:
             branches:
-              only: development     
+              only: dummy-authorization-bump-test
