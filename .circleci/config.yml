@@ -68,16 +68,6 @@ commands:
             sls deploy --stage <<parameters.stage>>
 
 jobs:
-  check-code-formatting:
-    executor: docker-dotnet
-    steps:
-      - checkout
-      - run:
-          name: Install dotnet format
-          command: dotnet tool install dotnet-format --tool-path ./dotnet-format-local/
-      - run:
-          name: Run formatter check
-          command: ./dotnet-format-local/dotnet-format --check
   build-and-test:
     executor: docker-python
     steps:
@@ -95,36 +85,15 @@ jobs:
     steps:
       - assume-role-and-persist-workspace:
           aws-account: $AWS_ACCOUNT_DEVELOPMENT
-  assume-role-staging:
-    executor: docker-python
-    steps:
-      - assume-role-and-persist-workspace:
-          aws-account: $AWS_ACCOUNT_STAGING
-  assume-role-production:
-    executor: docker-python
-    steps:
-      - assume-role-and-persist-workspace:
-          aws-account: $AWS_ACCOUNT_PRODUCTION
   deploy-to-development:
     executor: docker-dotnet
     steps:
       - deploy-lambda:
           stage: "development"
-  deploy-to-staging:
-    executor: docker-dotnet
-    steps:
-      - deploy-lambda:
-          stage: "staging"
-  deploy-to-production:
-    executor: docker-dotnet
-    steps:
-      - deploy-lambda:
-          stage: "production"
 
 workflows:
   check-and-deploy-development:
     jobs:
-      - check-code-formatting        
       - build-and-test:
           context:
             - api-nuget-token-context
@@ -144,51 +113,3 @@ workflows:
           filters:
             branches:
               only: development     
-  check-and-deploy-staging-and-production:
-    jobs:
-      - build-and-test:
-          context:
-            - api-nuget-token-context
-          filters:
-            branches:
-              only: master
-      - assume-role-staging:
-          context: api-assume-role-housing-staging-context
-          requires:
-              - build-and-test
-          filters:
-            branches:
-              only: master
-      - deploy-to-staging:
-          context:
-            - api-nuget-token-context
-            - "Serverless Framework"
-          requires:
-            - assume-role-staging
-          filters:
-            branches:
-              only: master
-      - permit-production-release:
-          type: approval
-          requires:
-            - deploy-to-staging
-          filters:
-            branches:
-              only: master
-      - assume-role-production:
-          context: api-assume-role-housing-production-context
-          requires:
-              - permit-production-release
-          filters:
-            branches:
-              only: master
-      - deploy-to-production:
-          context:
-            - api-nuget-token-context
-            - "Serverless Framework"
-          requires:
-            - permit-production-release
-            - assume-role-production
-          filters:
-            branches:
-              only: master
