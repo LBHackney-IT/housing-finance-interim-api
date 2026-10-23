@@ -166,14 +166,9 @@ This is required to connect the API to a functional database locally.
 `docker compose` reads the `.env` file in the root directory and connects to the port-forwarded database on
 `localhost:1433` using host networking.
 
-On Windows you need Docker Desktop running with WSL2 integration enabled. To authenticate against AWS
-Elastic Container Registry (for the base image):
+On Windows you need Docker Desktop running with WSL2 integration enabled.
 
-```sh
-aws ecr get-login-password --profile {profile}
-```
-
-Then, from the root directory:
+From the root directory:
 
 ```sh
 make build && make serve
