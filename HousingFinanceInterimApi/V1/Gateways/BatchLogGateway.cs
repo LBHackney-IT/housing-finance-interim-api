@@ -43,7 +43,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             try
             {
-                var batchLog = await _context.BatchLogs.FirstOrDefaultAsync(item => item.Id == batchId)
+                var batchLog = await _context.BatchLogs.AsQueryable().FirstOrDefaultAsync(item => item.Id == batchId)
                     .ConfigureAwait(false);
 
                 if (batchLog == null)
@@ -63,14 +63,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
         public async Task<IList<BatchLogDomain>> ListLastMonthAsync()
         {
-            var results = await _context.BatchLogs.Where(item => item.StartTime >= DateTimeOffset.Now.AddMonths(-1))
+            var results = await _context.BatchLogs.AsQueryable().Where(item => item.StartTime >= DateTimeOffset.Now.AddMonths(-1))
                 .ToListAsync().ConfigureAwait(false);
             return results.ToDomain();
         }
 
         public async Task<BatchLogDomain> GetAsync(string type)
         {
-            var batchLog = await _context.BatchLogs.FirstOrDefaultAsync(item =>
+            var batchLog = await _context.BatchLogs.AsQueryable().FirstOrDefaultAsync(item =>
                     item.Type.Equals(type) &&
                     item.StartTime.Date.Equals(DateTime.Now.Date) &&
                     item.IsSuccess.Equals(true))

@@ -46,7 +46,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
         public async Task<IList<BatchLogErrorDomain>> ListLastMonthAsync()
         {
-            var results = await _context.BatchLogErrors.Where(item => item.Timestamp >= DateTimeOffset.Now.AddMonths(-1))
+            var results = await _context.BatchLogErrors.AsQueryable().Where(item => item.Timestamp >= DateTimeOffset.Now.AddMonths(-1))
                 .ToListAsync().ConfigureAwait(false);
             return results.ToDomain();
         }
