@@ -1,12 +1,18 @@
 # Housing Finance Interim API
 
 The Housing Finance Interim API is the London Borough of Hackney (LBH) **interim housing finance** service.
-It exposes read/report endpoints over the finance database and hosts the scheduled **nightly finance
+It exposes read/report endpoints over the finance database and hosts most of the scheduled **nightly finance
 processing jobs** — importing cash files, housing benefit files, direct debits, charges, action diaries and
 adjustments from Google Sheets/Drive and spreadsheets into SQL Server, refreshing balances, and generating
 reports.
 
-It runs as **one AWS Lambda** for the HTTP API plus a set of scheduled Lambda functions and step functions.
+It doesn't include the charges load process, which has been split to a separate repository - [HFS Charges Container](https://github.com/LBHackney-IT/HfsChargesContainer)
+
+These overnight processes are triggered by an external service - the [HFS Overnight Process Orchestrator](https://github.com/LBHackney-IT/hfs-overnight-process-orchestrator)
+
+The SQL for these overnight processes including unit tests are contained in [HFS Database Objects](https://github.com/LBHackney-IT/HFSDatabaseObjects)
+
+It deploys one AWS Lambda for the HTTP API plus a set of scheduled Lambda functions and step functions.
 
 ## Stack
 
@@ -60,19 +66,7 @@ and implemented in `HousingFinanceInterimApi/Handler.cs`. All cron triggers are 
 `custom.schedulesEnabled` flag (`false`), which is why the individual `schedule` events are disabled by
 default.
 
-**Functions:** `loadTenancyAgreement` (00:00), `importCashFile`, `importCashFileTransactions`,
-`checkCashFiles`, `checkHousingFiles`, `importHousingFile`, `importHousingFileTransactions`,
-`refreshCurrentBalance`, `refreshOperatingBalance` (06:45), `refreshManageArrearsTables`,
-`importDirectDebit`, `importDirectDebitTransactions`, `importDirectDebitTransactionsOnDemand`,
-`checkChargesBatchYears`, `importCharges`, `importChargesHistory`, `importChargesTransactions`,
-`importChargesTransactionsOnDemand`, `loadActionDiary` (03:00), `generateRentPosition` (07:15),
-`importAdjustmentsTransactions` (02:45), `suspenseCash` (03:05), `suspenseHousingBenefit` (03:10),
-`generateReport`, `parseNightlyProcessLogs` (07:30).
-
-**Step functions:** `HFCashFileStateMachine` (02:00 daily), `HFHousingFileStateMachine` (06:00 Mondays),
-`HFDirectDebitStateMachine` (02:30 daily), `HFCurrentBalanceStateMachine` (06:10 daily) and
-`HFReportsStateMachine` (every 30 minutes — the one schedule that is **not** gated by `schedulesEnabled`).
-Each Task state retries `States.All` three times with a backoff rate of 2.
+These scheduled jobs are triggered by the [hfs-overnight-process-orchestrator](https://github.com/LBHackney-IT/hfs-overnight-process-orchestrator/tree/main). See the repository's README for details on the sequence and functionality.
 
 ### Known limitations
 
@@ -90,15 +84,12 @@ Each Task state retries `States.All` three times with a backoff rate of 2.
 | Dependency | Detail |
 | --- | --- |
 | **SQL Server** | The single primary datastore. The connection string comes from the `CONNECTION_STRING` environment variable (SSM per stage in Lambda; `.env` locally; `finance_database.mk` generates one for the port-forwarded dev database). |
-| Entities / tables | `BatchLog`, `BatchLogError`, `ChargesBatchYears`, `GoogleFileSetting`, `UPCashDumpFileName`, `UPCashDump`, `UPHousingCashDumpFileName`, `UPHousingCashDump`, `ErrorLog`, `SSRentBreakdown`, `SSCurrentRentPosition`, `SSServiceChargePaymentsReceived`, `SSLeaseholdAccount`, `SSGarage`, `SSOtherHRA`, `SuspenseTransaction`, `SuspenseTransactionAux`, `ReportCashSuspenseAccount`, `ReportCashImport`, `BatchReport`, `ReportAccountBalance`, `NightlyProcessLog`, `ChargesAux`, `DirectDebitAux`, `ActionDiaryAux`, `AdjustmentAux`, `TenancyAgreementAux`, plus keyless views for `OperatingBalance`, `Payment`, `Tenancy`, `TenancyTransaction`, `Transaction` and `PRNTransactionEntity`. |
-| Stored procedures | ~50, e.g. `usp_GetOperatingBalancesByRentGroup`, `usp_UpdateAssetDetails`, `usp_GetTenancyTransactions[ByDate]`, `usp_RefreshManageArrears{Member,Property}`, `usp_GetTransactions`, `usp_Load*` (13), `usp_GetCashSuspenseAccountByYear`, `usp_GetReportAccountBalance`. The real schema lives in the database — `database/schema.sql` is only a 4-line stub used to initialise the test container. |
 | **Google Drive / Google Sheets** | Credentials from `GOOGLE_API_KEY` (the service-account JSON) in SSM; scopes `DriveService.Scope.Drive` and `SheetsService.Scope.SpreadsheetsReadonly`. Spreadsheet and folder IDs are not in code — they come from the `GoogleFileSetting` table (`GoogleIdentifier`, `FileType`, `Label`, `FileYear`, `StartDate`, `EndDate`). |
 | **Amazon S3** | `S3_BUCKET_NAME` and `S3_OBJECT_PREFIX` from SSM. Used to list, download, copy (`OK_`/`NOK_` prefixes) and delete cash/housing-benefit files. |
 | **Amazon CloudWatch Logs** | `services.AddAWSService<IAmazonCloudWatchLogs>()`; nightly-process log groups (17, built from `ENVIRONMENT_NAME`) are queried and the results persisted to `NightlyProcessLog`. |
 | **SNS** | Per-Lambda error alarms and spreadsheet-error metric filters publish to the `housing-finance-alarms` topic. |
 | **AWS SSM Parameter Store** | DB host/port/database/username/password, Google credentials, wait duration, batch size, file regexes, accepted origins, charges batch years, S3 bucket/prefix and allowed groups — all under `/housing-finance/{stage}/...`. |
 | **AWS X-Ray** | Tracing on the API and the scheduled functions. |
-| PostgreSQL / DynamoDB | **Not used.** The earlier README (and a few settings) referred to PostgreSQL; the datastore is SQL Server. `database.env` configures the SQL Server test container. |
 
 ## Development
 
