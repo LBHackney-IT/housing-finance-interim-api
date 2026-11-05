@@ -2,15 +2,12 @@ version: 2.1
 
 orbs:
   aws_assume_role: lbh-hackit/aws_assume_role@0.1.1
-  node: circleci/node@6.3.0
+  node: circleci/node@7.2.1
 
 executors:
   docker-python:
     docker:
-      - image: circleci/python:3.7
-  docker-terraform:
-    docker:
-      - image: "hashicorp/terraform:light"
+      - image: cimg/python:3.13
   docker-dotnet:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:10.0
