@@ -22,14 +22,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
         }
 
         public async Task<IList<GoogleFileSetting>> ListAsync()
-            => await _context.GoogleFileSettings.ToListAsync().ConfigureAwait(false);
+            => await _context.GoogleFileSettings.AsQueryable().ToListAsync().ConfigureAwait(false);
 
         public Task<List<GoogleFileSettingDomain>> GetSettingsByLabel(string label)
         {
             try
             {
                 var googleFileSettings = _context.GoogleFileSettings
-                    .Where(item => item.Label.Equals(label)).ToList();
+                    .AsQueryable().Where(item => item.Label.Equals(label)).ToList();
                 foreach (var setting in googleFileSettings)
                 {
                     LoggingHandler.LogInfo($"Google Identifier: {setting.GoogleIdentifier}, File Type: {setting.FileType}");

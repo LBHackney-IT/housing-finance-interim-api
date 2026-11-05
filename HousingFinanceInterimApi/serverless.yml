@@ -2,7 +2,7 @@ service: housing-finance-interim-api
 provider:
   name: aws
   timeout: 300
-  runtime: dotnet8
+  runtime: dotnet10
   vpc:
     securityGroupIds: ${self:custom.vpc.${opt:stage}.securityGroupIds}
     subnetIds: ${self:custom.vpc.${opt:stage}.subnetIds}
@@ -31,7 +31,7 @@ provider:
     ENVIRONMENT_NAME: ${self:provider.stage}
 
 package:
-  artifact: ./bin/release/net8.0/housing-finance-interim-api.zip
+  artifact: ./bin/release/net10.0/housing-finance-interim-api.zip
 
 functions:
   interimFinanceSystem:

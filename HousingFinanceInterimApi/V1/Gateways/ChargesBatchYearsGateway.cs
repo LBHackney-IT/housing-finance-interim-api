@@ -43,7 +43,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             try
             {
-                var chargesBatchYears = await _context.ChargesBatchYears.FirstOrDefaultAsync(item => item.ProcessingDate == DateTime.Now.Date && item.Year == year)
+                var chargesBatchYears = await _context.ChargesBatchYears.AsQueryable().FirstOrDefaultAsync(item => item.ProcessingDate == DateTime.Now.Date && item.Year == year)
                     .ConfigureAwait(false);
 
                 if (chargesBatchYears == null)
@@ -62,14 +62,14 @@ namespace HousingFinanceInterimApi.V1.Gateways
 
         public async Task<bool> ExistDataForToday()
         {
-            var results = await _context.ChargesBatchYears.Where(item => item.ProcessingDate == DateTime.Now.Date)
+            var results = await _context.ChargesBatchYears.AsQueryable().Where(item => item.ProcessingDate == DateTime.Now.Date)
                 .ToListAsync().ConfigureAwait(false);
             return results.Any();
         }
 
         public async Task<ChargesBatchYearDomain> GetPendingYear()
         {
-            var results = await _context.ChargesBatchYears.Where(item => item.ProcessingDate == DateTime.Now.Date && item.IsRead == false).OrderBy(o => o.Year)
+            var results = await _context.ChargesBatchYears.AsQueryable().Where(item => item.ProcessingDate == DateTime.Now.Date && item.IsRead == false).OrderBy(o => o.Year)
                 .ToListAsync().ConfigureAwait(false);
 
             return results.Any() ? results.First().ToDomain() : null;
