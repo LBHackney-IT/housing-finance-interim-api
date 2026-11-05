@@ -43,7 +43,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             try
             {
-                var batch = await _context.BatchReports.FirstOrDefaultAsync(item => item.Id == id)
+                var batch = await _context.BatchReports.AsQueryable().FirstOrDefaultAsync(item => item.Id == id)
                     .ConfigureAwait(false);
 
                 if (batch == null)
@@ -65,7 +65,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         public async Task<IList<BatchReportDomain>> ListAsync(string reportName)
         {
             var results = await _context.BatchReports
-                .Where(r => r.ReportName == reportName)
+                .AsQueryable().Where(r => r.ReportName == reportName)
                 .ToListAsync()
                 .ConfigureAwait(false);
             return results.ToDomain();
@@ -74,7 +74,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         public async Task<IList<BatchReportDomain>> ListPendingAsync()
         {
             var results = await _context.BatchReports
-                .Where(r => r.EndTime == null)
+                .AsQueryable().Where(r => r.EndTime == null)
                 .ToListAsync()
                 .ConfigureAwait(false);
 

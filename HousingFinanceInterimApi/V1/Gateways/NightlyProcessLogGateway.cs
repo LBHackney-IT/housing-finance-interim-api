@@ -143,7 +143,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
             try
             {
                 var logs = await _context.NightlyProcessLogs
-                    .Where(log => log.DateCreated.Date == createdDate.Date)
+                    .AsQueryable().Where(log => log.DateCreated.Date == createdDate.Date)
                     .OrderByDescending(log => log.DateCreated)
                     .ToListAsync()
                     .ConfigureAwait(false);

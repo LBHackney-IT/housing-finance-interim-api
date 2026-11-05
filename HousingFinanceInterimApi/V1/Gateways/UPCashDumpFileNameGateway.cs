@@ -40,7 +40,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         /// An instance of <see cref="UPCashDumpFileName" /> or null if no record found.
         /// </returns>
         public async Task<UPCashDumpFileName> GetAsync(string fileName)
-            => await _context.UpCashDumpFileNames.FirstOrDefaultAsync(item => item.FileName.Equals(fileName) && item.IsSuccess.Equals(true))
+            => await _context.UpCashDumpFileNames.AsQueryable().FirstOrDefaultAsync(item => item.FileName.Equals(fileName) && item.IsSuccess.Equals(true))
                 .ConfigureAwait(false);
 
 
@@ -78,7 +78,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
         {
             try
             {
-                var upCashDumpFileName = await _context.UpCashDumpFileNames.FirstOrDefaultAsync(item => item.Id == fileId).ConfigureAwait(false);
+                var upCashDumpFileName = await _context.UpCashDumpFileNames.AsQueryable().FirstOrDefaultAsync(item => item.Id == fileId).ConfigureAwait(false);
 
                 if (upCashDumpFileName == null)
                     return false;
