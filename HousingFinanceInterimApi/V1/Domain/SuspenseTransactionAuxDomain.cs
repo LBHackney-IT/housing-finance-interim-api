@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HousingFinanceInterimApi.V1.Domain
 {
-    public class SuspenseTransactionAuxDomain
+    public class SuspenseTransactionAuxDomain : ISpreadsheetImportRow
     {
         public long Id { get; set; }
 
@@ -16,7 +16,7 @@ namespace HousingFinanceInterimApi.V1.Domain
 
         [JsonProperty("Payment Date")]
         [JsonConverter(typeof(DateTimeFormat))]
-        public DateTime Date { get; set; }
+        public DateTime? Date { get; set; }
 
         [JsonProperty("Amount")]
         public decimal Amount { get; set; }
@@ -24,5 +24,6 @@ namespace HousingFinanceInterimApi.V1.Domain
         [JsonProperty("New Payment Ref")]
         public string NewRentAccount { get; set; }
 
+        public bool IsValid() => Date.HasValue;
     }
 }

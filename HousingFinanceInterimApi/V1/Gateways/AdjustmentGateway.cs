@@ -31,7 +31,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     PaymentRef = a.PaymentRef,
                     TransactionType = a.TransactionType,
                     Amount = a.Amount,
-                    TransactionDate = a.TransactionDate
+                    TransactionDate = a.TransactionDate.Value
                 }).ToList();
 
                 await _context.BulkInsertAsync(adjustmentAux, new BulkConfig { BatchSize = _batchSize }).ConfigureAwait(false);

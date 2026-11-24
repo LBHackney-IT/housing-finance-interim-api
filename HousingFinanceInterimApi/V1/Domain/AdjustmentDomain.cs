@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace HousingFinanceInterimApi.V1.Domain
 {
-    public class AdjustmentDomain
+    public class AdjustmentDomain : ISpreadsheetImportRow
     {
         public int Id { get; set; }
 
@@ -22,10 +22,12 @@ namespace HousingFinanceInterimApi.V1.Domain
 
         [JsonProperty("Adjustment Date")]
         [JsonConverter(typeof(DateTimeFormat))]
-        public DateTime TransactionDate { get; set; }
+        public DateTime? TransactionDate { get; set; }
 
         public bool IsRead { get; set; }
 
         public DateTimeOffset Timestamp { get; set; }
+
+        public bool IsValid() => TransactionDate.HasValue;
     }
 }

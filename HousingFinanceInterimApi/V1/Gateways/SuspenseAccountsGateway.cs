@@ -31,7 +31,7 @@ namespace HousingFinanceInterimApi.V1.Gateways
                     IdSuspenseTransaction = c.Id,
                     RentAccount = c.RentAccount,
                     Type = type,
-                    Date = c.Date,
+                    Date = c.Date.Value,
                     Amount = c.Amount,
                     NewRentAccount = c.NewRentAccount
                 }).ToList();

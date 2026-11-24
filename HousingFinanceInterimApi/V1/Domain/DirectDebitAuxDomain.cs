@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace HousingFinanceInterimApi.V1.Domain
 {
-    public class DirectDebitAuxDomain
+    public class DirectDebitAuxDomain : ISpreadsheetImportRow
     {
         public long Id { get; set; }
 
@@ -13,11 +13,13 @@ namespace HousingFinanceInterimApi.V1.Domain
 
         [JsonProperty("Date")]
         [JsonConverter(typeof(DateTimeFormat))]
-        public DateTime Date { get; set; }
+        public DateTime? Date { get; set; }
 
         [JsonProperty("Amount")]
         public decimal Amount { get; set; }
 
         public DateTimeOffset Timestamp { get; set; }
+
+        public bool IsValid() => Date.HasValue;
     }
 }

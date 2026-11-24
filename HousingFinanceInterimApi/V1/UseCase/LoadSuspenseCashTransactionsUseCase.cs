@@ -105,7 +105,7 @@ namespace HousingFinanceInterimApi.V1.UseCase
                 rows.Add(new List<object>() {
                     suspenseTransaction.Id,
                     suspenseTransaction.RentAccount,
-                    suspenseTransaction.Date.ToString("dd/MM/yyyy"),
+                    suspenseTransaction.Date?.ToString("dd/MM/yyyy") ?? string.Empty,
                     suspenseTransaction.Amount,
                     "" });
             }
