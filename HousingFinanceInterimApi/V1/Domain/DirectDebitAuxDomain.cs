@@ -20,6 +20,22 @@ namespace HousingFinanceInterimApi.V1.Domain
 
         public DateTimeOffset Timestamp { get; set; }
 
-        public bool IsValid() => Date.HasValue;
+        public bool IsValid(out string reason)
+        {
+            if (!Date.HasValue)
+            {
+                reason = "Date is missing or in an unrecognised format.";
+                return false;
+            }
+
+            if (!SpreadsheetFieldRules.IsAccountReference(RentAccount))
+            {
+                reason = "Rent Account must be 4 to 20 characters.";
+                return false;
+            }
+
+            reason = null;
+            return true;
+        }
     }
 }

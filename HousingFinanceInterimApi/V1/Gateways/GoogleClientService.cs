@@ -362,10 +362,10 @@ namespace HousingFinanceInterimApi.V1.Gateways
                         var entity = JsonConvert.DeserializeObject<_TEntity>(convertedJson);
                         if (entity != null)
                         {
-                            if (entity is ISpreadsheetImportRow importRow && !importRow.IsValid())
+                            if (entity is ISpreadsheetImportRow importRow && !importRow.IsValid(out var reason))
                             {
                                 hasErrors = true;
-                                LoggingHandler.LogWarning($"Skip row: Row {i + 2} failed validation. A required field is missing or in an unrecognised format.");
+                                LoggingHandler.LogWarning($"Skip row: Row {i + 2} failed validation. {reason}");
                             }
                             else
                             {

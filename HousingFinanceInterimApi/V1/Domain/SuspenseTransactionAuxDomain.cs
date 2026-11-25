@@ -24,6 +24,22 @@ namespace HousingFinanceInterimApi.V1.Domain
         [JsonProperty("New Payment Ref")]
         public string NewRentAccount { get; set; }
 
-        public bool IsValid() => Date.HasValue;
+        public bool IsValid(out string reason)
+        {
+            if (!Date.HasValue)
+            {
+                reason = "Payment Date is missing or in an unrecognised format.";
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(NewRentAccount) && !SpreadsheetFieldRules.IsAccountReference(NewRentAccount))
+            {
+                reason = "New Payment Ref must be 4 to 20 characters.";
+                return false;
+            }
+
+            reason = null;
+            return true;
+        }
     }
 }

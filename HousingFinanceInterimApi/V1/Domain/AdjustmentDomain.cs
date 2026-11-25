@@ -28,6 +28,28 @@ namespace HousingFinanceInterimApi.V1.Domain
 
         public DateTimeOffset Timestamp { get; set; }
 
-        public bool IsValid() => TransactionDate.HasValue;
+        public bool IsValid(out string reason)
+        {
+            if (!TransactionDate.HasValue)
+            {
+                reason = "Adjustment Date is missing or in an unrecognised format.";
+                return false;
+            }
+
+            if (!SpreadsheetFieldRules.IsAccountReference(PaymentRef))
+            {
+                reason = "Payment Ref must be 4 to 20 characters.";
+                return false;
+            }
+
+            if (!SpreadsheetFieldRules.IsTransactionType(TransactionType))
+            {
+                reason = "Transaction Type must be 1 to 3 characters.";
+                return false;
+            }
+
+            reason = null;
+            return true;
+        }
     }
 }
