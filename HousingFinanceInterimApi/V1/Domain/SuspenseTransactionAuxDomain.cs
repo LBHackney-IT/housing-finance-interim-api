@@ -32,6 +32,12 @@ namespace HousingFinanceInterimApi.V1.Domain
                 return false;
             }
 
+            if (!SpreadsheetFieldRules.IsOnOrAfter1980(Date))
+            {
+                reason = "Payment Date is too far in the past";
+                return false;
+            }
+
             if (!string.IsNullOrWhiteSpace(NewRentAccount) && !SpreadsheetFieldRules.IsAccountReference(NewRentAccount))
             {
                 reason = "New Payment Ref must be 4 to 20 characters.";

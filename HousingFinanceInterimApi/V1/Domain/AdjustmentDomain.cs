@@ -36,6 +36,12 @@ namespace HousingFinanceInterimApi.V1.Domain
                 return false;
             }
 
+            if (!SpreadsheetFieldRules.IsOnOrAfter1980(TransactionDate))
+            {
+                reason = "Adjustment Date is too far in the past";
+                return false;
+            }
+
             if (!SpreadsheetFieldRules.IsAccountReference(PaymentRef))
             {
                 reason = "Payment Ref must be 4 to 20 characters.";

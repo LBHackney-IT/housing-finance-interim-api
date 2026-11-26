@@ -28,6 +28,12 @@ namespace HousingFinanceInterimApi.V1.Domain
                 return false;
             }
 
+            if (!SpreadsheetFieldRules.IsOnOrAfter1980(Date))
+            {
+                reason = "Date is too far in the past";
+                return false;
+            }
+
             if (!SpreadsheetFieldRules.IsAccountReference(RentAccount))
             {
                 reason = "Rent Account must be 4 to 20 characters.";
