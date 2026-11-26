@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace HousingFinanceInterimApi.V1.Domain
 {
-    public class DirectDebitAuxDomain
+    public class DirectDebitAuxDomain : ISpreadsheetImportRow
     {
         public long Id { get; set; }
 
@@ -13,11 +13,35 @@ namespace HousingFinanceInterimApi.V1.Domain
 
         [JsonProperty("Date")]
         [JsonConverter(typeof(DateTimeFormat))]
-        public DateTime Date { get; set; }
+        public DateTime? Date { get; set; }
 
         [JsonProperty("Amount")]
         public decimal Amount { get; set; }
 
         public DateTimeOffset Timestamp { get; set; }
+
+        public bool IsValid(out string reason)
+        {
+            if (!Date.HasValue)
+            {
+                reason = "Date is missing or in an unrecognised format.";
+                return false;
+            }
+
+            if (!SpreadsheetFieldRules.IsOnOrAfter1980(Date))
+            {
+                reason = "Date is too far in the past";
+                return false;
+            }
+
+            if (!SpreadsheetFieldRules.IsAccountReference(RentAccount))
+            {
+                reason = "Rent Account must be 4 to 20 characters.";
+                return false;
+            }
+
+            reason = null;
+            return true;
+        }
     }
 }

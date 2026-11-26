@@ -362,7 +362,15 @@ namespace HousingFinanceInterimApi.V1.Gateways
                         var entity = JsonConvert.DeserializeObject<_TEntity>(convertedJson);
                         if (entity != null)
                         {
-                            entities.Add(entity);
+                            if (entity is ISpreadsheetImportRow importRow && !importRow.IsValid(out var reason))
+                            {
+                                hasErrors = true;
+                                LoggingHandler.LogWarning($"Skip row: Row {i + 2} failed validation. {reason}");
+                            }
+                            else
+                            {
+                                entities.Add(entity);
+                            }
                         }
                     }
                     catch (Exception exc)
